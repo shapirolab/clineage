@@ -1,0 +1,56 @@
+
+{% extends "genericformdisp.html" %}
+
+{% block genericformdisp_header_extra %}
+    <style type="text/css">
+    @import "{{ DOJANGO.DOJOX_URL }}/form/resources/TriStateCheckBox.css";
+    </style>
+    <script type="text/javascript">
+        dojo.require("dijit.form.Form");
+        dojo.require("dijit.form.Select");
+        dojo.require("dijit.form.CheckBox");
+        dojo.require("dojox.form.TriStateCheckBox");
+    </script>
+{#    <script type="text/javascript">#}
+{#        function evaluate_checkboxes(event){#}
+{#            var txt ='';#}
+{#            var rows = new Array({% for row in rows %}"{{ row }}"{% if not forloop.last %},{% endif %}{% endfor %});#}
+{#            var columns = new Array({% for column in columns %}"{{ column }}"{% if not forloop.last %},{% endif %}{% endfor %});#}
+{#            for (var row in rows)#}
+{#            {#}
+{#                for (var column in columns)#}
+{#                {#}
+{#                    var element_id = row+column;#}
+{#                    var checked_value = dijit.byId(element_id).checked;#}
+{#                    if(checked_value){#}
+{#                        txt += str+',';#}
+{#                    }#}
+{#                    console.log(txt);#}
+{#                }#}
+{#            }#}
+{#        }#}
+{#    </script>#}
+{% endblock %}
+
+{% block dojango_content %}
+    <form id="plateForm" data-dojo-type="dijit.form.Form" data-dojo-props='action:"../../../dojango/dojo-media/1.9.0/dijit/tests/formAction.html", method:"", target:"formSubmitIframe"'>
+        <table>
+            <tr>
+                <th></th>
+                {% for column in columns %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in rows %}
+                <tr>
+                    <td>{{ row }}</td>
+                    {% for column in columns %}
+                        <td> <input data-dojo-type="dojox.form.TriStateCheckBox" id="{{ row }}{{ column }}"
+                                    data-dojo-id="{{ row }}{{ column }}" value="{{ row }}{{ column }}"
+                                    data-dojo-props='states:["mixed", true, false]'/></td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </form>
+{% endblock %}

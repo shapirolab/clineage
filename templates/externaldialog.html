@@ -1,0 +1,32 @@
+
+<style type="text/css">
+    #formDialog {width: 300px; height: 350px}
+    #formDialog_underlay { background-color:Grey; }
+</style>
+
+{#DECLARATIVE#}
+{#<body class=" claro ">#}
+<div id="formDialog" dojoType="dijit.Dialog" title="My external dialog"
+     href="http://dojotoolkit.org/reference-guide/1.6/_static/js/dojo/resources/LICENSE" style="overflow:auto; width: 400px; height: 200px;">
+</div>
+
+{# dijit.byId('external').show(); #}
+
+
+{#PROGRAMATIC#}
+<script type="text/javascript">
+    var formDialog;
+    dojo.addOnLoad(function() {
+        // create the dialog:
+        formDialog = new dijit.Dialog({
+            title: "Programatic Dialog Creation",
+            href: "http://dojotoolkit.org/reference-guide/1.6/_static/js/dojo/resources/LICENSE",
+            style: "width: 300px"
+        });
+    });
+    function showformDialog() {
+        // set the content of the dialog:
+        formDialog.attr("content", "{{ from.as_p }}");
+        formDialog.show();
+    }
+</script>

@@ -1,0 +1,6 @@
+{% extends "newbase.html" %}
+
+{% block dojango_content %}
+    <p>You have been logged out.</p>
+    <a href="{% url django.contrib.auth.views.login %}">Login again</a>
+{% endblock %}

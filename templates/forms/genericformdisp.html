@@ -1,0 +1,28 @@
+
+<div class="dijitDialogPaneContentArea">
+    <form data-dojo-type="dijit.form.Form" data-dojo-id="myForm" id="myForm">
+        <script type="dojo/on" data-dojo-event="submit" data-dojo-args="e">
+            e.preventDefault(); {#// prevent the default submit#}
+            if(!myForm.isValid()){ alert('Please fix fields'); return; }
+            var xhrArgs = {
+                  url: '{{ request.build_absolute_uri }}',
+                  form: "myForm",
+                  handleAs: "text",
+                  load: function(data){ dijit.byId('form_dialog').hide(); },
+                  error: function(data){ console.log(data); }
+            }
+            dojo.xhrPost(xhrArgs);
+        </script>
+        <div class="dijitDialogPaneContentArea">
+            <table>
+            {{ form.as_table }}
+            </table>
+        </div>
+        <div class="dijitDialogPaneActionBar">
+                <button id="submit_button" data-dojo-type="dijit.form.Button" type="submit">OK</button>
+                <button id="cancle_button" data-dojo-type="dijit.form.Button" type="button"
+                        data-dojo-props="onClick:function(){dijit.byId('form_dialog').hide();}">Cancel</button>
+        </div>
+    </form>
+    {% block dialog_div_extra %}{% endblock %}
+</div>

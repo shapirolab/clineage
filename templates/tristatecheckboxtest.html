@@ -1,0 +1,63 @@
+{% extends "dojango/base.html" %}
+
+{# setting the head attribute <title> #}
+{% block dojango_page_title %}{% endblock %}
+
+{# used to set some additional djConfig definitions (<script type="text/javascript">djConfig['isDebug'] = false;</script>) #}
+{% block dojango_post_dj_config %}
+    <script xmlns="http://www.w3.org/1999/html">
+        djConfig.parseOnLoad = true;
+    </script>
+{% endblock %}
+
+{# add your own javascript/css stuff here #}
+{% block dojango_header_extra %}
+    <style type="text/css">
+        @import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+        @import "{{ DOJANGO.THEME_CSS_URL }}";
+        @import "{{ DOJANGO.DOJOX_URL }}/form/resources/TriStateCheckBox.css";
+        html, body { height: 100%; width: 100%; padding: 0; border: 0; }
+    </style>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dojox.form.TriStateCheckBox");
+    </script>
+
+    {% block newbase_header_extra %}{% endblock %}
+{% endblock %}
+
+{% block dojango_content %}
+    <input id="cb1" data-dojo-id="cb1" data-dojo-type="dojox/form/TriStateCheckBox" value="foo" />
+{% endblock %}
+
+
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#<meta http-equiv="Content-type" content="text/html; charset=utf-8">#}
+{#<title>TriStateCheckBox Widget Demo</title>#}
+{#<style type="text/css">#}
+{#@import "../../../dojango/dojo-media/1.9.0/dijit/themes/claro/document.css";#}
+{#@import "../../../dojango/dojo-media/1.9.0/dijit/tests/css/dijitTests.css";#}
+{#@import "../../../dojango/dojo-media/1.9.0/dojox/form/resources/TriStateCheckBox.css";#}
+{#</style>#}
+{#<!-- required: the default dijit theme: -->#}
+{#<link id="themeStyles" rel="stylesheet" href="../../../dojango/dojo-media/1.9.0/dijit/themes/claro/claro.css"/>#}
+{#<!-- required: dojo.js -->#}
+{#<script type="text/javascript" src="../../../dojango/dojo-media/1.9.0/dojo/dojo.js" data-dojo-config="isDebug: true">#}
+{#</script>#}
+{#<script type="text/javascript">#}
+{#require(["dojo/_base/kernel", "dojo/parser", "dojo/ready", "dojo/dom", "dojo/json", "dijit/registry",#}
+{#"dojox/form/TriStateCheckBox", "dijit/form/Button", "dijit/form/Form"],#}
+{#function(kernel, parser, ready, dom, JSON, registry, TriStateCheckBox){#}
+{#kernel.global["registry"] = registry;#}
+{#ready(function(){#}
+{#parser.parse();#}
+{#);#}
+{#);#}
+{#</script>#}
+{#</head>#}
+{#<body class="claro" role="main">#}
+{#<input id="cb1" data-dojo-id="cb1" data-dojo-type="dojox/form/TriStateCheckBox" value="foo" />#}
+{#</body>#}
+{#</html>#}

@@ -1,0 +1,71 @@
+{% extends "forms/genericformdisp.html" %}
+{% block dialog_div_extra %}
+    <script>
+    var dialog_inner_div = dijit.byId('form_dialog');
+    function bind_existing_plate(){
+            var existing_plate_input = dijit.byId("id_platecells-existing_plate");
+            var new_plate_input_type = dijit.byId("id_platecells-plate_type");
+            var new_plate_input_name = dijit.byId("id_platecells-plate_name");
+            dojo.connect(existing_plate_input, 'onChange', function(){
+                console.log('changed1');
+                if (existing_plate_input.value){
+                    new_plate_input_type.set('disabled', true);
+                    new_plate_input_name.set('disabled', true);
+                }
+                else{
+                    new_plate_input_type.set('disabled', false);
+                    new_plate_input_name.set('disabled', false);
+                }
+            });
+        }
+    dojo.connect(dialog_inner_div, 'onLoad', bind_existing_plate);
+{#    dojo.ready(bind_existing_plate);#}
+    function bind_new_plate(){
+            var existing_plate_input = dijit.byId("id_platecells-existing_plate");
+            var new_plate_input_type = dijit.byId("id_platecells-plate_type");
+            var new_plate_input_name = dijit.byId("id_platecells-plate_name");
+            dojo.connect(new_plate_input_type, 'onChange', function(){
+                console.log('changed1');
+                if (new_plate_input_type.value){
+                    existing_plate_input.set('disabled', true);
+                }
+                else{
+                    existing_plate_input.set('disabled', false);
+                }
+            });
+            dojo.connect(new_plate_input_name, 'onChange', function(){
+                if (new_plate_input_name.value){
+                    existing_plate_input.set('disabled', true);
+                }
+                else{
+                    existing_plate_input.set('disabled', false);
+                }
+            });
+        }
+    dojo.connect(dialog_inner_div, 'onLoad', bind_new_plate);
+{#    dojo.ready(bind_new_plate);#}
+    dojo.parser.parse();
+    </script>
+{% endblock %}
+{#<script>#}
+{#    var storage_box = dijit.byId("id_platecells-storage_box");#}
+{#    var xhrArgs = {#}
+{#      url: '{% url storagetypeform %}',#}
+{#      form: "myForm",#}
+{#      handleAs: "text",#}
+{#      content: {storage_box: storage_box.value}#}
+{#      load: function(data){ dijit.byId('form_dialog').hide(); },#}
+{#      error: function(data){ console.log(data); }#}
+{#    }#}
+{#    var deferred = dojo.xhrGet(xhrArgs);#}
+{#    deferred.then(#}
+{#      function(data){#}
+{#          targetNode.innerHTML = data;#}
+{#      },#}
+{##}
+{#      function(error){#}
+{#          targetNode.innerHTML = "An unexpected error occurred: " + error;#}
+{#      }#}
+{#    );#}
+{#    var inner_location = dijit.byId("id_platecells-inner_location");#}
+{#</script>#}

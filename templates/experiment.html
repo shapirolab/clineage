@@ -1,0 +1,405 @@
+{% extends "userbase.html" %}
+
+{% block userbase_header_extra %}
+     <style type="text/css">
+        @import "{{ DOJANGO.DOJOX_URL }}/form/resources/UploaderFileList.css";
+        @import "{{ DOJANGO.DOJOX_URL }}/widget/Dialog/Dialog.css";
+        .datable_container {height:90%;}
+        #experimentDescriptionText {width:50%;}
+        #general {width: 40%;}
+        #members {width: 30%;}
+        #progression {width: 30%;}
+        #recentcomments {height:20%}
+    </style>
+    <script type="text/javascript" src="http://www.jsphylosvg.com/js/raphael/raphael-min.js" ></script>
+    <script type="text/javascript" src="http://www.jsphylosvg.com/js/jsphylosvg-min.js"></script>
+    <script type="text/javascript">
+        dojo.require("dijit.TitlePane");
+        dojo.require("dijit.form.CheckBox");
+        dojo.require("dojox.form.Uploader");
+        dojo.require("dojox.form.uploader.FileList");
+        dojo.require("dojo.data.ItemFileReadStore");
+        dojo.require("dijit.Tree");
+        dojo.require("dojox.charting.widget.Chart2D");
+        dojo.require("dojox.charting.themes.Claro");
+
+        function dialog_form_function(title_string, form_url, datable_table_refresh_function){
+            var formDialog;
+            formDialog = new dojox.widget.DialogSimple({
+                id: "form_dialog",
+                title: title_string,
+                href: form_url
+                });
+            dojo.connect(formDialog, "hide", formDialog, function(e){
+                {#  Hook self-destructor to hide event  #}
+                formDialog.destroyRecursive();
+                {# Refresh datable content for changes #}
+                datable_table_refresh_function.apply(this);
+                });
+            formDialog.show();
+        }
+
+        {# Individual #}
+        function edit_individual_form_function(id){
+            dialog_form_function("Individual editing form", "{% url 'individual_add' %}".slice(0,-3)+id, individualstableRefresh);
+        }
+        function bind_add_individual_button(){
+            var button = dijit.byId("add_new_individual_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Individual", "{% url 'individual_add' %}", individualstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_individual_button);
+
+        {# Cell #}
+        function edit_cell_form_function(id){
+            dialog_form_function("Sample editing form", "{% url 'cell_add' %}".slice(0,-3)+id, samplestableRefresh);
+        }
+        function bind_add_sample_button(){
+            var button = dijit.byId("add_sample_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cell", "{% url 'cell_add' %}", samplestableRefresh);
+            });
+        }
+        function bind_add_sample_multi_button(){
+            var button = dijit.byId("add_sample_multi_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cells", "{% url 'cell_multiple_add' %}", samplestableRefresh);
+            });
+        }
+        function bind_add_sample_plate_button(){
+            var button = dijit.byId("add_sample_plate_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cells Plate", "{% url 'cells_plate_add' %}", samplestableRefresh);
+            });
+        }
+        dojo.ready(bind_add_sample_button);
+        dojo.ready(bind_add_sample_multi_button);
+        dojo.ready(bind_add_sample_plate_button);
+
+        function shownode(node){
+            console.log(node);
+            var diag;
+{#            if(workflowStore.getValue(node, "type") == "individual"){#}
+{#                diag = new dijit.Dialog({#}
+{#                    title: "Individual Dialog",#}
+{#                    href: "{% url LinApp.views.individualform %}"+workflowStore.getValue(node, "compid").substring(11),#}
+{#                    style: "width: 300px"#}
+{#                });#}
+{#                diag.show();#}
+{#                return;#}
+{#            }#}
+{#            if(workflowStore.getValue(node, "type") == "extraction"){#}
+{#                diag = new dijit.Dialog({#}
+{#                    title: "Extraction Dialog",#}
+{#                    href: "{% url LinApp.views.extractionform %}"+workflowStore.getValue(node, "compid").substring(11),#}
+{#                    style: "width: 300px"#}
+{#                });#}
+{#                diag.show();#}
+{#                return;#}
+{#            }#}
+{#            if(workflowStore.getValue(node, "type") == "sampling"){#}
+{#                diag = new dijit.Dialog({#}
+{#                    title: "Sampling Dialog",#}
+{#                    href: "{% url LinApp.views.samplingform %}"+workflowStore.getValue(node, "compid").substring(7),#}
+{#                    style: "width: 300px"#}
+{#                });#}
+{#                diag.show();#}
+{#                return;#}
+{#            }#}
+            if(workflowStore.getValue(node, "type") == "cell"){
+                diag = new dijit.Dialog({
+                    title: "Cell Dialog",
+                    href: "../../cell/"+workflowStore.getValue(node, "compid").substring(5),
+                    style: "width: 300px"
+                });
+                diag.show();
+                return;
+            }
+        }
+        function sendText(){
+            var button = dijit.byId("submitCommentButton");
+            var comment = dijit.byId("commenttext");
+            var messagesPane = dijit.byId('{{ exp.name }}_comments');
+            dojo.connect(button, "onClick", function(event){
+                // summary:
+                // Comment is sent asynchronously to the server and the entire content of the messagesPane is returned from the server and replaces the original.
+                // This way, when sending a comment our page will display comments posted by others between our page loading to the posting moment.
+                var xhrArgs = {
+                    url: "{% url 'LinApp.views.commentPost' exp.pk %}",
+                    content: {'comment' : comment.get("value")},
+                    handleAs: "json",
+                    load: function(data){
+                        messagesPane.set('content', data.commentsHTML);
+                        comment.set('value', '');
+                    },
+                    error: function(error){
+                        console.log("Error: Message not posted.");
+                    }
+                }
+                console.log( "Message being sent...");
+                // Call the asynchronous xhrPost
+                var deferred = dojo.xhrPost(xhrArgs);
+            });
+        }
+        function resetFiles(){
+            fileuploader = dijit.byId("fileuploader");
+            resetbutton = dijit.byId("filesResetButton");
+            dojo.connect(resetbutton, "onClick", function(event){
+                fileuploader.reset();
+            });
+        }
+        function uploadFiles(){
+            fileuploader = dijit.byId("fileuploader");
+            uploadbutton = dijit.byId("filesUploadButton");
+            dojo.connect(uploadbutton, "onClick", function(event){
+                fileuploader.upload();
+            });
+        }
+        function postExperimentDetails(){
+            var button = dijit.byId("submitExperimentDetails");
+            var isPublicCheckBox = dijit.byId("is_public");
+            var experimentDescription = dijit.byId("experimentDescriptionText");
+            dojo.connect(button, "onClick", function(event){
+                // summary:
+                // Comment is sent asynchronously to the server and the entire content of the messagesPane is returned from the server and replaces the original.
+                // This way, when sending a comment our page will display comments posted by others between our page loading to the posting moment.
+                var xhrArgs = {
+                    url: "{% url 'LinApp.views.experimentPost' exp.pk %}",
+                    content: {'description' : experimentDescription.get("value"), 'is_public': isPublicCheckBox.get("checked")},
+                    handleAs: "json",
+                    load: function(data){
+                        experimentDescription.set('content', data.experimentdescription);
+                        isPublicCheckBox.set('checked', data.is_public);
+                    },
+                    error: function(error){
+                        console.log("Error: Message not posted.");
+                        console.log( error);
+                    }
+                }
+                console.log( "Message being sent...");
+                // Call the asynchronous xhrPost
+                var deferred = dojo.xhrPost(xhrArgs);
+            });
+        }
+
+        function bindaddmemberbutton(){
+            var button = dijit.byId("addnewmemberbutton");
+            dojo.connect(button, "onClick", function(){
+                    var formDialog;
+                    formDialog = new dijit.Dialog({
+                        title: "New member",
+                        href: "{% url 'LinApp.views.memberform' exp.id%}",
+                        style: "width: 300px"
+                    });
+                    formDialog.show();
+            });
+        }
+
+        function editmemberdiag(mem_id){
+            formDialog = dijit.byId("memberformdialog_" + mem_id);
+            if(!formDialog){
+                var formDialog;
+                formDialog = new dijit.Dialog({
+                    id: "memberformdialog_" + mem_id,
+                    title: "Edit member",
+                    href: "{% url 'LinApp.views.memberform' exp.id%}"+mem_id,
+                    style: "width: 500px"
+                });
+                dojo.connect(formDialog, "onHide", function(){
+                    formDialog.hide();
+                    formDialog.destroyRecursive(false);
+                });
+            }
+            formDialog.show();
+        }
+
+        dojo.ready(function() {
+            var xhrArgs = {
+                url: "{% url 'LinApp.views.testtree' %}",
+                content: {},
+                handleAs: "json",
+                load: function(data){
+                    console.log(data['newick']);
+                    phylocanvas = new Smits.PhyloCanvas(
+                            {
+                                newick: data['newick']
+                            },
+                            'svgCanvas',
+                            500, 500
+                    );
+                },
+                error: function(error){
+                    console.log("Error: Message not posted.");
+                }
+            }
+            console.log( "Message being sent...");
+            // Call the asynchronous xhrPost
+            var deferred = dojo.xhrPost(xhrArgs);
+        });
+        dojo.ready(function() {
+            dijit.byId('topTabs').selectChild(dijit.byId('{{ selectedtab }}'));
+        });
+        dojo.ready(sendText);
+        dojo.ready(resetFiles);
+        dojo.ready(uploadFiles);
+        dojo.ready(postExperimentDetails);
+        dojo.ready(bindaddmemberbutton);
+    </script>
+    {% load datable_tags %}
+    {% datable_init %}
+{% endblock %}
+
+{% block maincenter %}
+    <!-- data for tree and combobox -->
+    <div dojoType="dojo.data.ItemFileReadStore" jsId="workflowStore"
+         url="{% url 'LinApp.views.experimentworkflow' exp.pk%}"></div>
+
+    <!--Tabs-->
+    <div id="tab1" dojoType="dijit.layout.ContentPane" title="Home" style="padding:10px;display:none;">
+        <div data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', gutters:true, liveSplitters:true" id="borderContainer">
+            <div id="general" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="splitter:true, region:'left', layoutPriority:4">
+                General
+                <h1>{{ exp.name|escape }}</h1>
+                <p>Your role: <b>{{ userrole.name|escape }}</b></p>
+                <p> {{ exp.created_date|escape }}</p>
+                <textarea id="experimentDescriptionText" name="experimentDescriptionText" dojoType="dijit.form.Textarea" {% if not userrole.write %}disabled="disabled"{% endif %}>{{ exp.description|escape }}</textarea>
+                <p><input type="checkbox" id="is_public" dojoType="dijit.form.CheckBox" {% if not userrole.write %}disabled="disabled"{% endif %} {% if exp.is_public %}checked="checked"{% endif %}>Is public?
+                 {% if userrole.write %}
+                    <button data-dojo-type="dijit.form.Button" id="submitExperimentDetails">Save</button>
+                 {% endif %}
+            </div>
+            <div id="members" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="splitter:true, region:'right', layoutPriority:4">
+                {% datable memberstable %}
+                {% datable_dialog_on_click memberstable editmemberdiag %}
+                <div id="memberstableGridContainer" style="height:300px;"></div>
+                {% if userrole.delete %} {# if 'can delete' than user is owner/manager #}
+                    <button data-dojo-type="dijit.form.Button" id="addnewmemberbutton">Add member</button>
+                {% endif %}
+            </div>
+            <div id="progression"data-dojo-type="dijit.layout.ContentPane" data-dojo-props="splitter:true, region:'center', layoutPriority:1">
+                Progression
+                <script type="text/javascript">
+                    chartData = [
+                        { x: "1", y: "19021" },
+                        { x: "1", y: "12837" }
+                    ];
+                </script>
+                <div dojoType="dojox.charting.widget.Chart2D" theme="dojox.charting.themes.Claro" id="viewsChart" style="width: 550px; height: 550px;">
+                    <!-- Pie Chart: add the plot -->
+                    <div class="plot" name="default" type="Pie" radius="100" fontColor="#000" labelOffset="-20"></div>
+                    <!-- pieData is the data source -->
+                    <div class="series" name="Last Week's Visits" array="chartData"></div>
+                </div>
+            </div>
+            <div id="recentcomments" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="splitter:true, region:'bottom', layoutPriority:2">
+                <div id='recent_comments' dojoType="dijit.TitlePane" title="Recent comments:">
+                    {% for message in exp.comments.all|slice:":10" %}
+                        <div>[{{ message.date }}] <b>&lt{{ message.user|escape }}&gt</b> {{ message.comment|escape }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab2" dojoType="dijit.layout.ContentPane" title="Samples" style="padding:10px;display:none;">
+        {#{% if userrole.write %}#} {# if 'can delete' than user is owner/manager #}
+        {#    <button data-dojo-type="dijit.form.Button" id="add_sample_button">Add Cell/Bulk</button>#}
+        {#    <button data-dojo-type="dijit.form.Button" id="add_sample_multi_button">Add multiple Cells</button>#}
+        {#    <button data-dojo-type="dijit.form.Button" id="add_sample_plate_button">Add Cells Plate</button>#}
+        {#{% endif %}#}
+        {% datable samplestable %}
+        {#{% datable_dialog_on_click samplestable edit_cell_form_function %}#}
+        <div id="samplestableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab3" dojoType="dijit.layout.ContentPane" title="Processed DNA" style="padding:10px;display:none;">
+        {% datable pDNAtable %}
+        <div id="pDNAtableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab4" dojoType="dijit.layout.ContentPane" title="Sequencing" style="padding:10px;display:none;">
+        {% datable sequencingtable %}
+        <div id="sequencingtableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab5" dojoType="dijit.layout.ContentPane" title="Targets analysis" style="padding:10px;display:none;">
+        {% datable targetAnalysistable %}
+        <div id="targetAnalysistableGridContainer" class="datable_container"></div>
+    </div>
+
+    <!--<div id="tab6" dojoType="dijit.layout.ContentPane" title="True sequences" style="padding:10px;display:none;">-->
+        <!--{# datable trueSequencestable #}-->
+        <!--<div id="trueSequencestableGridContainer" class="datable_container"></div>-->
+    <!--</div>-->
+
+    <div id="tab7" dojoType="dijit.layout.ContentPane" title="Target variants" style="padding:10px;display:none;">
+        {% datable targetsVariantstable %}
+        <div id="targetsVariantstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab8" dojoType="dijit.layout.ContentPane" title="Genetic signatures" style="padding:10px;display:none;">
+        {% datable genSigstable %}
+        <div id="genSigstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab9" dojoType="dijit.layout.ContentPane" title="Distance matrix" style="padding:10px;display:none;">
+        {% datable DMtable %}
+        <div id="DMtableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab10" dojoType="dijit.layout.ContentPane" title="Individuals" style="padding:10px;display:none;">
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget individualstable name %}
+            <br />
+            {% datable_widget individualstable born_gte %}
+            {% datable_widget individualstable born_lte %}
+        </div>
+        {% datable individualstable %}
+        {% datable_dialog_on_click individualstable edit_individual_form_function %}
+        <div id="individualstableGridContainer" class="datable_container"></div>
+        {% if userrole.write %} {# if 'can delete' than user is owner/manager #}
+            <button data-dojo-type="dijit.form.Button" id="add_new_individual_button">Add individual</button>
+        {% endif %}
+    </div>
+
+    <div id="tab11" dojoType="dijit.layout.ContentPane" title="Messages" style="padding:10px;display:none;">
+        <div id='{{ exp.name }}_comments' dojoType="dijit.TitlePane" title="Comments for {{ exp.name }}:" width="275">
+            {% include 'comments.html' %}
+         </div>
+        <div>
+            <label for="commenttext">Enter Comment:</label>
+            <input id="commenttext" data-dojo-type="dijit.form.TextBox"
+                   data-dojo-props="placeHolder:'Enter text here.'">
+            <button data-dojo-type="dijit.form.Button" id="submitCommentButton">Send it!</button>
+        </div>
+    </div>
+
+    <div id="tab12" dojoType="dijit.layout.ContentPane" title="Map" style="padding:10px;display:none;">
+        <!-- tree widget -->
+        <div dojoType="dijit.Tree" store="workflowStore" query="{type:'individual'}">
+            <script type="dojo/method" event="onDblClick" args="item">
+                shownode(item);
+            </script>
+        </div>
+    </div>
+
+    <div id="tab13" dojoType="dijit.layout.ContentPane" title="?" style="padding:10px;display:none;">
+    </div>
+
+    <div id="tab14" dojoType="dijit.layout.ContentPane" title="Repository" style="padding:10px;display:none;">
+        <legend>Upload Experiment Files</legend>
+        <input name="uploadedfile" multiple="true" type="file" id="fileuploader"
+               dojoType="dojox.form.Uploader" label="Select Some Files" url="{% url 'LinApp.views.filesPost' exp.pk %}">
+        <input id="filesUploadButton" type="upload" label="Upload" dojoType="dijit.form.Button" />
+        <input id="filesResetButton" type="reset" label="Reset" dojoType="dijit.form.Button" />
+        <div id="files" dojoType="dojox.form.uploader.FileList"
+             uploaderId="fileuploader"></div>
+        {% datable filestable %}
+        <div id="filestableGridContainer" style="height:300px;"></div>
+    </div>
+
+    <div id="tab15" dojoType="dijit.layout.ContentPane" title="Tree" style="padding:10px;display:none;">
+        <div id="svgCanvas"> </div>
+    </div>
+{% endblock %}

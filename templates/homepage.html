@@ -1,0 +1,259 @@
+{% extends "userbase.html" %}
+
+{% block userbase_header_extra %}
+    <style type="text/css">
+    .datable_container {height:90%;}
+    @import "{{ DOJANGO.DOJOX_URL }}/widget/Dialog/Dialog.css";
+    </style>
+    <script type="text/javascript">
+        dojo.require("dijit.TitlePane");
+        dojo.require("dijit.form.CheckBox");
+        dojo.require("dijit.form.ComboBox");
+        dojo.require("dijit.form.NumberTextBox");
+        dojo.require("dijit.form.Button");
+        dojo.require("dojox.form.Uploader");
+        dojo.require("dojox.form.uploader.FileList");
+        dojo.ready(function() {
+            dijit.byId('topTabs').selectChild(dijit.byId('{{ selectedtab }}'));
+        });
+        function dialog_form_function(title_string, form_url, datable_table_refresh_function){
+            var formDialog;
+            formDialog = new dojox.widget.DialogSimple({
+                id: "form_dialog",
+                title: title_string,
+                href: form_url
+                });
+            dojo.connect(formDialog, "hide", formDialog, function(e){
+                {#  Hook self-destructor to hide event  #}
+                formDialog.destroyRecursive();
+                {# Refresh datable content for changes #}
+                datable_table_refresh_function.apply(this);
+                });
+            formDialog.show();
+        }
+
+        {# Individual #}
+        function edit_individual_form_function(id){
+            dialog_form_function("Individual editing form", "{% url 'individual_add' %}".slice(0,-3)+id, individualstableRefresh);
+        }
+        function bind_add_individual_button(){
+            var button = dijit.byId("add_individual_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Individual", "{% url 'individual_add' %}", individualstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_individual_button);
+
+        {# Extraction Event #}
+        function edit_extraction_event_form_function(id){
+            dialog_form_function("Extraction event editing form", "{% url 'extraction_event_add' %}".slice(0,-3)+id, extractioneventstableRefresh);
+        }
+        function bind_add_extraction_event_button(){
+            var button = dijit.byId("add_extraction_event_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Extraction Event", "{% url 'extraction_event_add' %}", extractioneventstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_extraction_event_button);
+
+        {# Extraction #}
+        function edit_extraction_form_function(id){
+            dialog_form_function("Extraction editing form", "{% url 'extraction_add' %}".slice(0,-3)+id, extractionstableRefresh);
+        }
+        function bind_add_extraction_button(){
+            var button = dijit.byId("add_extraction_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Extraction", "{% url 'extraction_add' %}", extractionstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_extraction_button);
+
+        {# Sampling Event #}
+        function edit_sampling_event_form_function(id){
+            dialog_form_function("Sampling event editing form", "{% url 'samplingevent_add' %}".slice(0,-3)+id, samplingeventstableRefresh);
+        }
+        function bind_add_sampling_event_button(){
+            var button = dijit.byId("add_sampling_event_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Sampling event", "{% url 'samplingevent_add' %}", samplingeventstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_sampling_event_button);
+        function bind_add_facs_event_button(){
+            var button = dijit.byId("add_facs_event_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New FACS event", "{% url 'facs_add' %}", samplingeventstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_facs_event_button);
+        function bind_add_lasercapture_event_button(){
+            var button = dijit.byId("add_lasercapture_event_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Laser Capture event", "{% url 'lasercapture_add' %}", samplingeventstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_lasercapture_event_button);
+        {# Cell #}
+        function edit_cell_form_function(id){
+            dialog_form_function("Sample editing form", "{% url 'cell_add' %}".slice(0,-3)+id, samplestableRefresh);
+        }
+        function bind_add_sample_button(){
+            var button = dijit.byId("add_sample_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cell", "{% url 'cell_add' %}", samplestableRefresh);
+            });
+        }
+        function bind_add_sample_multi_button(){
+            var button = dijit.byId("add_sample_multi_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cells", "{% url 'cell_multiple_add' %}", samplestableRefresh);
+            });
+        }
+        function bind_add_sample_plate_button(){
+            var button = dijit.byId("add_sample_plate_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cells Plate", "{% url 'cells_plate_add' %}", samplestableRefresh);
+            });
+        }
+        dojo.ready(bind_add_sample_button);
+        dojo.ready(bind_add_sample_multi_button);
+        dojo.ready(bind_add_sample_plate_button);
+
+        {# Algorithm #}
+        function edit_algorithm_form_function(id){
+            dialog_form_function("Algorithm editing form", "{% url 'algorithm_add' %}".slice(0,-3)+id, algorithmstableRefresh);
+        }
+        function bind_add_algorithm_button(){
+            var button = dijit.byId("add_algorithm_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Algorithm", "{% url 'algorithm_add' %}", algorithmstableRefresh);
+            });
+        }
+        dojo.ready(bind_add_algorithm_button);
+
+        {# Plate #}
+        function edit_plate_form_function(id){
+            dialog_form_function("Plate editing form", "{% url 'plate_add' %}".slice(0,-3)+id, platestableRefresh);
+        }
+        function bind_add_plate_button(){
+            var button = dijit.byId("add_plate_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Plate", "{% url 'plate_add' %}", platestableRefresh);
+            });
+        }
+        dojo.ready(bind_add_plate_button);
+
+    </script>
+    {% load datable_tags %}
+    {% datable_init %}
+{% endblock %}
+
+{% block maincenter %}
+    <div id="tab1" dojoType="dijit.layout.ContentPane" title="Individuals" style="padding:10px;display:none;">
+        <div>Each individual (e.g. patient, mouse...) is documented with some basic background.</div>
+        <button data-dojo-type="dijit.form.Button" id="add_individual_button">Add Individual</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget individualstable name %}
+            <br />
+            {% datable_widget individualstable born_gte %}
+            {% datable_widget individualstable born_lte %}
+        </div>
+        {% datable individualstable %}
+        {% datable_dialog_on_click individualstable edit_individual_form_function %}
+        <div id="individualstableGridContainer" class="datable_container"></div>
+
+    </div>
+
+    <div id="tab2" dojoType="dijit.layout.ContentPane" title="Sampling events" style="padding:10px;display:none;">
+        <div>Extraction event (e.g. operation where tumor samples were taken, mouse was sacrificed and dissected...) this is not necessarily post-mortem.</div>
+        <button data-dojo-type="dijit.form.Button" id="add_extraction_event_button">Add extraction event</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget extractioneventstable name %}
+            {% datable_widget extractioneventstable date_gte %}
+            {% datable_widget extractioneventstable date_lte %}
+            <br />
+            {% datable_widget extractioneventstable location %}
+            {% datable_widget extractioneventstable individual %}
+            {% datable_widget extractioneventstable user_performed %}
+            {% datable_widget extractioneventstable comment %}
+        </div>
+        {% datable extractioneventstable %}
+        {% datable_dialog_on_click extractioneventstable edit_extraction_event_form_function %}
+        <div id="extractioneventstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab3" dojoType="dijit.layout.ContentPane" title="Samples" style="padding:10px;display:none;">
+        <div>Samples extracted in said extracted event, these can range from or a simple blood test (documented once) up to multiple organs and multiple tissues sampled in the same autopsy (each documented separately and all referencing the same extraction operation). We currently record organ and tissue for these samples, both within this single hierarchical level.</div>
+        <button data-dojo-type="dijit.form.Button" id="add_extraction_button">Add extraction</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget extractionstable name %}
+            {% datable_widget extractionstable extraction_event %}
+            {% datable_widget extractionstable organ %}
+            <br />
+            {% datable_widget extractionstable tissue %}
+            {% datable_widget extractionstable comment %}
+        </div>
+        {% datable extractionstable %}
+        {% datable_dialog_on_click extractionstable edit_extraction_form_function %}
+        <div id="extractionstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab4" dojoType="dijit.layout.ContentPane" title="Separation events" style="padding:10px;display:none;">
+        <div>Separation event - documenting the separation of said sample into individual single cells. This can be done via FACS, documenting the related markers, via Laser capture, documenting the related coordinates or via more random tissue separation protocols (documenting only the protocol).</div>
+        <button data-dojo-type="dijit.form.Button" id="add_sampling_event_button">Add sampling event</button>
+        <button data-dojo-type="dijit.form.Button" id="add_facs_event_button">Add FACS sampling event</button>
+        <button data-dojo-type="dijit.form.Button" id="add_lasercapture_event_button">Add Laser Capture sampling event</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget samplingeventstable name %}
+            {% datable_widget samplingeventstable comment %}
+            <br />
+            {% datable_widget samplingeventstable extraction %}
+            {% datable_widget samplingeventstable user %}
+        </div>
+        {% datable samplingeventstable %}
+        {% datable_dialog_on_click samplingeventstable edit_sampling_event_form_function %}
+        <div id="samplingeventstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab5" dojoType="dijit.layout.ContentPane" title="Cells/Bulks" style="padding:10px;display:none;">
+        <div>Single Cells or Bulks, these can be documented one by one, in group or plate by plate.</div>
+        <button data-dojo-type="dijit.form.Button" id="add_sample_button">Add Cell/Bulk</button>
+        <button data-dojo-type="dijit.form.Button" id="add_sample_multi_button">Add multiple Cells</button>
+        <button data-dojo-type="dijit.form.Button" id="add_sample_plate_button">Add Cells Plate</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget samplestable name %}
+            {% datable_widget samplestable comment %}
+            {% datable_widget samplestable composition %}
+            {% datable_widget samplestable status %}
+            <br />
+            {% datable_widget samplestable samplingevent %}
+        </div>
+        {% datable samplestable %}
+        {% datable_dialog_on_click samplestable edit_cell_form_function %}
+        <div id="samplestableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab6" dojoType="dijit.layout.ContentPane" title="Algorithms" style="padding:10px;display:none;">
+        <button data-dojo-type="dijit.form.Button" id="add_algorithm_button">Add Algorithm</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget algorithmstable name %}
+            {% datable_widget algorithmstable version %}
+            {% datable_widget algorithmstable type %}
+        </div>
+        {% datable algorithmstable %}
+        {% datable_href_on_click algorithmstable %}
+        <div id="algorithmstableGridContainer" class="datable_container"></div>
+    </div>
+
+    <div id="tab7" dojoType="dijit.layout.ContentPane" title="Plates" style="padding:10px;display:none;">
+        <button data-dojo-type="dijit.form.Button" id="add_plate_button">Add Plate</button>
+        <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
+            {% datable_widget platestable name %}
+            {% datable_widget platestable state %}
+            {% datable_widget platestable type %}
+        </div>
+        {% datable platestable %}
+        {% datable_dialog_on_click platestable edit_plate_form_function %}
+        <div id="platestableGridContainer" class="datable_container"></div>
+    </div>
+{% endblock %}

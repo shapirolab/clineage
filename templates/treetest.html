@@ -1,0 +1,49 @@
+{% extends "userbase.html" %}
+
+{% block userbase_header_extra %}
+    <style type="text/css">
+    </style>
+    <script type="text/javascript" src="http://www.jsphylosvg.com/js/raphael/raphael-min.js" ></script>
+    <script type="text/javascript" src="http://www.jsphylosvg.com/js/jsphylosvg-min.js"></script>
+    <script type="text/javascript">
+        dojo.require("dijit.TitlePane");
+        dojo.require("dijit.form.CheckBox");
+        dojo.require("dijit.form.TextBox");
+        dojo.require("dijit.form.ComboBox");
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.Button");
+        dojo.require("dojox.form.Uploader");
+        dojo.require("dojox.form.uploader.FileList");
+        dojo.require("dijit.form.Textarea");
+        dojo.ready(function() {
+            dijit.byId('topTabs').selectChild(dijit.byId('{{ selectedtab }}'));
+        });
+        dojo.ready(function() {
+            var xhrArgs = {
+                url: "{% url LinApp.views.testtree %}",
+                content: {},
+                handleAs: "json",
+                load: function(data){
+                    console.log(data['newick']);
+                    phylocanvas = new Smits.PhyloCanvas(
+                            {
+                                newick: data['newick']
+                            },
+                            'svgCanvas',
+                            500, 500
+                    );
+                },
+                error: function(error){
+                    console.log("Error: Message not posted.");
+                }
+            }
+            console.log( "Message being sent...");
+            // Call the asynchronous xhrPost
+            var deferred = dojo.xhrPost(xhrArgs);
+        });
+    </script>
+{% endblock %}
+
+{% block maincenter %}
+    <div id="svgCanvas"> </div>
+{% endblock %}

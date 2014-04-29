@@ -1,0 +1,10 @@
+
+{#Breadcrumbs#}
+{% if sampling %}{{ sampling.extraction.individual }} >> {{ sampling.extraction }} >> {{ sampling }}{% endif %}
+
+<form action="" method="post">
+    {{ form.as_p }}
+</form>
+<button dojoType="dijit.form.Button" type="submit" onClick="return dijit.byId('formDialog').isValid();">
+    Submit
+</button>

@@ -1,0 +1,62 @@
+{% extends "userbase.html" %}
+
+{% block userbase_header_extra %}
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+        dojo.require("dijit.TitlePane");
+        dojo.require("dijit.form.CheckBox");
+        dojo.require("dijit.form.TextBox");
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.Button");
+        dojo.require("dojox.form.Uploader");
+        dojo.require("dojox.form.uploader.FileList");
+        dojo.require("dijit.form.Textarea");
+        dojo.ready(function() {
+            dijit.byId('topTabs').selectChild(dijit.byId('{{ selectedtab }}'));
+        });
+        function algform(alg_id){
+            var formDialog;
+            formDialog = new dijit.Dialog({
+                title: "Programatic Dialog Creation",
+                href: "{% url 'LinApp.views.algrunform' %}"+alg_id,
+                style: "width: 300px"
+            });
+            formDialog.show();
+        }
+    </script>
+    {% load datable_tags %}
+    {% datable_init %}
+{% endblock %}
+
+{% block maincenter %}
+    <div id="tab1" dojoType="dijit.layout.ContentPane" title="General" style="padding:10px;display:none;">
+        <h1>{{ alg.name|escape }}</h1>
+        <p> Type: <b>{{ alg.type|escape }}</b></p>
+        <p>Developers: </p>
+        {% for developer in developers %}
+            <p>{{ developer.name|escape }}</p>
+        {% endfor %}
+
+{#        <textarea id="experimentDescriptionText" name="experimentDescriptionText" dojoType="dijit.form.Textarea" {% if not userrole.write %}disabled="disabled"{% endif %}>{{ exp.description }}</textarea>#}
+{#        <p><input type="checkbox" id="is_public" dojoType="dijit.form.CheckBox" {% if not userrole.write %}disabled="disabled"{% endif %} {% if exp.is_public %}checked="checked"{% endif %}>Is public?#}
+{#            {% if userrole.write %}#}
+{#                <button data-dojo-type="dijit.form.Button" id="submitExperimentDetails">Save</button>#}
+{#            {% endif %}#}
+    </div>
+
+    <div id="tab2" dojoType="dijit.layout.ContentPane" title="Parameters" style="padding:10px;display:none;">
+        {% datable algparamstable %}
+        <div id="algparamstableGridContainer" style="height:300px;"></div>
+    </div>
+
+    <div id="tab3" dojoType="dijit.layout.ContentPane" title="Runs" style="padding:10px;display:none;">
+        {% datable algrunstable %}
+        {% datable_dialog_on_click algrunstable algform %}
+        <div id="algrunstableGridContainer" style="height:300px;"></div>
+    </div>
+
+    <div id="tab4" dojoType="dijit.layout.ContentPane" title="?" style="padding:10px;display:none;">
+        <h1>Anything else about "{{ alg.name }}"?</h1>
+    </div>
+{% endblock %}

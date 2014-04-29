@@ -1,0 +1,88 @@
+{% extends "dojango/base.html" %}
+
+{# setting the head attribute <title> #}
+{% block dojango_page_title %}{% endblock %}
+
+{# used to set some additional djConfig definitions (<script type="text/javascript">djConfig['isDebug'] = false;</script>) #}
+{% block dojango_post_dj_config %}
+    <script xmlns="http://www.w3.org/1999/html">
+        djConfig.parseOnLoad = true;
+    </script>
+{% endblock %}
+
+{# add your own javascript/css stuff here #}
+{% block dojango_header_extra %}
+    <style type="text/css">
+        @import "{{ DOJANGO.DOJO_URL }}/resources/dojo.css";
+        @import "{{ DOJANGO.THEME_CSS_URL }}";
+        html, body { height: 100%; width: 100%; padding: 0; border: 0; }
+        #main { height: 100%; width: 100%; padding: 0; border: 0; }
+        #leftAccordion { width: 25%; }
+        #main .dijitSplitterH { height: 7px }
+        #main .dijitSplitterV { width: 7px }
+        {% block headdesign %}
+            #header, #mainSplit { margin-left: 0px; margin-right: 0px; }
+            #header {height: 150px}
+            #title {width: 97%}
+            #righthead {width:3%}
+        {% endblock %}
+    </style>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dojox.widget.DialogSimple");
+        dojo.require("dijit.form.Button");
+        dojo.require("dijit.form.TextBox");
+        dojo.require("dijit.form.DateTextBox");
+        dojo.require("dijit.form.TimeTextBox");
+        dojo.require("dijit.layout.BorderContainer");
+        dojo.require("dijit.layout.ContentPane");
+        dojo.require("dijit.layout.AccordionContainer");
+        dojo.require("dijit.layout.TabContainer");
+        dojo.require("dijit.form.Select");
+        dojo.require("dijit.form.ValidationTextBox");
+        dojo.require("dijit.form.MultiSelect");
+        dojo.require("dijit.form.Form");
+        dojo.require("dijit.form.Textarea");
+    </script>
+    {% block newbase_header_extra %}{% endblock %}
+{% endblock %}
+
+{% block dojango_content %}
+    <!-- "main" BorderContainer just contains page title and another BorderContainer -->
+    <div id="main" dojoType="dijit.layout.BorderContainer">
+        <div class="edgePanel" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region: 'top'">
+            <div id="header" dojoType="dijit.layout.BorderContainer">
+                <!-- Title -->
+                <div id="title" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'left'">
+                    <a href="{%  url 'LinApp.views.homepage' %}">
+                        <img src="{{ MEDIA_URL }}images/clineagebanner.jpg" />
+                    </a>
+                </div>
+                {% block righthead %}
+                    <div id="righthead" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'right'">
+                        <div>
+                            <a href="{% url 'django.contrib.auth.views.logout' %}">Logout</a>
+                        </div>
+                        <div>
+                            {% load admin_urls %}
+                            <a href="{% url 'admin:index' %}">Manage</a>
+                        </div>
+                    </div>
+                {% endblock %}
+            </div>{# TODO: link to home #}
+        </div>
+        <!-- "mainSplit" BorderContainer has all the real content -->
+        <div dojoType="dijit.layout.BorderContainer" liveSplitters="false" design="sidebar" region="center" id="mainSplit">
+            <div dojoType="dijit.layout.AccordionContainer" duration="200" minSize="20" style="width: 150px;" id="leftAccordion" region="leading" splitter="true">
+                {% block accordion %}
+                {% endblock %}
+            </div> <!-- end AccordionContainer -->
+
+            <!-- top tabs (marked as "center" to take up the main part of the BorderContainer) -->
+            <div dojoType="dijit.layout.TabContainer" region="center" id="topTabs">
+                {% block maincenter %}
+                {% endblock %}
+            </div><!-- end of region="center" TabContainer -->
+        </div> <!-- end of "mainSplit" BorderContainer -->
+    </div> <!-- end of "main" BorderContainer -->
+{% endblock %}

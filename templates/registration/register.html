@@ -1,0 +1,12 @@
+{% extends "newbase.html" %}
+
+{% block title %}Create an account{% endblock %}
+
+{% block dojango_content %}
+    <h1>Create an account</h1>
+
+    <form action="" method="post">
+        {{ form.as_p }}
+        <input type="submit" value="Create the account">
+    </form>
+{% endblock %}

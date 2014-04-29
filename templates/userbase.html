@@ -1,0 +1,24 @@
+{% extends "newbase.html" %}
+{% block newbase_header_extra %}
+    {% block userbase_header_extra %}{% endblock %}
+{% endblock %}
+    {% block accordion %}
+        <div dojoType="dijit.layout.ContentPane" title="My experiments" selected="true">
+            {% if privateexperiments %}
+                {% for experiment in privateexperiments %}
+                    <p><a href="{% url 'LinApp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
+                {% endfor %}
+            {% else %}
+                you don't have any private experiments
+            {% endif %}
+        </div>
+        <div dojoType="dijit.layout.ContentPane" title="Public experiments">
+            {% if publicexperiments %}
+                {% for experiment in publicexperiments %}
+                   <p> <a href="{% url 'LinApp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
+                {% endfor %}
+            {% else %}
+                you don't have any public experiments
+            {% endif %}
+        </div>
+    {% endblock %}
