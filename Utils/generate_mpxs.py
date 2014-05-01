@@ -1,6 +1,6 @@
 __author__ = 'ofirr'
 
-from LinApp.models import TargetEnrichment
+from linapp.models import TargetEnrichment
 
 def other_target_enrichment_withing_margins(target_enrichment, existing_target_enrichments, margins=10000):
     """Check if the new amplicon collides with one of the existing amplicons within given margins"""

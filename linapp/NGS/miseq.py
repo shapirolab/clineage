@@ -1,4 +1,4 @@
-from LinApp.models import Sequencing, Machine
+from linapp.models import Sequencing, Machine
 import os
 import re
 import gzip

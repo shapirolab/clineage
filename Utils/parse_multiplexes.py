@@ -1,6 +1,6 @@
 
 import re
-from LinApp.models import *
+from linapp.models import *
 import hashlib
 from collections import defaultdict
 from django.db.models import Max, Count

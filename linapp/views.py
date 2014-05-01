@@ -1,10 +1,10 @@
 from django.shortcuts import render, render_to_response, redirect, get_object_or_404
 from django.template.context import RequestContext
-from LinApp.forms import *
-from LinApp.models import *
+from linapp.forms import *
+from linapp.models import *
 from Utils.plate_string_description import *
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from LinApp.DBUtils import DBUtils
+from linapp.DBUtils import DBUtils
 from datetime import datetime
 from dojango.decorators import json_response, expect_post_request
 from django.template import Template, Context, loader

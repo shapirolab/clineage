@@ -2,7 +2,7 @@
 # encoding: utf8
 
 from django.views.decorators.csrf import csrf_exempt
-from LinApp.models import *
+from linapp.models import *
 from spyne.server.django import DjangoApplication
 from spyne.model.primitive import String, Integer, AnyDict
 from spyne.model.complex import Iterable

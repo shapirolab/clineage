@@ -1,7 +1,7 @@
 from dojango.forms import *
 #from django import forms
-from LinApp.models import *
-from LinApp.widgets import *
+from linapp.models import *
+from linapp.widgets import *
 #### -------------------------------------------------------------------------------------
 #### Users/Roles Management
 #### -------------------------------------------------------------------------------------

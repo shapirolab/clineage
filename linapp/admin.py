@@ -1,4 +1,4 @@
-from LinApp.models import *
+from linapp.models import *
 from DBUtils import DBUtils
 from django.db.models import Q
 from django.contrib import admin

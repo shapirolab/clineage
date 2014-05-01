@@ -316,9 +316,9 @@ class Primer(Target):
                                              object_id_field='object_id')
 ### -------------------------------------------------------------------------------------
 class Microsatellite(Target):
-    repeat_type = models.DecimalField(max_digits=10, decimal_places=0) #length of repeat Nmer
+    repeat_type = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit = models.CharField(max_length=50) #string of repeat Nmer
-    repeat_number = models.DecimalField(max_digits=10, decimal_places=0) #number of repeats
+    repeat_number = models.PositiveIntegerField() #number of repeats
 
     def __unicode__(self):
         return self.name
@@ -731,7 +731,7 @@ class TargetVariant(models.Model):
     distribution = models.ManyToManyField(SequenceDistribution)
     creation = models.ForeignKey(AlgorithmRun, related_name='targetsvariants')
     type = models.ForeignKey(TargetVariantType)
-    value = models.DecimalField(max_digits=10, decimal_places=4)
+    value = models.PositiveIntegerField()
     #TODO:Decide if the same target as parent or different one.
 
     def __unicode__(self):
@@ -764,7 +764,7 @@ class GenSig(models.Model):
 class DM(models.Model):
     cell1 = models.ForeignKey(GenSig, related_name='+')
     cell2 = models.ForeignKey(GenSig, related_name='+')
-    distance = models.DecimalField(max_digits=10, decimal_places=4)
+    distance = models.IntegerField()
     creation = models.ForeignKey(AlgorithmRun, related_name='dms')
 
     def __unicode__(self):
@@ -780,7 +780,7 @@ class DM(models.Model):
 class CellTreeNode(MPTTModel):
     cell = models.ForeignKey(Cell)
     parent = TreeForeignKey('self', null=True, blank = True, related_name='children')
-    distance = models.DecimalField(max_digits=10, decimal_places=4)
+    distance = models.IntegerField()
     def __unicode__(self):
         return self.cell.name
 #    class MPTTMeta:

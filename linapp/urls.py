@@ -1,23 +1,23 @@
 
 from django.conf.urls import patterns, include, url
-from LinApp.views import *
+from linapp.views import *
 from django.views.generic.base import RedirectView
 from django.core.urlresolvers import reverse
 
 urlpatterns = patterns('',
-    url(r'^experiment/(?P<exp_id>\d+)/$', 'LinApp.views.experiment'),
-    url(r'^experiment/(?P<exp_id>\d+)/tab:(?P<tab>\w+)$', 'LinApp.views.experiment'),
-    url(r'^experiment/workflow/(?P<exp_id>\d+)$','LinApp.views.experimentworkflow'),
-    url(r'^comment/(?P<exp_id>\d+)/$', 'LinApp.views.commentPost'),
-    url(r'^postexperiment/(?P<exp_id>\d+)/$', 'LinApp.views.experimentPost'),
-    url(r'^postfile/(?P<exp_id>\d+)/$', 'LinApp.views.filesPost'),
+    url(r'^experiment/(?P<exp_id>\d+)/$', 'linapp.views.experiment'),
+    url(r'^experiment/(?P<exp_id>\d+)/tab:(?P<tab>\w+)$', 'linapp.views.experiment'),
+    url(r'^experiment/workflow/(?P<exp_id>\d+)$', 'linapp.views.experimentworkflow'),
+    url(r'^comment/(?P<exp_id>\d+)/$', 'linapp.views.commentPost'),
+    url(r'^postexperiment/(?P<exp_id>\d+)/$', 'linapp.views.experimentPost'),
+    url(r'^postfile/(?P<exp_id>\d+)/$', 'linapp.views.filesPost'),
     url(r'^algorithms/(?P<alg_id>\d+)/$', algorithm, name='algorithm-details'),
-    url(r'^algorithms/(?P<alg_id>\d+)/tab:(?P<tab>\w+)$', 'LinApp.views.algorithm'),
-    url(r'^treedata/$','LinApp.views.testtree'),
-    url(r'^algform/$','LinApp.views.algrunform'),
-    url(r'^algform/(?P<alg_id>\d+)$','LinApp.views.algrunform'),
-    url(r'^taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', 'LinApp.views.targets_tdv'),
-    url(r'^existing/taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', 'LinApp.views.existing_primer_pairs_tdv'),
+    url(r'^algorithms/(?P<alg_id>\d+)/tab:(?P<tab>\w+)$', 'linapp.views.algorithm'),
+    url(r'^treedata/$', 'linapp.views.testtree'),
+    url(r'^algform/$', 'linapp.views.algrunform'),
+    url(r'^algform/(?P<alg_id>\d+)$', 'linapp.views.algrunform'),
+    url(r'^taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', 'linapp.views.targets_tdv'),
+    url(r'^existing/taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', 'linapp.views.existing_primer_pairs_tdv'),
 
     ###############################################################################################
     ##################################Forms urls for dialogs#######################################
@@ -68,8 +68,8 @@ urlpatterns = patterns('',
     url(r'^forms/cell/delete/(?P<pk>\d+)$',CellDelete.as_view(), name='cell_delete'),
 
     #multiple cells
-    url(r'^forms/cell/add_multiple_cells$', 'LinApp.views.multiple_cells_create', name='cell_multiple_add'),
-    url(r'^forms/cell/add_cells_plate$', 'LinApp.views.plate_input', name='cells_plate_add'),
+    url(r'^forms/cell/add_multiple_cells$', 'linapp.views.multiple_cells_create', name='cell_multiple_add'),
+    url(r'^forms/cell/add_cells_plate$', 'linapp.views.plate_input', name='cells_plate_add'),
 
     #algorithm
     url(r'^forms/algorithm/add$',AlgorithmCreate.as_view(), name='algorithm_add'),
@@ -83,10 +83,10 @@ urlpatterns = patterns('',
     url(r'^forms/plate/(?P<pk>\d+)$',PlateUpdate.as_view(), name='plate_update'),
     url(r'^forms/plate/delete/(?P<pk>\d+)$',PlateDelete.as_view(), name='plate_delete'),
 
-    url(r'^plate_wells_selection/(?P<plate_plastica_id>\d+)$','LinApp.views.plate_well_selection'),
+    url(r'^plate_wells_selection/(?P<plate_plastica_id>\d+)$', 'linapp.views.plate_well_selection'),
 
-    # url(r'^cell/$','LinApp.views.cellform'),
-    # url(r'^cell/(?P<cell_id>\d+)$','LinApp.views.cellform'),
-    url(r'^experiment/(?P<exp_id>\d+)/member/$','LinApp.views.memberform'),
-    url(r'^experiment/(?P<exp_id>\d+)/member/(?P<mem_id>\d+)$','LinApp.views.memberform'),
+    # url(r'^cell/$','linapp.views.cellform'),
+    # url(r'^cell/(?P<cell_id>\d+)$','linapp.views.cellform'),
+    url(r'^experiment/(?P<exp_id>\d+)/member/$', 'linapp.views.memberform'),
+    url(r'^experiment/(?P<exp_id>\d+)/member/(?P<mem_id>\d+)$', 'linapp.views.memberform'),
 )

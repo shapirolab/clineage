@@ -47,7 +47,7 @@ urlpatterns = patterns('',
 
 #
 #    (r'^register/done/$',
-#     'LinApp.views.signup_done',
+#     'linapp.views.signup_done',
 #         {'template_name': 'accounts/signup_done.html'}),
 #
 #    (r'^signup/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',

@@ -1,4 +1,4 @@
-from LinApp.models import *
+from linapp.models import *
 from django.contrib.auth.models import User
 
 class DBUtils:

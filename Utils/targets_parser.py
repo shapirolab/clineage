@@ -1,6 +1,6 @@
 
 import re
-from LinApp.models import TargetType, Assembly, Target, Primer, Sequence
+from linapp.models import TargetType, Assembly, Target, Primer, Sequence
 
 def getTabDelimitedValues(f):
     """

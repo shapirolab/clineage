@@ -8,11 +8,11 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-     url(r'^CLineage/', include('LinApp.urls')),
+     url(r'^CLineage/', include('linapp.urls')),
 
     #Homepage
-    (r'^$', 'LinApp.views.homepage'),
-    (r'^tab:(?P<tab>\w+)$', 'LinApp.views.homepage'),
+    (r'^$', 'linapp.views.homepage'),
+    (r'^tab:(?P<tab>\w+)$', 'linapp.views.homepage'),
 
     # Login/Logout/Register Account
     (r'^accounts/', include('accounts.urls')),

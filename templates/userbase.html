@@ -6,7 +6,7 @@
         <div dojoType="dijit.layout.ContentPane" title="My experiments" selected="true">
             {% if privateexperiments %}
                 {% for experiment in privateexperiments %}
-                    <p><a href="{% url 'LinApp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
+                    <p><a href="{% url 'linapp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
                 {% endfor %}
             {% else %}
                 you don't have any private experiments
@@ -15,7 +15,7 @@
         <div dojoType="dijit.layout.ContentPane" title="Public experiments">
             {% if publicexperiments %}
                 {% for experiment in publicexperiments %}
-                   <p> <a href="{% url 'LinApp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
+                   <p> <a href="{% url 'linapp.views.experiment' experiment.pk %}">{{ experiment.name|escape }}</a></p>
                 {% endfor %}
             {% else %}
                 you don't have any public experiments

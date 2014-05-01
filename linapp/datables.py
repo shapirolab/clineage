@@ -1,4 +1,4 @@
-from LinApp.models import *
+from linapp.models import *
 from datable.web.table import Table
 from datable.web.storage import Storage
 from datable.web.columns import StringColumn, DateTimeColumn

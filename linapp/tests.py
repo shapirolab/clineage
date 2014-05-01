@@ -6,7 +6,7 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase
-from LinApp.models import Taxa, Assembly, TargetEnrichment, Target, Microsatellite
+from linapp.models import Taxa, Assembly, TargetEnrichment, Target, Microsatellite
 
 class queries_test(TestCase):
     def targets_enrichments_test(self):

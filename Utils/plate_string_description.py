@@ -3,7 +3,7 @@ import csv
 from StringIO import StringIO
 from Utils.wells import xy_index_2_index, index2str
 import re
-from LinApp.models import SampleComposition
+from linapp.models import SampleComposition
 from django.utils.encoding import smart_bytes
 
 def plate_parser(plate_string, rows_number=8, columns_number=12):

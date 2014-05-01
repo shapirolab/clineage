@@ -1,5 +1,5 @@
 import re
-from LinApp.models import *
+from linapp.models import *
 from Utils.wells import *
 from collections import defaultdict
 from decimal import Decimal

@@ -1,6 +1,6 @@
 
 
-from LinApp.models import PrimersMultiplex
+from linapp.models import PrimersMultiplex
 
 def func(multiplexes, mpx_plate):
     primers_mapping = []
