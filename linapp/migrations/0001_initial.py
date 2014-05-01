@@ -143,6 +143,7 @@ class Migration(SchemaMigration):
             ('taxonomy_id', self.gf('django.db.models.fields.IntegerField')()),
             ('rank', self.gf('django.db.models.fields.CharField')(max_length=50)),
             ('parent', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('friendly_name', self.gf('django.db.models.fields.CharField')(max_length=50)),
         ))
         db.send_create_signal(u'linapp', ['Taxa'])
 
@@ -180,8 +181,8 @@ class Migration(SchemaMigration):
         db.create_table(u'linapp_chromosome', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('sequence', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Sequence'])),
             ('assembly', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Assembly'])),
+            ('sequence_length', self.gf('django.db.models.fields.IntegerField')(null=True)),
         ))
         db.send_create_signal(u'linapp', ['Chromosome'])
 
@@ -1074,7 +1075,7 @@ class Migration(SchemaMigration):
             'assembly': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Assembly']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'sequence': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Sequence']"})
+            'sequence_length': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
         },
         u'linapp.coordinates': {
             'Meta': {'object_name': 'Coordinates'},
@@ -1453,6 +1454,7 @@ class Migration(SchemaMigration):
         },
         u'linapp.taxa': {
             'Meta': {'object_name': 'Taxa'},
+            'friendly_name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'parent': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
