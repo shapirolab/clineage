@@ -1,7 +1,7 @@
 
 import csv
 from StringIO import StringIO
-from Utils.wells import xy_index_2_index, index2str
+from utils.wells import xy_index_2_index, index2str
 import re
 from linapp.models import SampleComposition
 from django.utils.encoding import smart_bytes

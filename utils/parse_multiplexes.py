@@ -4,8 +4,8 @@ from linapp.models import *
 import hashlib
 from collections import defaultdict
 from django.db.models import Max, Count
-from Utils.wells import *
-from Utils.distribute_multiplex import *
+from utils.wells import *
+from utils.distribute_multiplex import *
 
 
 def test_multiplex():

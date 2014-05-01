@@ -1,4 +1,4 @@
-from Utils.script_header import *
+from utils.script_header import *
 # from Automation.robotic_scripts.getScriptHeader import *
 
 

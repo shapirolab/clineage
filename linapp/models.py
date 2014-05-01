@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 
 from clineage.settings import MEDIA_ROOT, NGS_RUNS
 from mptt.models import MPTTModel, TreeForeignKey
-from Utils.wells import index2str, str2index
+from utils.wells import index2str, str2index
 
 # Create your models here.
 

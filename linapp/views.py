@@ -2,7 +2,7 @@ from django.shortcuts import render, render_to_response, redirect, get_object_or
 from django.template.context import RequestContext
 from linapp.forms import *
 from linapp.models import *
-from Utils.plate_string_description import *
+from utils.plate_string_description import *
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from linapp.DBUtils import DBUtils
 from datetime import datetime
@@ -14,7 +14,7 @@ from dataminers import *
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
-from Utils.wells import num2abc
+from utils.wells import num2abc
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 
@@ -32,7 +32,7 @@ def index(request):
 
 
 def homepage(request, tab='individuals'):
-    # from Utils.parse_multiplexes import *
+    # from utils.parse_multiplexes import *
     # test_multiplex()
     try:
         publicexp = Experiment.objects.filter(is_public=True)
