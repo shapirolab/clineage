@@ -1,4 +1,5 @@
 import hashlib
+import mmap
 import os
 
 from django.db import models, transaction
@@ -252,31 +253,11 @@ class Assembly(models.Model):
 ### -------------------------------------------------------------------------------------
 class Chromosome(models.Model):
     name = models.CharField(max_length=50)
-    sequence = models.ForeignKey(Sequence, null=True)
     assembly = models.ForeignKey(Assembly)
     sequence_length = models.IntegerField(null=True)
 
     def __unicode__(self):
         return self.name
-
-    def write_legacy_seq(self):
-        fn = self.get_abs_path()
-        s = self.sequence.sequence
-        n = len(s)
-        print fn, n
-        with open(fn, 'w') as f:
-            f.write(s)
-        written = os.path.getsize(fn)
-        assert written == n, "{} != {}".format(written, n)
-
-        with transaction.commit_on_success():
-            seq = self.sequence
-            self.sequence_length = n
-            self.sequence = None
-            self.save()
-            seq.delete()
-
-        return n
 
     def get_path(self, ext="txt"):
         return os.path.join(self.assembly.get_path(), 'chr{}.{}'.format(self.name, ext))
@@ -285,30 +266,27 @@ class Chromosome(models.Model):
         return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
     def getdna(self, start, stop):
-        if stop > self.sequence.length:
+        assert stop > start
+        if stop > self.sequence_length:
             raise ValueError('indices out of bounds')
-        return self.sequence.sequence[start-1:stop].upper()
+        with open(self.get_abs_path(), 'r+b') as f:
+            mm = mmap.mmap(f.fileno(), 0)
+            return mm[start-1:stop].upper()
 
-    def rawtest_getdna(self, start, stop):
-        if stop > self.sequence.length:
-            raise ValueError('indices out of bounds')
-        q = Sequence.objects.filter(pk=self.sequence.pk).defer("sequence").extra(select={'subsequence': "SUBSTRING(sequence,%d,%d)" % (start-1, stop-start+1)})
-        return q[0].subsequence
-        # cursor = connection.cursor()
-        # cursor.execute('SELECT SUBSTRING(sequence,%d,%d) as chr_substring FROM linapp_sequence WHERE id = %d' % (start-1, stop-start+1, self.sequence.pk))
-        # row = cursor.fetchone()
-        # return row[0].upper()
+    def locate(self, start, stop, sequence, padding=10):
+        l = padding if start > padding else start
+        r = padding if stop + padding < self.sequence_length else self.sequence_length - stop
+        s = self.getdna(start - l, stop + r)
 
-    def locate(self, start, stop, sequence):
-        if self.getdna(start, stop) == sequence.upper():
+        # check for exact match
+        if s[l:-r] == sequence.upper():
             return start, stop
-        index = self.sequence.sequence[start-10:stop+10].upper().find(sequence.upper())  # search for reference value with extra 10bp on each side
-        if index >= 0:
-            start += index - 9  # adjust found index to start index - added extra bp
-            stop = start + len(sequence) - 1
-            return start, stop
-        else:
+
+        index = s.find(sequence.upper())  # search for reference value with extra 10bp on each side
+        if index < 0:
             raise ValueError('could not find %s within %s:%d-%d' % (sequence, self.name, start-10, stop+10))
+
+        return start - l + index, start - l + index + len(sequence) - 1
 
 ### -------------------------------------------------------------------------------------
 #class Kit(models.Model):

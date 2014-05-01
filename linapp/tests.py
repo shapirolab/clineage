@@ -1,66 +1,44 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
-from linapp.models import Taxa, Assembly, TargetEnrichment, Target, Microsatellite
+from linapp.models import Taxa, Assembly, Chromosome
+import os
 
-class queries_test(TestCase):
-    def targets_enrichments_test(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        taxa_object = Taxa.objects.get(taxonomy_id=10090)
-        assembly = Assembly.objects.get(taxa=taxa_object, friendly_name='mm9')
-        for enrichment in TargetEnrichment.objects.filter(left__assembly=assembly)\
-                .prefetch_related('targets__microsatellite', 'physical_locations',
-                                  'left__sequence', 'right__sequence'):
-            for target in enrichment.targets.all():
-                try:
-                    mstarget = target.microsatellite
-                    mstarget.repeat_type
-                    mstarget.repeat_number
-                    mstarget.repeat_unit
-                except Microsatellite.DoesNotExist:
-                    pass
-                target.start_pos
-                target.referencevalue.length
-                enrichment.left.sequence.sequence
-                enrichment.left.start_pos
-                locations = enrichment.physical_locations.all()
 
-def targets_tdv(request, taxa, assem):
-    for enrichment in TargetEnrichment.objects.filter(left__assembly=assembly)\
-            .prefetch_related('targets', 'targets__microsatellite', 'physical_locations', 'left', 'right', 'left__sequence', 'right__sequence'):
-        for target in enrichment.targets.all():
-            s += target.name + '\t'
-            try:
-                mstarget = target.microsatellite
-                s += str(mstarget.repeat_type) + '\t'
-                s += str(mstarget.repeat_number) + '\t'
-                s += mstarget.repeat_unit + '\t'
-            except Microsatellite.DoesNotExist:
-                s += '\t\t\t'
-            s += str(target.start_pos) + '\t'
-            s += str(target.end_pos) + '\t'
-            s += str(target.referencevalue.length) + '\t'
-            s += enrichment.left.sequence.sequence + '\t'
-            s += str(enrichment.left.start_pos) + '\t'
-            s += str(enrichment.left.end_pos) + '\t'
-            s += enrichment.right.sequence.sequence + '\t'
-            s += str(enrichment.right.start_pos) + '\t'
-            s += str(enrichment.right.end_pos) + '\t'
-            locations = enrichment.physical_locations.all()
-            if len(locations) == 1:
-                s += locations[0].plate.name + '\t'
-                s += locations[0].well + '\t'
-            else:
-                s += '\t\t'
-            s += str(enrichment.passed_validation) + '\t'
-            s += str(enrichment.validation_failure_id) + '\t'
-            s += str(enrichment.validation_date) + '\t'
-            s += '\r\n'
-    return HttpResponse(s, content_type="text/plain")
+class LinappModelTestCase(TestCase):
+    seq = "TTAAGTAACATCAGCCAAGCA"
+    start = 1700000
+    stop = start + len(seq) - 1
+
+
+    @classmethod
+    def setUpClass(cls):
+        t = Taxa.objects.create(
+            name="Homo sapiens",
+            taxonomy_id=7,
+            rank="Specie",
+            friendly_name="Human",
+        )
+
+        a = Assembly.objects.create(
+            taxa=t,
+            name="Human #19",
+            friendly_name="hg19",
+        )
+
+        cls.cx = Chromosome.objects.create(
+            name="X",
+            assembly=a,
+            sequence_length=1
+        )
+
+        cls.cx.sequence_length = os.path.getsize(cls.cx.get_abs_path())
+        cls.cx.save()
+
+    def test_getdna(self):
+        self.assertEquals(self.seq, self.cx.getdna(self.start, self.stop))
+
+    def test_locate(self):
+        self.assertEquals((self.start, self.stop), self.cx.locate(self.start, self.stop, self.seq))
+        self.assertEquals((self.start, self.stop), self.cx.locate(self.start-5, self.stop-5, self.seq))
+        self.assertEquals((self.start, self.stop), self.cx.locate(self.start+5, self.stop+5, self.seq))
+        self.assertRaises(ValueError, self.cx.locate, self.start+50, self.stop+50, self.seq)
+

@@ -1,5 +1,6 @@
 # Django settings for CLineage project.
 import os
+import sys
 
 DEBUG = True
 # DEBUG = False
@@ -190,7 +191,11 @@ LOGGING = {
     }
 }
 
+
 try:
     from local_settings import *
 except ImportError:
     pass
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
