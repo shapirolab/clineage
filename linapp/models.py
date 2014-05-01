@@ -1,7 +1,7 @@
 import hashlib
 import os
 
-from django.db import models
+from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
@@ -9,8 +9,7 @@ from django.dispatch import receiver
 from django.db.models import Count
 from django.db.models.signals import *
 from django.core.urlresolvers import reverse
-
-from clineage.settings import MEDIA_ROOT, NGS_RUNS
+from django.conf import settings
 from mptt.models import MPTTModel, TreeForeignKey
 from utils.wells import index2str, str2index
 
@@ -113,7 +112,7 @@ class FileContext(models.Model):
 ### -------------------------------------------------------------------------------------
 class ExperimentFile(models.Model):
     def path(self, filename):
-        return MEDIA_ROOT+'/CLineageFiles/'+self.experiment.name+'/'+filename
+        return settings.MEDIA_ROOT+'/CLineageFiles/'+self.experiment.name+'/'+filename
     title = models.CharField(max_length=50)
     experiment = models.ForeignKey(Experiment)
     file_name = models.CharField(max_length=50)
@@ -211,6 +210,7 @@ class Taxa(models.Model):
     taxonomy_id = models.IntegerField()
     rank = models.CharField(max_length=50)
     parent = models.IntegerField(null=True, blank=True)
+    friendly_name = models.CharField(max_length=50)
 
     def __unicode__(self):
         return self.name
@@ -245,11 +245,44 @@ class Assembly(models.Model):
 
     class Meta:
         verbose_name_plural = 'Assemblies'
+
+    def get_path(self):
+        return os.path.join(self.taxa.friendly_name, self.friendly_name)
+
 ### -------------------------------------------------------------------------------------
 class Chromosome(models.Model):
     name = models.CharField(max_length=50)
-    sequence = models.ForeignKey(Sequence)
+    sequence = models.ForeignKey(Sequence, null=True)
     assembly = models.ForeignKey(Assembly)
+    sequence_length = models.IntegerField(null=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def write_legacy_seq(self):
+        fn = self.get_abs_path()
+        s = self.sequence.sequence
+        n = len(s)
+        print fn, n
+        with open(fn, 'w') as f:
+            f.write(s)
+        written = os.path.getsize(fn)
+        assert written == n, "{} != {}".format(written, n)
+
+        with transaction.commit_on_success():
+            seq = self.sequence
+            self.sequence_length = n
+            self.sequence = None
+            self.save()
+            seq.delete()
+
+        return n
+
+    def get_path(self, ext="txt"):
+        return os.path.join(self.assembly.get_path(), 'chr{}.{}'.format(self.name, ext))
+
+    def get_abs_path(self):
+        return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
     def getdna(self, start, stop):
         if stop > self.sequence.length:
@@ -277,8 +310,6 @@ class Chromosome(models.Model):
         else:
             raise ValueError('could not find %s within %s:%d-%d' % (sequence, self.name, start-10, stop+10))
 
-    def __unicode__(self):
-        return self.name
 ### -------------------------------------------------------------------------------------
 #class Kit(models.Model):
     #TODO: complete.
@@ -500,7 +531,7 @@ class Extraction(models.Model):
 ### -------------------------------------------------------------------------------------
 class SamplingEvent(models.Model):
     def path(self, filename):
-        return MEDIA_ROOT+'/CLineageFiles/sampling_events/'+self.name+'/'+filename
+        return settings.MEDIA_ROOT+'/CLineageFiles/sampling_events/'+self.name+'/'+filename
     name = models.CharField(max_length=50)
     extraction = models.ForeignKey(Extraction)
     date = models.DateField(null=True, blank=True)
@@ -611,7 +642,7 @@ class Sequencing(models.Model):
 #            raise
 #        return experiments[0]
     def directory(self):
-        path = '%s/%s'%(NGS_RUNS,self.name)
+        path = '%s/%s'%(settings.NGS_RUNS,self.name)
         if not os.path.exists(path):
             os.makedirs(path)
         return path

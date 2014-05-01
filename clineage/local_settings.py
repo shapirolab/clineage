@@ -27,3 +27,4 @@ DATABASES = {
 
 # Uncomment the following line to enable the debug toolbar
 INTERNAL_IPS = ('127.0.0.1',)
+CHROMOSOMES_PATH = r'S:\LINEAGE\GenomesData'
