@@ -14,4 +14,4 @@ easy_install http://pkgs.10x.org.il/amd64/numpy-MKL-1.8.1.win-amd64-py2.7.exe
 
 echo ===============================
 echo Installing biopython
-easy_install http://pkgs.10x.org.il/amd64/biopython-1.63.win-amd64-py3.3.exe
+easy_install http://pkgs.10x.org.il/amd64/biopython-1.63.win-amd64-py2.7.exe
