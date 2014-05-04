@@ -342,6 +342,7 @@ class TargetEnrichmentType(models.Model):
 ### -------------------------------------------------------------------------------------
 class TargetEnrichment(models.Model):
     type = models.ForeignKey(TargetEnrichmentType)
+    chromosome = models.ForeignKey(Chromosome)
     left = models.ForeignKey(Primer, related_name='left_primer')
     right = models.ForeignKey(Primer, related_name='right_primer')
     passed_validation = models.NullBooleanField()
