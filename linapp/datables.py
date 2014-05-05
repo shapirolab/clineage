@@ -7,6 +7,7 @@ from django.utils.translation import ugettext as _
 from datable.web.extra.widgets import DateTimeLessOrEqual
 from datable.web.extra.widgets import ForeignKeyComboBox
 from datable.web.extra.widgets import DateTimeGreaterOrEqual
+from django.core.urlresolvers import reverse
 
 def getmemberstable(exp):
     return Table(
@@ -114,7 +115,7 @@ def getalgrunstable(alg):
                 DateTimeColumn('timestamp', width=150),
                 ],
         ),
-        objectpath='/CLineage/algform/',
+        # objectpath=reverse('linapp.views.algrunform')
     )
 
 def getalgparamstable(alg):
@@ -344,7 +345,7 @@ def getalgorithmstable():
                     placeholder=_("Type")),
                 ]
         ),
-        objectpath='/CLineage/algorithms/',
+        # objectpath='/CLineage/algorithms/',
     )
 
 def getplatestable():
