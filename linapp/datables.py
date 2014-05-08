@@ -115,7 +115,7 @@ def getalgrunstable(alg):
                 DateTimeColumn('timestamp', width=150),
                 ],
         ),
-        # objectpath=reverse('linapp.views.algrunform')
+        objectpath=reverse('linapp.views.algrunform')
     )
 
 def getalgparamstable(alg):
@@ -345,7 +345,7 @@ def getalgorithmstable():
                     placeholder=_("Type")),
                 ]
         ),
-        # objectpath='/CLineage/algorithms/',
+        objectpath='/CLineage/algorithms/',
     )
 
 def getplatestable():
@@ -372,7 +372,7 @@ def getplatestable():
                     placeholder=_("Type")),
                 ]
         ),
-        # objectpath='/CLineage/plate/',
+        objectpath='/CLineage/plate/',
     )
 
 

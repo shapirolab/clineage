@@ -15,4 +15,4 @@ xlwt==0.7.5
 biopython==1.63
 MySQL-python==1.2.5
 ipython==2.0.0
-git+https://github.com/mpasternak/dojango-datable.git#egg=dojango-datable
+-e git+https://github.com/ofirr/dojango-datable.git#egg=dojango-datable
