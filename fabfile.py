@@ -66,7 +66,7 @@ def deploy(restart=True):
         run("python manage.py syncdb --noinput")
         run("python manage.py migrate --merge --noinput")
         run("python manage.py collectstatic --noinput")
-        run("git log -n 1 --format=\"%ai %h\" > static/version.txt")
+        run("git log -n 1 --format='%ai %h' > static/version.txt")
         run("git log -n 1 > static/version-full.txt")
     if restart:
         reload_app()
@@ -91,8 +91,14 @@ def log():
 @task
 def clone_project():
     run("git clone %s %s" % (env.clone_url, env.code_dir))
+
+
+@task
+def create_venv():
     with cd(env.code_dir):
-        run("mkvirtualenv cl")
+        # run("mkvirtualenv cl")
+        run("mkdir -p ~/.virtualenvs/")
+        run("cd ~/.virtualenvs/ && virtualenv cl")
 
 
 @task
