@@ -15,3 +15,11 @@ easy_install http://pkgs.10x.org.il/amd64/numpy-MKL-1.8.1.win-amd64-py2.7.exe
 echo ===============================
 echo Installing biopython
 easy_install http://pkgs.10x.org.il/amd64/biopython-1.63.win-amd64-py2.7.exe
+
+echo ===============================
+echo Installing pycrypto
+easy_install http://www.voidspace.org.uk/downloads/pycrypto26/pycrypto-2.6.win-amd64-py2.7.exe
+
+echo ===============================
+echo Installing paramiko
+pip install paramiko==1.10.2

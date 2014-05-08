@@ -37,10 +37,4 @@ urlpatterns = patterns('',
 
     #soap test
     (r'^soap/', include('soap.urls')),
-    ### Media
-    (r'^media/(?P<path>.*)$', 'django.views.static.serve',
-     {'document_root': settings.MEDIA_ROOT}),
-    ### Media
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-     {'document_root': settings.STATIC_ROOT}),
 )
