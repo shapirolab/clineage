@@ -307,7 +307,6 @@ class Protocol(models.Model):
 class Target(models.Model):#Target is a locus on a reference genome.
     name = models.CharField(max_length=50)
     type = models.ForeignKey(TargetType) #Microsatellite / SNP / etc...
-    assembly = models.ForeignKey(Assembly)
     chromosome = models.ForeignKey(Chromosome)
     start_pos = models.IntegerField()
     end_pos = models.IntegerField()
