@@ -18,7 +18,7 @@ class Migration(DataMigration):
 
     def backwards(self, orm):
         "Write your backwards methods here."
-
+        raise RuntimeError("Cannot reverse this migration. 'Target.assembly' and its values cannot be restored.")
 
     models = {
         u'auth.group': {
