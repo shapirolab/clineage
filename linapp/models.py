@@ -319,6 +319,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
 ### -------------------------------------------------------------------------------------
 class Primer(Target):
     sequence = models.ForeignKey(Sequence)
+    tail = models.CharField(max_length=50, null=True)
     physical_locations = generic.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')
