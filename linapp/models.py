@@ -344,6 +344,7 @@ class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     left = models.ForeignKey(Primer, related_name='left_primer')
     right = models.ForeignKey(Primer, related_name='right_primer')
+    amplicon = models.CharField(max_length=500)
     passed_validation = models.NullBooleanField()
     validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
     validation_date = models.DateField(null=True, blank=True)
