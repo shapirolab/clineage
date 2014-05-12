@@ -317,9 +317,20 @@ class Target(models.Model):#Target is a locus on a reference genome.
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
+class PrimerTail(models.Model):
+    tail = models.CharField(max_length=50, null=True)
+### -------------------------------------------------------------------------------------
 class Primer(Target):
+    PLUS = '+'
+    MINUS = '-'
+    STRANDS = (
+        (PLUS, 'Plus'),
+        (MINUS, 'Minus'),
+    )
+    strand = models.CharField(max_length=1, choices=STRANDS, null=True)
     sequence = models.ForeignKey(Sequence)
     tail = models.CharField(max_length=50, null=True)
+    xtail = models.ForeignKey(PrimerTail, null=True)
     physical_locations = generic.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')
