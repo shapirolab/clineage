@@ -11,23 +11,13 @@ class Migration(DataMigration):
         # Note: Don't use "from appname.models import ModelName". 
         # Use orm.ModelName to refer to models in this application,
         # and orm['appname.ModelName'] for models in other applications.
-        for te in orm.TargetEnrichment.objects.filter(type_id=2).filter(left__tail=None): #'PCR_with_tails'
-            pl = te.left
-            pl.tail = pl.sequence.sequence[:22]
-            pl.save()
-            pr = te.right
-            pr.tail = pr.sequence.sequence[:22]
-            pr.save()
+        orm.PrimerTail.objects.create(tail='CTACACGACGCTCTTCCGATCT')
+        orm.PrimerTail.objects.create(tail='CAGACGTGTGCTCTTCCGATCT')
 
     def backwards(self, orm):
         "Write your backwards methods here."
-        for te in orm.TargetEnrichment.objects.filter(type_id=2).filter(left__tail__isnull=False):
-            pl = te.left
-            pl.tail = None
-            pl.save()
-            pr = te.right
-            pr.tail = None
-            pr.save()
+        orm.PrimerTail.objects.get(tail='CTACACGACGCTCTTCCGATCT').delete()
+        orm.PrimerTail.objects.get(tail='CAGACGTGTGCTCTTCCGATCT').delete()
 
     models = {
         u'auth.group': {
@@ -377,14 +367,21 @@ class Migration(DataMigration):
         u'linapp.primer': {
             'Meta': {'object_name': 'Primer', '_ormbases': [u'linapp.Target']},
             'sequence': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Sequence']"}),
+            'strand': ('django.db.models.fields.CharField', [], {'max_length': '1', 'null': 'True'}),
             'tail': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'}),
-            u'target_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['linapp.Target']", 'unique': 'True', 'primary_key': 'True'})
+            u'target_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['linapp.Target']", 'unique': 'True', 'primary_key': 'True'}),
+            'xtail': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.PrimerTail']", 'null': 'True'})
         },
         u'linapp.primersmultiplex': {
             'Meta': {'object_name': 'PrimersMultiplex'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'primers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['linapp.TargetEnrichment']", 'symmetrical': 'False'})
+        },
+        u'linapp.primertail': {
+            'Meta': {'object_name': 'PrimerTail'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'tail': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'})
         },
         u'linapp.protocol': {
             'Meta': {'object_name': 'Protocol'},

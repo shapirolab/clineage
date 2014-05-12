@@ -329,8 +329,7 @@ class Primer(Target):
     )
     strand = models.CharField(max_length=1, choices=STRANDS, null=True)
     sequence = models.ForeignKey(Sequence)
-    tail = models.CharField(max_length=50, null=True)
-    xtail = models.ForeignKey(PrimerTail, null=True)
+    tail = models.ForeignKey(PrimerTail, null=True)
     physical_locations = generic.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')

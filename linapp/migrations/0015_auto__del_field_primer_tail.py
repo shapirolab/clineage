@@ -1,33 +1,23 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        for te in orm.TargetEnrichment.objects.filter(type_id=2).filter(left__tail=None): #'PCR_with_tails'
-            pl = te.left
-            pl.tail = pl.sequence.sequence[:22]
-            pl.save()
-            pr = te.right
-            pr.tail = pr.sequence.sequence[:22]
-            pr.save()
+        # Deleting field 'Primer.tail'
+        db.delete_column(u'linapp_primer', 'tail')
+
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        for te in orm.TargetEnrichment.objects.filter(type_id=2).filter(left__tail__isnull=False):
-            pl = te.left
-            pl.tail = None
-            pl.save()
-            pr = te.right
-            pr.tail = None
-            pr.save()
+        # Adding field 'Primer.tail'
+        db.add_column(u'linapp_primer', 'tail',
+                      self.gf('django.db.models.fields.CharField')(max_length=50, null=True),
+                      keep_default=False)
+
 
     models = {
         u'auth.group': {
@@ -377,14 +367,20 @@ class Migration(DataMigration):
         u'linapp.primer': {
             'Meta': {'object_name': 'Primer', '_ormbases': [u'linapp.Target']},
             'sequence': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Sequence']"}),
-            'tail': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'}),
-            u'target_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['linapp.Target']", 'unique': 'True', 'primary_key': 'True'})
+            'strand': ('django.db.models.fields.CharField', [], {'max_length': '1', 'null': 'True'}),
+            u'target_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['linapp.Target']", 'unique': 'True', 'primary_key': 'True'}),
+            'xtail': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.PrimerTail']", 'null': 'True'})
         },
         u'linapp.primersmultiplex': {
             'Meta': {'object_name': 'PrimersMultiplex'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'primers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['linapp.TargetEnrichment']", 'symmetrical': 'False'})
+        },
+        u'linapp.primertail': {
+            'Meta': {'object_name': 'PrimerTail'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'tail': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'})
         },
         u'linapp.protocol': {
             'Meta': {'object_name': 'Protocol'},
@@ -565,4 +561,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['linapp']
-    symmetrical = True
