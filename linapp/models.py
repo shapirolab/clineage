@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from mptt.models import MPTTModel, TreeForeignKey
 from utils.wells import index2str, str2index
+from utils.SequenceManipulations import *
 
 # Create your models here.
 
@@ -313,7 +314,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
     referencevalue = models.ForeignKey(Sequence)
 
     def get_referencevalue(self):
-        return self.chromosome.sequence.sequence[self.start_pos:self.end_pos]
+        return self.chromosome.getdna(self.start_pos,self.end_pos)
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
@@ -333,6 +334,13 @@ class Primer(Target):
     physical_locations = generic.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')
+    def validate_reference(self):
+        if self.strand == self.PLUS:
+            assert self.referencevalue.sequence == self.get_referencevalue()
+            assert self.sequence.sequence[-(self.end_pos-self.start_pos+1):] == self.get_referencevalue()
+        if self.strand == self.MINUS:
+            assert self.referencevalue.sequence == self.get_referencevalue()
+            assert complement(self.sequence.sequence[-(self.end_pos-self.start_pos+1):])[::-1] == self.get_referencevalue()
 ### -------------------------------------------------------------------------------------
 class Microsatellite(Target):
     repeat_type = models.PositiveIntegerField() #length of repeat Nmer
@@ -492,7 +500,7 @@ class Individual(models.Model):
 class ExtractionEvent(models.Model):
     individual = models.ForeignKey(Individual)
     name = models.CharField(max_length=100)
-    comment = models.TextField()
+    comment = models.TextField(null=True, blank=True)
     date = models.DateTimeField()
     location = models.ForeignKey(Location, null=True, blank=True)
     user_performed = models.ForeignKey(User, related_name='+')
