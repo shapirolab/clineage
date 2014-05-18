@@ -204,7 +204,6 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
             ('type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.TargetType'])),
-            ('assembly', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Assembly'])),
             ('chromosome', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Chromosome'])),
             ('start_pos', self.gf('django.db.models.fields.IntegerField')()),
             ('end_pos', self.gf('django.db.models.fields.IntegerField')()),
@@ -212,10 +211,19 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'linapp', ['Target'])
 
+        # Adding model 'PrimerTail'
+        db.create_table(u'linapp_primertail', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('tail', self.gf('django.db.models.fields.CharField')(max_length=50, null=True)),
+        ))
+        db.send_create_signal(u'linapp', ['PrimerTail'])
+
         # Adding model 'Primer'
         db.create_table(u'linapp_primer', (
             (u'target_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['linapp.Target'], unique=True, primary_key=True)),
+            ('strand', self.gf('django.db.models.fields.CharField')(max_length=1, null=True)),
             ('sequence', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Sequence'])),
+            ('tail', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.PrimerTail'], null=True)),
         ))
         db.send_create_signal(u'linapp', ['Primer'])
 
@@ -240,8 +248,10 @@ class Migration(SchemaMigration):
         db.create_table(u'linapp_targetenrichment', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.TargetEnrichmentType'])),
+            ('chromosome', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Chromosome'])),
             ('left', self.gf('django.db.models.fields.related.ForeignKey')(related_name='left_primer', to=orm['linapp.Primer'])),
             ('right', self.gf('django.db.models.fields.related.ForeignKey')(related_name='right_primer', to=orm['linapp.Primer'])),
+            ('amplicon', self.gf('django.db.models.fields.CharField')(max_length=500)),
             ('passed_validation', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
             ('validation_failure', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.TargetEnrichmentFailureType'], null=True)),
             ('validation_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
@@ -389,7 +399,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('individual', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Individual'])),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('comment', self.gf('django.db.models.fields.TextField')()),
+            ('comment', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('date', self.gf('django.db.models.fields.DateTimeField')()),
             ('location', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['linapp.Location'], null=True, blank=True)),
             ('user_performed', self.gf('django.db.models.fields.related.ForeignKey')(related_name='+', to=orm['auth.User'])),
@@ -782,6 +792,9 @@ class Migration(SchemaMigration):
         # Deleting model 'Target'
         db.delete_table(u'linapp_target')
 
+        # Deleting model 'PrimerTail'
+        db.delete_table(u'linapp_primertail')
+
         # Deleting model 'Primer'
         db.delete_table(u'linapp_primer')
 
@@ -1147,7 +1160,7 @@ class Migration(SchemaMigration):
         },
         u'linapp.extractionevent': {
             'Meta': {'object_name': 'ExtractionEvent'},
-            'comment': ('django.db.models.fields.TextField', [], {}),
+            'comment': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'date': ('django.db.models.fields.DateTimeField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'individual': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Individual']"}),
@@ -1290,6 +1303,8 @@ class Migration(SchemaMigration):
         u'linapp.primer': {
             'Meta': {'object_name': 'Primer', '_ormbases': [u'linapp.Target']},
             'sequence': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Sequence']"}),
+            'strand': ('django.db.models.fields.CharField', [], {'max_length': '1', 'null': 'True'}),
+            'tail': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.PrimerTail']", 'null': 'True'}),
             u'target_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['linapp.Target']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'linapp.primersmultiplex': {
@@ -1297,6 +1312,11 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'primers': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['linapp.TargetEnrichment']", 'symmetrical': 'False'})
+        },
+        u'linapp.primertail': {
+            'Meta': {'object_name': 'PrimerTail'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'tail': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'})
         },
         u'linapp.protocol': {
             'Meta': {'object_name': 'Protocol'},
@@ -1393,7 +1413,6 @@ class Migration(SchemaMigration):
         },
         u'linapp.target': {
             'Meta': {'object_name': 'Target'},
-            'assembly': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Assembly']"}),
             'chromosome': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Chromosome']"}),
             'end_pos': ('django.db.models.fields.IntegerField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -1412,6 +1431,8 @@ class Migration(SchemaMigration):
         },
         u'linapp.targetenrichment': {
             'Meta': {'object_name': 'TargetEnrichment'},
+            'amplicon': ('django.db.models.fields.CharField', [], {'max_length': '500'}),
+            'chromosome': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['linapp.Chromosome']"}),
             'comment': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'left': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'left_primer'", 'to': u"orm['linapp.Primer']"}),

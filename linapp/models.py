@@ -267,7 +267,7 @@ class Chromosome(models.Model):
         return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
     def getdna(self, start, stop):
-        assert stop > start
+        assert stop >= start
         if stop > self.sequence_length:
             raise ValueError('indices out of bounds')
         with open(self.get_abs_path(), 'r+b') as f:
@@ -345,8 +345,7 @@ class Primer(Target):
 class Microsatellite(Target):
     repeat_type = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit = models.CharField(max_length=50) #string of repeat Nmer
-    repeat_number = models.PositiveIntegerField() #number of repeats
-
+    repeat_number = models.DecimalField(max_digits=3, decimal_places=1, null=True)
     def __unicode__(self):
         return self.name
 
