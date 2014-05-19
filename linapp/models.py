@@ -345,7 +345,7 @@ class Primer(Target):
 class Microsatellite(Target):
     repeat_type = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit = models.CharField(max_length=50) #string of repeat Nmer
-    repeat_number = models.DecimalField(max_digits=3, decimal_places=1, null=True)
+    repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
     def __unicode__(self):
         return self.name
 
