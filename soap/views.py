@@ -12,8 +12,7 @@ from spyne.protocol.soap import Soap11
 from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.error import *
-from django.core.exceptions import ObjectDoesNotExist
-#from Bio.SeqUtils.MeltingTemp import Tm_staluc
+from Bio.SeqUtils.MeltingTemp import Tm_staluc
 
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))
@@ -80,9 +79,9 @@ class CLineageWebServices(ServiceBase):
                            tgt.chromosome.name,  # Chromosome
                            str(tgt.end_pos-tgt.start_pos),  # Length MS
                            te.left.sequence.sequence,  # Primer sequence -  Left
-                           1,#str(Tm_staluc(te.left.sequence.sequence)),  # Primer Tm -  Left
+                           str(Tm_staluc(te.left.sequence.sequence)),  # Primer Tm -  Left
                            te.right.sequence.sequence,  # Primer sequence -  Right
-                           1,#str(Tm_staluc(te.right.sequence.sequence)),  # Primer Tm -  Right
+                           str(Tm_staluc(te.right.sequence.sequence)),  # Primer Tm -  Right
                            str(te.passed_validation),
                            str(tgt.start_pos),  # Target location on Chromosome - start
                            str(tgt.end_pos),  # Target location on Chromosome - end
