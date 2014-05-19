@@ -373,8 +373,8 @@ class TargetEnrichment(models.Model):
     targets = models.ManyToManyField(Target, null=True, blank=True)
 
     def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
-        assert self.left.assembly == self.right.assembly
-        self.targets = Target.objects.filter(assembly=self.left.assembly, start_pos__gte=self.left.start_pos)\
+        assert self.left.chromosome == self.right.chromosome
+        self.targets = Target.objects.filter(chromosome=self.left.chromosome, start_pos__gte=self.left.start_pos)\
             .filter(end_pos__lte=self.right.end_pos)\
             .exclude(pk__in=Primer.objects.all().values('pk'))
         self.save()
