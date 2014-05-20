@@ -58,9 +58,11 @@ class CLineageWebServices(ServiceBase):
         @param target_names list of target names to query.
         @return full target data in table format (see columns)
         '''
+        tails_pcr = TargetEnrichmentType.objects.get(name='PCR_with_tails')
         targets = [target for target in target_names]
+        print targets
         for tgt in Target.objects.filter(name__in=targets):
-            for te in tgt.targetenrichment_set.all():
+            for te in tgt.targetenrichment_set.all().filter(type=tails_pcr):
                 for mpx in te.primersmultiplex_set.all():
                     try:
                         ms = tgt.microsatellite
@@ -79,9 +81,9 @@ class CLineageWebServices(ServiceBase):
                            tgt.chromosome.name,  # Chromosome
                            str(tgt.end_pos-tgt.start_pos),  # Length MS
                            te.left.sequence.sequence,  # Primer sequence -  Left
-                           str(Tm_staluc(te.left.sequence.sequence)),  # Primer Tm -  Left
+                           str(Tm_staluc(te.left.referencevalue.sequence)),  # Primer Tm -  Left
                            te.right.sequence.sequence,  # Primer sequence -  Right
-                           str(Tm_staluc(te.right.sequence.sequence)),  # Primer Tm -  Right
+                           str(Tm_staluc(te.right.referencevalue.sequence)),  # Primer Tm -  Right
                            str(te.passed_validation),
                            str(tgt.start_pos),  # Target location on Chromosome - start
                            str(tgt.end_pos),  # Target location on Chromosome - end
