@@ -60,7 +60,6 @@ class CLineageWebServices(ServiceBase):
         '''
         tails_pcr = TargetEnrichmentType.objects.get(name='PCR_with_tails')
         targets = [target for target in target_names]
-        print targets
         for tgt in Target.objects.filter(name__in=targets):
             for te in tgt.targetenrichment_set.all().filter(type=tails_pcr):
                 for mpx in te.primersmultiplex_set.all():
@@ -91,6 +90,76 @@ class CLineageWebServices(ServiceBase):
                            str(te.right.end_pos),  # Amplicon location on Chromosome - end
                            mpx.name,  # Mpx groups names
                            str(len(mpx.primers.all()))]
+
+    @rpc(String, _returns=Iterable(Iterable(String)))
+    def get_targets_by_panel(ctx, panel_name):
+        '''
+        Elaborate query for targets.
+        MATLAB example: get_targets_by_panel(service_obj, struct('string','Seq05944'))
+
+        output columns:
+        # Target name
+        # Target: MS/Other Mutation
+        # Basic Unit size
+        # Expected Number of repeats
+        # Basic Unit Type
+        # Chromosome
+        # Length MS
+        # Primer sequence -  Left
+        # Primer Tm -  Left
+        # Primer sequence -  Right
+        # Primer Tm -  Right
+        # Validation status
+        # Target location on Chromosome - start
+        # Target location on Chromosome - end
+        # Amplicon location on Chromosome - start
+        # Amplicon location on Chromosome - end
+        # Mpx groups names
+        # number of primer-pairs in the multiplex group
+
+        <b>Parameters:</b>
+        @param target_names list of target names to query.
+        @return full target data in table format (see columns)
+        '''
+        try:
+            panel = Panel.objects.get(name=panel_name)
+        except Panel.DoesNotExist:
+            yield ['No such panel']
+            return
+
+        for te in panel.targets.all():
+            for tgt in te.targets.all():
+                for mpx in te.primersmultiplex_set.all():
+                    for loc in mpx.physical_locations.all():
+                        try:
+                            ms = tgt.microsatellite
+                            repeat_type = str(ms.repeat_type)
+                            repeat_number = str(ms.repeat_number)
+                            repeat_unit = str(ms.repeat_unit)
+                        except Microsatellite.DoesNotExist:
+                            repeat_type = ''
+                            repeat_number = ''
+                            repeat_unit = ''
+                        yield [tgt.name,
+                               tgt.type.name,  # Target: MS/Other Mutation
+                               str(repeat_type),  # Basic Unit size
+                               str(repeat_number),  # Expected Number of repeats
+                               str(repeat_unit),  # Basic Unit Type
+                               tgt.chromosome.name,  # Chromosome
+                               str(tgt.end_pos-tgt.start_pos),  # Length MS
+                               te.left.sequence.sequence,  # Primer sequence -  Left
+                               str(Tm_staluc(te.left.referencevalue.sequence)),  # Primer Tm -  Left
+                               te.right.sequence.sequence,  # Primer sequence -  Right
+                               str(Tm_staluc(te.right.referencevalue.sequence)),  # Primer Tm -  Right
+                               str(te.passed_validation),
+                               str(tgt.start_pos),  # Target location on Chromosome - start
+                               str(tgt.end_pos),  # Target location on Chromosome - end
+                               str(te.left.start_pos),  # Amplicon location on Chromosome - start
+                               str(te.right.end_pos),  # Amplicon location on Chromosome - end
+                               mpx.name,  # Mpx groups names
+                               str(len(mpx.primers.all())),
+                               loc.plate.name,
+                               loc.well]
 
     @rpc(String, String, Integer, Integer, _returns=String)
     def get_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index):
