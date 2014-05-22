@@ -121,6 +121,7 @@ class CLineageWebServices(ServiceBase):
         @param target_names list of target names to query.
         @return full target data in table format (see columns)
         '''
+        print panel_name
         try:
             panel = Panel.objects.get(name=panel_name)
         except Panel.DoesNotExist:
@@ -156,10 +157,10 @@ class CLineageWebServices(ServiceBase):
                                str(tgt.end_pos),  # Target location on Chromosome - end
                                str(te.left.start_pos),  # Amplicon location on Chromosome - start
                                str(te.right.end_pos),  # Amplicon location on Chromosome - end
-                               mpx.name,  # Mpx groups names
+                               str(mpx.name),  # Mpx groups names
                                str(len(mpx.primers.all())),
-                               loc.plate.name,
-                               loc.well]
+                               str(loc.plate.name),
+                               str(loc.well)]
 
     @rpc(String, String, Integer, Integer, _returns=String)
     def get_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index):
