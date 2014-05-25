@@ -142,6 +142,7 @@ class CLineageWebServices(ServiceBase):
                             repeat_number = ''
                             repeat_unit = ''
                         yield [tgt.name,
+                               str(te.id),  # Target enrichment name
                                tgt.type.name,  # Target: MS/Other Mutation
                                str(repeat_type),  # Basic Unit size
                                str(repeat_number),  # Expected Number of repeats
