@@ -17,6 +17,7 @@ from django.views.generic.detail import DetailView
 from utils.wells import num2abc
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
+import time
 
 def index(request):
     """
