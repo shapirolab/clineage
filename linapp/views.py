@@ -637,5 +637,5 @@ def testtree(request):
 
 @json_response
 def longview(request):
-    time.sleep(300)
+    time.sleep(60)
     return {'ok': '1'}
