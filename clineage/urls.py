@@ -37,4 +37,7 @@ urlpatterns = patterns('',
 
     #soap test
     (r'^soap/', include('soap.urls')),
+
+    #test
+    ('^long_view/$', 'linapp.views.longview'),
 )

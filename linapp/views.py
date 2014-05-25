@@ -633,3 +633,8 @@ def testtree(request):
     if roots_query:
         return {'newick': newickify(roots_query[0])}
     return {'newick': ''}
+
+@json_response
+def longview(request):
+    time.sleep(300)
+    return {'ok': '1'}
