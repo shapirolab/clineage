@@ -2,7 +2,7 @@
 # encoding: utf8
 
 from django.views.decorators.csrf import csrf_exempt
-from linapp.models import *
+from linapp.models import Microsatellite, TargetEnrichmentType, Target, Panel, Assembly, Chromosome
 from spyne.server.django import DjangoApplication
 from spyne.model.primitive import String, Integer, AnyDict
 from spyne.model.complex import Iterable
@@ -13,6 +13,7 @@ from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.error import *
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
+from linapp.queries import get_targets_by_panel
 
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))
@@ -65,16 +66,16 @@ class CLineageWebServices(ServiceBase):
                 for mpx in te.primersmultiplex_set.all():
                     try:
                         ms = tgt.microsatellite
-                        repeat_type = str(ms.repeat_type)
+                        repeat_unit_len = str(ms.repeat_unit_len)
                         repeat_number = str(ms.repeat_number)
                         repeat_unit = str(ms.repeat_unit)
                     except Microsatellite.DoesNotExist:
-                        repeat_type = ''
+                        repeat_unit_len = ''
                         repeat_number = ''
                         repeat_unit = ''
                     yield [tgt.name,
                            tgt.type.name,  # Target: MS/Other Mutation
-                           str(repeat_type),  # Basic Unit size
+                           str(repeat_unit_len),  # Basic Unit size
                            str(repeat_number),  # Expected Number of repeats
                            str(repeat_unit),  # Basic Unit Type
                            tgt.chromosome.name,  # Chromosome
@@ -121,47 +122,14 @@ class CLineageWebServices(ServiceBase):
         @param target_names list of target names to query.
         @return full target data in table format (see columns)
         '''
-        print panel_name
+
         try:
             panel = Panel.objects.get(name=panel_name)
         except Panel.DoesNotExist:
-            yield ['No such panel']
-            return
+            raise ArgumentError('Panel not found: {}'.format(panel_name))
 
-        for te in panel.targets.all():
-            for tgt in te.targets.all():
-                for mpx in te.primersmultiplex_set.all():
-                    for loc in mpx.physical_locations.all():
-                        try:
-                            ms = tgt.microsatellite
-                            repeat_type = str(ms.repeat_type)
-                            repeat_number = str(ms.repeat_number)
-                            repeat_unit = str(ms.repeat_unit)
-                        except Microsatellite.DoesNotExist:
-                            repeat_type = ''
-                            repeat_number = ''
-                            repeat_unit = ''
-                        yield [tgt.name,
-                               str(te.id),  # Target enrichment name
-                               tgt.type.name,  # Target: MS/Other Mutation
-                               str(repeat_type),  # Basic Unit size
-                               str(repeat_number),  # Expected Number of repeats
-                               str(repeat_unit),  # Basic Unit Type
-                               tgt.chromosome.name,  # Chromosome
-                               str(tgt.end_pos-tgt.start_pos),  # Length MS
-                               te.left.sequence.sequence,  # Primer sequence -  Left
-                               str(Tm_staluc(te.left.referencevalue.sequence)),  # Primer Tm -  Left
-                               te.right.sequence.sequence,  # Primer sequence -  Right
-                               str(Tm_staluc(te.right.referencevalue.sequence)),  # Primer Tm -  Right
-                               str(te.passed_validation),
-                               str(tgt.start_pos),  # Target location on Chromosome - start
-                               str(tgt.end_pos),  # Target location on Chromosome - end
-                               str(te.left.start_pos),  # Amplicon location on Chromosome - start
-                               str(te.right.end_pos),  # Amplicon location on Chromosome - end
-                               str(mpx.name),  # Mpx groups names
-                               str(len(mpx.primers.all())),
-                               str(loc.plate.name),
-                               str(loc.well)]
+        for row in get_targets_by_panel(panel):
+            yield row
 
     @rpc(String, String, Integer, Integer, _returns=String)
     def get_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index):
@@ -206,16 +174,16 @@ class CLineageWebServices(ServiceBase):
 #                 for mpx in te.primersmultiplex_set.all():
 #                     try:
 #                         ms = tgt.microsatellite
-#                         repeat_type = str(ms.repeat_type)
+#                         repeat_unit_len = str(ms.repeat_unit_len)
 #                         repeat_number = str(ms.repeat_number)
 #                         repeat_unit = str(ms.repeat_unit)
 #                     except Microsatellite.DoesNotExist:
-#                         repeat_type = ''
+#                         repeat_unit_len = ''
 #                         repeat_number = ''
 #                         repeat_unit = ''
 #                     yield [tgt.name,
 #                            tgt.type.name,  # Target: MS/Other Mutation
-#                            str(repeat_type),  # Basic Unit size
+#                            str(repeat_unit_len),  # Basic Unit size
 #                            str(repeat_number),  # Expected Number of repeats
 #                            str(repeat_unit),  # Basic Unit Type
 #                            tgt.chromosome.name,  # Chromosome

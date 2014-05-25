@@ -314,7 +314,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
     referencevalue = models.ForeignKey(Sequence)
 
     def get_referencevalue(self):
-        return self.chromosome.getdna(self.start_pos,self.end_pos)
+        return self.chromosome.getdna(self.start_pos, self.end_pos)
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ class Primer(Target):
             assert complement(self.sequence.sequence[-(self.end_pos-self.start_pos+1):])[::-1] == self.get_referencevalue()
 ### -------------------------------------------------------------------------------------
 class Microsatellite(Target):
-    repeat_type = models.PositiveIntegerField() #length of repeat Nmer
+    repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
     def __unicode__(self):
@@ -370,7 +370,7 @@ class TargetEnrichment(models.Model):
     physical_locations = generic.GenericRelation('SampleLocation',
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
-    targets = models.ManyToManyField(Target, null=True, blank=True)
+    targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
 
     def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
         assert self.left.chromosome == self.right.chromosome

@@ -541,7 +541,7 @@ def memberform(request, exp_id, mem_id = None):
 def targets_tdv(request, taxa, assem):
     taxa_object = get_object_or_404(Taxa, taxonomy_id=taxa)
     assembly = get_object_or_404(Assembly, taxa=taxa_object, friendly_name=assem)
-    s = 'target_name\trepeat_type\trepeat_number\trepeat_unit\ttarget_start_pos\ttarget_end_pos\ttarget_length\t'
+    s = 'target_name\trepeat_unit_len\trepeat_number\trepeat_unit\ttarget_start_pos\ttarget_end_pos\ttarget_length\t'
     s += 'fwd_primer\tfwd_start_pos\tfwd_end_pos\trev_primer\trev_start_pos\trev_end_pos\tplate_name\twell\t'
     s += 'passed_validation\tvalidation_failure\tvalidation_date\r\n'
     for enrichment in TargetEnrichment.objects.filter(physical_locationsleft__assembly=assembly)\
@@ -551,7 +551,7 @@ def targets_tdv(request, taxa, assem):
             s += target.name + '\t'
             try:
                 mstarget = target.microsatellite
-                s += str(mstarget.repeat_type) + '\t'
+                s += str(mstarget.repeat_unit_len) + '\t'
                 s += str(mstarget.repeat_number) + '\t'
                 s += mstarget.repeat_unit + '\t'
             except Microsatellite.DoesNotExist:
@@ -582,7 +582,7 @@ def existing_primer_pairs_tdv(request, taxa, assem):
     taxa_object = get_object_or_404(Taxa, taxonomy_id=taxa)
     assembly = get_object_or_404(Assembly, taxa=taxa_object, friendly_name=assem)
     pcr_with_tails_type = TargetEnrichmentType.objects.get(pk=2)#TEMP
-    s = 'target_name\trepeat_type\trepeat_number\trepeat_unit\ttarget_start_pos\ttarget_end_pos\ttarget_length\t'
+    s = 'target_name\trepeat_unit_len\trepeat_number\trepeat_unit\ttarget_start_pos\ttarget_end_pos\ttarget_length\t'
     s += 'fwd_primer\trev_primer\tplate_name\twell\tpassed_validation\tvalidation_failure\t'
     s += 'validation_date\tmultiplex_group\r\n'
     for enrichment in TargetEnrichment.objects.filter(left__assembly=assembly)\
@@ -596,7 +596,7 @@ def existing_primer_pairs_tdv(request, taxa, assem):
             s += target.name + '\t'
             try:
                 mstarget = target.microsatellite
-                s += str(mstarget.repeat_type) + '\t'
+                s += str(mstarget.repeat_unit_len) + '\t'
                 s += str(mstarget.repeat_number) + '\t'
                 s += mstarget.repeat_unit + '\t'
             except Microsatellite.DoesNotExist:
