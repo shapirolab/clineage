@@ -68,16 +68,16 @@ class CLineageWebServices(ServiceBase):
                         ms = tgt.microsatellite
                         repeat_unit_len = str(ms.repeat_unit_len)
                         repeat_number = str(ms.repeat_number)
-                        repeat_unit = str(ms.repeat_unit)
+                        repeat_unit_type = str(ms.repeat_unit_type)
                     except Microsatellite.DoesNotExist:
                         repeat_unit_len = ''
                         repeat_number = ''
-                        repeat_unit = ''
+                        repeat_unit_type = ''
                     yield [tgt.name,
                            tgt.type.name,  # Target: MS/Other Mutation
                            str(repeat_unit_len),  # Basic Unit size
                            str(repeat_number),  # Expected Number of repeats
-                           str(repeat_unit),  # Basic Unit Type
+                           str(repeat_unit_type),  # Basic Unit Type
                            tgt.chromosome.name,  # Chromosome
                            str(tgt.end_pos-tgt.start_pos),  # Length MS
                            te.left.sequence.sequence,  # Primer sequence -  Left
@@ -127,9 +127,9 @@ class CLineageWebServices(ServiceBase):
             panel = Panel.objects.get(name=panel_name)
         except Panel.DoesNotExist:
             raise ArgumentError('Panel not found: {}'.format(panel_name))
-
         for row in get_targets_by_panel(panel):
             yield row
+
 
     @rpc(String, String, Integer, Integer, _returns=String)
     def get_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index):
@@ -176,16 +176,16 @@ class CLineageWebServices(ServiceBase):
 #                         ms = tgt.microsatellite
 #                         repeat_unit_len = str(ms.repeat_unit_len)
 #                         repeat_number = str(ms.repeat_number)
-#                         repeat_unit = str(ms.repeat_unit)
+#                         repeat_unit_type = str(ms.repeat_unit_type)
 #                     except Microsatellite.DoesNotExist:
 #                         repeat_unit_len = ''
 #                         repeat_number = ''
-#                         repeat_unit = ''
+#                         repeat_unit_type = ''
 #                     yield [tgt.name,
 #                            tgt.type.name,  # Target: MS/Other Mutation
 #                            str(repeat_unit_len),  # Basic Unit size
 #                            str(repeat_number),  # Expected Number of repeats
-#                            str(repeat_unit),  # Basic Unit Type
+#                            str(repeat_unit_type),  # Basic Unit Type
 #                            tgt.chromosome.name,  # Chromosome
 #                            str(tgt.end_pos-tgt.start_pos),  # Length MS
 #                            te.left.sequence.sequence,  # Primer sequence -  Left

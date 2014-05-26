@@ -10,24 +10,23 @@ def get_targets_by_panel(panel):
         for tgt in te.targets.select_related('chromosome', 'type'):
             for mpx in te.primersmultiplex_set.all():
                 for loc in mpx.physical_locations.all():
-                    # logger.debug('loc: {}'.format(loc))
                     try:
                         ms = tgt.microsatellite
                         repeat_unit_len = str(ms.repeat_unit_len)
                         repeat_number = str(ms.repeat_number)
-                        repeat_unit = str(ms.repeat_unit)
+                        repeat_unit_type = str(ms.repeat_unit_type)
                     except Microsatellite.DoesNotExist:
                         repeat_unit_len = ''
                         repeat_number = ''
-                        repeat_unit = ''
-                    yield [tgt.id,
+                        repeat_unit_type = ''
+                    yield [str(tgt.id),
                            tgt.name,
                            str(te.id),  # Target enrichment name
                            tgt.type.name,  # Target: MS/Other Mutation
                            tgt.chromosome.assembly.name, #Assembly name
                            str(repeat_unit_len),  # Basic Unit size
                            str(repeat_number),  # Expected Number of repeats
-                           str(repeat_unit),  # Basic Unit Type
+                           str(repeat_unit_type),  # Basic Unit Type
                            tgt.chromosome.name,  # Chromosome
                            str(tgt.end_pos-tgt.start_pos),  # Length MS
                            te.left.sequence.sequence,  # Primer sequence -  Left

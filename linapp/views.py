@@ -553,7 +553,7 @@ def targets_tdv(request, taxa, assem):
                 mstarget = target.microsatellite
                 s += str(mstarget.repeat_unit_len) + '\t'
                 s += str(mstarget.repeat_number) + '\t'
-                s += mstarget.repeat_unit + '\t'
+                s += mstarget.repeat_unit_type + '\t'
             except Microsatellite.DoesNotExist:
                 s += '\t\t\t'
             s += str(target.start_pos) + '\t'
@@ -598,7 +598,7 @@ def existing_primer_pairs_tdv(request, taxa, assem):
                 mstarget = target.microsatellite
                 s += str(mstarget.repeat_unit_len) + '\t'
                 s += str(mstarget.repeat_number) + '\t'
-                s += mstarget.repeat_unit + '\t'
+                s += mstarget.repeat_unit_type + '\t'
             except Microsatellite.DoesNotExist:
                 s += '\t\t\t'
             s += str(target.start_pos) + '\t'
