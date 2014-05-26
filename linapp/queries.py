@@ -20,9 +20,11 @@ def get_targets_by_panel(panel):
                         repeat_unit_len = ''
                         repeat_number = ''
                         repeat_unit = ''
-                    yield [tgt.name,
+                    yield [tgt.id,
+                           tgt.name,
                            str(te.id),  # Target enrichment name
                            tgt.type.name,  # Target: MS/Other Mutation
+                           tgt.chromosome.assembly.name, #Assembly name
                            str(repeat_unit_len),  # Basic Unit size
                            str(repeat_number),  # Expected Number of repeats
                            str(repeat_unit),  # Basic Unit Type
@@ -35,6 +37,10 @@ def get_targets_by_panel(panel):
                            str(te.passed_validation),
                            str(tgt.start_pos),  # Target location on Chromosome - start
                            str(tgt.end_pos),  # Target location on Chromosome - end
+                           str(te.left.start_pos), # left primer location on Chromosome - start
+                           str(te.left.end_pos),  # left primer location on Chromosome - end
+                           str(te.right.start_pos), # right primer location on Chromosome - start
+                           str(te.right.end_pos),  # right primer location on Chromosome - end
                            str(te.left.start_pos),  # Amplicon location on Chromosome - start
                            str(te.right.end_pos),  # Amplicon location on Chromosome - end
                            str(mpx.name),  # Mpx groups names
