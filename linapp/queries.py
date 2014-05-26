@@ -19,8 +19,8 @@ def get_targets_by_panel(panel):
                         repeat_unit_len = ''
                         repeat_number = ''
                         repeat_unit_type = ''
-                    yield [str(tgt.id),
-                           tgt.name,
+                    yield [str(tgt.id), # Target ID
+                           tgt.name, # Target name
                            str(te.id),  # Target enrichment name
                            tgt.type.name,  # Target: MS/Other Mutation
                            tgt.chromosome.assembly.name, #Assembly name

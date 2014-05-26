@@ -99,8 +99,11 @@ class CLineageWebServices(ServiceBase):
         MATLAB example: get_targets_by_panel(service_obj, struct('string','Seq05944'))
 
         output columns:
+        # Target ID
         # Target name
+        # Target enrichment name
         # Target: MS/Other Mutation
+        # Assembly name
         # Basic Unit size
         # Expected Number of repeats
         # Basic Unit Type
@@ -113,10 +116,16 @@ class CLineageWebServices(ServiceBase):
         # Validation status
         # Target location on Chromosome - start
         # Target location on Chromosome - end
+        # left primer location on Chromosome - start
+        # left primer location on Chromosome - end
+        # right primer location on Chromosome - start
+        # right primer location on Chromosome - end
         # Amplicon location on Chromosome - start
         # Amplicon location on Chromosome - end
         # Mpx groups names
         # number of primer-pairs in the multiplex group
+        # Mpx plate name
+        # Mpx plate well
 
         <b>Parameters:</b>
         @param target_names list of target names to query.
