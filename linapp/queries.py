@@ -10,7 +10,7 @@ def get_targets_by_panel(panel):
         for tgt in te.targets.select_related('chromosome', 'type'):
             for mpx in te.primersmultiplex_set.all():
                 for loc in mpx.physical_locations.all():
-                    logger.debug('loc: {}'.format(loc))
+                    # logger.debug('loc: {}'.format(loc))
                     try:
                         ms = tgt.microsatellite
                         repeat_unit_len = str(ms.repeat_unit_len)
