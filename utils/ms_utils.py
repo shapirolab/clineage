@@ -4,7 +4,7 @@ from math import floor
 import hashlib
 def trim_ms(ms):
     ms.repeat_number = floor(ms.repeat_number)
-    seq = ms.referencevalue.sequence[:int(ms.repeat_unit_len*floor(ms.repeat_number))]
+    seq = ms.referencevalue.sequence[:int(ms.repeat_unit_len*ms.repeat_number)]
     try:
         sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
     except Sequence.DoesNotExist:
@@ -18,8 +18,8 @@ def trim_ms(ms):
 
 
 def cut_ms(ms, k=1):
-    ms.repeat_number = floor(ms.repeat_number)
-    seq = ms.referencevalue.sequence[:int(ms.repeat_unit_len*(floor(ms.repeat_number)-k))]
+    ms.repeat_number = floor(ms.repeat_number) - k
+    seq = ms.referencevalue.sequence[:int(ms.repeat_unit_len*ms.repeat_number)]
     try:
         sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
     except Sequence.DoesNotExist:
@@ -51,6 +51,7 @@ def resolve_overlapping_mss(te_queryset, max_trim=3):
             for i in range(max_trim):
                 if overlapping_mss:
                     cut_ms(ms)
+                    overlapping_mss = Microsatellite.objects.filter(chromosome=ms.chromosome).filter(start_pos__lte=ms.end_pos).filter(end_pos__gte=ms.end_pos).exclude(pk=ms.pk)
             overlapping_mss = Microsatellite.objects.filter(chromosome=ms.chromosome).filter(start_pos__lte=ms.end_pos).filter(end_pos__gte=ms.end_pos).exclude(pk=ms.pk)
             if overlapping_mss:
                 print ms.repeat_unit_len, [oms.repeat_unit_len for oms in overlapping_mss]
