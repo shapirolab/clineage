@@ -13,6 +13,7 @@ def trim_ms(ms):
     ms.end_pos = ms.start_pos + len(sequence.sequence) - 1
     assert ms.chromosome.getdna(ms.start_pos, ms.end_pos) == sequence.sequence
     ms.referencevalue = sequence
+    ms.name = '{}_{}_{}'.format(ms.chromosome.name, ms.start_pos, ms.end_pos)
     ms.save()
 
 
@@ -27,6 +28,7 @@ def cut_ms(ms, k=1):
     ms.end_pos = ms.start_pos + len(sequence.sequence) - 1
     assert ms.chromosome.getdna(ms.start_pos, ms.end_pos) == sequence.sequence
     ms.referencevalue = sequence
+    ms.name = '{}_{}_{}'.format(ms.chromosome.name, ms.start_pos, ms.end_pos)
     ms.save()
 
 
