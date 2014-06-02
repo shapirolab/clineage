@@ -14,12 +14,12 @@ def delete_overlapping_tes():
                                                .filter(right__end_pos__gte=te1.left.start_pos)\
                                                .exclude(pk=te1.pk):
                 if te1.physical_locations.all() and not te2.physical_locations.all():
-                    te2.delete()
                     print 'deleted', te2
+                    te2.delete()
                     continue
                 if te2.physical_locations.all() and not te1.physical_locations.all():
-                    te1.delete()
                     print 'deleted', te1
+                    te1.delete()
                     continue
                 if te2.physical_locations.all() and te1.physical_locations.all():
                     if te1.type != te2.type:
@@ -27,12 +27,12 @@ def delete_overlapping_tes():
                     tes_conflict.append((te1, te2))
                     continue
                 if te1.left.start_pos < te2.left.start_pos and te1.right.end_pos > te2.right.end_pos:
-                    te2.delete()
                     print 'deleted', te2
+                    te2.delete()
                     continue
                 if te2.left.start_pos < te1.left.start_pos and te2.right.end_pos > te1.right.end_pos:
-                    te1.delete()
                     print 'deleted', te1
+                    te1.delete()
                     continue
                 tes_conflict.append((te1, te2))
             c += 1
