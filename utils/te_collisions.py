@@ -37,5 +37,5 @@ def delete_overlapping_tes():
                 tes_conflict.append((te1, te2))
             c += 1
             if c % 100 == 0:
-                print len(tes_to_delete), len(tes_conflict), c, c/t*100
+                print len(tes_to_delete), len(tes_conflict), c, float(c)/t*100
     return tes_conflict
