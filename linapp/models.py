@@ -313,10 +313,16 @@ class Target(models.Model):#Target is a locus on a reference genome.
     end_pos = models.IntegerField()
     referencevalue = models.ForeignKey(Sequence)
 
+    # unique_together = (("chromosome", "start_pos"),)
+
     def get_referencevalue(self):
         return self.chromosome.getdna(self.start_pos, self.end_pos)
+
     def __unicode__(self):
         return self.name
+
+    def validate_reference(self):
+        assert self.referencevalue.sequence == self.get_referencevalue()
 ### -------------------------------------------------------------------------------------
 class PrimerTail(models.Model):
     tail = models.CharField(max_length=50, null=True)
@@ -371,10 +377,12 @@ class TargetEnrichment(models.Model):
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
     targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
+    targets_analyzed_by_phobos = models.PositiveIntegerField(default=0)
 
     def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
         assert self.left.chromosome == self.right.chromosome
-        self.targets = Target.objects.filter(chromosome=self.left.chromosome, start_pos__gte=self.left.start_pos)\
+        assert self.chromosome == self.left.chromosome
+        self.targets = Target.objects.filter(chromosome=self.chromosome, start_pos__gte=self.left.start_pos)\
             .filter(end_pos__lte=self.right.end_pos)\
             .exclude(pk__in=Primer.objects.all().values('pk'))
         self.save()

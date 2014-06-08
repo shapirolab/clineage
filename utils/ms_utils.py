@@ -2,6 +2,8 @@ __author__ = 'ofirr'
 from linapp.models import Sequence, Microsatellite
 from math import floor
 import hashlib
+
+
 def trim_ms(ms):
     ms.repeat_number = floor(ms.repeat_number)
     seq = ms.referencevalue.sequence[:int(ms.repeat_unit_len*ms.repeat_number)]
