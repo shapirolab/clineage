@@ -309,8 +309,8 @@ class Target(models.Model):#Target is a locus on a reference genome.
     name = models.CharField(max_length=50)
     type = models.ForeignKey(TargetType) #Microsatellite / SNP / etc...
     chromosome = models.ForeignKey(Chromosome)
-    start_pos = models.IntegerField()
-    end_pos = models.IntegerField()
+    start_pos = models.IntegerField(db_index=True)
+    end_pos = models.IntegerField(db_index=True)
     referencevalue = models.ForeignKey(Sequence)
 
     # unique_together = (("chromosome", "start_pos"),)
