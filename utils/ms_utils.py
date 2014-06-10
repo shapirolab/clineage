@@ -38,7 +38,7 @@ def cut_ms(ms, k=1):
 def resolve_overlapping_mss(te_queryset, max_trim=3):
     c = 0
     for te in te_queryset:
-        for t in te.targets.all():
+        for t in te.targets.filter(type=te.type):
             c += 1
             ms = Microsatellite.objects.get(pk=t.pk)
             overlapping_mss = Microsatellite.objects.filter(chromosome=ms.chromosome).filter(start_pos__lte=ms.end_pos).filter(end_pos__gte=ms.end_pos).exclude(pk=ms.pk)
@@ -47,7 +47,6 @@ def resolve_overlapping_mss(te_queryset, max_trim=3):
                     if ms.start_pos == ms2.start_pos and ms.end_pos == ms2.end_pos:
                         ms.delete()
                         continue
-
                 trim_ms(ms)
             overlapping_mss = Microsatellite.objects.filter(chromosome=ms.chromosome).filter(start_pos__lte=ms.end_pos).filter(end_pos__gte=ms.end_pos).exclude(pk=ms.pk)
             for i in range(max_trim):
