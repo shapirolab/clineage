@@ -153,7 +153,6 @@ class CLineageWebServices(ServiceBase):
         @param end_index End index in integer format
         @return Genomic sequence between indices
         '''
-        print type(assembly_name), type(chromosome_name), type(start_index), type(end_index)
         try:
             assembly = Assembly.objects.get(friendly_name=assembly_name)
         except Assembly.DoesNotExist:
@@ -164,6 +163,27 @@ class CLineageWebServices(ServiceBase):
             return ResourceNotFoundError(faultstring='Chromosome \'%s\' was not found.'%chromosome_name)
         return chromosome.getdna(start_index, end_index)
 
+    @rpc(String, String, Integer, Integer, String, _returns=Iterable(Integer))
+    def locate_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index, sequence):
+        '''
+        Chromosome sequence query. Search for sequence between margins.
+        <b>Parameters</b>
+        @param assembly_name Assembly name in short format only e.g. 'mm9', 'hg19'...
+        @param chromosome_name Chromosome name in string format only e.g. 'X', '3'...
+        @param start_index Start index in integer format
+        @param end_index End index in integer format
+        @param seqeunce
+        @return Genomic indices of the sequence
+        '''
+        try:
+            assembly = Assembly.objects.get(friendly_name=assembly_name)
+        except Assembly.DoesNotExist:
+            return ResourceNotFoundError(faultstring='Assembly \'%s\' was not found.'%assembly_name)
+        try:
+            chromosome = Chromosome.objects.get(assembly=assembly, name=chromosome_name)
+        except Chromosome.DoesNotExist:
+            return ResourceNotFoundError(faultstring='Chromosome \'%s\' was not found.'%chromosome_name)
+        return list(chromosome.locate(start_index, end_index, sequence))
 
 # @rpc(Iterable(String), _returns=Iterable(Iterable(String)))
 #     def save_panel(ctx, target_names):
