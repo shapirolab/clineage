@@ -13,7 +13,7 @@ from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.error import *
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
-from linapp.queries import get_targets_by_panel, get_targets_for_aar7
+from linapp.queries import get_targets_by_panel, get_targets_for_aar7, get_extra_targets_for_aar7
 
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))
@@ -140,6 +140,16 @@ class CLineageWebServices(ServiceBase):
         for row in get_targets_for_aar7(panel):
             yield row
 
+
+    @rpc(String, _returns=Iterable(Iterable(String)))
+    def get_missing_targets_by_panel(ctx, panel_name):
+        try:
+            panel = Panel.objects.get(name=panel_name)
+        except Panel.DoesNotExist:
+            raise ArgumentError('Panel not found: {}'.format(panel_name))
+        # for row in get_targets_by_panel(panel):
+        for row in get_extra_targets_for_aar7(panel):
+            yield row
 
 
     @rpc(String, String, Integer, Integer, _returns=String)
