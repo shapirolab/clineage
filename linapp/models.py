@@ -323,6 +323,12 @@ class Target(models.Model):#Target is a locus on a reference genome.
 
     def validate_reference(self):
         assert self.referencevalue.sequence == self.get_referencevalue()
+
+    def update_primers(self):
+        for te in TargetEnrichment.objects.filter(chromosome=self.chromosome)\
+                                .filter(left__end_pos__lte=self.start_pos)\
+                                .filter(right__start_pos__gte=self.end_pos):
+            te.update_enriched_targets()
 ### -------------------------------------------------------------------------------------
 class PrimerTail(models.Model):
     tail = models.CharField(max_length=50, null=True)
