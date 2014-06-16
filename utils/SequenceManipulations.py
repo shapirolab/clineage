@@ -2,7 +2,9 @@ import random
 from unittest import TestCase
 from Bio import SeqIO
 from random import randint, sample
+from linapp.models import Sequence
 import re
+import hashlib
 __author__ = 'Yair'
 
 
@@ -139,3 +141,12 @@ def regionalmutation(seq, i, j, percentage): #randomize region i to j according 
     for m in mutations:
         seq = mutate(seq, m, sample(list(bases - set(seq[m])), 1)[0])
     return seq
+
+def save_sequence(sequence):
+    seq = sequence.strip().upper()
+    try:
+        sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
+    except Sequence.DoesNotExist:
+        sequence = Sequence(length=len(seq), sequence=seq, hash=hashlib.md5(seq).hexdigest())
+        sequence.save()
+    return sequence
