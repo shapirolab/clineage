@@ -2,7 +2,17 @@ __author__ = 'ofirr'
 from linapp.models import Sequence, Microsatellite
 from math import floor
 import hashlib
-from SequenceManipulations import save_sequence
+
+
+def save_sequence(sequence):
+    seq = sequence.strip().upper()
+    try:
+        sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
+    except Sequence.DoesNotExist:
+        sequence = Sequence(length=len(seq), sequence=seq, hash=hashlib.md5(seq).hexdigest())
+        sequence.save()
+    return sequence
+
 
 def trim_ms(ms):
     ms.repeat_number = floor(ms.repeat_number)
