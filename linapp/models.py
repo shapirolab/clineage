@@ -383,7 +383,6 @@ class TargetEnrichment(models.Model):
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
     targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
-    targets_analyzed_by_phobos = models.PositiveIntegerField(default=0)
 
     def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
         assert self.left.chromosome == self.right.chromosome
