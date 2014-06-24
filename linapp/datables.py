@@ -283,7 +283,7 @@ def getsamplestable():
                 StringWidget('name', placeholder=_("Name")),
                 StringWidget('comment', placeholder=_("Comment")),
                 ForeignKeyComboBox(
-                    'samplingevent',
+                    'sampling',
                     otherSet=SamplingEvent.objects.all(),
                     otherField='name',
                     otherFormat='Sampling event: %(name)s',
