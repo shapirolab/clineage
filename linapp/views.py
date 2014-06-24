@@ -531,7 +531,9 @@ def plate_input_with_names(request):
                     notes=plate_form.cleaned_data['notes']
                 )
                 plate = new_plate
-
+            else:
+                print 'invalid choice in plate form'
+                raise
             wells = plate_parser(plate_form.cleaned_data['samples_in_wells'])
             for index, cell_value in wells:
                 if cell_value:
