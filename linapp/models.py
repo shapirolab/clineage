@@ -519,7 +519,8 @@ class ExtractionEvent(models.Model):
     user_documented = models.ForeignKey(User, related_name='+')
 
     def __unicode__(self):
-        return self.individual.__unicode__()+'>'+self.name
+        return u'{}>{}'.format(unicode(self.individual), self.name)
+
     def get_absolute_url(self):
         return reverse('extraction_event_detail', kwargs={'pk': self.pk})
 ### -------------------------------------------------------------------------------------
@@ -534,7 +535,7 @@ class Extraction(models.Model):
                                content_type_field='content_type',
                                object_id_field='object_id')
     def __unicode__(self):
-        return self.extraction_event.__unicode__()+'>'+self.name
+        return u'{}>{}'.format(unicode(self.extraction_event), self.name)
 
     def get_absolute_url(self):
         return reverse('extraction_detail', kwargs={'pk': self.pk})
@@ -549,7 +550,7 @@ class SamplingEvent(models.Model):
     comment = models.TextField(null=True, blank=True)
     attachment = models.FileField(upload_to=path, null=True, blank=True)
     def __unicode__(self):
-        return self.extraction.__unicode__()+'>'+self.name
+        return u'{}>{}'.format(unicode(self.extraction), self.name)
 
     def get_absolute_url(self):
         return reverse('sampling_event_detail', kwargs={'pk': self.pk})
@@ -581,7 +582,7 @@ class Cell(models.Model):
     comment = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
-        return self.sampling.__unicode__()+'>'+self.name
+        return u'{}>{}'.format(unicode(self.sampling), self.name)
 
     def get_absolute_url(self):
         return reverse('cell_detail', kwargs={'pk': self.pk})
@@ -600,7 +601,7 @@ class CellContent(models.Model):  # aka DNA
                                content_type_field='content_type',
                                object_id_field='object_id')
     def __unicode__(self):
-        return self.cell.__unicode__()+'>'+self.name
+        return u'{}>{}'.format(unicode(self.cell), self.name)
 
     def get_absolute_url(self):
         return reverse('cell_content_detail', kwargs={'pk': self.pk})
