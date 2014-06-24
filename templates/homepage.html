@@ -115,9 +115,16 @@
                 dialog_form_function("New Cells Plate", "{% url 'cells_plate_add' %}", samplestableRefresh);
             });
         }
+        function bind_add_sample_plate_with_names_button(){
+            var button = dijit.byId("add_sample_plate_with_names_button");
+            dojo.connect(button, "onClick", function(){
+                dialog_form_function("New Cells Plate By Names", "{% url 'cells_plate_add_with_names' %}", samplestableRefresh);
+            });
+        }
         dojo.ready(bind_add_sample_button);
         dojo.ready(bind_add_sample_multi_button);
         dojo.ready(bind_add_sample_plate_button);
+        dojo.ready(bind_add_sample_plate_with_names_button);
 
         {# Algorithm #}
         function edit_algorithm_form_function(id){
@@ -220,6 +227,7 @@
         <button data-dojo-type="dijit.form.Button" id="add_sample_button">Add Cell/Bulk</button>
         <button data-dojo-type="dijit.form.Button" id="add_sample_multi_button">Add multiple Cells</button>
         <button data-dojo-type="dijit.form.Button" id="add_sample_plate_button">Add Cells Plate</button>
+        <button data-dojo-type="dijit.form.Button" id="add_sample_plate_with_names_button">Add Cells Plate By Names</button>
         <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
             {% datable_widget samplestable name %}
             {% datable_widget samplestable comment %}

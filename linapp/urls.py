@@ -70,6 +70,7 @@ urlpatterns = patterns('',
     #multiple cells
     url(r'^forms/cell/add_multiple_cells$', 'linapp.views.multiple_cells_create', name='cell_multiple_add'),
     url(r'^forms/cell/add_cells_plate$', 'linapp.views.plate_input', name='cells_plate_add'),
+    url(r'^forms/cell/add_cells_plate_with_names$', 'linapp.views.plate_input_with_names', name='cells_plate_add_with_names'),
 
     #algorithm
     url(r'^forms/algorithm/add$',AlgorithmCreate.as_view(), name='algorithm_add'),

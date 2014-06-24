@@ -491,6 +491,85 @@ def plate_input(request):
     return render(request, 'plate_cells_form.html', {'form': plate_form})
 
 
+def plate_input_with_names(request):
+    if request.method == 'POST':
+        plate_form = PlateInputForm(request.POST, prefix='platecells')
+        if plate_form.is_valid():
+            plate_content_type = CellContentType.objects.get()
+            sampling_event = plate_form.cleaned_data['sampling']
+            inserting_user = plate_form.cleaned_data['user']
+            cell_content_protocol = plate_form.cleaned_data['protocol']
+
+            existing_plate = plate_form.cleaned_data['existing_plate']
+            if existing_plate:
+                # todo:improve DRY
+                try:
+                    existing_plate_location = PlateStorage.objects.get(plate=existing_plate)
+                    existing_plate_location.storageBox = plate_form.cleaned_data['storage_box']
+                    existing_plate_location.inner_location = plate_form.cleaned_data['inner_location']
+                    existing_plate_location.notes = plate_form.cleaned_data['notes']
+                    existing_plate_location.save()
+                except PlateStorage.DoesNotExists:
+                    new_plate_location = PlateStorage.objects.create(
+                        storageBox=plate_form.cleaned_data['storage_box'],
+                        plate=existing_plate,
+                        inner_location=plate_form.cleaned_data['inner_location'],
+                        notes=plate_form.cleaned_data['notes']
+                    )
+                plate = existing_plate
+            elif plate_form.cleaned_data['plate_type'] and plate_form.cleaned_data['plate_name']:
+                plate_type = plate_form.cleaned_data['plate_type']
+                new_plate = Plate.objects.create(
+                    name=plate_form.cleaned_data['plate_name'],
+                    type=plate_type,
+                    timestamp=plate_form.cleaned_data['timestamp']
+                )
+                new_plate_location = PlateStorage.objects.create(
+                    storageBox=plate_form.cleaned_data['storage_box'],
+                    plate=new_plate,
+                    inner_location=plate_form.cleaned_data['inner_location'],
+                    notes=plate_form.cleaned_data['notes']
+                )
+                plate = new_plate
+
+            wells = plate_parser(plate_form.cleaned_data['samples_in_wells'])
+            for index, cell_value in wells:
+                if cell_value:
+                    new_cell = Cell.objects.create(
+                        sampling=sampling_event,
+                        name=cell_value,
+                        composition=SampleComposition.objects.get(name='Single Cell'),
+                        comment=plate_form.cleaned_data['comment'] + '\r\ncomposition comment:%s' % cell_value,
+                    )
+                    new_cell_content = CellContent.objects.create(
+                        cell=new_cell,
+                        type=plate_content_type,
+                        name=cell_value,
+                        protocol=cell_content_protocol,
+                        seq_ready=False,
+                        user=inserting_user,
+                        comment=plate_form.cleaned_data['comment']
+                    )
+                    try:
+                        # TODO: check if updating the pre-existing well's content is the desired behaviour
+                        existing_location = SampleLocation.objects.get(plate=plate, well=index2str(index))
+                        existing_location.sample = new_cell_content
+                        existing_location.timestamp = plate_form.cleaned_data['timestamp']
+                        existing_location.save()
+                    except SampleLocation.DoesNotExist:
+                        #plate.place_reagent(new_cell_content)
+                        SampleLocation.objects.create(
+                            plate=plate,
+                            well=index2str(index),
+                            reagent=new_cell_content,
+                            timestamp=plate_form.cleaned_data['timestamp']
+                        )
+            return render(request, 'plate_cells_form.html', {'form': plate_form})
+    else:
+        plate_form = PlateInputForm(prefix='platecells')
+    return render(request, 'plate_cells_form.html', {'form': plate_form})
+
+
 #@json_response
 def algrunform(request, alg_id = None): #TODO: check for permissions
     if request.method == 'POST':
