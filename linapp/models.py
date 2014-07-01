@@ -268,7 +268,7 @@ class Chromosome(models.Model):
         return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
     def getdna(self, start, stop):
-        if start >= stop and stop <= self.sequence_length:
+        if start <= stop and stop <= self.sequence_length:
             with open(self.get_abs_path(), 'r+b') as f:
                 mm = mmap.mmap(f.fileno(), 0)
                 return mm[start-1:stop].upper()
