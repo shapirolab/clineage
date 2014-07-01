@@ -272,9 +272,9 @@ class Chromosome(models.Model):
             with open(self.get_abs_path(), 'r+b') as f:
                 mm = mmap.mmap(f.fileno(), 0)
                 return mm[start-1:stop].upper()
-        if cyclic and start > stop:
+        if self.cyclic and start > stop:
             return getdna(start, self.sequence_length) + getdna(0, stop)
-        if cyclic and stop > self.sequence_length:
+        if self.cyclic and stop > self.sequence_length:
             return getdna(start, stop-self.sequence_length)
         raise ValueError('indices out of bounds')
 
