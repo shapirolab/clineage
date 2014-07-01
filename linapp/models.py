@@ -256,6 +256,7 @@ class Chromosome(models.Model):
     name = models.CharField(max_length=50)
     assembly = models.ForeignKey(Assembly)
     sequence_length = models.IntegerField(null=True)
+    cyclic = models.BooleanField()
 
     def __unicode__(self):
         return self.name
@@ -267,12 +268,15 @@ class Chromosome(models.Model):
         return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
     def getdna(self, start, stop):
-        assert stop >= start
-        if stop > self.sequence_length:
-            raise ValueError('indices out of bounds')
-        with open(self.get_abs_path(), 'r+b') as f:
-            mm = mmap.mmap(f.fileno(), 0)
-            return mm[start-1:stop].upper()
+        if start >= stop and stop <= self.sequence_length:
+            with open(self.get_abs_path(), 'r+b') as f:
+                mm = mmap.mmap(f.fileno(), 0)
+                return mm[start-1:stop].upper()
+        if cyclic and start > stop:
+            return getdna(start, self.sequence_length) + getdna(0, stop)
+        if cyclic and stop > self.sequence_length:
+            return getdna(start, stop-self.sequence_length)
+        raise ValueError('indices out of bounds')
 
     def locate(self, start, stop, sequence, padding=10):
         l = padding if start > padding else start
