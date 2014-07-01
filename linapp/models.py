@@ -291,8 +291,12 @@ class Chromosome(models.Model):
         raise ValueError('indices out of bounds')
 
     def locate(self, start, stop, sequence, padding=10):
-        l = padding if start > padding else start
-        r = padding if stop + padding < self.sequence_length else self.sequence_length - stop
+        if self.cyclic:
+            l = padding
+            r = padding
+        else:
+            l = padding if start > padding else start
+            r = padding if stop + padding < self.sequence_length else self.sequence_length - stop
         s = self.getdna(start - l, stop + r)
 
         # check for exact match
