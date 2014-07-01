@@ -277,6 +277,8 @@ class Chromosome(models.Model):
                 start = start-self.sequence_length
             if stop > self.sequence_length:
                 stop = stop-self.sequence_length
+            if start <= 0:
+                start = self.sequence_length + start
             if start > stop:
                 return self.getdna(start, self.sequence_length) + self.getdna(1, stop)
             return self.getdna(start, stop)
