@@ -2,7 +2,7 @@
 # encoding: utf8
 
 from django.views.decorators.csrf import csrf_exempt
-from linapp.models import Microsatellite, TargetEnrichmentType, Target, Panel, Assembly, Chromosome
+from linapp.models import Microsatellite, TargetEnrichmentType, Target, Panel, Assembly, Chromosome, Plate
 from spyne.server.django import DjangoApplication
 from spyne.model.primitive import String, Integer, AnyDict
 from spyne.model.complex import Iterable
@@ -13,7 +13,7 @@ from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.error import *
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
-from linapp.queries import get_targets_by_panel, get_targets_for_aar7, get_extra_targets_for_aar7
+from linapp.queries import get_targets_by_panel, get_targets_by_aar
 
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))
@@ -122,10 +122,6 @@ class CLineageWebServices(ServiceBase):
         # right primer location on Chromosome - end
         # Amplicon location on Chromosome - start
         # Amplicon location on Chromosome - end
-        # Mpx groups names
-        # number of primer-pairs in the multiplex group
-        # Mpx plate name
-        # Mpx plate well
 
         <b>Parameters:</b>
         @param target_names list of target names to query.
@@ -137,19 +133,66 @@ class CLineageWebServices(ServiceBase):
         except Panel.DoesNotExist:
             raise ArgumentError('Panel not found: {}'.format(panel_name))
         # for row in get_targets_by_panel(panel):
-        for row in get_targets_for_aar7(panel):
+        for row in get_targets_by_panel(panel):
             yield row
 
 
     @rpc(String, _returns=Iterable(Iterable(String)))
-    def get_missing_targets_by_panel(ctx, panel_name):
+    def get_targets_by_aar(ctx, aar_plate_name):
+        '''
+        Elaborate query for targets.
+        MATLAB example: get_targets_by_panel(service_obj, struct('string','Seq05944'))
+
+        output columns:
+        # Target ID
+        # Target name
+        # Target enrichment name
+        # Target: MS/Other Mutation
+        # Assembly name
+        # Basic Unit size
+        # Expected Number of repeats
+        # Basic Unit Type
+        # Chromosome
+        # Length MS
+        # Primer sequence -  Left
+        # Primer Tm -  Left
+        # Primer sequence -  Right
+        # Primer Tm -  Right
+        # Validation status
+        # Target location on Chromosome - start
+        # Target location on Chromosome - end
+        # left primer location on Chromosome - start
+        # left primer location on Chromosome - end
+        # right primer location on Chromosome - start
+        # right primer location on Chromosome - end
+        # Amplicon location on Chromosome - start
+        # Amplicon location on Chromosome - end
+        # Mpx groups names
+        # number of primer-pairs in the multiplex group
+        # aar plate name
+        # aar plate well
+
+        <b>Parameters:</b>
+        @param target_names list of target names to query.
+        @return full target data in table format (see columns)
+        '''
+
         try:
-            panel = Panel.objects.get(name=panel_name)
+            aar_plate = Plate.objects.get(name=aar_plate_name)
         except Panel.DoesNotExist:
-            raise ArgumentError('Panel not found: {}'.format(panel_name))
+            raise ArgumentError('Plate not found: {}'.format(aar_plate_name))
         # for row in get_targets_by_panel(panel):
-        for row in get_extra_targets_for_aar7(panel):
+        for row in get_targets_by_aar(aar_plate):
             yield row
+    # @rpc(String, _returns=Iterable(Iterable(String)))
+    # def get_missing_targets_by_panel(ctx, panel_name):
+    #     try:
+    #         panel = Panel.objects.get(name=panel_name)
+    #     except Panel.DoesNotExist:
+    #         raise ArgumentError('Panel not found: {}'.format(panel_name))
+    #     # for row in get_targets_by_panel(panel):
+    #     for row in get_extra_targets_for_aar7(panel):
+    #         yield row
 
 
     @rpc(String, String, Integer, Integer, _returns=String)
@@ -173,6 +216,7 @@ class CLineageWebServices(ServiceBase):
             return ResourceNotFoundError(faultstring='Chromosome \'%s\' was not found.'%chromosome_name)
         return chromosome.getdna(start_index, end_index)
 
+
     @rpc(String, String, Integer, Integer, String, _returns=Iterable(Integer))
     def locate_genomic_sequence(ctx, assembly_name, chromosome_name, start_index, end_index, sequence):
         '''
@@ -195,51 +239,6 @@ class CLineageWebServices(ServiceBase):
             return ResourceNotFoundError(faultstring='Chromosome \'%s\' was not found.'%chromosome_name)
         return list(chromosome.locate(start_index, end_index, sequence))
 
-# @rpc(Iterable(String), _returns=Iterable(Iterable(String)))
-#     def save_panel(ctx, target_names):
-#         '''
-#         Elaborate query for targets.
-#         MATLAB example: get_targets_data(service_obj, struct('string',{{'Seq05944'}}))
-#
-#         output columns:
-#         # Target name
-#
-#
-#         <b>Parameters:</b>
-#         @param target_names list of target names to query.
-#         @return full target data in table format (see columns)
-#         '''
-#         targets = [target for target in target_names]
-#         for tgt in Target.objects.filter(name__in=targets):
-#             for te in tgt.targetenrichment_set.all():
-#                 for mpx in te.primersmultiplex_set.all():
-#                     try:
-#                         ms = tgt.microsatellite
-#                         repeat_unit_len = str(ms.repeat_unit_len)
-#                         repeat_number = str(ms.repeat_number)
-#                         repeat_unit_type = str(ms.repeat_unit_type)
-#                     except Microsatellite.DoesNotExist:
-#                         repeat_unit_len = ''
-#                         repeat_number = ''
-#                         repeat_unit_type = ''
-#                     yield [tgt.name,
-#                            tgt.type.name,  # Target: MS/Other Mutation
-#                            str(repeat_unit_len),  # Basic Unit size
-#                            str(repeat_number),  # Expected Number of repeats
-#                            str(repeat_unit_type),  # Basic Unit Type
-#                            tgt.chromosome.name,  # Chromosome
-#                            str(tgt.end_pos-tgt.start_pos),  # Length MS
-#                            te.left.sequence.sequence,  # Primer sequence -  Left
-#                            str(Tm_staluc(te.left.sequence.sequence)),  # Primer Tm -  Left
-#                            te.right.sequence.sequence,  # Primer sequence -  Right
-#                            str(Tm_staluc(te.right.sequence.sequence)),  # Primer Tm -  Right
-#                            str(te.passed_validation),
-#                            str(tgt.start_pos),  # Target location on Chromosome - start
-#                            str(tgt.end_pos),  # Target location on Chromosome - end
-#                            str(te.left.start_pos),  # Amplicon location on Chromosome - start
-#                            str(te.right.end_pos),  # Amplicon location on Chromosome - end
-#                            mpx.name,  # Mpx groups names
-#                            str(len(mpx.primers.all()))]
 
 niki_service = csrf_exempt(DjangoApplication(Application([CLineageWebServices],
     'spyne.examples.django',
