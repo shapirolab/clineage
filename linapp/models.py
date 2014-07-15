@@ -416,6 +416,24 @@ class TargetEnrichment(models.Model):
     def amplicon_indices(self):
         return (self.left.start_pos, self.right.end_pos)
 
+    def get_internal_restriction(self, restriction):
+        return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
+
+    def get_surrounding_restriction(self, restriction):
+        for x in range(100, 1500, 100):
+            lamplicon = self.chromosome.getdna(self.amplicon_indices()[0]-x, self.amplicon_indices()[0])
+            lttaas = [self.amplicon_indices()[0] - m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
+            if lttaas:
+                break
+
+        for x in range(100, 1500, 100):
+            ramplicon = self.chromosome.getdna(self.amplicon_indices()[1], self.amplicon_indices()[1]+x)
+            rttaas = [self.amplicon_indices()[1] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
+            if rttaas:
+                break
+
+        return max(lttaas), min(rttaas)
+    
     def __unicode__(self):
         return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
 ### -------------------------------------------------------------------------------------
