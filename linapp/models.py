@@ -958,9 +958,9 @@ class PlateStorage(models.Model):
 ### -------------------------------------------------------------------------------------
 class SampleLocation(models.Model):
     plate = models.ForeignKey(Plate)
-    well = models.CharField(max_length=3, blank=True)
+    well = models.CharField(max_length=3, blank=True, db_index=True)
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(db_index=True)
     reagent = generic.GenericForeignKey('content_type', 'object_id')
     volume = models.DecimalField(null=True, max_digits=10, decimal_places=3, blank=True)
     concentration = models.DecimalField(null=True, max_digits=10, decimal_places=5, blank=True)
