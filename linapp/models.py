@@ -967,6 +967,11 @@ class SampleLocation(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
     def __unicode__(self):
         return 'plate %s at %s' % (self.plate.name, self.well)
+
+    class Meta:
+        index_together = [
+            ["content_type", "object_id"],
+        ]
 ### -------------------------------------------------------------------------------------
 ### Primers Multiplex
 ### -------------------------------------------------------------------------------------
