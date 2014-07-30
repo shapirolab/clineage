@@ -3,13 +3,22 @@
     <form data-dojo-type="dijit.form.Form" data-dojo-id="myForm" id="myForm">
         <script type="dojo/on" data-dojo-event="submit" data-dojo-args="e">
             e.preventDefault(); {#// prevent the default submit#}
-            if(!myForm.isValid()){ alert('Please fix fields'); return; }
+            if(!myForm.isValid()){
+                alert('Please fix fields');
+                return;
+            }
             var xhrArgs = {
                   url: '{{ request.build_absolute_uri }}',
                   form: "myForm",
                   handleAs: "text",
-                  load: function(data){ dijit.byId('form_dialog').hide(); },
-                  error: function(data){ console.log(data); }
+                  load: function(data){
+                    {# debugger; #}
+                    dijit.byId('form_dialog').hide();
+                  },
+                  error: function(data){
+                        console.log(data);
+                        alert('error submitting form');
+                  }
             }
             dojo.xhrPost(xhrArgs);
         </script>

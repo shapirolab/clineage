@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, render_to_response, redirect, get_object_or_404
 from django.template.context import RequestContext
 from linapp.forms import *
@@ -245,10 +246,22 @@ def filesPost(request, exp_id):  # Handle POST request from experiment repositor
     return {'success':True}
 
 
-class IndividualCreate(CreateView):
+class JsonFormMixin(object):
+    def form_valid(self, form):
+        html = super(JsonFormMixin, self).form_valid(form)
+        return HttpResponse(json.dumps("ok"), content_type="application/json")
+
+
+    def form_invalid(self, form):
+        return HttpResponse(json.dumps(form.errors), status=401,
+                            content_type="application/json")
+
+
+class IndividualCreate(JsonFormMixin, CreateView):
     model = Individual
 
-class IndividualUpdate(UpdateView):
+
+class IndividualUpdate(JsonFormMixin, UpdateView):
     model = Individual
 
 class IndividualDetail(DetailView):
@@ -257,10 +270,10 @@ class IndividualDetail(DetailView):
 class IndividualDelete(DeleteView):
     model = Individual
 
-class ExtractionEventCreate(CreateView):
+class ExtractionEventCreate(JsonFormMixin, CreateView):
     model = ExtractionEvent
 
-class ExtractionEventUpdate(UpdateView):
+class ExtractionEventUpdate(JsonFormMixin, UpdateView):
     model = ExtractionEvent
 
 class ExtractionEventDetail(DetailView):
@@ -269,22 +282,22 @@ class ExtractionEventDetail(DetailView):
 class ExtractionEventDelete(DeleteView):
     model = ExtractionEvent
 
-class ExtractionCreate(CreateView):
+class ExtractionCreate(JsonFormMixin, CreateView):
     model = Extraction
 
 class ExtractionDetail(DetailView):
     model = Extraction
 
-class ExtractionUpdate(UpdateView):
+class ExtractionUpdate(JsonFormMixin, UpdateView):
     model = Extraction
 
 class ExtractionDelete(DeleteView):
     model = Extraction
 
-class SamplingEventCreate(CreateView):
+class SamplingEventCreate(JsonFormMixin, CreateView):
     model = SamplingEvent
 
-class SamplingEventUpdate(UpdateView):
+class SamplingEventUpdate(JsonFormMixin, UpdateView):
     model = SamplingEvent
 
 class SamplingEventDetail(DetailView):
@@ -293,10 +306,10 @@ class SamplingEventDetail(DetailView):
 class SamplingEventDelete(DeleteView):
     model = SamplingEvent
 
-class FACSCreate(CreateView):
+class FACSCreate(JsonFormMixin, CreateView):
     model = FACS
 
-class FACSUpdate(UpdateView):
+class FACSUpdate(JsonFormMixin, UpdateView):
     model = FACS
 
 class FACSDetail(DetailView):
@@ -305,10 +318,10 @@ class FACSDetail(DetailView):
 class FACSDelete(DeleteView):
     model = FACS
 
-class LaserCaptureCreate(CreateView):
+class LaserCaptureCreate(JsonFormMixin, CreateView):
     model = LaserCapture
 
-class LaserCaptureUpdate(UpdateView):
+class LaserCaptureUpdate(JsonFormMixin, UpdateView):
     model = LaserCapture
 
 class LaserCaptureDetail(DetailView):
@@ -317,10 +330,10 @@ class LaserCaptureDetail(DetailView):
 class LaserCaptureDelete(DeleteView):
     model = LaserCapture
 
-class CellCreate(CreateView):
+class CellCreate(JsonFormMixin, CreateView):
     model = Cell
 
-class CellUpdate(UpdateView):
+class CellUpdate(JsonFormMixin, UpdateView):
     model = Cell
 
 class CellDetail(DetailView):
@@ -329,10 +342,10 @@ class CellDetail(DetailView):
 class CellDelete(DeleteView):
     model = Cell
 
-class CellContentCreate(CreateView):
+class CellContentCreate(JsonFormMixin, CreateView):
     model = CellContent
 
-class CellContentUpdate(UpdateView):
+class CellContentUpdate(JsonFormMixin, UpdateView):
     model = CellContent
 
 class CellContentDetail(DetailView):
@@ -341,10 +354,10 @@ class CellContentDetail(DetailView):
 class CellContentDelete(DeleteView):
     model = CellContent
 
-class AlgorithmCreate(CreateView):
+class AlgorithmCreate(JsonFormMixin, CreateView):
     model = Algorithm
 
-class AlgorithmUpdate(UpdateView):
+class AlgorithmUpdate(JsonFormMixin, UpdateView):
     model = Algorithm
 
 class AlgorithmDetail(DetailView):
@@ -353,37 +366,37 @@ class AlgorithmDetail(DetailView):
 class AlgorithmDelete(DeleteView):
     model = Algorithm
 
-class AlgorithmRunCreate(CreateView):
+class AlgorithmRunCreate(JsonFormMixin, CreateView):
     model = AlgorithmRun
 
-class AlgorithmRunUpdate(UpdateView):
+class AlgorithmRunUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmRun
 
 class AlgorithmRunDelete(DeleteView):
     model = AlgorithmRun
 
-class AlgorithmParameterCreate(CreateView):
+class AlgorithmParameterCreate(JsonFormMixin, CreateView):
     model = AlgorithmParameter
 
-class AlgorithmParameterUpdate(UpdateView):
+class AlgorithmParameterUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmParameter
 
 class AlgorithmParameterDelete(DeleteView):
     model = AlgorithmParameter
 
-class AlgorithmRunParametersCreate(CreateView):
+class AlgorithmRunParametersCreate(JsonFormMixin, CreateView):
     model = AlgorithmRunParameters
 
-class AlgorithmRunParametersUpdate(UpdateView):
+class AlgorithmRunParametersUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmRunParameters
 
 class AlgorithmRunParametersDelete(DeleteView):
     model = AlgorithmRunParameters
 
-class PlateCreate(CreateView):
+class PlateCreate(JsonFormMixin, CreateView):
     model = Plate
 
-class PlateUpdate(UpdateView):
+class PlateUpdate(JsonFormMixin, UpdateView):
     model = Plate
 
 class PlateDelete(DeleteView):
