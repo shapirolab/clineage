@@ -591,7 +591,7 @@ class SamplingEvent(models.Model):
         return u'{}>{}'.format(unicode(self.extraction), self.name)
 
     def get_absolute_url(self):
-        return reverse('sampling_event_detail', kwargs={'pk': self.pk})
+        return reverse('samplingevent_detail', kwargs={'pk': self.pk})
 ### -------------------------------------------------------------------------------------
 class FACS(SamplingEvent):
     marker = models.ForeignKey(FACSMarker)

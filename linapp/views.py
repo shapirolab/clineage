@@ -260,7 +260,6 @@ class JsonFormMixin(object):
 class IndividualCreate(JsonFormMixin, CreateView):
     model = Individual
 
-
 class IndividualUpdate(JsonFormMixin, UpdateView):
     model = Individual
 
