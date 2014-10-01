@@ -447,6 +447,8 @@ class Coordinates(models.Model):#XYZ coordinates of laser capture.
 ### -------------------------------------------------------------------------------------
 class FACSMarker(models.Model):
     name = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.name
 ### -------------------------------------------------------------------------------------
 class Panel(models.Model):#collection of targets
     name = models.CharField(max_length=50)
