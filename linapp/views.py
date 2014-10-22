@@ -406,12 +406,14 @@ def multiple_cells_create(request):
         cells_form = MultipleCellForm(request.POST, prefix='multicell')
         if cells_form.is_valid():
             print cells_form.cleaned_data
+            individual = cells_form.cleaned_data['individual']
             sampling_event = cells_form.cleaned_data['sampling']
             cell_composition = cells_form.cleaned_data['composition']
             cell_status = cells_form.cleaned_data['status']
             new_cells = []
             for i in range(1, cells_form.cleaned_data['copies']+1):
-                new_cells.append(Cell(sampling=sampling_event,
+                new_cells.append(Cell(individual=individual,
+                                      sampling=sampling_event,
                                       name=cells_form.cleaned_data['cells_name_prefix'] + str(i),
                                       composition=cell_composition,
                                       status=cell_status,
@@ -428,6 +430,7 @@ def plate_input(request):
         plate_form = PlateInputForm(request.POST, prefix='platecells')
         if plate_form.is_valid():
             plate_content_type = CellContentType.objects.get()
+            individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
             inserting_user = plate_form.cleaned_data['user']
             cell_content_protocol = plate_form.cleaned_data['protocol']
@@ -469,6 +472,7 @@ def plate_input(request):
                 well_composition = well_value_to_composition(cell_value)
                 if well_composition:
                     new_cell = Cell.objects.create(
+                        individual=individual,
                         sampling=sampling_event,
                         name=plate_form.cleaned_data['cells_name_prefix'] + index2str(index),
                         composition=well_composition,
@@ -508,6 +512,7 @@ def plate_input_with_names(request):
         plate_form = PlateInputForm(request.POST, prefix='platecells')
         if plate_form.is_valid():
             plate_content_type = CellContentType.objects.get()
+            individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
             inserting_user = plate_form.cleaned_data['user']
             cell_content_protocol = plate_form.cleaned_data['protocol']
@@ -550,6 +555,7 @@ def plate_input_with_names(request):
             for index, cell_value in wells:
                 if cell_value:
                     new_cell = Cell.objects.create(
+                        individual=individual,
                         sampling=sampling_event,
                         name=cell_value,
                         composition=SampleComposition.objects.get(name='Single Cell'),

@@ -614,7 +614,8 @@ class CellSelector(SamplingEvent):
         return reverse('cellselector_detail', kwargs={'pk': self.pk})
 ### -------------------------------------------------------------------------------------
 class Cell(models.Model):
-    sampling = models.ForeignKey(SamplingEvent)
+    individual = models.ForeignKey(Individual)
+    sampling = models.ForeignKey(SamplingEvent, null=True)
     name = models.CharField(max_length=50)
     experiment = models.ManyToManyField(Experiment, related_name='cells', null=True, blank=True)
     composition = models.ForeignKey(SampleComposition)#single cell or bulk

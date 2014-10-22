@@ -184,12 +184,13 @@ class CellForm(ModelForm):
 
 class MultipleCellForm(forms.Form):
     copies = IntegerField(min_value=1)
-    sampling = ModelChoiceField(queryset=SamplingEvent.objects.all())
-    cells_name_prefix = CharField(max_length=50)
+    individual = ModelChoiceField(queryset=Individual.objects.all())
+    sampling = ModelChoiceField(queryset=SamplingEvent.objects.all(), required=False)
+    cells_name_prefix = CharField(max_length=50, required=False)
     # experiment = ModelMultipleChoiceField(queryset=Experiment.objects.all())
     composition = ModelChoiceField(queryset=SampleComposition.objects.all())  # single cell or bulk
-    status = ModelChoiceField(queryset=SampleStatus.objects.all())
-    comment = CharField(widget=Textarea)
+    status = ModelChoiceField(queryset=SampleStatus.objects.all(), required=False)
+    comment = CharField(widget=Textarea, required=False)
 
 
 
@@ -212,9 +213,10 @@ class PlateInputForm(forms.Form):
     #         inner_location = HiddenInput()
 
     # cell input fields
-    sampling = ModelChoiceField(queryset=SamplingEvent.objects.all())
-    cells_name_prefix = CharField(max_length=50)
-    comment = CharField(widget=Textarea)
+    individual = ModelChoiceField(queryset=Individual.objects.all())
+    sampling = ModelChoiceField(queryset=SamplingEvent.objects.all(), required=False)
+    cells_name_prefix = CharField(max_length=50, required=False)
+    comment = CharField(widget=Textarea, required=False)
 
     # plate input fields
     existing_plate = ModelChoiceField(queryset=Plate.objects.all(), required=False)
@@ -225,13 +227,13 @@ class PlateInputForm(forms.Form):
     #plate storage fields
     # storage_type = ModelChoiceField(queryset=StorageType.objects.all())
     storage_box = ModelChoiceField(queryset=StorageBox.objects.select_related('storage_type'))
-    inner_location = CharField(max_length=100)  # RevcoWidget()  # HiddenInput()  #
-    notes = CharField(max_length=250)
+    inner_location = CharField(max_length=100, required=False)
+    notes = CharField(max_length=250, required=False)
 
     # logical fields
     user = ModelChoiceField(User.objects.all())
     timestamp = DateField()
-    protocol = ModelChoiceField(Protocol.objects.all())
+    protocol = ModelChoiceField(Protocol.objects.all(), required=False)
 
 
 class CellContentForm(ModelForm):
