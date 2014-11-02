@@ -403,6 +403,7 @@ class TargetEnrichment(models.Model):
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
     targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
+    partner = models.ManyToManyField(User, null=True)
 
     def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
         assert self.left.chromosome == self.right.chromosome
@@ -419,20 +420,23 @@ class TargetEnrichment(models.Model):
     def get_internal_restriction(self, restriction):
         return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
 
-    def get_surrounding_restriction(self, restriction):
-        for x in range(0, 5000, 10):
+    def get_surrounding_restriction(self, restriction, max_seek=5000):
+        for x in range(0, max_seek, 10):
             lamplicon = self.chromosome.getdna(self.amplicon_indices()[0]-x, self.amplicon_indices()[0])
             lttaas = [self.amplicon_indices()[0] - m.start() for m in re.finditer(restriction, lamplicon)]
             if lttaas:
                 break
 
-        for x in range(0, 5000, 10):
+        for x in range(0, max_seek, 10):
             ramplicon = self.chromosome.getdna(self.amplicon_indices()[1], self.amplicon_indices()[1]+x)
             rttaas = [self.amplicon_indices()[1] + m.start() for m in re.finditer(restriction, ramplicon)]
             if rttaas:
                 break
 
-        return max(lttaas), min(rttaas)
+        if lttaas and rttaas:
+            return max(lttaas), min(rttaas)
+        return None
+
 
     def __unicode__(self):
         return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
