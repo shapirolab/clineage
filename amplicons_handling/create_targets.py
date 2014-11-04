@@ -110,7 +110,7 @@ if '__main__' == __name__:
     with open(input_file, 'rb') as f:
         dialect = csv.Sniffer().sniff(f.read(1000))
         f.seek(0)
-        rdr = csv.reader(f, dialect=dialect)
+        rdr = csv.DictReader(f, dialect=dialect)
         case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
             process_row(row, case)
