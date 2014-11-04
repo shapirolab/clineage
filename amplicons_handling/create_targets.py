@@ -45,8 +45,9 @@ def get_or_create_sequence(seq):
 
 
 def get_case_from_columns(columns):
-    if columns_case_dict[columns]:
-        return columns_case_dict[columns]
+    col_tup = tuple(columns)
+    if columns_case_dict[col_tup]:
+        return columns_case_dict[col_tup]
     print 'unsupported columns structure' #add helpful example
     raise
 
