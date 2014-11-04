@@ -1,5 +1,5 @@
 import re
-from LinApp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
+from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
 import hashlib
 import csv
 import argparse
@@ -93,6 +93,10 @@ def process_row(row_dict, case):
     return obj, created
 
 if '__main__' == __name__:
+    import sys, os
+    sys.path.append('/home/ofirr/CLineage/')
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+    from django.conf import settings
     parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
     parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
     args = parser.parse_args()
