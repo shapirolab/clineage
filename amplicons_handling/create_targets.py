@@ -7,7 +7,7 @@ import argparse
 if '__main__' == __name__:
     sys.path.append('/home/ofirr/CLineage/')
     os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-    from django.conf import settings
+    from clineage import settings
 
 from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
 
