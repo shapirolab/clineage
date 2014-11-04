@@ -1,13 +1,15 @@
-import sys, os
+
 import re
 import hashlib
 import csv
 import argparse
 
 if '__main__' == __name__:
+    from django.core.management import setup_environ
+    import sys
     sys.path.append('/home/ofirr/CLineage/')
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
     from clineage import settings
+    setup_environ(settings)
 
 from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
 
