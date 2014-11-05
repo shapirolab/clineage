@@ -66,10 +66,10 @@ def clean_chromosome_name(raw_chr_name):
 def parse_commons(row_dict):
     assem = Assembly.objects.get(friendly_name=row_dict['Assembly'])
     chromosome_name = clean_chromosome_name(row_dict['Chromosome'])
-    chr = Chromosome.objects.get(name=chromosome_name, assembly=assem)
+    chrom = Chromosome.objects.get(name=chromosome_name, assembly=assem)
     start_pos = int(row_dict['Start'])
     end_pos = int(row_dict['End'])
-    return chr, start_pos, end_pos
+    return chrom, start_pos, end_pos
 
 
 def process_row(row_dict, case):
@@ -82,11 +82,11 @@ def process_row(row_dict, case):
 
     if case in ['Plain', 'SNP', 'MicroSatellite']:
         sequence = get_or_create_sequence(row_dict['Sequence'])
-        start_pos, end_pos = chrom.locate(start_pos, end_pos, sequence)
+        start_pos, end_pos = chrom.locate(start_pos, end_pos, sequence.sequence)
 
     if case in ['SNP']:
         modified = row_dict['SNP']
-        mutation = '{}>{}'.format(sequence, modified)
+        mutation = '{}>{}'.format(sequence.sequence, modified)
         obj, created = SNP.objects.get_or_create(start_pos=start_pos, end_pos=end_pos,
                                             defaults={'name': name, 'type': tgtype, 'chromosome': chrom, 'referencevalue': sequence, 'mutation':mutation, 'modified':modified})
         return obj, created
@@ -114,4 +114,5 @@ if '__main__' == __name__:
         rdr = csv.DictReader(f, dialect=dialect)
         case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
-            process_row(row, case)
+            obj, created = process_row(row, case)
+            print obj, created
