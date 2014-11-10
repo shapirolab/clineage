@@ -26,7 +26,8 @@ def build_primer3_input(loci_names_file,ListFileName):
         fasta_primers = '{}.fasta'.format(str(short_name))
         # fasta_primers_file = open(fasta_primers, 'w+')
         system_call = ()
-        s = 'bedtools getfasta -fi ~/Adam/GenomesData/Human/hg19/hg19_AllGenome.fa -bed {} -fo {}'.format(loci_names_file, fasta_primers)
+
+        s = 'bedtools getfasta -fi {} -bed {} -fo {}'.format(chrom.get_abs_path(), loci_names_file, fasta_primers)
         # s = 'bedtools getfasta -fi ~/Adam/GenomesData/Human/hg19/chrM.fa -bed {} -fo {}'.format(loci_names_file, fasta_primers)
         os.system(s)
 
@@ -62,16 +63,16 @@ def build_primer3_input(loci_names_file,ListFileName):
 
     #Go over the results of primer3 and parse all the primers candidates and Generate fasta file for primers alignment
     primer_data_check = 'Primers_availability_{}.fa'.format(str(ListFileName))
-    primers_output = open(primer_data_check, 'w+')
+
     fasta_output_file = open(primer3_output, 'rb')
     s = fasta_output_file.read()
     out_string = ''
-    l = s.split('\n=\n')
+    fasta_string = s.split('\n=\n')
     pid = re.compile('SEQUENCE_ID=(\w+)')
     pl = re.compile('PRIMER_LEFT_\d+_SEQUENCE=([actgACTG]+)')
     pr = re.compile('PRIMER_RIGHT_\d+_SEQUENCE=([actgACTG]+)')
     target_primers = defaultdict(lambda: defaultdict(lambda: defaultdict(str)))
-    for seq in l[:-1]:
+    for seq in fasta_string[:-1]:
         seq_id = pid.findall(seq)[0]
         left_primers = pl.findall(seq)
         right_primers = pr.findall(seq)
@@ -84,6 +85,7 @@ def build_primer3_input(loci_names_file,ListFileName):
             out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(i, seq_id, primer_right)
 
     fasta_output_file.close()
+    primers_output = open(primer_data_check, 'w+')
     primers_output.write(out_string)
     primers_output.close()
 
