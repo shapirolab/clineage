@@ -1,4 +1,6 @@
 __author__ = 'ofirr'
+import xlwt
+import xlrd
 from utils.wells import index2str
 from linapp.models import SampleLocation, Assembly, Plate, PlateType
 
@@ -15,6 +17,7 @@ def position_in_plates(targetenrichments_group,
                        stk_fw_plate,
                        stk_rv_plate,
                        pairs_plate,
+                       plate_size=96,
                        pair_vol=50,
                        pair_conc=60,
                        stk_vol=100,
@@ -23,7 +26,7 @@ def position_in_plates(targetenrichments_group,
     Positions up to 96 primer pairs in stk plates and mixed pairs.
     returns three lists of (SampleLocation, created) tuples for pair, fw, rv
     """
-    assert len(targetenrichments_group) <= 96
+    assert len(targetenrichments_group) <= plate_size
     fw_positions, rv_positions, pairs_positions = [], [], []
     for i, te in enumerate(targetenrichments_group):
         well = index2str(i+1)
@@ -51,9 +54,9 @@ def position_in_plates(targetenrichments_group,
         return fw_positions, rv_positions, pairs_positions
 
 
-def get_next_primers_plate(assembly):
+def create_next_primers_plates(assembly):
     """
-    This is a temporary function for generating the next primers plate name
+    This is a temporary function for generating the next primers plate
     """
     stk_primers_type = PlateType.objects.get(friendly='Primers STK')
     paired_primers_type = PlateType.objects.get(friendly='Primer pairs')
@@ -79,3 +82,24 @@ def get_next_primers_plate(assembly):
         print 'ERROR: unsupported assembly'
         raise
     return plate_united, plate_fw, plate_rev
+
+def insertion_plates_to_db(create_primer_pairs, plate_united, plate_fw, plate_rev, assembly='hg19', plate_size=96):
+    primers_partition_list = list(chunks(range(1, len(create_primer_pairs)), plate_size))
+    for i in primers_partition_list:
+        targetenrichments_group = create_primer_pairs
+        pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
+        fw_positions, rv_positions, pairs_positions = position_in_plates(targetenrichments_group,
+                                                                       stk_fw_plate,
+                                                                       stk_rv_plate,
+                                                                       pairs_plate)
+
+def create_primer_order_file_xls():
+
+    workbook = xlrd.open_workbook('input.xls')
+    sheet = workbook.sheet_by_index(0)
+    data = [sheet.cell_value(0, col) for col in range(sheet.ncols)]
+    workbook = xlwt.Workbook()
+    sheet = workbook.add_sheet('test')
+    for index, value in enumerate(data):
+        sheet.write(0, index, value)
+    workbook.save('output.xls')

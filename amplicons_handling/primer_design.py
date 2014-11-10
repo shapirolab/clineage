@@ -15,8 +15,13 @@ if '__main__' == __name__:
     setup_environ(settings)
 
 
-def primer3_design(target, input_name, output_name, primer_num_rerun=10000, margins=200, seq_region=100):
+def create_amplicons_for_primer3(target, margins):
     amplicon = target.chromosome.getdna(target.start_pos-margins, target.end_pos+margins)
+
+    return amplicon
+
+
+def primer3_design(target_list, input_name, output_name, primer_num_rerun=10000, margins=200, seq_region=100):
     primer3_input = ("{}.txt".format(str(input_name)))
     with open(primer3_input, 'w+') as primer3_file:
         primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
@@ -24,15 +29,23 @@ def primer3_design(target, input_name, output_name, primer_num_rerun=10000, marg
                                     'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
                                     'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
                                     'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n').format(primer_num_rerun)
-        primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}\n=\n'.format(target.id, amplicon, seq_region, len(amplicon)-seq_region, seq_region))
+        for target in target_list:
+            amplicon = create_amplicons_for_primer3(target, margins)
+            primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
+                               'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}\n=\n'.format(target.id,
+                                                                                            amplicon,
+                                                                                            seq_region,
+                                                                                            len(amplicon)-seq_region,
+                                                                                            seq_region))
+
     #Run the primer3 on the input
     primer3_output = ("{}.txt".format(str(output_name)))
-    s= '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core < {} > {}'.format(primer3_input,primer3_output)
+    s = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core < {} > {}'.format(primer3_input,primer3_output)
     os.system(s)
     return output_name
 
 
-def parse_primer3_output(output_name,):
+def parse_primer3_output(output_name):
     fasta_output_file = open(output_name, 'rb')
     primer3_output = fasta_output_file.read()
     fasta_string = primer3_output.split('\n=\n')
@@ -99,25 +112,20 @@ def sort_unique_primers(sam_file, target_primers):
     return chosen_target_primers
 
 
-def primer_order_file_prepare(chosen_target_primers, template_file, file_order_name, plate_prefix='Primers'):
-    row_number = 2
-    plt_number = 1
-    for target_id in chosen_target_primers.keys():
-        
+def create_primers_for_new_targets(loci_names_file, list_file_name):
+    loci_names_file = target_list
+
+    Primer3_file_data = primer3_design(target_list, ListFileName, 'Primer3_output_file')
 
 
 
 
-if '__main__' == __name__:
-    parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
-    parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("loci_names_file", help=".bed file name for generating primers",
+                        type=str)
+    parser.add_argument("ListFileName", help="prefix name for all the files that are generated",
+                        type=str)
     args = parser.parse_args()
-    input_file = args.input_file
-    with open(input_file, 'rb') as f:
-        dialect = csv.Sniffer().sniff(f.read(1000))
-        f.seek(0)
-        rdr = csv.DictReader(f, dialect=dialect)
-        case = get_case_from_columns(rdr.fieldnames)
-        for row in rdr:
-            obj, created = process_row(row, case)
-            print obj, created
+
+    create_primers_for_new_targets(args.loci_names_file, args.ListFileName)
