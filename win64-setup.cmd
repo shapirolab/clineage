@@ -6,7 +6,7 @@ easy_install lxml==2.3
 
 echo ===============================
 echo Installing MySQL-python
-easy_install MySQL-python==1.2.5
+easy_install https://pypi.python.org/packages/2.7/M/MySQL-python/MySQL-python-1.2.5.win32-py2.7.exe#md5=6f43f42516ea26e79cfb100af69a925e
 
 echo ===============================
 echo Installing NumPy
