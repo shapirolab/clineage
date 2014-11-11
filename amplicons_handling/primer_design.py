@@ -7,12 +7,12 @@ from collections import defaultdict
 from collections import Counter
 
 
-if '__main__' == __name__:
-    from django.core.management import setup_environ
-    import sys
-    sys.path.append('/home/ofirr/CLineage/')
-    from clineage import settings
-    setup_environ(settings)
+# if '__main__' == __name__:
+#     from django.core.management import setup_environ
+#     import sys
+#     sys.path.append('/home/ofirr/CLineage/')
+#     from clineage import settings
+#     setup_environ(settings)
 
 
 def create_amplicons_for_primer3(target, margins):
@@ -21,7 +21,7 @@ def create_amplicons_for_primer3(target, margins):
     return amplicon
 
 
-def primer3_design(target_list, input_name, output_name, primer_num_rerun=10000, margins=200, seq_region=100):
+def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, margins=200, seq_region=100):
     primer3_input = ("{}.txt".format(str(input_name)))
     with open(primer3_input, 'w+') as primer3_file:
         primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
@@ -29,7 +29,7 @@ def primer3_design(target_list, input_name, output_name, primer_num_rerun=10000,
                                     'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
                                     'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
                                     'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n').format(primer_num_rerun)
-        for target in target_list:
+        for target in obj_list:
             amplicon = create_amplicons_for_primer3(target, margins)
             primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
                                'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}\n=\n'.format(target.id,
@@ -42,7 +42,7 @@ def primer3_design(target_list, input_name, output_name, primer_num_rerun=10000,
     primer3_output = ("{}.txt".format(str(output_name)))
     s = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core < {} > {}'.format(primer3_input,primer3_output)
     os.system(s)
-    return output_name
+    return primer3_output
 
 
 def parse_primer3_output(output_name):
@@ -65,20 +65,21 @@ def parse_primer3_output(output_name):
     return target_primers
 
 
-def bowtie2_design(target_primers, inputFastaFile, outputFile, bowtie2_index):
+def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
+    target_primers = parse_primer3_output(output_name)
     out_string = ''
     for seq_id in target_primers.keys():
         for primer_number in enumerate(target_primers[seq_id]['LEFT'].keys()):
             out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['LEFT'][primer_number])
             out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['RIGHT'][primer_number])
-        primer_data_check = '{}.fa'.format(str(inputFastaFile))
+        primer_data_check = '{}.fa'.format(str(input_fasta_file))
         primers_output = open(primer_data_check, 'w+')
         primers_output.write(out_string)
         primers_output.close()
-        sam_file = '{}.sam'.format(str(outputFile))
+        sam_file = '{}.sam'.format(str(output_file))
         s = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2 -k 2 {} -f -U {} -S {}'.format(bowtie2_index, primer_data_check, sam_file)
         os.system(s)
-        return sam_file, primer_data_check
+        return sam_file, primer_data_check, target_primers
 
 
 def primer_count_from_sam_file(sam_file):
@@ -93,39 +94,39 @@ def primer_count_from_sam_file(sam_file):
 def sort_unique_primers(sam_file, target_primers):
     name_count = primer_count_from_sam_file(sam_file)
     chosen_target_primers = defaultdict(lambda: defaultdict(str))
+    discarded_targets = []
     for target_id in target_primers.keys():
         #left
+        left_primer = None
         for primer_number in sorted(target_primers[target_id]['LEFT'].keys()):
             bowtie2_key = 'PRIMER_LEFT_{}_{}'.format(primer_number, target_id)
             if name_count[bowtie2_key] == 1:
-                chosen_target_primers[target_id]['LEFT'] = target_primers[target_id]['LEFT'][primer_number]
+                left_primer = target_primers[target_id]['LEFT'][primer_number]
                 break
         #right
-        for primer_number in sorted(target_primers[target_id]['RIGHT'].keys()):
+        right_primer = None
+        for primer_number in sorted(target_primers[target_id]['LEFT'].keys()):
             bowtie2_key = 'PRIMER_RIGHT_{}_{}'.format(primer_number, target_id)
             if name_count[bowtie2_key] == 1:
-                chosen_target_primers[target_id]['RIGHT'] = target_primers[target_id]['RIGHT'][primer_number]
+                right_primer = target_primers[target_id]['RIGHT'][primer_number]
                 break
-        if not(chosen_target_primers[target_id]['LEFT']) or not(chosen_target_primers[target_id]['RIGHT']):
-            chosen_target_primers.remove(target_id)
-            # chosen_target_primers[target_id]['LEFT'] = 'no primer'
-    return chosen_target_primers
 
+        if left_primer and right_primer:
+            chosen_target_primers[target_id]['LEFT'] = left_primer
+            chosen_target_primers[target_id]['RIGHT'] = right_primer
+        else:
+            discarded_targets.append(target_id)
 
-def create_primers_for_new_targets(loci_names_file, list_file_name):
-    loci_names_file = target_list
-
-    Primer3_file_data = primer3_design(target_list, ListFileName, 'Primer3_output_file')
-
+    return chosen_target_primers, discarded_targets
 
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("loci_names_file", help=".bed file name for generating primers",
-                        type=str)
-    parser.add_argument("ListFileName", help="prefix name for all the files that are generated",
-                        type=str)
-    args = parser.parse_args()
-
-    create_primers_for_new_targets(args.loci_names_file, args.ListFileName)
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("loci_names_file", help=".bed file name for generating primers",
+#                         type=str)
+#     parser.add_argument("ListFileName", help="prefix name for all the files that are generated",
+#                         type=str)
+#     args = parser.parse_args()
+#
+#     create_primers_for_new_targets(args.loci_names_file, args.ListFileName)

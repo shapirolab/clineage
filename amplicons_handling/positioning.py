@@ -51,7 +51,7 @@ def position_in_plates(targetenrichments_group,
                       'volume': stk_vol,
                       'concentration': stk_conc})
         rv_positions.append(stk_rv_location)
-        return fw_positions, rv_positions, pairs_positions
+    return fw_positions, rv_positions, pairs_positions
 
 
 def create_next_primers_plates(assembly):
@@ -83,23 +83,25 @@ def create_next_primers_plates(assembly):
         raise
     return plate_united, plate_fw, plate_rev
 
-def insertion_plates_to_db(create_primer_pairs, plate_united, plate_fw, plate_rev, assembly='hg19', plate_size=96):
+
+def insertion_plates_to_db(create_primer_pairs, xls_name, plate_united, plate_fw, plate_rev, assembly='hg19', plate_size=96):
     primers_partition_list = list(chunks(range(1, len(create_primer_pairs)), plate_size))
-    for i in primers_partition_list:
-        targetenrichments_group = create_primer_pairs
+    for plate in primers_partition_list:
+        targetenrichments_group = create_primer_pairs.keys(plate)
         pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
         fw_positions, rv_positions, pairs_positions = position_in_plates(targetenrichments_group,
                                                                        stk_fw_plate,
                                                                        stk_rv_plate,
                                                                        pairs_plate)
+        create_primer_order_file_xls(targetenrichments_group, fw_positions, xls_name)
+        create_primer_order_file_xls(targetenrichments_group, rv_positions, xls_name)
+    return fw_positions, rv_positions, pairs_positions
 
-def create_primer_order_file_xls():
 
-    workbook = xlrd.open_workbook('input.xls')
-    sheet = workbook.sheet_by_index(0)
-    data = [sheet.cell_value(0, col) for col in range(sheet.ncols)]
-    workbook = xlwt.Workbook()
-    sheet = workbook.add_sheet('test')
-    for index, value in enumerate(data):
+def create_primer_order_file_xls(plate, positions, xls_name):
+
+    workbook = xlwt.Workbook(xls_name)
+    sheet = workbook.add_sheet(plate.name)
+    for index, value in enumerate(positions):
         sheet.write(0, index, value)
-    workbook.save('output.xls')
+    workbook.save(xls_name)

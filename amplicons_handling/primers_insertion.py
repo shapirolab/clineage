@@ -1,5 +1,5 @@
 __author__ = 'ofirr'
-from linapp.models import Target, TargetEnrichment, Primer
+from linapp.models import Target, TargetEnrichment, Primer, TargetType
 from utils.SequenceManipulations import complement
 from create_targets import get_or_create_sequence
 
@@ -18,7 +18,7 @@ class AmpliconCollisionError(Exception):
         super(AmpliconCollisionError, self).__init__(msg)
 
 
-def check_primers(target, primer_left_sequence, primer_right_sequence, primer_type, margins=120):
+def check_primers(target, primer_left_sequence, primer_right_sequence, target_enrichment_type, margins=120):
     """
     Search given primer sequences surrounding a Target object in the reference genome
     of the target. Checks for existing overlapping amplicons.
@@ -34,7 +34,7 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, primer_ty
                                               padding=margins)
     except ValueError:
         raise PrimerLocationError
-    if TargetEnrichment.objects.filter(type=primer_type)\
+    if TargetEnrichment.objects.filter(type=target_enrichment_type)\
                                       .filter(chromosome=target.chromosome)\
                                       .filter(left__start_pos__lte=pr_e)\
                                       .filter(right__end_pos__gte=pf_s):
@@ -43,7 +43,7 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, primer_ty
 
 
 
-def create_primers_in_db(chosen_target_primers, primer_type, pf_tail=None, pr_tail=None, margins=120):
+def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_type=TargetType.objects.get(name='Flank'), pf_tail=None, pr_tail=None, margins=120):
     colliding_amplicons = []
     create_primer_pairs = []
     for target_id in chosen_target_primers:
@@ -51,7 +51,7 @@ def create_primers_in_db(chosen_target_primers, primer_type, pf_tail=None, pr_ta
         primer_left_sequence = chosen_target_primers[target_id]['LEFT']
         primer_right_sequence = chosen_target_primers[target_id]['RIGHT']
         try:
-            primers_indexes_tuple = check_primers(target, primer_left_sequence, primer_right_sequence, primer_type, margins=margins)
+            primers_indexes_tuple = check_primers(target, primer_left_sequence, primer_right_sequence, target_enrichment_type, margins=margins)
         except PrimerLocationError:
             print 'Unresolved primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
             continue
@@ -65,6 +65,7 @@ def create_primers_in_db(chosen_target_primers, primer_type, pf_tail=None, pr_ta
         pr_refseq = get_or_create_sequence(primer_right_sequence)
         pf_seq = get_or_create_sequence(pf_tail.tail+primer_left_sequence)
         pr_seq = get_or_create_sequence(pr_tail.tail+complement(primer_right_sequence)[::-1])
+        TargetType.objects.get(name='Flank')
         primer_fwd, created_fw = Primer.objects.get_or_create(start_pos=pf_s,
                                         end_pos=pf_e,
                                         defaults={'name': target.name + '_fwd',
