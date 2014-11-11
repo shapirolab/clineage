@@ -84,24 +84,29 @@ def create_next_primers_plates(assembly):
     return plate_united, plate_fw, plate_rev
 
 
-def insertion_plates_to_db(create_primer_pairs, xls_name, plate_united, plate_fw, plate_rev, assembly='hg19', plate_size=96):
-    primers_partition_list = list(chunks(range(1, len(create_primer_pairs)), plate_size))
-    for plate in primers_partition_list:
-        targetenrichments_group = create_primer_pairs.keys(plate)
+def insertion_plates_to_db(create_primer_pairs, assembly='hg19', plate_size=96):
+    pairs_plates, stk_fw_plates, stk_rv_plates = [], [], []
+    for plate_te in chunks(range(1, len(create_primer_pairs)), plate_size):
         pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
-        fw_positions, rv_positions, pairs_positions = position_in_plates(targetenrichments_group,
+        pairs_plates.append(pairs_plate)
+        stk_fw_plates.append(stk_fw_plate)
+        stk_rv_plates.append(stk_rv_plate)
+        fw_positions, rv_positions, pairs_positions = position_in_plates(plate_te,
                                                                        stk_fw_plate,
                                                                        stk_rv_plate,
                                                                        pairs_plate)
-        create_primer_order_file_xls(targetenrichments_group, fw_positions, xls_name)
-        create_primer_order_file_xls(targetenrichments_group, rv_positions, xls_name)
-    return fw_positions, rv_positions, pairs_positions
+    return pairs_plates, stk_fw_plates, stk_rv_plates
 
 
-def create_primer_order_file_xls(plate, positions, xls_name):
-
+def create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name):
     workbook = xlwt.Workbook(xls_name)
-    sheet = workbook.add_sheet(plate.name)
-    for index, value in enumerate(positions):
-        sheet.write(0, index, value)
+    for fw_plate, rv_plate in zip(stk_fw_plates, stk_rv_plates):
+        for plate in [fw_plate, rv_plate]:
+            sheet = workbook.add_sheet(plate.name)
+            sheet.write(0, 'WellPosition', 'Name', 'Sequence', 'Notes')
+            for index, sl in enumerate(SampleLocation.objects.filter(plate=plate)):
+                well = sl.well
+                primer = sl.reagent
+                name = primer.name
+                sheet.write(index+1, 0,  well, primer, name)
     workbook.save(xls_name)

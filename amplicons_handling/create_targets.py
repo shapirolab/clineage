@@ -5,7 +5,7 @@ import csv
 import argparse
 from primer_design import primer3_design, bowtie2_design, sort_unique_primers
 from primers_insertion import create_primers_in_db
-from positioning import create_next_primers_plates, insertion_plates_to_db
+from positioning import create_next_primers_plates, insertion_plates_to_db, create_primer_order_file_xls
 from linapp.models import User, TargetEnrichmentType
 
 
@@ -186,7 +186,8 @@ if '__main__' == __name__:
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
     create_primer_pairs = create_primers_in_db(chosen_target_primers, te_type)
     plate_united, plate_fw, plate_rev = create_next_primers_plates(obj_list[0].chromosome.assembly)
-    insertion_plates_to_db(create_primer_pairs, xls_name, plate_united, plate_fw, plate_rev)
+    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(create_primer_pairs, plate_united, plate_fw, plate_rev)
+    create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 
 
 
