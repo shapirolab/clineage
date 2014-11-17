@@ -6,7 +6,7 @@ easy_install lxml==2.3
 
 echo ===============================
 echo Installing MySQL-python
-easy_install MySQL-python==1.2.5
+easy_install http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
 echo ===============================
 echo Installing NumPy
