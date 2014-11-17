@@ -6,17 +6,14 @@ import argparse
 from primer_design import primer3_design, bowtie2_design, sort_unique_primers
 from primers_insertion import create_primers_in_db
 from positioning import insertion_plates_to_db, create_primer_order_file_xls
-from linapp.models import User, TargetEnrichmentType
 
-
-if '__main__' == __name__:
-    from django.core.management import setup_environ
-    import sys
-    sys.path.append('/home/ofirr/CLineage/')
-    from clineage import settings
-    setup_environ(settings)
-
-from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
+from primers_insertion import get_or_create_sequence
+from django.core.management import setup_environ
+import sys
+sys.path.append('/home/mint/clineage')
+from clineage import settings
+setup_environ(settings)
+from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP, User, TargetEnrichmentType, Target, PrimerTail
 
 
 columns_case_dict = {
@@ -40,18 +37,6 @@ case_target_type = {
                     'SNP': TargetType.objects.get(name='SNP'),
                     'MicroSatellite': TargetType.objects.get(name='Microsatellite'),
 }
-
-
-def get_or_create_sequence(seq):
-    if not re.match('^[ACTGactg]+$', seq.strip()):
-        print 'unsupported characters in input sequence {}'.format(seq)
-        raise
-    try:
-        sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
-    except Sequence.DoesNotExist:
-        sequence = Sequence(length=len(seq), sequence=seq, hash=hashlib.md5(seq).hexdigest())
-        sequence.save()
-    return sequence
 
 
 def get_case_from_columns(columns):
@@ -155,7 +140,7 @@ def proccess_input_target_file(input_file):
         row_case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
             obj, created = process_row(row, row_case)
-            obj_list.appent(obj)
+            obj_list.append(obj)
             print "Target {} INFO: {}".format(obj, created)
     return obj_list
 
@@ -184,8 +169,9 @@ if '__main__' == __name__:
     primer3_name_file = primer3_design(obj_list, input_name, output_name)
     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
-    create_primer_pairs = create_primers_in_db(chosen_target_primers, te_type)
-    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(create_primer_pairs)
+    ptf, ptr = PrimerTail.objects.all()
+    te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
+    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
     create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 
 

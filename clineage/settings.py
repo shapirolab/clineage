@@ -12,6 +12,12 @@ ADMINS = (
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+CHROMOSOMES_PATH = '/home/mint/'
+
+PRIMER3_PATH = '/usr/bin/primer3_core'
+
+BOWTIE2_PATH = '/usr/bin/bowtie2'
+
 DOJANGO_DOJO_VERSION = "1.7.2"
 
 MANAGERS = ADMINS

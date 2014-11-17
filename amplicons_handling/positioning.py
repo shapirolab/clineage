@@ -60,9 +60,9 @@ def create_next_primers_plates(assembly):
     """
     stk_primers_type = PlateType.objects.get(friendly='Primers STK')
     paired_primers_type = PlateType.objects.get(friendly='Primer pairs')
-    mm9 = Assembly.objects.get(friendly_name='mm9')
-    hg19 = Assembly.objects.get(friendly_name='hg19')
-    if assembly == mm9:
+    #mm9 = Assembly.objects.get(friendly_name='mm9')
+    #hg19 = Assembly.objects.get(friendly_name='hg19')
+    if assembly == 'mm9':
         next_primers_plate_num = Plate.objects.filter(name__contains='United_MM_plate').count()+2
         name_united = 'United_MM_plate{}'.format(next_primers_plate_num)
         plate_united = Plate.objects.create(name=name_united, type=paired_primers_type)
@@ -70,7 +70,7 @@ def create_next_primers_plates(assembly):
         plate_fw = Plate.objects.create(name=name_fw, type=stk_primers_type)
         name_rev = 'MM_v2_Pl{}_Rev'.format(next_primers_plate_num)
         plate_rev = Plate.objects.create(name=name_rev, type=stk_primers_type)
-    elif assembly == hg19:
+    elif assembly == 'hg19':
         next_primers_plate_num = Plate.objects.filter(name__contains='United_hg19_Tails').count()+1
         name_united = 'United_hg19_Tails_plt{}'.format(next_primers_plate_num)
         plate_united = Plate.objects.create(name=name_united, type=paired_primers_type)
@@ -84,10 +84,11 @@ def create_next_primers_plates(assembly):
     return plate_united, plate_fw, plate_rev
 
 
-def insertion_plates_to_db(create_primer_pairs, assembly='hg19', plate_size=96):
+def insertion_plates_to_db(te_list, assembly='hg19', plate_size=96):
     pairs_plates, stk_fw_plates, stk_rv_plates = [], [], []
-    for plate_te in chunks(range(1, len(create_primer_pairs)), plate_size):
+    for plate_te in chunks(te_list, plate_size):
         pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
+	print pairs_plate
         pairs_plates.append(pairs_plate)
         stk_fw_plates.append(stk_fw_plate)
         stk_rv_plates.append(stk_rv_plate)
@@ -99,14 +100,20 @@ def insertion_plates_to_db(create_primer_pairs, assembly='hg19', plate_size=96):
 
 
 def create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name):
-    workbook = xlwt.Workbook(xls_name)
+    workbook = xlwt.Workbook()
     for fw_plate, rv_plate in zip(stk_fw_plates, stk_rv_plates):
         for plate in [fw_plate, rv_plate]:
             sheet = workbook.add_sheet(plate.name)
-            sheet.write(0, 'WellPosition', 'Name', 'Sequence', 'Notes')
+            sheet.write(0, 0, 'WellPosition')
+            sheet.write(0, 1, 'Name')
+            sheet.write(0, 2, 'Sequence')
+            sheet.write(0, 3, 'Notes')
             for index, sl in enumerate(SampleLocation.objects.filter(plate=plate)):
                 well = sl.well
                 primer = sl.reagent
                 name = primer.name
-                sheet.write(index+1, 0,  well, primer, name)
+                primer_sequence = primer.sequence.sequence
+                sheet.write(index+1, 0,  well)
+                sheet.write(index+1, 1,  name)
+                sheet.write(index+1, 2,  primer_sequence)
     workbook.save(xls_name)
