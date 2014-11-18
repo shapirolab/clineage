@@ -58,7 +58,7 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
                                       .filter(left__start_pos__lte=pr_e)\
                                       .filter(right__end_pos__gte=pf_s)
     if colliding_te:
-	print colliding_te
+    print colliding_te
         raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
 
@@ -69,7 +69,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
     create_primer_pairs = []
     te_list = []
     for target_id in chosen_target_primers:
-	print target_id
+    print target_id
         target = Target.objects.get(pk=target_id)
         primer_left_sequence = chosen_target_primers[target_id]['LEFT']
         primer_right_sequence = chosen_target_primers[target_id]['RIGHT']
@@ -79,7 +79,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
             print 'Unresolved primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
             continue
         except AmpliconCollisionError:
-	    print 'Colliding primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
+        print 'Colliding primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
             colliding_amplicons.append(target)
             continue
         left_primer_indexes, right_primer_indexes = primers_indexes_tuple
@@ -104,7 +104,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'sequence': pf_seq,
                                                   'tail': pf_tail,
                                                   })
-	print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
+    print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
         primer_rev, created_rv = Primer.objects.get_or_create(start_pos=pr_s,
                                         end_pos=pr_e,
                                         defaults={'name': target.name + '_rev',
@@ -115,18 +115,18 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'sequence': pr_seq,
                                                   'tail': pr_tail,
                                                   })
-	print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
+    print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         te_made, created = TargetEnrichment.objects.get_or_create(
-				    chromosome=target.chromosome,
-				    left=primer_fwd,
-				    right=primer_rev,
-				    defaults={
-				    'type': target_enrichment_type,
-				    'amplicon': target.chromosome.getdna(primer_fwd.start_pos, primer_rev.end_pos),
-				    'passed_validation': None,
-				    'validation_failure': None,
-				    'validation_date': None,
-				    'comment': None,
-				    })
-	te_list.append(te_made)
+                    chromosome=target.chromosome,
+                    left=primer_fwd,
+                    right=primer_rev,
+                    defaults={
+                    'type': target_enrichment_type,
+                    'amplicon': target.chromosome.getdna(primer_fwd.start_pos, primer_rev.end_pos),
+                    'passed_validation': None,
+                    'validation_failure': None,
+                    'validation_date': None,
+                    'comment': None,
+                    })
+    te_list.append(te_made)
     return te_list
