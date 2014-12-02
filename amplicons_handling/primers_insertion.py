@@ -69,7 +69,6 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
     create_primer_pairs = []
     te_list = []
     for target_id in chosen_target_primers:
-    print target_id
         target = Target.objects.get(pk=target_id)
         primer_left_sequence = chosen_target_primers[target_id]['LEFT']
         primer_right_sequence = chosen_target_primers[target_id]['RIGHT']
