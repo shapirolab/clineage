@@ -58,7 +58,7 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
                                       .filter(left__start_pos__lte=pr_e)\
                                       .filter(right__end_pos__gte=pf_s)
     if colliding_te:
-    print colliding_te
+        print colliding_te
         raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
 
