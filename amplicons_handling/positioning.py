@@ -88,7 +88,9 @@ def insertion_plates_to_db(te_list, assembly='hg19', plate_size=96):
     pairs_plates, stk_fw_plates, stk_rv_plates = [], [], []
     for plate_te in chunks(te_list, plate_size):
         pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
-	print pairs_plate
+        print pairs_plate
+        print stk_fw_plate
+        print stk_rv_plate
         pairs_plates.append(pairs_plate)
         stk_fw_plates.append(stk_fw_plate)
         stk_rv_plates.append(stk_rv_plate)
