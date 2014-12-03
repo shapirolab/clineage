@@ -332,7 +332,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
     referencevalue = models.ForeignKey(Sequence)
-
+    partner = models.ManyToManyField(User, null=True)
     # unique_together = (("chromosome", "start_pos"),)
 
     def get_referencevalue(self):

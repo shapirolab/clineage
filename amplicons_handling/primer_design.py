@@ -1,18 +1,11 @@
 __author__ = 'veronika'
-from linapp.models import Target
+
 import os
 import re
 import pysam
+from django.conf import settings
 from collections import defaultdict
 from collections import Counter
-
-
-# if '__main__' == __name__:
-#     from django.core.management import setup_environ
-#     import sys
-#     sys.path.append('/home/ofirr/CLineage/')
-#     from clineage import settings
-#     setup_environ(settings)
 
 
 def create_amplicons_for_primer3(target, margins):
@@ -28,7 +21,7 @@ def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, ma
                                     'PRIMER_MAX_SIZE=27\nPRIMER_PRODUCT_SIZE_RANGE=30-1000\nP3_FILE_FLAG=0\n'
                                     'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
                                     'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
-                                    'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n').format(primer_num_rerun)
+                                    'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n'.format(primer_num_rerun))
         for target in obj_list:
             amplicon = create_amplicons_for_primer3(target, margins)
             primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
@@ -39,13 +32,14 @@ def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, ma
                                                                                             seq_region))
 
     #Run the primer3 on the input
-    primer3_output = ("{}.txt".format(str(output_name)))
-    s = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core < {} > {}'.format(primer3_input,primer3_output)
+    primer3_output = ("{}_primer3.txt".format(str(output_name)))
+    s = '{} < {} > {}'.format(settings.PRIMER3_PATH, primer3_input, primer3_output)
     os.system(s)
     return primer3_output
 
 
 def parse_primer3_output(output_name):
+    print output_name
     fasta_output_file = open(output_name, 'rb')
     primer3_output = fasta_output_file.read()
     fasta_string = primer3_output.split('\n=\n')
@@ -69,17 +63,19 @@ def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
     target_primers = parse_primer3_output(output_name)
     out_string = ''
     for seq_id in target_primers.keys():
-        for primer_number in enumerate(target_primers[seq_id]['LEFT'].keys()):
+        print seq_id
+        for primer_number in target_primers[seq_id]['LEFT'].keys():
             out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['LEFT'][primer_number])
             out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['RIGHT'][primer_number])
         primer_data_check = '{}.fa'.format(str(input_fasta_file))
         primers_output = open(primer_data_check, 'w+')
         primers_output.write(out_string)
         primers_output.close()
-        sam_file = '{}.sam'.format(str(output_file))
-        s = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2 -k 2 {} -f -U {} -S {}'.format(bowtie2_index, primer_data_check, sam_file)
-        os.system(s)
-        return sam_file, primer_data_check, target_primers
+    sam_file = '{}.sam'.format(str(output_file))
+    s = '{] -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
+    os.system(s)
+    
+    return sam_file, primer_data_check, target_primers
 
 
 def primer_count_from_sam_file(sam_file):
@@ -120,13 +116,3 @@ def sort_unique_primers(sam_file, target_primers):
     return chosen_target_primers, discarded_targets
 
 
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("loci_names_file", help=".bed file name for generating primers",
-#                         type=str)
-#     parser.add_argument("ListFileName", help="prefix name for all the files that are generated",
-#                         type=str)
-#     args = parser.parse_args()
-#
-#     create_primers_for_new_targets(args.loci_names_file, args.ListFileName)
