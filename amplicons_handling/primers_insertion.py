@@ -127,5 +127,5 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                     'validation_date': None,
                     'comment': None,
                     })
-    te_list.append(te_made)
+        te_list.append(te_made)
     return te_list
