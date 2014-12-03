@@ -22,7 +22,7 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
     inputPlates = list(set(inputPlates))
     #first script is for wetting
     script = getScriptHeader()
-    script += 'LIST DDW_LIST\n'
+    script += 'LIST TE_LIST\n'
     done_wells = []
     for i, tup in enumerate(test_input):#now distributing all multiplexes from src to dst
         volume = MULTIPLEX_VOLUME
@@ -40,7 +40,7 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
     script += 'LABWARE ' + dest_plate_name + ' P2  \"96 Well PCR Plate\"\n'  # dest plate is allways in P2
     script += '############  SCRIPT SECTION ###############################\nSCRIPT\n'
     #distributing DDW into detination wells
-    script += 'DIST_REAGENT2 DDW '
+    script += 'DIST_REAGENT2 TE '
     done_wells = []
     for i, tup in enumerate(test_input):  # now distributing all multiplexes from src to dst
         platePos = 'P2'
@@ -50,7 +50,7 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
             done_wells.append(dstWell)
             if i < len(test_input) - 1:
                 script += ';'
-    script += ' '+'DDW_LIST  AUT_AIR  TIPTYPE:200\n'
+    script += ' '+'TE_LIST  AUT_AIR  TIPTYPE:200\n'
     script += '\nENDSCRIPT\n'
     print script
     for i in range(0, len(inputPlates)/len(allowedPlates) + 1):
