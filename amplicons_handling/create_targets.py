@@ -3,15 +3,17 @@ import re
 import hashlib
 import csv
 import argparse
+from primer_design import primer3_design, bowtie2_design, sort_unique_primers
+from primers_insertion import create_primers_in_db
+from positioning import insertion_plates_to_db, create_primer_order_file_xls
 
-if '__main__' == __name__:
-    from django.core.management import setup_environ
-    import sys
-    sys.path.append('/home/ofirr/CLineage/')
-    from clineage import settings
-    setup_environ(settings)
-
-from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP
+from primers_insertion import get_or_create_sequence
+from django.core.management import setup_environ
+import sys
+sys.path.append('/home/mint/clineage')
+from clineage import settings
+setup_environ(settings)
+from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP, User, TargetEnrichmentType, Target, PrimerTail
 
 
 columns_case_dict = {
@@ -19,7 +21,12 @@ columns_case_dict = {
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name'):'NoSec',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence'):'Plain',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'SNP'):'SNP',
-                    ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_length'):'MicroSatellite'
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_length'):'MicroSatellite',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner'):'Nameless',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name'):'NoSec',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence'):'Plain',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence', 'SNP'):'SNP',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_length'):'MicroSatellite'
                     }
 
 
@@ -30,18 +37,6 @@ case_target_type = {
                     'SNP': TargetType.objects.get(name='SNP'),
                     'MicroSatellite': TargetType.objects.get(name='Microsatellite'),
 }
-
-
-def get_or_create_sequence(seq):
-    if not re.match('^[ACTGactg]+$', seq.strip()):
-        print 'unsupported characters in input sequence {}'.format(seq)
-        raise
-    try:
-        sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
-    except Sequence.DoesNotExist:
-        sequence = Sequence(length=len(seq), sequence=seq, hash=hashlib.md5(seq).hexdigest())
-        sequence.save()
-    return sequence
 
 
 def get_case_from_columns(columns):
@@ -69,14 +64,23 @@ def parse_commons(row_dict):
     chrom = Chromosome.objects.get(name=chromosome_name, assembly=assem)
     start_pos = int(row_dict['Start'])
     end_pos = int(row_dict['End'])
-    return chrom, start_pos, end_pos
+    partner = None
+    if row_dict['Partner']:
+        try:
+            partner = User.objects.get(username=row_dict['Partner'])
+        except User.DoesNotExist:
+            #warning
+            pass
+    return chrom, start_pos, end_pos, partner
 
 
 def process_row(row_dict, case):
-    chrom, start_pos, end_pos = parse_commons(row_dict)
+    chrom, start_pos, end_pos, partner = parse_commons(row_dict)
     name = '{}_{}_{}'.format(chrom.name, start_pos, end_pos)
+
     sequence = get_or_create_sequence(chrom.getdna(start_pos, end_pos))
     tgtype = case_target_type[case]
+
     if case in ['NoSec', 'Plain', 'SNP', 'MicroSatellite']:
         name = row_dict['Name']
 
@@ -87,32 +91,88 @@ def process_row(row_dict, case):
     if case in ['SNP']:
         modified = row_dict['SNP']
         mutation = '{}>{}'.format(sequence.sequence, modified)
-        obj, created = SNP.objects.get_or_create(start_pos=start_pos, end_pos=end_pos,
-                                            defaults={'name': name, 'type': tgtype, 'chromosome': chrom, 'referencevalue': sequence, 'mutation':mutation, 'modified':modified})
+        obj, created = SNP.objects.get_or_create(
+            start_pos=start_pos, end_pos=end_pos,
+            defaults={'name': name,
+                      'type': tgtype,
+                      'chromosome': chrom,
+                      'referencevalue': sequence,
+                      'partner': partner,
+                      'mutation':mutation,
+                      'modified':modified}
+        )
         return obj, created
 
     if case in ['MicroSatellite']:
         repeat_type = row_dict['Repeat_Type']
         repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
         repeat_len = int(row_dict['Repeat_Length'])
-        obj, created = Microsatellite.objects.get_or_create(start_pos=start_pos, end_pos=end_pos,
-                                            defaults={'name':name, 'type':tgtype, 'chromosome':chr, 'referencevalue':sequence, 'repeat_unit_len':repeat_unit_length, 'repeat_unit_type':repeat_type, 'repeat_number':repeat_len})
+        obj, created = Microsatellite.objects.get_or_create(
+            start_pos=start_pos, end_pos=end_pos,
+            defaults={'name':name,
+                      'type':tgtype,
+                      'chromosome':chr,
+                      'referencevalue':sequence,
+                      'partner': partner,
+                      'repeat_unit_len':repeat_unit_length,
+                      'repeat_unit_type':repeat_type,
+                      'repeat_number':repeat_len}
+        )
         return obj, created
 
-    obj, created = Target.objects.get_or_create(start_pos=start_pos, end_pos=end_pos,
-                                            defaults={'name':name, 'type':tgtype, 'chromosome':chr, 'referencevalue':sequence})
+    obj, created = Target.objects.get_or_create(
+        start_pos=start_pos, end_pos=end_pos,
+        defaults={'name':name,
+                  'type':tgtype,
+                  'chromosome':chr,
+                  'referencevalue':sequence,
+                  'partner': partner}
+    )
     return obj, created
 
-if '__main__' == __name__:
-    parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
-    parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
-    args = parser.parse_args()
-    input_file = args.input_file
+
+def proccess_input_target_file(input_file):
+    obj_list = []
     with open(input_file, 'rb') as f:
         dialect = csv.Sniffer().sniff(f.read(1000))
         f.seek(0)
         rdr = csv.DictReader(f, dialect=dialect)
-        case = get_case_from_columns(rdr.fieldnames)
+        row_case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
-            obj, created = process_row(row, case)
-            print obj, created
+            obj, created = process_row(row, row_case)
+            obj_list.append(obj)
+            print "Target {} INFO: {}".format(obj, created)
+    return obj_list
+
+
+
+if '__main__' == __name__:
+    parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
+    parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
+    parser.add_argument('-n', '--name', type=str, dest='input_name', help='path for target table file')
+    parser.add_argument('-o', '--output', type=str, dest='output_name', help='output file name prefix for the ')
+    parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for target table file')
+    parser.add_argument('-t', '--tails', type=bool, dest='tails', help='primers have tails?')
+    args = parser.parse_args()
+    input_file = args.input_file
+    input_name = args.input_name
+    output_name = args.output_name
+    bowtie2_index = args.bowtie2_index
+    xls_name = ("PrimerOrder{}.xls".format(str(output_name)))
+    is_tails = args.tails
+    no_tails_te_type, tails_te_type = TargetEnrichmentType.objects.all()
+    if is_tails:
+        te_type = tails_te_type
+    else:
+        te_type = no_tails_te_type
+    obj_list = proccess_input_target_file(input_file)
+    primer3_name_file = primer3_design(obj_list, input_name, output_name)
+    sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
+    chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
+    ptf, ptr = PrimerTail.objects.all()
+    te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
+    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
+    create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
+
+
+
