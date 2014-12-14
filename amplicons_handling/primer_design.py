@@ -72,7 +72,7 @@ def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
         primers_output.write(out_string)
         primers_output.close()
     sam_file = '{}.sam'.format(str(output_file))
-    s = '{] -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
+    s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
     os.system(s)
     
     return sam_file, primer_data_check, target_primers

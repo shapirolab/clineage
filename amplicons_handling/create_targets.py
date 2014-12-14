@@ -70,7 +70,7 @@ def parse_commons(row_dict):
             partner = User.objects.get(username=row_dict['Partner'])
         except User.DoesNotExist:
             #warning
-            pass
+            partner = None
     return chrom, start_pos, end_pos, partner
 
 
@@ -97,10 +97,13 @@ def process_row(row_dict, case):
                       'type': tgtype,
                       'chromosome': chrom,
                       'referencevalue': sequence,
-                      'partner': partner,
                       'mutation':mutation,
                       'modified':modified}
         )
+        if partner in obj.partner.all():
+            return obj, created
+        obj.partner.add(partner)
+        obj.save()
         return obj, created
 
     if case in ['MicroSatellite']:
