@@ -1,0 +1,164 @@
+import glob
+import os
+import math
+import sys
+from frogress import bar as tqdm
+from scipy import stats
+from collections import Counter
+
+class Histogram(object):
+    def __init__(self, h, normalize=False, nsamples=None, trunc=False, cut_peak=False, trim_extremes=False):
+        if isinstance(h,list):
+            h = Counter({i+3:x for i,x in enumerate(h)})
+        if isinstance(h,dict):
+            h = Counter(h)
+        self._hist = h
+        self.clean_zero_entries()
+        if nsamples is not None:
+            self.nsamples = nsamples
+        else:
+            self.nsamples = sum(self.values())
+        if trim_extremes:
+            self.trim_extremes()
+        if normalize:
+            self.normalize()
+        if trunc:
+            self.truncate()
+        if normalize:
+            self.normalize()
+        if cut_peak:
+            self.cut_peak()
+        if normalize:
+            self.normalize()
+
+    # Cleaning
+    def clean_zero_entries(self):
+        for key in self.keys():
+            if self[key] == 0:
+                del self._hist[key]
+            
+            
+    def trim_extremes(self, p=0.5):
+        "Cleans extreme values over given percentage"
+        extr_items = int(self.nsamples*p) if self.nsamples*p > 1.0 else 0
+        self._hist = Counter(sorted(self.sample)[extr_items:-extr_items])
+            
+        
+    def truncate(self, p=.050):
+        "Cleans noise below p"
+        for k in self.keys():
+            if self[k]<p:
+                self.nsamples -= self[k]*self.nsamples
+                self[k] = 0
+
+    def cut_peak(self, n=1):
+        "Cleans anything with n zen zeros between it and the maximum"
+        keys = self.keys()
+        max_key = max([(self[k],k) for k in keys])[1]
+        max_ind = keys.index(max_key)
+        zeros_left = n
+        for k in keys[max_ind:]:
+            if not zeros_left:
+                self.nsamples -= self[k]*self.nsamples
+                self[k]=0
+            else:
+                if self[k]:
+                    zeros_left = n
+                else:
+                    zeros_left -= 1
+        zeros_left = n
+        for k in keys[max_ind::-1]:
+            if not zeros_left:
+                self.nsamples -= self[k]*self.nsamples
+                self[k]=0
+            else:
+                if self[k]:
+                    zeros_left = n
+                else:
+                    zeros_left -= 1
+
+    # Setters / Getters
+    def keys(self):
+        return sorted(self._hist.keys())
+
+    def values(self):
+         return [self._hist[k] for k in self.keys()]
+
+    def __getitem__(self, item):
+        return self._hist[item]
+
+    def __setitem__(self, item, value):
+        self._hist[item] = value
+
+    @property
+    def sample(self):
+        return [k for k in self.keys()
+                for i in xrange(int(self.nsamples*self[k]))]
+
+    # Operators
+    def normalize(self):
+        s = float(sum(self.values()))
+        if not s:
+            return
+        for k in self.keys():
+            self._hist[k] /= s
+
+    def __add__(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i+other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def __sub__(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i-other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def __mul__(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i*other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def __div__(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i/other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def __pow__(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i**other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+    
+    # Statistical operators
+    def mu(self):
+        return sum(k*self[k] for k in self.keys())
+    
+    def sig(self):
+        return math.sqrt(mu((self-mu(self))**2))
+    
+    def skew(self):
+        if not sig(self):
+            return 0
+        return mu(((self-mu(self))/sig(self))**3)
+    
+    # Repr
+    def __repr__(self):
+        N = sum(self.values())
+        if N<.1:
+            return "<Empty on [%s]>"%(', '.join('%.2f'%k for k in self.keys()))
+        return '\n'.join(('%.2f: %.2f'%(x,self[x])).ljust(20)[:20] + '|'
+        + '#'*int(50*self[x]/N+.5) for x in self.keys() if self[x])
+
+def mu(x):
+    return x.mu()
+
+
+def sig(x):
+    return x.sig()
+
+
+def skew(x):
+    return x.skew()
+
+
+def moment(hist, n=1):
+    return stats.moment(hist.sample, n)
