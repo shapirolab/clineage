@@ -11,7 +11,7 @@ env.hosts = [
 PROJ_DIR = os.path.abspath(os.path.dirname(__file__))
 CONF_DIR = os.path.abspath(os.path.join(PROJ_DIR, 'conf'))
 
-# env.user = "ofirr"
+env.user = "ofirr"
 env.gunicorn_port = 9000
 env.code_dir = '~/CLineage/'
 env.venv_dir = '~/.virtualenvs/cl/'

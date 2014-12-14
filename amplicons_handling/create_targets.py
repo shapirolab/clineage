@@ -70,7 +70,7 @@ def parse_commons(row_dict):
             partner = User.objects.get(username=row_dict['Partner'])
         except User.DoesNotExist:
             #warning
-            pass
+            partner = None
     return chrom, start_pos, end_pos, partner
 
 
