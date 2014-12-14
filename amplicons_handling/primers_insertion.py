@@ -95,24 +95,24 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
         TargetType.objects.get(name='Flank')
         primer_fwd, created_fw = Primer.objects.get_or_create(start_pos=pf_s,
                                         end_pos=pf_e,
+                                        tail=pf_tail,
+                                        chromosome=target.chromosome,
                                         defaults={'name': target.name + '_fwd',
                                                   'type': primer_type,
-                                                  'chromosome': target.chromosome,
                                                   'referencevalue': pf_refseq,
                                                   'strand': '+',
                                                   'sequence': pf_seq,
-                                                  'tail': pf_tail,
                                                   })
         print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
         primer_rev, created_rv = Primer.objects.get_or_create(start_pos=pr_s,
                                         end_pos=pr_e,
+                                        tail=pr_tail,
+                                        chromosome=target.chromosome,
                                         defaults={'name': target.name + '_rev',
                                                   'type': primer_type,
-                                                  'chromosome': target.chromosome,
                                                   'referencevalue': pr_refseq,
                                                   'strand': '-',
                                                   'sequence': pr_seq,
-                                                  'tail': pr_tail,
                                                   })
         print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         te_made, created = TargetEnrichment.objects.get_or_create(
