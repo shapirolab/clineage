@@ -1,0 +1,15 @@
+.idea/.name
+.idea/encodings.xml
+.idea/hist_calling.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+.idea/workspace.xml
+hise_input_file.tab
+hise_input_file.tab.gz
+make_diploidic_hist.py
+mini_hise_input_file.tab
+mini_hise_input_file.tab.gz
+sim_hists.15o.pickle
+*.pyc
