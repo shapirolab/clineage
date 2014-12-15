@@ -6,8 +6,17 @@ from frogress import bar as tqdm
 from scipy import stats
 from collections import Counter
 
+
+def get_lims(hist1, hist2):
+    li = min(min(hist1.keys()),min(hist2.keys()))
+    ri = max(max(hist1.keys()),max(hist2.keys())) + 1
+    if ri == li:
+        ri = li + 1
+    return li, ri
+
+
 class Histogram(object):
-    def __init__(self, h, normalize=False, nsamples=None, trunc=False, cut_peak=False, trim_extremes=False):
+    def __init__(self, h, normalize=False, nsamples=None, truncate=False, cut_peak=False, trim_extremes=False, **kwargs):
         if isinstance(h,list):
             h = Counter({i+3:x for i,x in enumerate(h)})
         if isinstance(h,dict):
@@ -22,7 +31,7 @@ class Histogram(object):
             self.trim_extremes()
         if normalize:
             self.normalize()
-        if trunc:
+        if truncate:
             self.truncate()
         if normalize:
             self.normalize()
@@ -106,7 +115,16 @@ class Histogram(object):
     def __add__(self, other):
         if isinstance(other, (int, long, float)):
             return Histogram({i+other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, Histogram):
+            self.normalize()
+            other.normalize()
+            return Histogram({k:self[k]+other[k] for k in range(*get_lims(self, other))}, normalize=True)
+
         raise TypeError()
+
+
+    def __radd__(self, other):
+        return self.__add__(other)
 
     def __sub__(self, other):
         if isinstance(other, (int, long, float)):
