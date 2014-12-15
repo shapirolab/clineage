@@ -43,12 +43,12 @@ def inflate_hist(hist, reads):
     # cv.CalcEMD2(a32,b32,cv.CV_DIST_L2)
 
 
-def match_cycles(hist, sim_hists, ms_len_for_probabilities, method='cor', reads=50, min_cycles=0, max_cycles=100):
+def match_cycles(hist, sim_hists, method='cor', reads=50, min_cycles=0, max_cycles=100, **kwargs):
     s = 9999
     c = 0
     best_sim_hist = None
     for cycles in range(min_cycles, max_cycles):
-        sim_hist = sim_hists[ms_len_for_probabilities][cycles]
+        sim_hist = sim_hists[cycles]
         score = pop_dist(hist, sim_hist, method=method, reads=reads)
         if score < s:
             s = score
@@ -57,16 +57,16 @@ def match_cycles(hist, sim_hists, ms_len_for_probabilities, method='cor', reads=
     return c, s, best_sim_hist
 
 
-def fit(ms_hist, sim_hists, method='cor' ,reads=50, min_cycles=0, max_cycles=100):
-    ml = np.median(ms_hist.sample)
-    out = []
-    for d in range(int(np.median(ms_hist.sample))-3, int(np.median(ms_hist.sample))+3):
-        normalized_shifted_reads_hist = normalize(shift_population(Counter(ms_hist.sample), -d))  
-        c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist, sim_hists, d, method=method ,reads=reads, min_cycles=min_cycles, max_cycles=max_cycles)
-        out.append([d, c, s, best_sim_hist])
-    locis = defaultdict(lambda: defaultdict(list))
-    res = out[0]
-    for r in out:
-        if r[2] < res[2]:
-            res = r
-    return res
+# def fit(ms_hist, sim_hists, method='cor' ,reads=50, min_cycles=0, max_cycles=100):
+#     ml = np.median(ms_hist.sample)
+#     out = []
+#     for d in range(int(np.median(ms_hist.sample))-3, int(np.median(ms_hist.sample))+3):
+#         normalized_shifted_reads_hist = normalize(shift_population(Counter(ms_hist.sample), -d))
+#         c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist, sim_hists, d, method=method,reads=reads, min_cycles=min_cycles, max_cycles=max_cycles)
+#         out.append([d, c, s, best_sim_hist])
+#     locis = defaultdict(lambda: defaultdict(list))
+#     res = out[0]
+#     for r in out:
+#         if r[2] < res[2]:
+#             res = r
+#     return res
