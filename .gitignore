@@ -13,3 +13,9 @@ mini_hise_input_file.tab
 mini_hise_input_file.tab.gz
 sim_hists.15o.pickle
 *.pyc
+order/__init__.pyc
+order/binomial_sim.pyc
+order/fitting.pyc
+order/hist.pyc
+order/histogram_utils.pyc
+order/preprocessing.pyc
