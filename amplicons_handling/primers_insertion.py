@@ -103,7 +103,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'strand': '+',
                                                   'sequence': pf_seq,
                                                   })
-        print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
+        # print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
         primer_rev, created_rv = Primer.objects.get_or_create(start_pos=pr_s,
                                         end_pos=pr_e,
                                         tail=pr_tail,
@@ -114,7 +114,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'strand': '-',
                                                   'sequence': pr_seq,
                                                   })
-        print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
+        # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
@@ -127,5 +127,6 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                     'validation_date': None,
                     'comment': None,
                     })
+        te_made.update_enriched_targets()
         te_list.append(te_made)
     return te_list
