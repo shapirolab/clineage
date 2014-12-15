@@ -1,25 +1,9 @@
-from collections import defaultdict
-from cloud.serialization.cloudpickle import loads, dumps
 import argparse
-
-from order.utils.output_formatters import generate_calling_file, generate_output_file, load_or_create_simulations_file
-
-
-def load_or_create_calling(callingfile):
-    try:
-        f = open(callingfile,'rb').read()
-        calling = loads(f)
-    except:
-        calling = defaultdict(lambda: defaultdict(dict))
-    return calling
-
-
-def save_calling_file(calling, callingfile):
-    try:
-        f = open(callingfile,'rb').read()
-    except:
-        with open(callingfile,'wb') as f:
-            f.write(dumps(calling))
+from order.calling import load_or_create_calling
+from order.utils.output_formatters import generate_calling_file, \
+    generate_output_file, \
+    load_or_create_simulations_file, \
+    save_calling_file
 
 
 if '__main__' == __name__:
@@ -38,6 +22,7 @@ if '__main__' == __name__:
     parser.add_argument('-v', '--verbose', type=bool, dest='verbose', default=False, help='prints additional calling information columns in the output table')
     parser.add_argument('-sf', '--simulationsfile', type=str, dest='simulationsfile', default='sim_hists.pickle', help='path of preprocessed simulations file')
     parser.add_argument('-cf', '--callingfile', type=str, dest='callingfile', default='calling.pickle', help='path of preprocessed calling file')
+    parser.add_argument('-sm', '--shiftmargins', type=int, dest='shiftmargins', default=15, help='number of attempted shifts to either side of the histogram median')
     
     args = parser.parse_args()
     normalize = args.normalize
@@ -50,26 +35,49 @@ if '__main__' == __name__:
     score_threshold = args.maxscore
     cycles_threshold = args.maxcycles
     min_cycles = args.mincycles
+    shift_margins = args.shiftmargins
     meth = args.method
     verbose = args.verbose
     SIMULATED_HISTS_PATH = args.simulationsfile
     SIGNALS_CALLING_PATH = args.callingfile
-    
-    sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH, cycles_threshold, normalize=True, truncate=False, cutpeak=False, trim_extremes=False)
+
+
+    sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
+                                                max_cycles=cycles_threshold,
+                                                up=lambda d: 0.00005*d**2 - 0.0009*d + 0.0036,
+                                                dw=lambda d: 0.00009*d**2 - 0.00003*d - 0.0013,
+                                                max_ms_length=60,
+                                                sample_depth=10000,
+                                                max_alleles=2,
+                                                normalize=True,
+                                                truncate=False,
+                                                cut_peak=False,
+                                                trim_extremes=False)
     calling = load_or_create_calling(SIGNALS_CALLING_PATH)
     
     calling = generate_calling_file(input_file,
-                          sim_hists,
-                          calling,
-                          method=meth, 
-                          reads_threshold=reads_threshold, 
-                          score_threshold=score_threshold, 
-                          min_cycles=min_cycles, 
-                          max_cycles=cycles_threshold, 
-                          normalize=normalize, 
-                          truncate=truncate, 
-                          cutpeak=cutpeak, 
-                          trim_extremes=trim_extremes
-                          )
+                                    sim_hists,
+                                    calling,
+                                    method=meth,
+                                    reads_threshold=reads_threshold,
+                                    score_threshold=score_threshold,
+                                    min_cycles=min_cycles,
+                                    max_cycles=cycles_threshold,
+                                    nsamples=None,
+                                    normalize=normalize,
+                                    truncate=truncate,
+                                    cut_peak=cutpeak,
+                                    trim_extremes=trim_extremes,
+                                    shift_margins=shift_margins,
+                                    max_distance_from_median=10,
+                                    max_alleles=2,
+                                    max_ms_length=60
+                                    )
+
     save_calling_file(calling, SIGNALS_CALLING_PATH)
-    generate_output_file(input_file, output_file, calling,reads_threshold=reads_threshold, score_threshold=score_threshold, verbose=verbose)
+    generate_output_file(input_file,
+                         output_file,
+                         calling,
+                         reads_threshold=reads_threshold,
+                         score_threshold=score_threshold,
+                         verbose=verbose)
