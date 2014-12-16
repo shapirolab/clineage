@@ -1,7 +1,7 @@
 __author__ = 'ofirr'
 import xlwt
 import xlrd
-from utils.wells import index2str
+from utils.wells import index2str, str2index
 from linapp.models import SampleLocation, Assembly, Plate, PlateType
 
 
@@ -21,15 +21,16 @@ def position_in_plates(targetenrichments_group,
                        pair_vol=50,
                        pair_conc=60,
                        stk_vol=100,
-                       stk_conc=100):
+                       stk_conc=100,
+                       first_well='A1'):
     """
     Positions up to 96 primer pairs in stk plates and mixed pairs.
     returns three lists of (SampleLocation, created) tuples for pair, fw, rv
     """
-    assert len(targetenrichments_group) <= plate_size
+    assert len(targetenrichments_group) <= plate_size + 1 - str2index(first_well)
     fw_positions, rv_positions, pairs_positions = [], [], []
     for i, te in enumerate(targetenrichments_group):
-        well = index2str(i+1)
+        well = index2str(str2index(first_well)+i)
         pair_location = SampleLocation.objects.get_or_create(
             plate=pairs_plate,
             well=well,
