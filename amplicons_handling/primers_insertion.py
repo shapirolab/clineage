@@ -9,6 +9,7 @@ from clineage import settings
 setup_environ(settings)
 from linapp.models import Target, TargetEnrichment, Primer, TargetType, Sequence
 from utils.SequenceManipulations import complement
+from frogress import bar
 
 
 def get_or_create_sequence(seq):
@@ -68,7 +69,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
     colliding_amplicons = []
     create_primer_pairs = []
     te_list = []
-    for target_id in chosen_target_primers:
+    for target_id in bar(chosen_target_primers):
         target = Target.objects.get(pk=target_id)
         primer_left_sequence = chosen_target_primers[target_id]['LEFT']
         primer_right_sequence = chosen_target_primers[target_id]['RIGHT']
