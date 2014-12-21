@@ -86,13 +86,13 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
         pf_s, pf_e = left_primer_indexes
         pr_s, pr_e = right_primer_indexes
         pf_refseq = get_or_create_sequence(primer_left_sequence)
-        pr_refseq = get_or_create_sequence(primer_right_sequence)
+        pr_refseq = get_or_create_sequence(complement(primer_right_sequence)[::-1])
         if pf_tail and pr_tail:
             pf_seq = get_or_create_sequence(pf_tail.tail+primer_left_sequence)
-            pr_seq = get_or_create_sequence(pr_tail.tail+complement(primer_right_sequence)[::-1])
+            pr_seq = get_or_create_sequence(pr_tail.tail+primer_right_sequence)
         else:
             pf_seq = get_or_create_sequence(primer_left_sequence)
-            pr_seq = get_or_create_sequence(complement(primer_right_sequence)[::-1])
+            pr_seq = get_or_create_sequence(primer_right_sequence)
         TargetType.objects.get(name='Flank')
         primer_fwd, created_fw = Primer.objects.get_or_create(start_pos=pf_s,
                                         end_pos=pf_e,
