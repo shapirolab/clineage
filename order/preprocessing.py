@@ -26,6 +26,24 @@ def generate_sim_hists(max_ms_length=60,
     return sim_hists
 
 
+def generate_sim_hists_dyn(max_ms_length=60,
+                           max_cycles=90,
+                           up=lambda x: 0.003,
+                           dw=lambda x: 0.022,
+                           sample_depth=10000,
+                           normalize=True,
+                           truncate=False,
+                           cut_peak=False,
+                           trim_extremes=False,
+                           **kwargs):
+    sim_hists = defaultdict(dict)
+    for d in tqdm(range(max_ms_length)):
+        for cycles in range(max_cycles):
+            dyn_hist = dyn_prob(cycles, d, up, dw)
+            dyn_hist.normalize()
+            sim_hists[d][cycles] = dyn_hist - d
+    return sim_hists
+
 
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     dup_sim_hist = defaultdict(lambda: defaultdict(dict))
