@@ -34,7 +34,6 @@ def call_multi_hist(hist,
         min_cycles=0,
         max_cycles=50,
         method='cor',
-        max_ms_length=60
     :param hist:
     :param dup_sim_hist:
     :param shift_margines:
@@ -52,22 +51,23 @@ def call_multi_hist(hist,
             normalized_shifted_reads_hist = h-measured_hist_shift
             possible_hist_seeds = combinations(
                 range(
-                    max(0, measured_hist_shift-max_distance_from_median),
+                    max(5, measured_hist_shift-max_distance_from_median),
                     min(measured_hist_shift+max_distance_from_median, max_ms_length)
                 ), allele_number
             )
             for seeds in possible_hist_seeds:
-                c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
-                                                   dup_sim_hist[frozenset(seeds)],
-                                                   reads=h.nsamples,
-                                                   **kwargs)
-                if best_score > s:
-                    best_score = s
-                    res = {
-                          'shifts': seeds,
-                          'cycle': c,
-                          'score': s,
-                          'median': med,
-                          'reads': h.nsamples
-                          }
+                if measured_hist_shift == int(np.mean(seeds)):
+                    c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
+                                                       dup_sim_hist[frozenset(seeds)],
+                                                       reads=h.nsamples,
+                                                       **kwargs)
+                    if best_score > s:
+                        best_score = s
+                        res = {
+                              'shifts': seeds,
+                              'cycle': c,
+                              'score': s,
+                              'median': med,
+                              'reads': h.nsamples
+                              }
     return res
