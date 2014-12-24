@@ -102,7 +102,6 @@ def generate_calling_file(input_file,
     :param kwargs:
     :return:
     """
-
     with gzip.open(input_file, 'rb') as f:
         rdr = csv.reader(f, dialect='excel-tab')
         header_row = rdr.next()
@@ -119,9 +118,11 @@ def generate_calling_file(input_file,
 def generate_output_file(input_file,
                          output_file,
                          calling,
+                         sim_hists,
                          reads_threshold=50,
                          score_threshold=0.006,
-                         verbose=False):
+                         verbose=False,
+                         **kwargs):
     """
           shift_margins=3
           nsamples=None
@@ -139,6 +140,7 @@ def generate_output_file(input_file,
     :param kwargs:
     :return:
     """
+    print kwargs
     with gzip.open(output_file, 'wb') as out:
         owrtr = csv.writer(out, dialect='excel-tab')
         with gzip.open(input_file, 'rb') as f:
@@ -153,23 +155,23 @@ def generate_output_file(input_file,
                 row_hist = parse_spaces_hist(row[2], header_row[2])
                 loc = row[0]
                 cell = row[1]
-                if sum(row_hist.values()) < reads_threshold:
+                if sum(row_hist.values()) < reads_threshold or not calling[loc][cell]:
                     row.append('[]')
                 else:
-                    vc = get_or_create_call(row_hist, loc, cell, calling)
+                    vc = get_or_create_call(row_hist, loc, cell, calling, sim_hists, score_threshold=score_threshold, **kwargs)
                     if vc['score'] > score_threshold:
                         row.append('[]')
                     else:
                         if verbose:
-                            row.extend([vc['shift'], vc['cycle'], vc['score'], vc['median'], vc['reads']])
+                            row.extend([str(vc['shifts']), vc['cycle'], vc['score'], vc['median'], vc['reads']])
                         else:
-                            row.append(vc['shift'])
+                            row.append(vc['shifts'])
                 owrtr.writerow(row)
 
 
 def save_calling_file(calling, callingfile):
     try:
-        f = open(callingfile,'rb').read()
+        f = open(callingfile, 'rb').read()
     except:
-        with open(callingfile,'wb') as f:
+        with open(callingfile, 'wb') as f:
             f.write(dumps(calling))
