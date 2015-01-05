@@ -20,3 +20,4 @@ order/hist.pyc
 order/histogram_utils.pyc
 order/preprocessing.pyc
 cor.hise_f30.calling.pickle
+.idea/*
