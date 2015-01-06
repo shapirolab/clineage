@@ -48,6 +48,7 @@ def get_or_create_call(hist,
 
 def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
+        method='bin',
         max_cycles=90,
         up=lambda d:0.00005*d**2 - 0.0009*d + 0.0036,
         dw=lambda d:0.00009*d**2 - 0.00003*d - 0.0013,
@@ -64,7 +65,7 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
     :return:
     """
     try:
-        f = open(simulationsfile,'rb').read()
+        f = open(simulationsfile, 'rb').read()
         print 'loading existing simulations'
         sim_hists = loads(f)
     except:
