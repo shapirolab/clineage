@@ -1,7 +1,5 @@
-import numpy as np
-from histogram_utils import normalize, shift_population
-from collections import Counter, defaultdict
 from hist_dist import pop_dist
+#import numpy as np
 #from cv2 import *
 
 
@@ -55,18 +53,3 @@ def match_cycles(hist, sim_hists, method='cor', reads=50, min_cycles=0, max_cycl
             c = cycles
             best_sim_hist = sim_hist
     return c, s, best_sim_hist
-
-
-# def fit(ms_hist, sim_hists, method='cor' ,reads=50, min_cycles=0, max_cycles=100):
-#     ml = np.median(ms_hist.sample)
-#     out = []
-#     for d in range(int(np.median(ms_hist.sample))-3, int(np.median(ms_hist.sample))+3):
-#         normalized_shifted_reads_hist = normalize(shift_population(Counter(ms_hist.sample), -d))
-#         c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist, sim_hists, d, method=method,reads=reads, min_cycles=min_cycles, max_cycles=max_cycles)
-#         out.append([d, c, s, best_sim_hist])
-#     locis = defaultdict(lambda: defaultdict(list))
-#     res = out[0]
-#     for r in out:
-#         if r[2] < res[2]:
-#             res = r
-#     return res
