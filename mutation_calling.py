@@ -23,7 +23,7 @@ if '__main__' == __name__:
     parser.add_argument('-sf', '--simulationsfile', type=str, dest='simulationsfile', default='sim_hists.pickle', help='path of preprocessed simulations file')
     parser.add_argument('-cf', '--callingfile', type=str, dest='callingfile', default='calling.pickle', help='path of preprocessed calling file')
     parser.add_argument('-sm', '--shiftmargins', type=int, dest='shiftmargins', default=15, help='number of attempted shifts to either side of the histogram median')
-
+    parser.add_argument('-bd', '--simulationmethod', type=str, dest='simulationmethod', default='bin', help='method of MS histogram simulation')
     #TODO: document those:
     parser.add_argument('-ma', '--maxalleles', type=int, dest='max_alleles', default=2, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-sd', '--sampledepth', type=int, dest='sample_depth', default=10000, help='number of attempted shifts to either side of the histogram median')
@@ -49,11 +49,13 @@ if '__main__' == __name__:
     max_distance_from_median = args.max_distance_from_median
     meth = args.method
     verbose = args.verbose
+    sim_method = args.simulationmethod
     SIMULATED_HISTS_PATH = args.simulationsfile
     SIGNALS_CALLING_PATH = args.callingfile
 
 
     sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
+                                                method=sim_method,
                                                 max_cycles=cycles_threshold,
                                                 up=lambda d: 0.00005*d**2 - 0.0009*d + 0.0036,
                                                 dw=lambda d: 0.00009*d**2 - 0.00003*d - 0.0013,
