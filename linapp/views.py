@@ -334,6 +334,7 @@ class CellCreate(JsonFormMixin, CreateView):
 
 class CellUpdate(JsonFormMixin, UpdateView):
     model = Cell
+    template_name_suffix = '_update_form'
 
 class CellDetail(DetailView):
     model = Cell
