@@ -4,6 +4,15 @@ from emd import emd
 from math import sqrt, log10
 from hist import get_lims
 
+
+def inflate_hist(hist, reads):
+    pop = []
+    for k in hist.keys():
+        for i in range(int(hist[k]*reads)):
+            pop.append(k)
+    return pop
+
+
 def pop_dist_sub(hist1, hist2):
     """
     Calculate the distance between two populations in the form of histograms
