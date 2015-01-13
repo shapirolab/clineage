@@ -5,46 +5,7 @@ from cloud.serialization.cloudpickle import loads, dumps
 
 from parsers import parse_spaces_hist
 from order.preprocessing import generate_sim_hists_of_up_to_k_alleles
-from order.calling import call_multi_hist
-
-
-def get_or_create_call(hist,
-                       loc,
-                       cell,
-                       calling,
-                       sim_hists,
-                       **kwargs):
-    """
-        max_alleles=2,
-        max_distance_from_median=30,
-
-        min_cycles=0,
-        max_cycles=100,
-        method='cor',
-        shift_margins=15,
-        max_ms_length=60
-        normalize=True,
-        nsamples=None,
-        truncate=False,
-        cut_peak=False,
-        trim_extremes=False
-    :param hist:
-    :param loc:
-    :param cell:
-    :param calling:
-    :param sim_hists:
-    :return:
-    """
-    if calling[loc][cell]:
-        return calling[loc][cell]
-    if calling and sim_hists:
-        calling[loc][cell] = call_multi_hist(hist,
-                                             sim_hists,
-                                             **kwargs)
-        return calling[loc][cell]
-    print 'ERROR: No existing calling and not enough parameters to call from scratch'
-    raise
-
+from order.calling import generate_hist_calls
 
 def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
@@ -78,14 +39,14 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
 
 
 def generate_calling_file(input_file,
-                          sim_hists, 
+                          sim_hists,
                           calling,
-                          reads_threshold=50,
                           **kwargs):
     """
+        workers=1,
         max_alleles=2,
         max_distance_from_median=30,
-
+        reads_threshold=50
         shift_margins=3
         nsamples=None
         method='cor',
@@ -103,45 +64,23 @@ def generate_calling_file(input_file,
     :param kwargs:
     :return:
     """
-    with gzip.open(input_file, 'rb') as f:
-        rdr = csv.reader(f, dialect='excel-tab')
-        header_row = rdr.next()
-        for row in bar(rdr):
-            row_hist = parse_spaces_hist(row[2], header_row[2])
-            loc = row[0]
-            cell = row[1]
-            if sum(row_hist.values()) < reads_threshold:
-                continue
-            vc = get_or_create_call(row_hist, loc, cell, calling, sim_hists, **kwargs)
+    for loc, cell, row_hist, res in generate_hist_calls(input_file, sim_hists, calling, **kwargs):
+        calling[loc][cell] = res
     return calling
 
 
 def generate_output_file(input_file,
                          output_file,
                          calling,
-                         sim_hists,
                          reads_threshold=50,
                          score_threshold=0.006,
-                         verbose=False,
-                         **kwargs):
+                         verbose=False):
     """
-          shift_margins=3
-          nsamples=None
-          method='cor',
-          score_threshold=0.006,
-          min_cycles=0,
-          max_cycles=80,
-          normalize=True,
-          truncate=False,
-          cut_peak=False,
-          trim_extremes=False):
     :param input_file:
     :param sim_hists:
     :param calling:
-    :param kwargs:
     :return:
     """
-    print kwargs
     with gzip.open(output_file, 'wb') as out:
         owrtr = csv.writer(out, dialect='excel-tab')
         with gzip.open(input_file, 'rb') as f:
@@ -153,13 +92,12 @@ def generate_output_file(input_file,
                 header_row.append('shift')
             owrtr.writerow(header_row)
             for row in bar(rdr):
-                row_hist = parse_spaces_hist(row[2], header_row[2])
                 loc = row[0]
                 cell = row[1]
-                if sum(row_hist.values()) < reads_threshold or not calling[loc][cell]:
+                if not calling[loc][cell] or calling[loc][cell]['reads'] < reads_threshold:
                     row.append('[]')
                 else:
-                    vc = get_or_create_call(row_hist, loc, cell, calling, sim_hists, score_threshold=score_threshold, **kwargs)
+                    vc = calling[loc][cell]
                     if vc['score'] > score_threshold:
                         row.append('[]')
                     else:
