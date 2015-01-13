@@ -6,36 +6,61 @@ from itertools import combinations
 import numpy as np
 
 
-def generate_sim_hists_bin(max_ms_length=60,
-                       max_cycles=90,
-                       up=lambda x: 0.003,
-                       dw=lambda x: 0.022,
-                       sample_depth=10000,
-                       normalize=True,
-                       truncate=False,
-                       cut_peak=False,
-                       trim_extremes=False,
-                       **kwargs):
-    sim_hists = defaultdict(dict)
-    for d in tqdm(range(max_ms_length)):
-        for cycles in range(max_cycles):
-            up_p = up(d)
-            dw_p = dw(d)
-            z = sim(cycles, up_p, dw_p)
-            sim_hists[d][cycles] = Histogram(Counter(z.rand(sample_depth)), normalize=normalize, nsamples=sample_depth, truncate=truncate, cut_peak=cut_peak, trim_extremes=trim_extremes)
-    return sim_hists
+def generate_bin_hist(d,
+                  cycles,
+                  up=lambda x: 0.003,
+                  dw=lambda x: 0.022,
+                  sample_depth=10000,
+                  normalize=True,
+                  truncate=False,
+                  cut_peak=False,
+                  trim_extremes=False,
+                  **kwargs):
+    up_p = up(d)
+    dw_p = dw(d)
+    z = sim(cycles, up_p, dw_p)
+    return Histogram(
+        Counter(z.rand(sample_depth)),
+        normalize=normalize,
+        nsamples=sample_depth,
+        truncate=truncate,
+        cut_peak=cut_peak,
+        trim_extremes=trim_extremes
+    )
 
 
-def generate_sim_hists_dyn(max_ms_length=60,
+def generate_dyn_hist(d,
+                  cycles,
+                  up=lambda x: 0.003,
+                  dw=lambda x: 0.022,
+                  sample_depth=10000,
+                  normalize=True,
+                  truncate=False,
+                  cut_peak=False,
+                  trim_extremes=False,
+                  **kwargs):
+    dyn_hist = dyn_prob(cycles, d, up, dw)
+    dyn_hist.normalize()
+    return dyn_hist - d
+
+
+def get_method(method):
+    if method == 'bin':
+        return generate_bin_hist
+    if method == 'dyn':
+        return generate_dyn_hist
+    return
+
+
+def generate_sim_hists(max_ms_length=60,
                            max_cycles=90,
-                           up=lambda x: 0.003,
-                           dw=lambda x: 0.022):
+                           method='bin',
+                           **kwargs):
+    generate_hist = get_method(method)
     sim_hists = defaultdict(dict)
     for d in tqdm(range(max_ms_length)):
         for cycles in range(max_cycles):
-            dyn_hist = dyn_prob(cycles, d, up, dw)
-            dyn_hist.normalize()
-            sim_hists[d][cycles] = dyn_hist - d
+            sim_hists[d][cycles] = generate_hist(d, cycles, **kwargs)
     return sim_hists
 
 
@@ -52,21 +77,16 @@ def generate_sim_hists(method='bin',
                        **kwargs):
     """
     """
-    if method == 'bin':
-        return generate_sim_hists_bin(max_ms_length=max_ms_length,
-                       max_cycles=max_cycles,
-                       up=up,
-                       dw=dw,
-                       sample_depth=sample_depth,
-                       normalize=normalize,
-                       truncate=truncate,
-                       cut_peak=cut_peak,
-                       trim_extremes=trim_extremes)
-    if method == 'dyn':
-        return generate_sim_hists_dyn(max_ms_length=max_ms_length,
-                                      max_cycles=max_cycles,
-                                      up=up,
-                                      dw=dw)
+    return generate_sim_hists(method=method,
+                              max_ms_length=max_ms_length,
+                              max_cycles=max_cycles,
+                              up=up,
+                              dw=dw,
+                              sample_depth=sample_depth,
+                              normalize=normalize,
+                              truncate=truncate,
+                              cut_peak=cut_peak,
+                              trim_extremes=trim_extremes)
 
 
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
