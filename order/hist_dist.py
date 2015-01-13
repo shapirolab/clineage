@@ -102,6 +102,10 @@ def pop_dist_kl(hist1, hist2):
     return (pop_dist_klp(hist1, hist2) + pop_dist_klp(hist2, hist1))/float(2)
 
 
+def prob(hist_sample, hist_distribution):
+    return -sum([log10(hist_distribution[bin])*hist_sample[bin] for bin in hist_sample])
+
+
 def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
     """
     Calculate the distance between two populations in the form of histograms
@@ -123,5 +127,7 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
         return pop_dist_chisq(hist1, hist2)
     if method == 'kl':
         return pop_dist_kl(hist1, hist2)
+    if method == 'pr':
+        return prob(hist1, hist2)
     print 'unknown method'
     raise
