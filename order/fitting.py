@@ -3,13 +3,6 @@ from hist_dist import pop_dist
 #from cv2 import *
 
 
-def inflate_hist(hist, reads):
-    pop = []
-    for k in hist.keys():
-        for i in range(int(hist[k]*reads)):
-            pop.append(k)
-    return pop
-
 # def convert_to_cv():
     # a = np.zeros((5,2))
     # for i in range(0,5):
