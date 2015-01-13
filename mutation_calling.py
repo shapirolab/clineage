@@ -24,13 +24,13 @@ if '__main__' == __name__:
     parser.add_argument('-cf', '--callingfile', type=str, dest='callingfile', default='calling.pickle', help='path of preprocessed calling file')
     parser.add_argument('-sm', '--shiftmargins', type=int, dest='shiftmargins', default=15, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-bd', '--simulationmethod', type=str, dest='simulationmethod', default='bin', help='method of MS histogram simulation')
+    parser.add_argument('-w', '--workers', type=int, dest='workers', default=1, help='Number of working processes')
     #TODO: document those:
     parser.add_argument('-ma', '--maxalleles', type=int, dest='max_alleles', default=2, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-sd', '--sampledepth', type=int, dest='sample_depth', default=10000, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-ml', '--maxmslength', type=int, dest='max_ms_length', default=60, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-md', '--mediandistance', type=int, dest='max_distance_from_median', default=10, help='number of attempted shifts to either side of the histogram median')
 
-    
     args = parser.parse_args()
     normalize = args.normalize
     truncate = args.truncate
@@ -52,7 +52,7 @@ if '__main__' == __name__:
     sim_method = args.simulationmethod
     SIMULATED_HISTS_PATH = args.simulationsfile
     SIGNALS_CALLING_PATH = args.callingfile
-
+    workers = args.workers
 
     sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
                                                 method=sim_method,
@@ -66,13 +66,14 @@ if '__main__' == __name__:
                                                 truncate=truncate,
                                                 cut_peak=cutpeak,
                                                 trim_extremes=trim_extremes)
+
     calling = load_or_create_calling(SIGNALS_CALLING_PATH)
-    
     calling = generate_calling_file(input_file,
                                     sim_hists,
                                     calling,
                                     method=meth,
                                     reads_threshold=reads_threshold,
+                                    workers=workers,
                                     score_threshold=score_threshold,
                                     min_cycles=min_cycles,
                                     max_cycles=cycles_threshold,
@@ -86,24 +87,10 @@ if '__main__' == __name__:
                                     max_alleles=max_alleles,
                                     max_ms_length=max_ms_length
                                     )
-
     save_calling_file(calling, SIGNALS_CALLING_PATH)
     generate_output_file(input_file,
                          output_file,
                          calling,
-                         sim_hists,
-                         method=meth,
                          reads_threshold=reads_threshold,
                          score_threshold=score_threshold,
-                         min_cycles=min_cycles,
-                         max_cycles=cycles_threshold,
-                         nsamples=None,
-                         normalize=normalize,
-                         truncate=truncate,
-                         cut_peak=cutpeak,
-                         trim_extremes=trim_extremes,
-                         shift_margins=shift_margins,
-                         max_distance_from_median=max_distance_from_median,
-                         max_alleles=max_alleles,
-                         max_ms_length=max_ms_length,
                          verbose=verbose)
