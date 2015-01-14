@@ -3,7 +3,6 @@ import gzip
 from frogress import bar
 from cloud.serialization.cloudpickle import loads, dumps
 
-from parsers import parse_spaces_hist
 from order.preprocessing import generate_sim_hists_of_up_to_k_alleles
 from order.calling import generate_hist_calls
 
