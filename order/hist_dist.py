@@ -112,7 +112,12 @@ def pop_dist_kl(hist1, hist2):
 
 
 def prob(hist_sample, hist_distribution):
-    return -sum([log10(hist_distribution[bin])*hist_sample[bin] for bin in hist_sample])
+    li, ri = get_lims(hist_sample, hist_distribution)
+    def zero_case_log(input_number):
+        if input_number >= 0.001:
+            return log10(input_number)
+        return -3
+    return -sum([zero_case_log(hist_distribution[bin])*hist_sample[bin] for bin in range(li, ri)])
 
 
 def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
