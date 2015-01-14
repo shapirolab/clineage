@@ -64,31 +64,6 @@ def generate_sim_hists(max_ms_length=60,
     return sim_hists
 
 
-def generate_sim_hists(method='bin',
-                       max_ms_length=60,
-                       max_cycles=90,
-                       up=lambda x: 0.003,
-                       dw=lambda x: 0.022,
-                       sample_depth=10000,
-                       normalize=True,
-                       truncate=False,
-                       cut_peak=False,
-                       trim_extremes=False,
-                       **kwargs):
-    """
-    """
-    return generate_sim_hists(method=method,
-                              max_ms_length=max_ms_length,
-                              max_cycles=max_cycles,
-                              up=up,
-                              dw=dw,
-                              sample_depth=sample_depth,
-                              normalize=normalize,
-                              truncate=truncate,
-                              cut_peak=cut_peak,
-                              trim_extremes=trim_extremes)
-
-
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     dup_sim_hist = defaultdict(lambda: defaultdict(dict))
     for allele_number in range(1, max_alleles+1):
