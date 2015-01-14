@@ -49,7 +49,8 @@ def get_method(method):
         return generate_bin_hist
     if method == 'dyn':
         return generate_dyn_hist
-    return
+    print 'unknown method'
+    raise
 
 
 def generate_sim_hists(max_ms_length=60,
@@ -97,3 +98,18 @@ def generate_sim_hists_of_up_to_k_alleles(**kwargs):
     sim_hists = generate_sim_hists(**kwargs)
     dup_sim_hist = generate_duplicate_sim_hist(sim_hists, kwargs['max_alleles'])
     return dup_sim_hist
+
+
+def flatten_index(sim_hists):
+    flat_dict = {}
+    for root in sim_hists:
+        for cycle in sim_hists[root]:
+            flat_dict[(root, cycle)] = sim_hists[root][cycle]
+    return flat_dict
+
+
+def inflate_index(sim_hists):
+    inflated_dict = defaultdict(lambda: defaultdict(dict))
+    for root, cycle in sim_hists:
+        inflated_dict[root][cycle] = sim_hists[(root, cycle)]
+    return inflated_dict
