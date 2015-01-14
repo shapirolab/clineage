@@ -1,16 +1,19 @@
 import sys
 import numpy as np
-
+from order.utils.parsers import uncalled_inputs
+from preprocessing import flatten_index, inflate_index
 from fitting import match_cycles
 from hist import Histogram
 from itertools import combinations
 from collections import defaultdict
-from cloud.serialization.cloudpickle import loads
+from pickle import loads
+import concurrent.futures
+from itertools import repeat, izip, imap
 
 
 def load_or_create_calling(callingfile):
     try:
-        f = open(callingfile,'rb').read()
+        f = open(callingfile, 'rb').read()
         calling = loads(f)
     except:
         calling = defaultdict(lambda: defaultdict(dict))
@@ -18,13 +21,13 @@ def load_or_create_calling(callingfile):
 
 
 def call_multi_hist(hist,
-                  dup_sim_hist,
-                  shift_margins=15,
-                  max_alleles=2,
-                  max_distance_from_median=30,
-                  max_ms_length=60,
-                  **kwargs
-                  ):
+                    dup_sim_hist,
+                    shift_margins=15,
+                    max_alleles=2,
+                    max_distance_from_median=30,
+                    max_ms_length=60,
+                    **kwargs
+                    ):
     """
         normalize=True,
         nsamples=None,
@@ -42,7 +45,7 @@ def call_multi_hist(hist,
     :param kwargs:
     :return:
     """
-    h = Histogram(hist, **kwargs) #normalize, nsamples, truncate, cut_peak, trim_extremes
+    h = Histogram(hist, **kwargs)  # normalize, nsamples, truncate, cut_peak, trim_extremes
     med = int(np.median(h.sample))
     best_score = sys.maxint
     res = {}
@@ -64,10 +67,61 @@ def call_multi_hist(hist,
                     if best_score > s:
                         best_score = s
                         res = {
-                              'shifts': seeds,
-                              'cycle': c,
-                              'score': s,
-                              'median': med,
-                              'reads': h.nsamples
-                              }
+                            'shifts': seeds,
+                            'cycle': c,
+                            'score': s,
+                            'median': med,
+                            'reads': h.nsamples
+                            }
     return res
+
+
+def helper(tup):
+    input_tup, extras = tup
+    loc, cell, row_hist = input_tup
+    flat_sim_hists, kwargs = extras
+    sim_hists = inflate_index(flat_sim_hists)
+    # print 'working on loc: {} , cell: ...{}'.format(loc, cell[-15:])
+    res = call_multi_hist(row_hist, sim_hists, **kwargs)
+    return loc, cell, row_hist, res
+
+
+def generate_hist_calls(input_file,
+                        sim_hists,
+                        calling,
+                        reads_threshold=50,
+                        workers=1,
+                        **kwargs):
+    """
+        max_alleles=2,
+        max_distance_from_median=30,
+
+        shift_margins=3
+        nsamples=None
+        method='cor',
+        score_threshold=0.006,
+        min_cycles=0,
+        max_cycles=80,
+        max_ms_length=60
+        normalize=True,
+        truncate=False,
+        cut_peak=False,
+        trim_extremes=False):
+    :param input_file:
+    :param sim_hists:
+    :param calling:
+    :param kwargs:
+    :return:
+    """
+    flat_sim_hists = flatten_index(sim_hists)
+    print 'starting {} auxiliary process'.format(workers)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
+        for result in executor.map(helper,
+                                   izip(
+                                       uncalled_inputs(input_file,
+                                                       calling,
+                                                       reads_threshold=reads_threshold),
+                                       repeat((flat_sim_hists, kwargs))
+                                   )):
+            loc, cell, row_hist, res = result
+            yield loc, cell, row_hist, res
