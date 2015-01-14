@@ -29,6 +29,7 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
         f = open(simulationsfile, 'rb').read()
         print 'loading existing simulations'
         sim_hists = loads(f)
+        print 'done loading existing simulations'
     except:
         print 'generating simulated histograms'
         sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
@@ -64,7 +65,7 @@ def generate_calling_file(input_file,
     :param kwargs:
     :return:
     """
-    for loc, cell, row_hist, res in generate_hist_calls(input_file, sim_hists, calling, **kwargs):
+    for loc, cell, row_hist, res in bar(generate_hist_calls(input_file, sim_hists, calling, **kwargs)):
         calling[loc][cell] = res
     return calling
 
