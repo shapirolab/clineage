@@ -1,10 +1,11 @@
-PaCal==1.5
+numpy==1.9.1
+scipy==0.15.1
+sympy==0.7.6
+PaCal==1.5.1
 cloud==2.8.5
-emd==0.0.0
 frogress==0.9.1
 futures==2.2.0
-ipython==2.0.0
-numpy==1.8.1
-scipy==0.14.0
-sympy==0.7.5
-virtualenv==1.11.6
+ipython==2.3.1
+virtualenv==12.0.5
+wsgiref==0.1.2
+-e git+https://github.com/andreasjansson/python-emd
