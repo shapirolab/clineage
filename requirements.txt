@@ -8,4 +8,4 @@ futures==2.2.0
 ipython==2.3.1
 virtualenv==12.0.5
 wsgiref==0.1.2
--e git+https://github.com/andreasjansson/python-emd
+-e git+https://github.com/andreasjansson/python-emd#egg=python-emd
