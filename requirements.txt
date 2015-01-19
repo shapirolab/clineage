@@ -1,0 +1,10 @@
+PaCal==1.5
+cloud==2.8.5
+emd==0.0.0
+frogress==0.9.1
+futures==2.2.0
+ipython==2.0.0
+numpy==1.8.1
+scipy==0.14.0
+sympy==0.7.5
+virtualenv==1.11.6
