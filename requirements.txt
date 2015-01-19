@@ -3,9 +3,16 @@ scipy==0.15.1
 sympy==0.7.6
 PaCal==1.5.1
 cloud==2.8.5
+-e git+https://github.com/andreasjansson/python-emd@2acd0416a864512d0229d49f388169338d4563de#egg=emd-master
 frogress==0.9.1
 futures==2.2.0
 ipython==2.3.1
+matplotlib==1.4.2
+mock==1.0.1
+nose==1.3.4
+pyparsing==2.0.3
+python-dateutil==2.4.0
+pytz==2014.10
+six==1.9.0
 virtualenv==12.0.5
 wsgiref==0.1.2
--e git+https://github.com/andreasjansson/python-emd#egg=python-emd
