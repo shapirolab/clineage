@@ -39,7 +39,15 @@ def generate_dyn_hist(d,
                   cut_peak=False,
                   trim_extremes=False,
                   **kwargs):
-    dyn_hist = dyn_prob(cycles, d, up, dw)
+    dyn_hist = dyn_prob(cycles,
+                        d,
+                        up,
+                        dw,
+                        nsamples=sample_depth,
+                        normalize=normalize,
+                        truncate=truncate,
+                        cut_peak=cut_peak,
+                        trim_extremes=trim_extremes)
     dyn_hist.normalize()
     return dyn_hist - d
 
@@ -53,15 +61,19 @@ def get_method(method):
     raise
 
 
+def generate_hist(d, cycles, method, **kwargs):
+    generate_method_hist = get_method(method)
+    return generate_method_hist(d, cycles, **kwargs)
+
+
 def generate_sim_hists(max_ms_length=60,
-                           max_cycles=90,
-                           method='bin',
-                           **kwargs):
-    generate_hist = get_method(method)
+                       max_cycles=90,
+                       method='bin',
+                       **kwargs):
     sim_hists = defaultdict(dict)
     for d in tqdm(range(max_ms_length)):
         for cycles in range(max_cycles):
-            sim_hists[d][cycles] = generate_hist(d, cycles, **kwargs)
+            sim_hists[d][cycles] = generate_hist(d, cycles, method, **kwargs)
     return sim_hists
 
 
