@@ -22,6 +22,15 @@ def read_synthetic_data(filename='hist_by_ms_len_as_0_sum.tab', normalize=False,
     return hist_object_per_length_per_cycle
 
 
+def read_transposed_synthetic_data(filename='hist_by_ms_len_as_0_sum.tab', normalize=False, nsamples=None, trunc=False, cut_peak=False):
+    hist_per_length_per_cycle = read_synthetic_data(filename)
+    trans_hist_per_length_per_cycle = defaultdict(lambda: defaultdict(list))
+    for ms_len in hist_per_length_per_cycle:
+        for cycle in hist_per_length_per_cycle[ms_len]:
+            trans_hist_per_length_per_cycle[ms_len][cycle] = hist_per_length_per_cycle[ms_len][cycle] - ms_len
+    return trans_hist_per_length_per_cycle
+
+
 def get_hists_pairs_by_len(hist_per_length_per_cycle):
     hist_pairs = []
     for ms_len in [5, 10, 15, 20, 25, 30]:
@@ -32,4 +41,4 @@ def get_hists_pairs_by_len(hist_per_length_per_cycle):
 
 
 def get_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab'):
-    return get_hists_pairs_by_len(read_synthetic_data(filename))
+    return get_hists_pairs_by_len(read_transposed_synthetic_data(filename))
