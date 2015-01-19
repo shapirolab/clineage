@@ -4,7 +4,7 @@ from frogress import bar as tqdm
 from order.hist import Histogram
 from itertools import combinations
 import numpy as np
-
+from optimize_probs import dyn_mat_model
 
 def generate_bin_hist(d,
                   cycles,
@@ -52,11 +52,33 @@ def generate_dyn_hist(d,
     return dyn_hist - d
 
 
+def generate_mat_hist(d,
+                  cycles,
+                  up=lambda x: 0.003,
+                  dw=lambda x: 0.022,
+                  sample_depth=10000,
+                  normalize=True,
+                  truncate=False,
+                  cut_peak=False,
+                  trim_extremes=False,
+                  **kwargs):
+    values = dyn_mat_model(up, dw, d, cycles)
+    h = Histogram({i: values[i] for i in range(100)},
+               nsamples=sample_depth,
+               normalize=normalize,
+               truncate=truncate,
+               cut_peak=cut_peak,
+               trim_extremes=trim_extremes)
+    h.truncate(p=0.0001)
+    return h
+
 def get_method(method):
     if method == 'bin':
         return generate_bin_hist
     if method == 'dyn':
         return generate_dyn_hist
+    if method == 'mat':
+        return generate_mat_hist
     print 'unknown method'
     raise
 
