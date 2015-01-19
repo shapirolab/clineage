@@ -7,7 +7,7 @@ def markovian_matrix(fu, fd, n=100):
     return matrix([[fd(0)+fs(0),fu(0)] + [0]*(n-2)] + 
                   [[0]*(i-1) + [fd(i), fs(i), fu(i)] + [0]*(n-i-2)
                     for i in xrange(1,n-1)] + 
-                  [[0]*(n-2) + [fd(n), fs(n)+fu(n)]]).transpose()
+                  [[0]*(n-2) + [fd(n), fs(n)+fu(n)]])
 
 def get_probs_n(mat, n):
     return [mat[n,i] for i in xrange(mat.shape[0])]
