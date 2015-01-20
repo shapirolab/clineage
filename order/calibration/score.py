@@ -19,7 +19,7 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
 
-def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair):
+def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair, distance_measure='cor', **kwargs):
     """
 
     :param msmodel: (up, dw, method)
@@ -30,6 +30,6 @@ def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair):
     cycles_26, cycles_47 = cycles_pair
     score = 0.0
     for syn_len, syn_hist_26, syn_hist_47 in syn_hist_list:
-        score += distance_from_model(syn_len, syn_hist_26, cycles_26, msmodel, distance_measure='cor')
-        score += distance_from_model(syn_len, syn_hist_47, cycles_47, msmodel, distance_measure='cor')
+        score += distance_from_model(syn_len, syn_hist_26, cycles_26, msmodel, distance_measure=distance_measure, **kwargs)
+        score += distance_from_model(syn_len, syn_hist_47, cycles_47, msmodel, distance_measure=distance_measure, **kwargs)
     return score

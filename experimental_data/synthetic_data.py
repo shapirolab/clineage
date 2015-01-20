@@ -41,4 +41,4 @@ def get_hists_pairs_by_len(hist_per_length_per_cycle):
 
 
 def get_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab'):
-    return get_hists_pairs_by_len(read_transposed_synthetic_data(filename))
+    return get_hists_pairs_by_len(read_synthetic_data(filename))

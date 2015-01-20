@@ -48,6 +48,7 @@ def generate_dyn_hist(d,
                         truncate=truncate,
                         cut_peak=cut_peak,
                         trim_extremes=trim_extremes)
+    dyn_hist.truncate(p=0.0001)
     dyn_hist.normalize()
     return dyn_hist - d
 
@@ -70,7 +71,8 @@ def generate_mat_hist(d,
                cut_peak=cut_peak,
                trim_extremes=trim_extremes)
     h.truncate(p=0.0001)
-    return h
+    h.normalize()
+    return h - d
 
 def get_method(method):
     if method == 'bin':
