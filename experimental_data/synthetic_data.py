@@ -30,22 +30,22 @@ def transpose_hist_objects(hist_per_length_per_cycle):
     return trans_hist_per_length_per_cycle
 
 
-def get_hists_pairs_by_len(hist_per_length_per_cycle, length=[5, 10, 15, 20, 25, 30]):
+def get_hists_pairs_by_len(hist_per_length_per_cycle, lengths=[5, 10, 15, 20, 25, 30]):
     hist_pairs = []
-    for ms_len in length:
+    for ms_len in lengths:
         syn_hist_26 = hist_per_length_per_cycle[ms_len][26]
         syn_hist_47 = hist_per_length_per_cycle[ms_len][47]
         hist_pairs.append((ms_len, syn_hist_26, syn_hist_47))
     return hist_pairs
 
 
-def get_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab', normalize=False, nsamples=None, trunc=False, cut_peak=False, length=[5, 10, 15, 20, 25, 30]):
+def get_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab', normalize=False, nsamples=None, trunc=False, cut_peak=False, lengths=[5, 10, 15, 20, 25, 30]):
     hist_per_length_per_cycle = read_synthetic_data_raw(filename=filename)
     hist_object_per_length_per_cycle = to_hist_objects(hist_per_length_per_cycle, normalize=normalize, nsamples=nsamples, trunc=trunc, cut_peak=cut_peak)
     return get_hists_pairs_by_len(hist_object_per_length_per_cycle, lengths=lengths)
 
 
-def get_transposed_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab', normalize=False, nsamples=None, trunc=False, cut_peak=False, length=[5, 10, 15, 20, 25, 30]):
+def get_transposed_hists_pairs(filename='hist_by_ms_len_as_0_sum.tab', normalize=False, nsamples=None, trunc=False, cut_peak=False, lengths=[5, 10, 15, 20, 25, 30]):
     hist_per_length_per_cycle = read_synthetic_data_raw(filename=filename)
     hist_object_per_length_per_cycle = to_hist_objects(hist_per_length_per_cycle, normalize=normalize, nsamples=nsamples, trunc=trunc, cut_peak=cut_peak)
     trans_hist_per_length_per_cycle = transpose_hist_objects(hist_object_per_length_per_cycle)
