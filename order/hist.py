@@ -13,7 +13,7 @@ def get_lims(hist1, hist2):
     ri = max(max(hist1.keys()),max(hist2.keys())) + 1
     if ri == li:
         ri = li + 1
-    return li, ri
+    return int(li), int(ri)
 
 
 
