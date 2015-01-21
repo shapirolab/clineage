@@ -106,7 +106,7 @@ def generate_mat_hist(d,
 
 def get_method(method):
     if method == 'bin':
-        return generate_bin_hist
+        return generate_bin_hist_pure
     if method == 'dyn':
         return generate_dyn_hist
     if method == 'mat':
