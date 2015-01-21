@@ -30,7 +30,7 @@ def test_score_single(up_x3, up_x2, up_x, up_c, dw_x3, dw_x2, dw_x, dw_c, ms_len
 
 def moddiff(d='con'):
     diffs = []
-    for i in range(100):
+    for i in bar(range(100)):
         diffs.append(test_score_single(0, 0.00005,  -0.0009, 0.0036, 0, 0.00009, -0.00003, -0.0013, 15, method='mat', cycles_pair=(11,38), distance_measure=d, sample_depth=1000000) - test_score_single(0, 0.00005,  -0.0009, 0.0036, 0, 0.00009, -0.00003, -0.0013, 15, method='bin', cycles_pair=(11,38), distance_measure=d, sample_depth=1000000))
     return diffs
 
