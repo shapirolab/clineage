@@ -21,7 +21,7 @@ def generate_bin_hist_pure(d,
     dw_p = dw(d)
     z = sim(cycles, up_p, dw_p)
     zpdf = z.get_piecewise_pdf()
-    return Histogram(
+    h = Histogram(
         Counter(
             {i: zpdf.findSegment(i).f for i in zpdf.getBreaks()}
         ),
@@ -31,6 +31,9 @@ def generate_bin_hist_pure(d,
         cut_peak=cut_peak,
         trim_extremes=trim_extremes
     )
+    h.truncate(p=0.0001)
+    h.normalize()
+    return h
 
 
 def generate_bin_hist(d,
