@@ -147,6 +147,11 @@ class Histogram(object):
     def __sub__(self, other):
         if isinstance(other, (int, long, float)):
             return Histogram({i-other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, Histogram):
+            self.normalize()
+            other.normalize()
+            return Histogram({k:self[k]-other[k] for k in range(*get_lims(self, other))}, normalize=True)
+
         raise TypeError()
 
     def __mul__(self, other):
