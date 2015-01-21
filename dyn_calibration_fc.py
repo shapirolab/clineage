@@ -5,8 +5,9 @@ from multiprocessing import Pool
 from time import sleep, time
 
 import numpy
-from experimental_data.synthetic_data import get_hists_pairs
+from experimental_data.synthetic_data import get_hists_pairs, get_transposed_hists_pairs
 from order.calibration.score import distance_from_model
+
 
 
 def doWork(input_tuple):
@@ -15,7 +16,7 @@ def doWork(input_tuple):
     def mes(up, dw):
         score = 0.0
         for syn_len, syn_hist_26, syn_hist_47 in hist_pairs:
-            msmodel = (up, dw, 'mat')
+            msmodel = (up, dw, 'bin')
             score += distance_from_model(syn_len, syn_hist_26, cycles_26, msmodel, distance_measure='con')
             score += distance_from_model(syn_len, syn_hist_47, cycles_47, msmodel, distance_measure='con')
         return score
@@ -34,7 +35,7 @@ def doWork(input_tuple):
 
 
 def inputs_generator():
-    hist_pairs = get_hists_pairs(filename='experimental_data/hist_by_ms_len_as_0_sum.tab')
+    hist_pairs = get_transposed_hists_pairs(filename='experimental_data/hist_by_ms_len_as_0_sum.tab')
     alg = 'con'
     optimizer_method = "L-BFGS-B"
     # optimizer_method = "Nelder-Mead"

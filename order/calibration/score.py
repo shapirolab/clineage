@@ -2,7 +2,7 @@ from ..preprocessing import generate_hist
 from ..hist_dist import pop_dist
 
 
-def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='cor', **kwargs):
+def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='con', **kwargs):
     """
 
     :param syn_len:
@@ -15,11 +15,11 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     up, dw, method = msmodel
     model_hist = generate_hist(syn_len, cycles, method, up=up, dw=dw, **kwargs)
     for h in [model_hist, syn_hist]:
-        h.normalize()
+        h.sq_normalize()
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
 
-def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair, distance_measure='cor', **kwargs):
+def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair, distance_measure='con', **kwargs):
     """
 
     :param msmodel: (up, dw, method)
