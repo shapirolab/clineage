@@ -6,16 +6,43 @@ from itertools import combinations
 import numpy as np
 from optimize_probs import dyn_mat_model
 
+
+def generate_bin_hist_pure(d,
+                           cycles,
+                           up=lambda x: 0.003,
+                           dw=lambda x: 0.022,
+                           sample_depth=10000,
+                           normalize=False,
+                           truncate=False,
+                           cut_peak=False,
+                           trim_extremes=False,
+                           **kwargs):
+    up_p = up(d)
+    dw_p = dw(d)
+    z = sim(cycles, up_p, dw_p)
+    zpdf = z.get_piecewise_pdf()
+    return Histogram(
+        Counter(
+            {i: zpdf.findSegment(i) for i in zpdf.getBreaks()}
+        ),
+        normalize=normalize,
+        nsamples=sample_depth,
+        truncate=truncate,
+        cut_peak=cut_peak,
+        trim_extremes=trim_extremes
+    )
+
+
 def generate_bin_hist(d,
-                  cycles,
-                  up=lambda x: 0.003,
-                  dw=lambda x: 0.022,
-                  sample_depth=10000,
-                  normalize=True,
-                  truncate=False,
-                  cut_peak=False,
-                  trim_extremes=False,
-                  **kwargs):
+                      cycles,
+                      up=lambda x: 0.003,
+                      dw=lambda x: 0.022,
+                      sample_depth=10000,
+                      normalize=True,
+                      truncate=False,
+                      cut_peak=False,
+                      trim_extremes=False,
+                      **kwargs):
     up_p = up(d)
     dw_p = dw(d)
     z = sim(cycles, up_p, dw_p)
@@ -30,15 +57,15 @@ def generate_bin_hist(d,
 
 
 def generate_dyn_hist(d,
-                  cycles,
-                  up=lambda x: 0.003,
-                  dw=lambda x: 0.022,
-                  sample_depth=10000,
-                  normalize=True,
-                  truncate=False,
-                  cut_peak=False,
-                  trim_extremes=False,
-                  **kwargs):
+                      cycles,
+                      up=lambda x: 0.003,
+                      dw=lambda x: 0.022,
+                      sample_depth=10000,
+                      normalize=True,
+                      truncate=False,
+                      cut_peak=False,
+                      trim_extremes=False,
+                      **kwargs):
     dyn_hist = dyn_prob(cycles,
                         d,
                         up,
@@ -54,15 +81,15 @@ def generate_dyn_hist(d,
 
 
 def generate_mat_hist(d,
-                  cycles,
-                  up=lambda x: 0.003,
-                  dw=lambda x: 0.022,
-                  sample_depth=10000,
-                  normalize=True,
-                  truncate=False,
-                  cut_peak=False,
-                  trim_extremes=False,
-                  **kwargs):
+                      cycles,
+                      up=lambda x: 0.003,
+                      dw=lambda x: 0.022,
+                      sample_depth=10000,
+                      normalize=True,
+                      truncate=False,
+                      cut_peak=False,
+                      trim_extremes=False,
+                      **kwargs):
     values = dyn_mat_model(up, dw, d, cycles)
     h = Histogram({i: values[i] for i in range(100)},
                nsamples=sample_depth,
