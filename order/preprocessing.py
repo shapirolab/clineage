@@ -23,7 +23,7 @@ def generate_bin_hist_pure(d,
     zpdf = z.get_piecewise_pdf()
     return Histogram(
         Counter(
-            {i: zpdf.findSegment(i) for i in zpdf.getBreaks()}
+            {i: zpdf.findSegment(i).f for i in zpdf.getBreaks()}
         ),
         normalize=normalize,
         nsamples=sample_depth,
