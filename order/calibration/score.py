@@ -1,5 +1,7 @@
 from ..preprocessing import generate_hist
 from ..hist_dist import pop_dist
+from scipy import optimize
+import numpy
 
 
 def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='con', **kwargs):
@@ -36,16 +38,16 @@ def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair, dist
 
 
 def optimize_across_lengths(input_tuple):
-    alg, optimizer_method, hist_pairs, cycles_tup, bounds, initial_guess, iterations, optimizer_options = input_tuple
+    alg, sim, optimizer_method, hist_pairs, cycles_tup, bounds, initial_guess, iterations, optimizer_options = input_tuple
     def nmes(x):
         assert len(x) % 2 == 0
         up_params = list(x)[:len(x)/2]
         dw_params = list(x)[len(x)/2:]
         up = numpy.poly1d(up_params)
         dw = numpy.poly1d(dw_params)
-        msmodel = (up, dw, optimizer_method)
+        msmodel = (up, dw, sim)
         return distance_from_model_across_lengths(msmodel, hist_pairs, cycles_tup, distance_measure=alg)
 
     minimizer_kwargs = dict(method=optimizer_method, bounds=bounds, options=optimizer_options)
     res = optimize.basinhopping(nmes, initial_guess, minimizer_kwargs=minimizer_kwargs, niter=iterations)
-    return res
+    return alg, optimizer_method, cycles_tup, [hp[0] for hp in hist_pairs], res
