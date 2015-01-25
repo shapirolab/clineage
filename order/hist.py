@@ -29,7 +29,6 @@ class Histogram(object):
         if isinstance(h,dict):
             h = Counter(h)
         self._hist = h
-        self.clean_zero_entries()
         if nsamples is not None:
             self.nsamples = nsamples
         else:
@@ -46,7 +45,8 @@ class Histogram(object):
             self.cut_peak()
         if normalize:
             self.normalize()
-
+        self.clean_zero_entries()
+    
     # Cleaning
     def clean_zero_entries(self):
         for key in self.keys():
