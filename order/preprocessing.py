@@ -135,6 +135,8 @@ def generate_mat_hist(d,
     return h - d
 
 def get_method(method):
+    if method == 'bon':
+        return generate_bin_hist_pure_optimized
     if method == 'bin':
         return generate_bin_hist_pure
     if method == 'dyn':
