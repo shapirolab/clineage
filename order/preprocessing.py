@@ -5,6 +5,33 @@ from order.hist import Histogram
 from itertools import combinations
 import numpy as np
 from optimize_probs import dyn_mat_model
+from scipy.stats import binom
+
+
+def generate_bin_hist_pure_optimized(d,
+                           cycles,
+                           up=lambda x: 0.003,
+                           dw=lambda x: 0.022,
+                           margines = 20
+                           sample_depth=10000,
+                           normalize=False,
+                           truncate=False,
+                           cut_peak=False,
+                           trim_extremes=False,
+                           **kwargs):
+    n = np.convolve(binom.pmf(range(margines), cycles, up(d)), binom.pmf(range(margines), cycles, dw(d))[::-1])
+    nd = {i:n[i] for i in range(margines*2-1)}
+    nh = Histogram(nd, 
+                   normalize=normalize,
+                   nsamples=sample_depth,
+                   truncate=truncate,
+                   cut_peak=cut_peak,
+                   trim_extremes=trim_extremes
+                   ) - (margines - 1)
+    nh.truncate(p=0.0001)
+    nh.normalize()
+    nh.clean_zero_entries()
+    return h
 
 
 def generate_bin_hist_pure(d,
@@ -33,6 +60,7 @@ def generate_bin_hist_pure(d,
     )
     h.truncate(p=0.0001)
     h.normalize()
+    h.clean_zero_entries()
     return h
 
 
@@ -80,6 +108,7 @@ def generate_dyn_hist(d,
                         trim_extremes=trim_extremes)
     dyn_hist.truncate(p=0.0001)
     dyn_hist.normalize()
+    dyn_hist.clean_zero_entries()
     return dyn_hist - d
 
 
@@ -102,6 +131,7 @@ def generate_mat_hist(d,
                trim_extremes=trim_extremes)
     h.truncate(p=0.0001)
     h.normalize()
+    h.clean_zero_entries()
     return h - d
 
 def get_method(method):
