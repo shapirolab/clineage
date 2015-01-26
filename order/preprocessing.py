@@ -12,26 +12,35 @@ def generate_bin_hist_pure_optimized(d,
                            cycles,
                            up=lambda x: 0.003,
                            dw=lambda x: 0.022,
-                           margines = 20
+                           margines = 20,
                            sample_depth=10000,
                            normalize=False,
                            truncate=False,
                            cut_peak=False,
                            trim_extremes=False,
                            **kwargs):
-    n = np.convolve(binom.pmf(range(margines), cycles, up(d)), binom.pmf(range(margines), cycles, dw(d))[::-1])
-    nd = {i:n[i] for i in range(margines*2-1)}
-    nh = Histogram(nd, 
+    
+    upb = binom(cycles, min(max(0, up(d)),1.0))
+    dwb = binom(cycles, min(max(0, dw(d)),1.0))
+    max_mean = max(upb.mean(), dwb.mean())
+    try:
+        bin_margines = int(round(max_mean)) + margines
+    except:
+        print up(d), dw(d), d, cycles, upb.mean(), dwb.mean()
+        raise
+    n = np.convolve(upb.pmf(range(bin_margines)), dwb.pmf(range(bin_margines))[::-1])
+    nd = {i:n[i] for i in range(bin_margines*2-1)}
+    nh = Histogram(nd,
                    normalize=normalize,
                    nsamples=sample_depth,
                    truncate=truncate,
                    cut_peak=cut_peak,
                    trim_extremes=trim_extremes
-                   ) - (margines - 1)
+                   ) - (bin_margines - 1)
     nh.truncate(p=0.0001)
     nh.normalize()
     nh.clean_zero_entries()
-    return h
+    return nh
 
 
 def generate_bin_hist_pure(d,
