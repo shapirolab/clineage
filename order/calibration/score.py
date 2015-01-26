@@ -18,6 +18,9 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     model_hist = generate_hist(syn_len, cycles, method, up=up, dw=dw, **kwargs)
     for h in [model_hist, syn_hist]:
         h.sq_normalize()
+        if len(h.keys()) == 0:
+            print h
+            raise
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
 
@@ -50,4 +53,4 @@ def optimize_across_lengths(input_tuple):
 
     minimizer_kwargs = dict(method=optimizer_method, bounds=bounds, options=optimizer_options)
     res = optimize.basinhopping(nmes, initial_guess, minimizer_kwargs=minimizer_kwargs, niter=iterations)
-    return alg, optimizer_method, cycles_tup, [hp[0] for hp in hist_pairs], res
+    return alg, sim, optimizer_method, cycles_tup, [hp[0] for hp in hist_pairs], res
