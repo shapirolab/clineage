@@ -114,11 +114,12 @@ class Histogram(object):
 
     # Operators
     def normalize(self):
-        s = float(sum(self.values()))
-        if not s:
-            return
-        for k in self.keys():
-            self._hist[k] /= s
+        self.sq_normalize()
+        # s = float(sum(self.values()))
+        # if not s:
+            # return
+        # for k in self.keys():
+            # self._hist[k] /= s
     
     
     def sq_normalize(self, axis=-1, order=2):
