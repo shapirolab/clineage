@@ -1,12 +1,5 @@
-import pacal
 from collections import defaultdict
 from order.hist import Histogram
-
-
-def sim(g, up, dw):
-    x = pacal.BinomialDistr(g, up)
-    y = pacal.BinomialDistr(g, dw)
-    return x-y
 
 
 def update_probs(cycle, up, dw, probs):

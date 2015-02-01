@@ -2,8 +2,6 @@ import glob
 import os
 import math
 import sys
-from frogress import bar as tqdm
-from scipy import stats
 import numpy as np
 from collections import Counter
 
@@ -199,7 +197,3 @@ def sig(x):
 
 def skew(x):
     return x.skew()
-
-
-def moment(hist, n=1):
-    return stats.moment(hist.sample, n)
