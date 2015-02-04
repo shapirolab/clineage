@@ -22,6 +22,6 @@ def update_probs(cycle, up, dw, probs):
     return update_probs(cycle-1, up, dw, Histogram(new_probs, normalize=False, nsamples=1, truncate=False, cut_peak=False, trim_extremes=False) + probs)
         
     
-def dyn_prob(cycle, d, up, dw):
-    hist = Histogram({d:1.0}, normalize=False, nsamples=1, truncate=False, cut_peak=False, trim_extremes=False)
+def dyn_prob(cycle, d, up, dw, normalize=False, nsamples=1, truncate=False, cut_peak=False, trim_extremes=False):
+    hist = Histogram({d:1.0}, normalize=normalize, nsamples=1, truncate=truncate, cut_peak=cut_peak, trim_extremes=trim_extremes)
     return update_probs(cycle, up, dw, hist)

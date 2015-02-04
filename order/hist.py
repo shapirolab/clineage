@@ -4,6 +4,7 @@ import math
 import sys
 from frogress import bar as tqdm
 from scipy import stats
+import numpy as np
 from collections import Counter
 
 
@@ -12,7 +13,13 @@ def get_lims(hist1, hist2):
     ri = max(max(hist1.keys()),max(hist2.keys())) + 1
     if ri == li:
         ri = li + 1
-    return li, ri
+    return int(li), int(ri)
+
+
+def vnormalized(a, axis=-1, order=2):
+    l2 = np.atleast_1d(np.linalg.norm(a, order, axis))
+    l2[l2==0] = 1
+    return a / np.expand_dims(l2, axis)
 
 
 class Histogram(object):
@@ -22,7 +29,6 @@ class Histogram(object):
         if isinstance(h,dict):
             h = Counter(h)
         self._hist = h
-        self.clean_zero_entries()
         if nsamples is not None:
             self.nsamples = nsamples
         else:
@@ -39,7 +45,8 @@ class Histogram(object):
             self.cut_peak()
         if normalize:
             self.normalize()
-
+        self.clean_zero_entries()
+    
     # Cleaning
     def clean_zero_entries(self):
         for key in self.keys():
@@ -60,6 +67,7 @@ class Histogram(object):
                 self.nsamples -= self[k]*self.nsamples
                 self[k] = 0
 
+                
     def cut_peak(self, n=1):
         "Cleans anything with n zen zeros between it and the maximum"
         keys = self.keys()
@@ -106,12 +114,23 @@ class Histogram(object):
 
     # Operators
     def normalize(self):
-        s = float(sum(self.values()))
-        if not s:
-            return
-        for k in self.keys():
-            self._hist[k] /= s
-
+        self.sq_normalize()
+        # s = float(sum(self.values()))
+        # if not s:
+            # return
+        # for k in self.keys():
+            # self._hist[k] /= s
+    
+    
+    def sq_normalize(self, axis=-1, order=2):
+        tuples_list = self._hist.items()
+        keys = [t[0] for t in tuples_list]
+        values = [t[1] for t in tuples_list]
+        nvalues = vnormalized(values)[0]
+        self._hist = Counter({k: v for k,v in zip(keys, nvalues)})
+        
+    
+    
     def __add__(self, other):
         if isinstance(other, (int, long, float)):
             return Histogram({i+other:self[i] for i in self.keys()}, nsamples=self.nsamples)
@@ -129,6 +148,11 @@ class Histogram(object):
     def __sub__(self, other):
         if isinstance(other, (int, long, float)):
             return Histogram({i-other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, Histogram):
+            self.normalize()
+            other.normalize()
+            return Histogram({k:self[k]-other[k] for k in range(*get_lims(self, other))}, normalize=True)
+
         raise TypeError()
 
     def __mul__(self, other):
