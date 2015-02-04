@@ -59,8 +59,6 @@ if '__main__' == __name__:
                                                 max_cycles=cycles_threshold,
                                                 up=lambda d: 0.0*d**2 + 3.63701136e-04*d - 3.49979857e-03,
                                                 dw=lambda d: 2.57826596e-05*d**2 + 1.41367146e-03*d - 9.06688104e-03,
-                                                # up=lambda d: 0.00005*d**2 - 0.0009*d + 0.0036,
-                                                # dw=lambda d: 0.00009*d**2 - 0.00003*d - 0.0013,
                                                 max_ms_length=max_ms_length,
                                                 sample_depth=sample_depth,
                                                 max_alleles=max_alleles,
