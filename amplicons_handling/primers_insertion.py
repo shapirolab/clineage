@@ -116,6 +116,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'sequence': pr_seq,
                                                   })
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
+        assert primer_rev.end_pos - primer_fwd.start_pos < 300
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
