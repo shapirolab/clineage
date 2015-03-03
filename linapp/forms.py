@@ -195,22 +195,6 @@ class MultipleCellForm(forms.Form):
 
 
 class PlateInputForm(forms.Form):
-    # def __init__(self, *args, **kwargs):
-    #     # call constructor to set up the fields. If you don't do this
-    #     # first you can't modify fields.
-    #     super(PlateInputForm, self).__init__(*args, **kwargs)
-    #     try:
-    #         revko = StorageType.objects.get(name='REVCO')
-    #         freezer = StorageType.objects.get(name='Freezer')
-    #         if self.instance.storage_box.storage_type == revko:
-    #             inner_location = RevcoWidget()
-    #         elif self.instance.storage_box.storage_type == freezer:
-    #             inner_location = FreezerWidget()
-    #         else:
-    #             inner_location = HiddenInput()
-    #     except AttributeError:
-    #         # unbound form
-    #         inner_location = HiddenInput()
 
     # cell input fields
     individual = ModelChoiceField(queryset=Individual.objects.all())
@@ -219,7 +203,15 @@ class PlateInputForm(forms.Form):
     comment = CharField(widget=Textarea, required=False)
 
     # plate input fields
-    existing_plate = ModelChoiceField(queryset=Plate.objects.all(), required=False)
+    existing_plate = ModelChoiceField(
+        queryset=Plate.objects.exclude(name__startswith='MM_v2_P')\
+                              .exclude(name__startswith='amplicon_MM_notails_plt')\
+                              .exclude(name__startswith='Primers_')\
+                              .exclude(name__startswith='United_')\
+                              .exclude(name__startswith='MM_MPX_w/o_LB_P')\
+                              .exclude(name__startswith='AAR')\
+                              .exclude(name__startswith='hg19_Tails_plt'),
+        required=False)
     plate_type = ModelChoiceField(queryset=PlateType.objects.all(), required=False)
     plate_name = CharField(max_length=200, required=False)
     samples_in_wells = CharField(widget=Textarea)

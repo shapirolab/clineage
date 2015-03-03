@@ -1,0 +1,12 @@
+{% extends "genericformdisp.html" %}
+
+{% block dialog_div_extra %}
+    <ul>
+        <li>{{ object }}</li>
+        {% for cc in object.cellcontent_set.all %}
+            {% for sl in cc.physical_locations.all %}
+                <li>{{ sl }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endblock %}
