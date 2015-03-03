@@ -13,7 +13,7 @@ import sys
 sys.path.append('/home/mint/clineage')
 from clineage import settings
 setup_environ(settings)
-from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP, User, TargetEnrichmentType, Target, PrimerTail
+from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP, User, TargetEnrichmentType, PrimerTail
 
 
 columns_case_dict = {
