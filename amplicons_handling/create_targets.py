@@ -10,11 +10,10 @@ from positioning import insertion_plates_to_db, create_primer_order_file_xls
 from primers_insertion import get_or_create_sequence
 from django.core.management import setup_environ
 import sys
-sys.path.append('/home/mint/clineage')
+sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
-setup_environ(settings)
 from linapp.models import TargetType, Assembly, Target, Sequence, Chromosome, Microsatellite, SNP, User, TargetEnrichmentType, PrimerTail
-
+setup_environ(settings)
 
 columns_case_dict = {
                     ('Assembly', 'Chromosome', 'Start', 'End'):'Nameless',
