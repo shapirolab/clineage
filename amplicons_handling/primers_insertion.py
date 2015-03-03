@@ -4,7 +4,7 @@ import re
 import hashlib
 import sys
 from django.core.management import setup_environ
-sys.path.append('/home/mint/clineage')
+sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
 setup_environ(settings)
 from linapp.models import Target, TargetEnrichment, Primer, TargetType, Sequence
