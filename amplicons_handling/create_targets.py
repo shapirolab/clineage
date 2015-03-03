@@ -152,9 +152,9 @@ def proccess_input_target_file(input_file):
 if '__main__' == __name__:
     parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
     parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
-    parser.add_argument('-n', '--name', type=str, dest='input_name', help='path for target table file')
-    parser.add_argument('-o', '--output', type=str, dest='output_name', help='output file name prefix for the ')
-    parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for target table file')
+    parser.add_argument('-n', '--name', type=str, dest='input_name', help='files prefix for the targets')
+    parser.add_argument('-o', '--output', type=str, dest='output_name', help='output file name prefix for the targets')
+    parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for bowtie2_index files')
     parser.add_argument('-t', '--tails', type=bool, dest='tails', help='primers have tails?')
     args = parser.parse_args()
     input_file = args.input_file
