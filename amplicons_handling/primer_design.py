@@ -14,7 +14,7 @@ def create_amplicons_for_primer3(target, margins):
     return amplicon
 
 
-def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, margins=200, seq_region=100):
+def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, margins=100, seq_region=100):
     primer3_input = ("{}.txt".format(str(input_name)))
     with open(primer3_input, 'w+') as primer3_file:
         primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'

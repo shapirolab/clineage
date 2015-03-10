@@ -1,3 +1,5 @@
 *.pyc
 .idea/
 clineage/local_settings.py
+fabfile.py
+amplicons_handling/insert_ordered_primers.txt

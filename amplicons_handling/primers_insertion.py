@@ -4,7 +4,7 @@ import re
 import hashlib
 import sys
 from django.core.management import setup_environ
-sys.path.append('/home/mint/clineage')
+sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
 setup_environ(settings)
 from linapp.models import Target, TargetEnrichment, Primer, TargetType, Sequence
@@ -116,6 +116,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                                                   'sequence': pr_seq,
                                                   })
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
+        assert primer_rev.end_pos - primer_fwd.start_pos < 300
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
