@@ -547,6 +547,7 @@ class Individual(models.Model):
     background = models.ForeignKey(GeneticBackground, null=True, blank=True)
     location = models.ForeignKey(Location, null=True, blank=True)
     sacrificed = models.DateTimeField(null=True, blank=True)
+    partner = models.ForeignKey(User, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
