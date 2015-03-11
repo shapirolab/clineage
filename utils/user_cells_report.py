@@ -65,7 +65,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
     for individual in individuals:
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
-                individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
+                not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
             for cell in individual.cell_set.all():
                 cell_groups[cell] = current_group
             current_group += 1
