@@ -86,7 +86,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
 def get_cells_color_map(cell_groups):
     if len(set(cell_groups.values())) == 1:
         return {cell: (0,0,0) for cell in cell_groups}
-    palette = sns.color_palette('hls', len(cell_groups.keys()))
+    palette = sns.color_palette('hls', len(set(cell_groups.values())))
     return {cell: palette[cell_groups[cell]] for cell in cell_groups}
 
 
