@@ -13,8 +13,11 @@ def query_partner_individuals(partner_name, individual_name=None):
         individuals = Individual.objects.filter(partner=partner)
     return partner, individuals
 
+
 def to_hex(n):
     return hex(int(n*255))[2:].upper()
+
+
 def user_report_string(partner_name, individual_name=None):
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     report_string = '<!DOCTYPE html>\r\n<html>\r\n<body>\r\n<pre>\r\n'
@@ -81,7 +84,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
 
 
 def get_cells_color_map(cell_groups):
-    if len(cell_groups.keys()) == 1:
+    if len(set(cell_groups.values())) == 1:
         return {cell: (0,0,0) for cell in cell_groups}
     palette = sns.color_palette('hls', len(cell_groups.keys()))
     return {cell: palette[cell_groups[cell]] for cell in cell_groups}
