@@ -17,7 +17,7 @@ def to_hex(n):
     return hex(int(n*255))[2:].upper()
 def user_report_string(partner_name, individual_name=None):
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
-    report_string = '<!DOCTYPE html>\r\n<html>\r\n<body>\r\n'
+    report_string = '<!DOCTYPE html>\r\n<html>\r\n<body>\r\n<pre>\r\n'
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     report_string += 'Collaborator: {}\r\n'.format(partner.username)
     for individual in individuals:
@@ -37,8 +37,8 @@ def user_report_string(partner_name, individual_name=None):
                     report_string += '\t\t\tCells separation: {}\r\n'.format(se.name)
                     report_string += '\t\t\tCells separation date: {}\r\n'.format(se.date)
                     report_string += '\t\t\tCells separation details: {}\r\n'.format(se.comment)
-                    report_string += '\t\t\t<mark style="background-color:#{}{}{};">Cells: {}\r\n'.format(to_hex(color_map[se.cell_set.all()[0]][0]),to_hex(color_map[se.cell_set.all()[0]][1]),to_hex(color_map[se.cell_set.all()[0]][2]),se.cell_set.count())
-    report_string += '</body>\r\n</html>\r\n'
+                    report_string += '\t\t\t<mark style="background-color:#{}{}{};">Cells: {}</mark>\r\n'.format(to_hex(color_map[se.cell_set.all()[0]][0]),to_hex(color_map[se.cell_set.all()[0]][1]),to_hex(color_map[se.cell_set.all()[0]][2]),se.cell_set.count())
+    report_string += '</pre>\r\n</body>\r\n</html>\r\n'
     return report_string
 
 
