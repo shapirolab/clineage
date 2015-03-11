@@ -15,6 +15,7 @@ def query_partner_individuals(partner_name, individual_name=None):
 
 
 def user_report_string(partner_name, individual_name=None):
+    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     report_string = ''
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     report_string += 'Collaborator: {}\r\n'.format(partner.username)
@@ -36,6 +37,7 @@ def user_report_string(partner_name, individual_name=None):
                     report_string += '\t\t\tCells separation date: {}\r\n'.format(se.date)
                     report_string += '\t\t\tCells separation details: {}\r\n'.format(se.comment)
                     report_string += '\t\t\tCells: {}\r\n'.format(se.cell_set.count())
+                    report_string += '\t\t\tCells Color: {}\r\n'.format(color_map[se.cell_set.all()[0]])
     return report_string
 
 
@@ -90,25 +92,26 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
     for individual in individuals:
         for cell, file_name in get_cells_filenames_in_folder(individual.cell_set.all(), cell_folder):
             for cell_cont in cell.cellcontent_set.all():
-                assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() == 1
-                yield {
-                    'Cell ID': smart_str(cell.pk),
-                    'Sequencing File Name': smart_str(file_name),
-                    'Cell Name': smart_str(cell.name),
-                    'Individual Name': smart_str(cell.individual.name),
-                    'Individual Comment': smart_str(cell.individual.comment),
-                    'Gender': smart_str(cell.individual.sex),
-                    'Sample Name': smart_str(cell.sampling.extraction.name if cell.sampling else ''),
-                    'Sample Comment': smart_str(cell.sampling.extraction.comment if cell.sampling else ''),
-                    'Organ': smart_str(cell.sampling.extraction.organ.name if cell.sampling else ''),
-                    'Tissue': smart_str(cell.sampling.extraction.tissue.name if cell.sampling else ''),
-                    'Sampling Event': smart_str(cell.sampling.name if cell.sampling else ''),
-                    'Group Color': color_map[cell],
-                    'Sampling Comment': smart_str(cell.sampling.comment if cell.sampling else ''),
-                    'Cell Type': smart_str(cell.composition.name),
-                    'Plate': smart_str(cell_cont.physical_locations.exclude(plate__name__contains='AAR')[0].plate.name),
-                    'Well': smart_str(cell_cont.physical_locations.exclude(plate__name__contains='AAR')[0].well)
-                }
+                assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
+                for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
+                    yield {
+                        'Cell ID': smart_str(cell.pk),
+                        'Sequencing File Name': smart_str(file_name),
+                        'Cell Name': smart_str(cell.name),
+                        'Individual Name': smart_str(cell.individual.name),
+                        'Individual Comment': smart_str(cell.individual.comment),
+                        'Gender': smart_str(cell.individual.sex),
+                        'Sample Name': smart_str(cell.sampling.extraction.name if cell.sampling else ''),
+                        'Sample Comment': smart_str(cell.sampling.extraction.comment if cell.sampling else ''),
+                        'Organ': smart_str(cell.sampling.extraction.organ.name if cell.sampling else ''),
+                        'Tissue': smart_str(cell.sampling.extraction.tissue.name if cell.sampling else ''),
+                        'Sampling Event': smart_str(cell.sampling.name if cell.sampling else ''),
+                        'Group Color': color_map[cell],
+                        'Sampling Comment': smart_str(cell.sampling.comment if cell.sampling else ''),
+                        'Cell Type': smart_str(cell.composition.name),
+                        'Plate': smart_str(loc.plate.name),
+                        'Well': smart_str(loc.well)
+                    }
 
 
 def print_cells_table(partner_name, individual_name=None, cell_folder=None):
