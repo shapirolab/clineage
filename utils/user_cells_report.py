@@ -121,7 +121,7 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None):
                       'Cell Name',
                       'Cell Type',
                       'Plate',
-                      'Well'
+                      'Well',
                       'Group Color',
                       'Sampling Event',
                       'Sampling Comment',
@@ -132,7 +132,7 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None):
                       'Individual Name',
                       'Individual Comment',
                       'Gender',
-                      'Sequencing File Name'
+                      'Sequencing File Name',
                       ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
