@@ -122,7 +122,6 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None):
                       'Cell Type',
                       'Plate',
                       'Well'
-                      'Cell Comment',
                       'Group Color',
                       'Sampling Event',
                       'Sampling Comment',
