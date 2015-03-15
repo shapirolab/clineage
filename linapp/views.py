@@ -19,6 +19,7 @@ from utils.wells import num2abc
 from utils.user_cells_report import user_cells_table_values
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
+import csv
 import time
 
 def index(request):
@@ -766,7 +767,7 @@ def partner_cells_table_view(request, partner_name,
                   ]
     writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
-    print '############niki################'
+    # print '############niki################'
     for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
             writer.writerow(cell_values)
     return response
