@@ -771,7 +771,7 @@ def partner_cells_table_view(request, partner_name,
     # writer.writeheader()
     print '############niki################'
     for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
-            writer.writerow(str(list(cell_values)))
+            writer.writerow(list(cell_values))
 
     return response
     # return HttpResponse(str(list(user_cells_table_values(partner_name, individual_name, cell_folder))), content_type="text/plain")
