@@ -27,8 +27,8 @@ def build_primer3_input(loci_names_file,ListFileName):
         # fasta_primers_file = open(fasta_primers, 'w+')
         system_call = ()
 
-        s = 'bedtools getfasta -fi {} -bed {} -fo {}'.format(chrom.get_abs_path(), loci_names_file, fasta_primers)
-        # s = 'bedtools getfasta -fi ~/Adam/GenomesData/Human/hg19/chrM.fa -bed {} -fo {}'.format(loci_names_file, fasta_primers)
+        # s = 'bedtools getfasta -fi {} -bed {} -fo {}'.format(chrom.get_abs_path(), loci_names_file, fasta_primers)
+        s = 'bedtools getfasta -fi ~/Adam/GenomesData/Human/hg19/chr17_gl000205_random.fa -bed {} -fo {}'.format(loci_names_file, fasta_primers)
         os.system(s)
 
     with open(fasta_primers, 'rb') as fasta_primers_file:

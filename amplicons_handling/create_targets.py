@@ -1,13 +1,10 @@
-
 import re
 import hashlib
 import csv
 import argparse
 from primer_design import primer3_design, bowtie2_design, sort_unique_primers
-from primers_insertion import create_primers_in_db
+from primers_insertion import create_primers_in_db, get_or_create_sequence
 from positioning import insertion_plates_to_db, create_primer_order_file_xls
-
-from primers_insertion import get_or_create_sequence
 from django.core.management import setup_environ
 import sys
 sys.path.append('/home/ofirr/CLineage')
