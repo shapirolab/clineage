@@ -742,9 +742,10 @@ def longview(request):
     return {'ok': '1'}
 
 
-def partner_cells_table_view(request, partner_name,
-                             cell_folder='/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR2/fastq_human/Output',
-                             individual_name=None):
+def partner_cells_table_view(request, partner_name):
+                             # cell_folder='/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR2/fastq_human/Output',
+                             # individual_name=None):
+    return HttpResponse('test', content_type="text/plain")
     print '############niki################'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{}/{}_cell_data.csv".format(cell_folder, partner_name)'

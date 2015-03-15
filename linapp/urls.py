@@ -91,9 +91,8 @@ urlpatterns = patterns('',
     url(r'^experiment/(?P<exp_id>\d+)/member/$', 'linapp.views.memberform'),
     url(r'^experiment/(?P<exp_id>\d+)/member/(?P<mem_id>\d+)$', 'linapp.views.memberform'),
 
-    #forms
-    url(r'^partner_name/(?P<partner_name>\w+)$',
-        'linapp.views.partner_cells_table_view'),
-    url(r'^partner_name/(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
+    # collaborators_reports
+    url(r'^partner_name:(?P<partner_name>\w+)$', 'linapp.views.partner_cells_table_view'),
+    url(r'^partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
         'linapp.views.partner_cells_table_view'),
 )
