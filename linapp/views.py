@@ -765,7 +765,7 @@ def partner_cells_table_view(request, partner_name,
                   'Gender',
                   'Sequencing File Name',
                   ]
-    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    writer = csv.writer(response, fieldnames=fieldnames)
     writer.writeheader()
     # print '############niki################'
     for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
