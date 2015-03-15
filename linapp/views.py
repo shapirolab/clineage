@@ -16,6 +16,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from utils.wells import num2abc
+from utils.user_cells_report import user_cells_table_values
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 import time
@@ -739,3 +740,31 @@ def testtree(request):
 def longview(request):
     time.sleep(60)
     return {'ok': '1'}
+
+
+def partner_cells_table_view(request, partner_name,
+                             cell_folder='/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR2/fastq_human',
+                             individual_name=None):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{}/{}_cell_data.csv".format(cell_folder, partner_name)'
+    fieldnames = ['Cell ID',
+                  'Cell Name',
+                  'Cell Type',
+                  'Plate',
+                  'Well',
+                  'Group Color',
+                  'Sampling Event',
+                  'Sampling Comment',
+                  'Organ',
+                  'Tissue',
+                  'Sample Name',
+                  'Sample Comment',
+                  'Individual Name',
+                  'Individual Comment',
+                  'Gender',
+                  'Sequencing File Name',
+                  ]
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    writer.writeheader()
+    for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
+            writer.writerow(cell_values)

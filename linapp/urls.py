@@ -73,10 +73,10 @@ urlpatterns = patterns('',
     url(r'^forms/cell/add_cells_plate_with_names$', 'linapp.views.plate_input_with_names', name='cells_plate_add_with_names'),
 
     #algorithm
-    url(r'^forms/algorithm/add$',AlgorithmCreate.as_view(), name='algorithm_add'),
-    url(r'^details/algorithm/(?P<pk>\d+)$',AlgorithmUpdate.as_view(), name='algorithm_detail'),
-    url(r'^forms/algorithm/(?P<pk>\d+)$',AlgorithmUpdate.as_view(), name='algorithm_update'),
-    url(r'^forms/algorithm/delete/(?P<pk>\d+)$',AlgorithmDelete.as_view(), name='algorithm_delete'),
+    url(r'^forms/algorithm/add$', AlgorithmCreate.as_view(), name='algorithm_add'),
+    url(r'^details/algorithm/(?P<pk>\d+)$', AlgorithmUpdate.as_view(), name='algorithm_detail'),
+    url(r'^forms/algorithm/(?P<pk>\d+)$', AlgorithmUpdate.as_view(), name='algorithm_update'),
+    url(r'^forms/algorithm/delete/(?P<pk>\d+)$', AlgorithmDelete.as_view(), name='algorithm_delete'),
 
     #plate
     url(r'^forms/plate/add$',PlateCreate.as_view(), name='plate_add'),
@@ -90,4 +90,10 @@ urlpatterns = patterns('',
     # url(r'^cell/(?P<cell_id>\d+)$','linapp.views.cellform'),
     url(r'^experiment/(?P<exp_id>\d+)/member/$', 'linapp.views.memberform'),
     url(r'^experiment/(?P<exp_id>\d+)/member/(?P<mem_id>\d+)$', 'linapp.views.memberform'),
+
+    #forms
+    url(r'^partner_name:(?P<partner_name>\w+)$',
+        'linapp.views.partner_cells_table_view', name='partner_cells_table_view'),
+    url(r'^partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
+        'linapp.views.partner_cells_table_view', name='partner_cells_table_view'),
 )
