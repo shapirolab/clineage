@@ -93,6 +93,6 @@ urlpatterns = patterns('',
 
     # collaborators_reports
     url(r'^partner_name:(?P<partner_name>\w+)$', 'linapp.views.partner_cells_table_view'),
-    # url(r'^partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
-    #     'linapp.views.partner_cells_table_view'),
+    url(r'^partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
+        'linapp.views.partner_cells_table_view'),
 )

@@ -745,8 +745,6 @@ def longview(request):
 def partner_cells_table_view(request, partner_name,
                              cell_folder='/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR2/fastq_human/Output',
                              individual_name=None):
-    # return HttpResponse('test', content_type="text/plain")
-    print '############niki################'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{}/{}_cell_data.csv".format(cell_folder, partner_name)'
     fieldnames = ['Cell ID',
@@ -766,6 +764,7 @@ def partner_cells_table_view(request, partner_name,
                   'Gender',
                   'Sequencing File Name',
                   ]
+    print '############niki################'
     writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
     for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
