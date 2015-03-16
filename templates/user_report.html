@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+    cellrow = 0
+    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
+    partner, individuals = query_partner_individuals(partner_name, individual_name)
+
+{% block content %}
+    <h1>Collaborator: {{partner.username}}</h1>
+    {% for individual in individuals %}
+        <p>Individual: {{individual.name}}</p>
+        {% if not individual.extractionevent_set.all() or
+        not individual.extractionevent_set.all()[0].extraction_set.all() or
+        individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all() %}
+                <p>Cells: {{individual.cell_set.count()}}</p>
+            <p>Collaborator table: None</p>
+            <p>Database table: None</p>
+            {% for ee in individual.extractionevent_set.all() %}
+                {% for e in ee.extraction_set.all() %}
+                    <p>Sample: {{e.name}}</p>
+                    <p>Extraction: {{ee.name}}</p>
+                    <p>Extraction date: {{ee.date}}</p>
+                    {% for se in e.samplingevent_set.all() %}
+                        <p>Cells separation: {{se.name}}</p>
+                        <p>Cells separation date: {{se.date}}</p>
+                        <p>Cells separation details: {{se.comment}}</p>
+                        <p><mark style="background-color:#{{to_hex(color_map[se.cell_set.all()[0]][0])}}{{to_hex(color_map[se.cell_set.all()[0]][1])}}{{to_hex(color_map[se.cell_set.all()[0]][2])}};">Cells: {{cellrow+1,}}-{{cellrow+se.cell_set.count()}}</mark></p>
+                        cellrow += se.cell_set.count()
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+</body>
+</html>
