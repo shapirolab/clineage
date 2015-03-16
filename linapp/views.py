@@ -776,5 +776,5 @@ def partner_cells_table_view(request, partner_name,
 def partner_cells_html_view(request, partner_name, individual_name=None):
     response = HttpResponse(content_type='text/html')
     response['content_type'] = 'application/liquid; charset=utf-8'
-    response = user_report_string(partner_name, individual_name)
-    return HttpResponse(response)
+    # response = user_report_string(partner_name, individual_name)
+    return render_to_response('user_report.html', {'partner_name': partner_name}, {'individual_name': individual_name})
