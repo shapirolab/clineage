@@ -5,11 +5,6 @@
     <title></title>
 </head>
 <body>
-
-    cellrow = 0
-    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
-    partner, individuals = query_partner_individuals(partner_name, individual_name)
-
 {% block content %}
     <h1>Collaborator: {{partner.username}}</h1>
     {% for individual in individuals %}
@@ -29,7 +24,7 @@
                         <p>Cells separation: {{se.name}}</p>
                         <p>Cells separation date: {{se.date}}</p>
                         <p>Cells separation details: {{se.comment}}</p>
-                        <p><mark style="background-color:#{{to_hex(color_map[se.cell_set.all()[0]][0])}}{{to_hex(color_map[se.cell_set.all()[0]][1])}}{{to_hex(color_map[se.cell_set.all()[0]][2])}};">Cells: {{cellrow+1,}}-{{cellrow+se.cell_set.count()}}</mark></p>
+                        <p><mark style="background-color:#{{}}">Cells: {{cellrow+1,}}-{{cellrow+se.cell_set.count()}}</mark></p>
                         cellrow += se.cell_set.count()
                     {% endfor %}
                 {% endfor %}
