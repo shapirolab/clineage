@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from utils.wells import num2abc
-from utils.user_cells_report import user_cells_table_values, user_report_string, get_cells_color_map, get_cells_grouping, query_partner_individuals
+from utils.user_cells_report import user_cells_table_values, user_report_string
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 import csv
@@ -780,6 +780,5 @@ def partner_cells_html_view(request, partner_name, individual_name=None):
     # cellrow = 0
     # color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     # partner, individuals = query_partner_individuals(partner_name, individual_name)
-
-    return response
     # return render_to_response('user_report.html', {'partner': partner, 'individuals': individuals, 'color_map': color_map, 'cellrow': cellrow})
+    return HttpResponse(response)
