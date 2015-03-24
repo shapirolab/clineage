@@ -2,6 +2,7 @@ import os
 import csv
 from django.utils.encoding import smart_str
 import seaborn as sns
+from collections import defaultdict
 from linapp.models import User, Cell, Individual
 
 
@@ -18,33 +19,38 @@ def to_hex(n):
     return hex(int(n*255))[2:].upper()
 
 
+def hex_to_rgb(color_map, cell):
+    rgb = []
+    color_cell = color_map[cell]
+    for i in color_cell:
+        rgb.append(to_hex(i))
+    return rgb
+
+
 def user_report_string(partner_name, individual_name=None):
     cellrow = 0
+    report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))))
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
-    report_string = '<!DOCTYPE html>\r\n<html>\r\n<body>\r\n<pre>\r\n'
     partner, individuals = query_partner_individuals(partner_name, individual_name)
-    report_string += 'Collaborator: {}\r\n'.format(partner.username)
+    report_dict['Collaborator'] = partner.username
     for individual in individuals:
-        report_string += '\tIndividual: {}\r\n'.format(individual.name)
+        report_dict[partner.username][individual.name]['name'] = individual.name
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
-                individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-            report_string += '\t\t\tCells: {}\r\n'.format(individual.cell_set.count())
-        report_string += '\tCollaborator table: {}\r\n'.format(None) #TODO:get this
-        report_string += '\tDatabase table: {}\r\n'.format(None) #TODO:get this
+                not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
+            report_dict[partner.username][individual.name]['cells_list'] = individual.cell_set.count()
+        report_dict[partner.username][individual.name]['Collaborator_table'] = None
+        report_dict[partner.username][individual.name]['Database_table'] = None
         for ee in individual.extractionevent_set.all():
             for e in ee.extraction_set.all():
-                report_string += '\t\tSample: {}\r\n'.format(e.name)
-                report_string += '\t\tExtraction: {}\r\n'.format(ee.name)
-                report_string += '\t\tExtraction date: {}\r\n'.format(ee.date)
+                report_dict[partner.username][individual.name][ee.name][e.name]['Extraction_date'] = ee.date
                 for se in e.samplingevent_set.all():
-                    report_string += '\t\t\tCells separation: {}\r\n'.format(se.name)
-                    report_string += '\t\t\tCells separation date: {}\r\n'.format(se.date)
-                    report_string += '\t\t\tCells separation details: {}\r\n'.format(se.comment)
-                    report_string += '\t\t\t<mark style="background-color:#{}{}{};">Cells: {}-{}</mark>\r\n'.format(to_hex(color_map[se.cell_set.all()[0]][0]),to_hex(color_map[se.cell_set.all()[0]][1]),to_hex(color_map[se.cell_set.all()[0]][2]),cellrow+1, cellrow+se.cell_set.count())
+                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_date'] = se.date
+                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_details'] = se.comment
+                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.all()[0])
+                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.count()]
                     cellrow += se.cell_set.count()
-    report_string += '</pre>\r\n</body>\r\n</html>\r\n'
-    return report_string
+    return report_dict
 
 
 def get_cell_files_from_folder(cell_folder):
@@ -87,7 +93,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
 
 def get_cells_color_map(cell_groups):
     if len(set(cell_groups.values())) == 1:
-        return {cell: (0,0,0) for cell in cell_groups}
+        return {cell: (0, 0.5, 0.5) for cell in cell_groups}
     palette = sns.color_palette('hls', len(set(cell_groups.values())))
     return {cell: palette[cell_groups[cell]] for cell in cell_groups}
 

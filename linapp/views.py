@@ -774,11 +774,8 @@ def partner_cells_table_view(request, partner_name,
 
 
 def partner_cells_html_view(request, partner_name, individual_name=None):
-    response = HttpResponse(content_type='text/html')
-    response['content_type'] = 'application/liquid; charset=utf-8'
-    response = user_report_string(partner_name, individual_name)
-    # cellrow = 0
-    # color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
-    # partner, individuals = query_partner_individuals(partner_name, individual_name)
-    # return render_to_response('user_report.html', {'partner': partner, 'individuals': individuals, 'color_map': color_map, 'cellrow': cellrow})
-    return HttpResponse(response)
+    # response = HttpResponse(content_type='text/html')
+    # response['content_type'] = 'application/liquid; charset=utf-8'
+    partner_dict = user_report_string(partner_name, individual_name)
+    return render_to_response('user_report.html', {'partner_dict': partner_dict})
+    # return HttpResponse(response)

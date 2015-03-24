@@ -1,36 +1,57 @@
 <!DOCTYPE html>
+{% load custom_filters %}
 <html>
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
 </head>
 <body>
-<!--{% block content %}-->
-    <!--<h1>Collaborator: {{partner.username}}</h1>-->
-    <!--{% for individual in individuals %}-->
-        <!--<p>Individual: {{individual.name}}</p>-->
-        <!--{% if not individual.extractionevent_set.all() or-->
-        <!--not individual.extractionevent_set.all()[0].extraction_set.all() or-->
-        <!--individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all() %}-->
-                <!--<p>Cells: {{individual.cell_set.count()}}</p>-->
-            <!--<p>Collaborator table: None</p>-->
-            <!--<p>Database table: None</p>-->
-            <!--{% for ee in individual.extractionevent_set.all() %}-->
-                <!--{% for e in ee.extraction_set.all() %}-->
-                    <!--<p>Sample: {{e.name}}</p>-->
-                    <!--<p>Extraction: {{ee.name}}</p>-->
-                    <!--<p>Extraction date: {{ee.date}}</p>-->
-                    <!--{% for se in e.samplingevent_set.all() %}-->
-                        <!--<p>Cells separation: {{se.name}}</p>-->
-                        <!--<p>Cells separation date: {{se.date}}</p>-->
-                        <!--<p>Cells separation details: {{se.comment}}</p>-->
-                        <!--<p><mark style="background-color:#{{}}">Cells: {{cellrow+1,}}-{{cellrow+se.cell_set.count()}}</mark></p>-->
-                        <!--cellrow += se.cell_set.count()-->
-                    <!--{% endfor %}-->
-                <!--{% endfor %}-->
-            <!--{% endfor %}-->
-        <!--{% endif %}-->
-    <!--{% endfor %}-->
-<!--{% endblock %}-->
+{% block content %}
+    <h1>Collaborator: {{partner_dict.Collaborator}}</h1>
+    {% for key in partner_dict|remove_def%}
+        {% if key != 'Collaborator' %}
+            {% with individuals=partner_dict|find_val:key %}
+                <ul>
+                {% for ind in individuals|remove_def %}
+                    <h2><u>Individual</u>: {{individuals|find_val:ind|find_val:'name'}}</h2>
+                    <li><u>Collaborator table</u>: {{individuals|find_val:ind|find_val:'Collaborator_table'}}</li>
+                    <li><u>Database table</u>: {{individuals|find_val:ind|find_val:'Database_table'}}</li>
+                    {% with individual=individuals|find_val:ind %}
+                        {% if not individual|has_value:'cells_list' %}
+                            <ul>
+                            {% for ee in individual|remove_def %}
+                                {% if ee != 'Database_table' and ee != 'Collaborator_table' and ee != 'name' and ee != 'cells_list' %}
+                                    {% with exe=individual|find_val:ee %}
+                                        {% for e in exe|remove_def %}
+                                            <li><u>Sample</u>: {{e}}</li>
+                                            <li><u>Extraction</u>: {{ee}}</li>
+                                            {% with samp=exe|find_val:e %}
+                                                <li><u>Extraction date</u>: {{samp|find_val:'Extraction_date'}}</li>
+                                                <ul>
+                                                {% for se in samp|remove_def %}
+                                                    {% if se != 'Extraction_date' %}
+                                                        <p><u>Cells separation</u>: {{se}}</p>
+                                                        <p><u>Cells separation date</u>: {{samp|find_val:se|find_val:'Cells_separation_date'}}</p>
+                                                        <p><u>Cells separation details</u>: {{samp|find_val:se|find_val:'Cells_separation_details'}}</p>
+                                                        <p><mark style="background-color:#{{samp|find_val:se|color:'Cells_color'}}"><u>Cells</u>: {{samp|find_val:se|find_val:'Cells_pos'|find_val:0}} - {{samp|find_val:se|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </ul>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                                <p>Cells: {{individual|find_val:'cells_list'}}</p>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+                </ul>
+            {% endwith %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}
 </body>
 </html>
