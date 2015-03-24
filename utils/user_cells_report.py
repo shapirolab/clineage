@@ -45,10 +45,11 @@ def user_report_string(partner_name, individual_name=None):
             for e in ee.extraction_set.all():
                 report_dict[partner.username][individual.name][ee.name][e.name]['Extraction_date'] = ee.date
                 for se in e.samplingevent_set.all():
-                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_date'] = se.date
-                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_details'] = se.comment
-                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.all()[0])
-                    report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.count()]
+                    if se.cell_set.all():
+                        report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_date'] = se.date
+                        report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_separation_details'] = se.comment
+                        report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.all()[0])
+                        report_dict[partner.username][individual.name][ee.name][e.name][se.name]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.count()]
                     cellrow += se.cell_set.count()
     return report_dict
 
@@ -80,14 +81,16 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
             for cell in individual.cell_set.all():
                 cell_groups[cell] = current_group
-            current_group += 1
+            if individual.cell_set.all():
+                current_group += 1
             continue
         for ee in individual.extractionevent_set.all():
             for e in ee.extraction_set.all():
                 for se in e.samplingevent_set.all():
                     for cell in se.cell_set.all():
                         cell_groups[cell] = current_group
-                    current_group += 1
+                    if se.cell_set.all():
+                        current_group += 1
     return cell_groups
 
 
