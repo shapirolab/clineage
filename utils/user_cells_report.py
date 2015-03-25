@@ -3,7 +3,7 @@ import csv
 from django.utils.encoding import smart_str
 import seaborn as sns
 from collections import defaultdict
-from linapp.models import User, Cell, Individual
+from linapp.models import User, Cell, Individual, UserReport
 
 
 def query_partner_individuals(partner_name, individual_name=None):
@@ -27,12 +27,15 @@ def hex_to_rgb(color_map, cell):
     return rgb
 
 
-def user_report_string(partner_name, individual_name=None):
+def get_partner_report(partner_name, individual_name=None):
     cellrow = 0
     report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))))
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     report_dict['Collaborator'] = partner.username
+    cells = get_cells(partner_name, individual_name)
+    ur = UserReport.get_create_new(cells=cells, partner=partner, individual=individuals)
+    report_dict['ID'] = ur.pk
     for individual in individuals:
         report_dict[partner.username][individual.name]['name'] = individual.name
         if not individual.extractionevent_set.all() or \
@@ -70,6 +73,12 @@ def get_cells_filenames_in_folder(cells, cell_folder):
             yield cell, folder_cells[cell]
         else:
             yield cell, None
+
+
+def get_cells(partner_name, individual_name=None, cell_groups=None):
+    if not cell_groups:
+        cell_groups = get_cells_grouping(partner_name, individual_name=individual_name)
+    return cell_groups.keys()
 
 
 def get_cells_grouping(partner_name, individual_name=None, current_group=0):

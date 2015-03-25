@@ -990,5 +990,40 @@ class PrimersMultiplex(models.Model):
     physical_locations = generic.GenericRelation(SampleLocation,
                                content_type_field='content_type',
                                object_id_field='object_id')
+
     def __unicode__(self):
         return self.name
+###----------------------------------------------------------------------------------------
+### User Report Data and Tables
+###----------------------------------------------------------------------------------------
+class UserReport(models.Model):
+    cells = models.ManyToManyField(Cell)
+    partner = models.ForeignKey(User, null=True)
+    individual = models.ManyToManyField(Individual, null=True)
+    creation_date = models.DateField(auto_now_add=True) #Automatically set the field to now when the object is first created.
+
+    def __unicode__(self):
+        return self.partner.username if self.partner else 'detached'
+
+    @staticmethod
+    def get_create_new(cells, partner=None, individual=None):
+        user_report = None
+        for ur in UserReport.objects.all():
+            if set(ur.cells.all()) == set(cells):
+                user_report = ur
+        if user_report:
+            print user_report
+            if not user_report.partner and partner:
+                user_report.partner = partner
+                user_report.save()
+            if not user_report.individual and individual:
+                user_report.individual = individual
+                user_report.save()
+            return user_report
+        else:
+            if not cells:
+                raise
+            ur = UserReport.objects.create(partner=partner)
+            ur.individual = individual
+            ur.cells = cells
+            return ur

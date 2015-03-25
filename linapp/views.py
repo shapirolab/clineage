@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from utils.wells import num2abc
-from utils.user_cells_report import user_cells_table_values, user_report_string
+from utils.user_cells_report import user_cells_table_values, get_partner_report
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 import csv
@@ -776,6 +776,6 @@ def partner_cells_table_view(request, partner_name,
 def partner_cells_html_view(request, partner_name, individual_name=None):
     # response = HttpResponse(content_type='text/html')
     # response['content_type'] = 'application/liquid; charset=utf-8'
-    partner_dict = user_report_string(partner_name, individual_name)
+    partner_dict = get_partner_report(partner_name, individual_name)
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)

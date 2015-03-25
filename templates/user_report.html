@@ -8,8 +8,9 @@
 <body>
 {% block content %}
     <h1>Collaborator: {{partner_dict.Collaborator}}</h1>
+    <p>ID: {{partner_dict.ID}}</p>
     {% for key in partner_dict|remove_def%}
-        {% if key != 'Collaborator' %}
+        {% if key != 'Collaborator' and key != 'ID' %}
             {% with individuals=partner_dict|find_val:key %}
                 <ul>
                 {% for ind in individuals|remove_def %}
