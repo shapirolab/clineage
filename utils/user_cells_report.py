@@ -69,7 +69,7 @@ def get_cell_files_from_folder(cell_folder):
 def get_cells_filenames_in_folder(cells, cell_folder):
     folder_cells = get_cell_files_from_folder(cell_folder)
     for cell in cells:
-        if cell in folder_cells:
+        if cell_folder and cell in folder_cells:
             yield cell, folder_cells[cell]
         else:
             yield cell, None
