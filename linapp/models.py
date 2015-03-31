@@ -627,7 +627,7 @@ class Cell(models.Model):
     composition = models.ForeignKey(SampleComposition)#single cell or bulk
     status = models.ForeignKey(SampleStatus, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
-
+    classification = models.CharField(max_length=50, null=True, blank=True)
     def __unicode__(self):
         return u'{}>{}'.format(unicode(self.sampling), self.name)
 
