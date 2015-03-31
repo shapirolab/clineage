@@ -41,6 +41,7 @@ def get_partner_report(partner_name, individual_name=None):
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
+            report_dict[partner.username][individual.name]['cells_list'] = 1 #temporary workaround TODO:revise
             for cls in set([cell.classification for cell in individual.cell_set.all()]):
                 report_dict[partner.username][individual.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, individual.cell_set.filter(classification=cls)[0])
                 report_dict[partner.username][individual.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+individual.cell_set.filter(classification=cls).count()]
