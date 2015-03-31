@@ -41,9 +41,10 @@ def get_partner_report(partner_name, individual_name=None):
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-            report_dict[partner.username][individual.name]['cells_list'] = 1  # arbitrary flag TODO:refactor this
             for cls in set([cell.classification for cell in individual.cell_set.all()]):
-                report_dict[partner.username][individual.name][cls]['cells_list'] = individual.cell_set.filter(classification=cls).count()
+                report_dict[partner.username][individual.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, individual.cell_set.filter(classification=cls)[0])
+                report_dict[partner.username][individual.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+individual.cell_set.filter(classification=cls).count()]
+                cellrow += individual.cell_set.filter(classification=cls).count()
         report_dict[partner.username][individual.name]['Collaborator_table'] = None
         report_dict[partner.username][individual.name]['Database_table'] = None
         for ee in individual.extractionevent_set.all():
@@ -52,10 +53,10 @@ def get_partner_report(partner_name, individual_name=None):
                 for se in e.samplingevent_set.all():
                     for cls in set([cell.classification for cell in se.cell_set.all()]):
                         if se.cell_set.filter(classification=cls):
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][cls]['Cells_separation_date'] = se.date
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][cls]['Cells_separation_details'] = se.comment
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][cls]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.all()[0])
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][cls]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.filter(classification=cls).count()]
+                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_date'] = se.date
+                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_details'] = se.comment
+                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.filter(classification=cls)[0])
+                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.filter(classification=cls).count()]
                             cellrow += se.cell_set.filter(classification=cls).count()
     return report_dict
 
@@ -127,6 +128,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Cell ID': smart_str(cell.pk),
                         'Sequencing File Name': smart_str(file_name),
                         'Cell Name': smart_str(cell.name),
+                        'Cell Group': smart_str(cell.classification),
                         'Individual Name': smart_str(cell.individual.name),
                         'Individual Comment': smart_str(cell.individual.comment),
                         'Gender': smart_str(cell.individual.sex),

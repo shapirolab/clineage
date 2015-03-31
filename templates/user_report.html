@@ -30,14 +30,16 @@
                                                 <li><u>Extraction date</u>: {{samp|find_val:'Extraction_date'}}</li>
                                                 <ul>
                                                 {% for se in samp|remove_def %}
-                                                    {% if se != 'Extraction_date' %}
-                                                        {% for cls in se|remove_def %}
-                                                            <p><u>Cells separation</u>: {{se}}</p>
-                                                            <p><u>Cells separation date</u>: {{samp|find_val:se|find_val:'Cells_separation_date'}}</p>
-                                                            <p><u>Cells separation details</u>: {{samp|find_val:se|find_val:'Cells_separation_details'}}</p>
-                                                            <p><mark style="background-color:#{{samp|find_val:se|color:'Cells_color'}}"><u>Cells</u>: {{samp|find_val:se|find_val:'Cells_pos'|find_val:0}} - {{samp|find_val:se|find_val:'Cells_pos'|find_val:1}}</mark></p>
-                                                        {% endfor %}
-                                                    {% endif %}
+                                                    {% with sampling_event=samp|find_val:se %}
+                                                        {% if sampling_event != 'Extraction_date' %}
+                                                            {% for cls in sampling_event|remove_def %}
+                                                                <p><u>Cells separation</u>: {{se}}</p>
+                                                                <p><u>Cells separation date</u>: {{sampling_event|find_val:'Cells_separation_date'}}</p>
+                                                                <p><u>Cells separation details</u>: {{sampling_event|find_val:'Cells_separation_details'}}</p>
+                                                                <p><mark style="background-color:#{{sampling_event|color:'Cells_color'}}"><u>Cells</u>: {{sampling_event|find_val:'Cells_pos'|find_val:0}} - {{sampling_event|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    {% endwith %}
                                                 {% endfor %}
                                                 </ul>
                                             {% endwith %}
@@ -48,7 +50,7 @@
                             </ul>
                         {% else %}
                             {% for cls in individual|remove_def %}
-                                <p>Cells: {{individual|find_val:'cells_list'}}</p>
+                                <p><mark style="background-color:#{{cls|color:'Cells_color'}}"><u>Cells</u>: {{cls|find_val:'Cells_pos'|find_val:0}} - {{cls|find_val:'Cells_pos'|find_val:1}}</mark></p>
                             {%  endfor %}
                         {% endif %}
                     {% endwith %}
