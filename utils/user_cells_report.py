@@ -29,7 +29,7 @@ def hex_to_rgb(color_map, cell):
 
 def get_partner_report(partner_name, individual_name=None):
     cellrow = 0
-    report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))))
+    report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))))
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     report_dict['Collaborator'] = partner.username
