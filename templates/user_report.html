@@ -31,10 +31,12 @@
                                                 <ul>
                                                 {% for se in samp|remove_def %}
                                                     {% if se != 'Extraction_date' %}
-                                                        <p><u>Cells separation</u>: {{se}}</p>
-                                                        <p><u>Cells separation date</u>: {{samp|find_val:se|find_val:'Cells_separation_date'}}</p>
-                                                        <p><u>Cells separation details</u>: {{samp|find_val:se|find_val:'Cells_separation_details'}}</p>
-                                                        <p><mark style="background-color:#{{samp|find_val:se|color:'Cells_color'}}"><u>Cells</u>: {{samp|find_val:se|find_val:'Cells_pos'|find_val:0}} - {{samp|find_val:se|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                        {% for cls in se|remove_def %}
+                                                            <p><u>Cells separation</u>: {{se}}</p>
+                                                            <p><u>Cells separation date</u>: {{samp|find_val:se|find_val:'Cells_separation_date'}}</p>
+                                                            <p><u>Cells separation details</u>: {{samp|find_val:se|find_val:'Cells_separation_details'}}</p>
+                                                            <p><mark style="background-color:#{{samp|find_val:se|color:'Cells_color'}}"><u>Cells</u>: {{samp|find_val:se|find_val:'Cells_pos'|find_val:0}} - {{samp|find_val:se|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                        {% endfor %}
                                                     {% endif %}
                                                 {% endfor %}
                                                 </ul>
@@ -45,7 +47,9 @@
                             {% endfor %}
                             </ul>
                         {% else %}
+                            {% for cls in individual|remove_def %}
                                 <p>Cells: {{individual|find_val:'cells_list'}}</p>
+                            {%  endfor %}
                         {% endif %}
                     {% endwith %}
                 {% endfor %}
