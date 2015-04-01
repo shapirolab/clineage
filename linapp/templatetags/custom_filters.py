@@ -26,7 +26,6 @@ def has_value(value, arg):
 def color(value, arg):
     color_p = ''
     clist = value[arg]
-    print clist
     for i in clist:
         color_p += i
     return color_p
