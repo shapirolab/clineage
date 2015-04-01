@@ -9,9 +9,9 @@ def find_val(value, arg):
     return value[arg]
 
 
-@register.filter(name='remove_def')
-def remove_def(value):
-    return value.keys()
+@register.filter(name='get_keys')
+def get_keys(value):
+    return sorted(value.keys())
 
 
 @register.filter(name='has_value')
@@ -26,6 +26,7 @@ def has_value(value, arg):
 def color(value, arg):
     color_p = ''
     clist = value[arg]
+    print clist
     for i in clist:
         color_p += i
     return color_p

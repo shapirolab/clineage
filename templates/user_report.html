@@ -9,37 +9,39 @@
 {% block content %}
     <h1>Collaborator: {{partner_dict.Collaborator}}</h1>
     <p>ID: {{partner_dict.ID}}</p>
-    {% for key in partner_dict|remove_def%}
+    {% for key in partner_dict|get_keys%}
         {% if key != 'Collaborator' and key != 'ID' %}
             {% with individuals=partner_dict|find_val:key %}
                 <ul>
-                {% for ind in individuals|remove_def %}
+                {% for ind in individuals|get_keys %}
                     <h2><u>Individual</u>: {{individuals|find_val:ind|find_val:'name'}}</h2>
                     <li><u>Collaborator table</u>: {{individuals|find_val:ind|find_val:'Collaborator_table'}}</li>
                     <li><u>Database table</u>: {{individuals|find_val:ind|find_val:'Database_table'}}</li>
                     {% with individual=individuals|find_val:ind %}
                         {% if not individual|has_value:'cells_list' %}
                             <ul>
-                            {% for ee in individual|remove_def %}
+                            {% for ee in individual|get_keys %}
                                 {% if ee != 'Database_table' and ee != 'Collaborator_table' and ee != 'name' and ee != 'cells_list' %}
                                     {% with exe=individual|find_val:ee %}
-                                        {% for e in exe|remove_def %}
+                                        {% for e in exe|get_keys %}
                                             <li><u>Sample</u>: {{e}}</li>
                                             <li><u>Extraction</u>: {{ee}}</li>
                                             {% with samp=exe|find_val:e %}
                                                 <li><u>Extraction date</u>: {{samp|find_val:'Extraction_date'}}</li>
                                                 <ul>
-                                                {% for se in samp|remove_def %}
-                                                    {% with sampling_event=samp|find_val:se %}
-                                                        {% if sampling_event != 'Extraction_date' %}
-                                                            {% for cls in sampling_event|remove_def %}
-                                                                <p><u>Cells separation</u>: {{se}}</p>
-                                                                <p><u>Cells separation date</u>: {{cls|find_val:'Cells_separation_date'}}</p>
-                                                                <p><u>Cells separation details</u>: {{cls|find_val:'Cells_separation_details'}}</p>
-                                                                <p><mark style="background-color:#{{sampling_event|color:'Cells_color'}}"><u>Cells</u>: {{cls|find_val:'Cells_pos'|find_val:0}} - {{cls|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                {% for se in samp|get_keys %}
+                                                    {% if se != 'Extraction_date' %}
+                                                        {% with sampling_event=samp|find_val:se %}
+                                                            {% for cls in sampling_event|get_keys %}
+                                                                {% with cl=sampling_event|find_val:cls %}
+                                                                    <p><u>Cells separation</u>: {{se}}</p>
+                                                                    <p><u>Cells separation date</u>: {{cl|find_val:'Cells_separation_date'}}</p>
+                                                                    <p><u>Cells separation details</u>: {{cl|find_val:'Cells_separation_details'}}</p>
+                                                                    <p><mark style="background-color:#{{cl|color:'Cells_color'}}"><u>Cells</u>: {{cl|find_val:'Cells_pos'|find_val:0}} - {{cl|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                                {% endwith %}
                                                             {% endfor %}
-                                                        {% endif %}
-                                                    {% endwith %}
+                                                        {% endwith %}
+                                                    {% endif %}
                                                 {% endfor %}
                                                 </ul>
                                             {% endwith %}
@@ -49,8 +51,10 @@
                             {% endfor %}
                             </ul>
                         {% else %}
-                            {% for cls in individual|remove_def %}
-                                <p><mark style="background-color:#{{cls|color:'Cells_color'}}"><u>Cells</u>: {{cls|find_val:'Cells_pos'|find_val:0}} - {{cls|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                            {% for cls in individual|get_keys %}
+                                {% with cl=individual|find_val:cls %}
+                                    <p><mark style="background-color:#{{cl|color:'Cells_color'}}"><u>Cells</u>: {{cl|find_val:'Cells_pos'|find_val:0}} - {{cl|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                {% endwith %}
                             {%  endfor %}
                         {% endif %}
                     {% endwith %}

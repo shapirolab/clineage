@@ -36,23 +36,26 @@ def get_partner_report(partner_name, individual_name=None):
     cells = get_cells(partner_name, individual_name)
     ur = UserReport.get_create_new(cells=cells, partner=partner, individual=individuals)
     report_dict['ID'] = ur.pk
-    for individual in individuals:
+    for individual in sorted(list(individuals), key=lambda i: i.name):
         report_dict[partner.username][individual.name]['name'] = individual.name
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
             report_dict[partner.username][individual.name]['cells_list'] = 1 #temporary workaround TODO:revise
-            for cls in set([cell.classification for cell in individual.cell_set.all()]):
+            for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
                 report_dict[partner.username][individual.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, individual.cell_set.filter(classification=cls)[0])
                 report_dict[partner.username][individual.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+individual.cell_set.filter(classification=cls).count()]
                 cellrow += individual.cell_set.filter(classification=cls).count()
         report_dict[partner.username][individual.name]['Collaborator_table'] = None
-        report_dict[partner.username][individual.name]['Database_table'] = None
-        for ee in individual.extractionevent_set.all():
-            for e in ee.extraction_set.all():
+        if individuals.count() > 1:
+            report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_cell_data.csv'.format(partner.username)
+        else:
+            report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_{}_cell_data.csv'.format(partner.username, individual.name)
+        for ee in sorted(list(individual.extractionevent_set.all()), key=lambda i: i.name):
+            for e in sorted(list(ee.extraction_set.all()), key=lambda i: i.name):
                 report_dict[partner.username][individual.name][ee.name][e.name]['Extraction_date'] = ee.date
-                for se in e.samplingevent_set.all():
-                    for cls in set([cell.classification for cell in se.cell_set.all()]):
+                for se in sorted(list(e.samplingevent_set.all()), key=lambda i: i.name):
+                    for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
                         if se.cell_set.filter(classification=cls):
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_date'] = se.date
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_details'] = se.comment
@@ -89,20 +92,20 @@ def get_cells(partner_name, individual_name=None, cell_groups=None):
 def get_cells_grouping(partner_name, individual_name=None, current_group=0):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     cell_groups = {}
-    for individual in individuals:
+    for individual in sorted(list(individuals), key=lambda i: i.name):
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-            for cls in set([cell.classification for cell in individual.cell_set.all()]):
+            for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
                 for cell in individual.cell_set.filter(classification=cls):
                     cell_groups[cell] = current_group
                 if individual.cell_set.filter(classification=cls):
                     current_group += 1
             continue
-        for ee in individual.extractionevent_set.all():
-            for e in ee.extraction_set.all():
-                for se in e.samplingevent_set.all():
-                    for cls in set([cell.classification for cell in se.cell_set.all()]):
+        for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
+            for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
+                for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
+                    for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
                         for cell in se.cell_set.filter(classification=cls):
                             cell_groups[cell] = current_group
                         if se.cell_set.filter(classification=cls):
