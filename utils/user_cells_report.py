@@ -28,7 +28,7 @@ def hex_to_rgb(color_map, cell):
 
 
 def get_partner_report(partner_name, individual_name=None):
-    cellrow = 0
+    cellrow = 1
     report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))))
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
     partner, individuals = query_partner_individuals(partner_name, individual_name)
@@ -89,6 +89,17 @@ def get_cells(partner_name, individual_name=None, cell_groups=None):
     return cell_groups.keys()
 
 
+def sorted_cells(individual):
+    cell_list = []
+    for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
+        for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
+            for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
+                for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
+                    for cell in se.cell_set.filter(classification=cls):
+                        cell_list.append(cell)
+    return cell_list
+
+
 def get_cells_grouping(partner_name, individual_name=None, current_group=0):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     cell_groups = {}
@@ -123,8 +134,8 @@ def get_cells_color_map(cell_groups):
 def user_cells_table_values(partner_name, individual_name=None, cell_folder=None):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
-    for individual in individuals:
-        for cell, file_name in get_cells_filenames_in_folder(individual.cell_set.all(), cell_folder):
+    for individual in sorted(list(individuals), key=lambda i: i.name):
+        for cell, file_name in get_cells_filenames_in_folder(sorted_cells(individual), cell_folder):
             for cell_cont in cell.cellcontent_set.all():
                 assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
                 for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
