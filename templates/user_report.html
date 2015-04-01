@@ -34,9 +34,9 @@
                                                         {% if sampling_event != 'Extraction_date' %}
                                                             {% for cls in sampling_event|remove_def %}
                                                                 <p><u>Cells separation</u>: {{se}}</p>
-                                                                <p><u>Cells separation date</u>: {{sampling_event|find_val:'Cells_separation_date'}}</p>
-                                                                <p><u>Cells separation details</u>: {{sampling_event|find_val:'Cells_separation_details'}}</p>
-                                                                <p><mark style="background-color:#{{sampling_event|color:'Cells_color'}}"><u>Cells</u>: {{sampling_event|find_val:'Cells_pos'|find_val:0}} - {{sampling_event|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                                                <p><u>Cells separation date</u>: {{cls|find_val:'Cells_separation_date'}}</p>
+                                                                <p><u>Cells separation details</u>: {{cls|find_val:'Cells_separation_details'}}</p>
+                                                                <p><mark style="background-color:#{{sampling_event|color:'Cells_color'}}"><u>Cells</u>: {{cls|find_val:'Cells_pos'|find_val:0}} - {{cls|find_val:'Cells_pos'|find_val:1}}</mark></p>
                                                             {% endfor %}
                                                         {% endif %}
                                                     {% endwith %}
