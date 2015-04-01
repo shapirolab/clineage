@@ -12,6 +12,8 @@ ADMINS = (
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+S_MAIN = '/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR2/fastq_human/Output'
+
 PRIMER3_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core'
 
 BOWTIE2_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2'
