@@ -27,10 +27,10 @@ def hex_to_rgb(color_map, cell):
     return rgb
 
 
-def get_partner_report(partner_name, individual_name=None):
+def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
     cellrow = 1
     report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))))
-    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
+    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name), palette_name)
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     report_dict['Collaborator'] = partner.username
     cells = get_cells(partner_name, individual_name)
@@ -124,16 +124,16 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
     return cell_groups
 
 
-def get_cells_color_map(cell_groups):
+def get_cells_color_map(cell_groups, palette_name='hls'):
     if len(set(cell_groups.values())) == 1:
         return {cell: (0, 0.5, 0.5) for cell in cell_groups}
-    palette = sns.color_palette('hls', len(set(cell_groups.values())))
+    palette = sns.color_palette(palette_name, len(set(cell_groups.values())))
     return {cell: palette[cell_groups[cell]] for cell in cell_groups}
 
 
-def user_cells_table_values(partner_name, individual_name=None, cell_folder=None):
+def user_cells_table_values(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
-    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name))
+    color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name), palette_name)
     for individual in sorted(list(individuals), key=lambda i: i.name):
         for cell, file_name in get_cells_filenames_in_folder(sorted_cells(individual), cell_folder):
             for cell_cont in cell.cellcontent_set.all():
@@ -159,7 +159,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Well': smart_str(loc.well)
                     }
 
-def print_cells_table(partner_name, individual_name=None, cell_folder=None):
+def print_cells_table(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
     cell_data_file = '{}cell_data.csv'.format(cell_folder)
     with open(cell_data_file, 'w') as f:
         fieldnames = ['Cell ID',
@@ -182,5 +182,5 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None):
                       ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
+        for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder, palette_name=palette_name):
             writer.writerow(cell_values)

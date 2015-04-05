@@ -745,7 +745,8 @@ def longview(request):
 
 def partner_cells_table_view(request, partner_name,
                              cell_folder=settings.S_MAIN,
-                             individual_name=None):
+                             individual_name=None,
+                             palette_name='hls'):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="{}_cell_data.csv"'.format(partner_name)
     fieldnames = ['Cell ID',
@@ -768,15 +769,15 @@ def partner_cells_table_view(request, partner_name,
                   ]
     writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
-    for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
+    for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder, palette_name=palette_name):
             writer.writerow(cell_values)
     return response
 
 
 
-def partner_cells_html_view(request, partner_name, individual_name=None):
+def partner_cells_html_view(request, partner_name, individual_name=None, palette_name='hls'):
     # response = HttpResponse(content_type='text/html')
     # response['content_type'] = 'application/liquid; charset=utf-8'
-    partner_dict = get_partner_report(partner_name, individual_name)
+    partner_dict = get_partner_report(partner_name, individual_name, palette_name=palette_name)
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)
