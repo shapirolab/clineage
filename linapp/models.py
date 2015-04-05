@@ -161,6 +161,9 @@ class TargetType(models.Model):
 ### -------------------------------------------------------------------------------------
 class RestrictionSiteType(models.Model):
     name = models.CharField(max_length=50)
+    sequence = models.CharField(max_length=50)
+    cut_delta = models.IntegerField()
+    sticky_bases = models.IntegerField()
 
     def __unicode__(self):
         return self.name
