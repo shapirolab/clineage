@@ -159,6 +159,12 @@ class TargetType(models.Model):
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
+class RestrictionSiteType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
 class TargetVariantType(models.Model): #TODO: This might be useless. Decide.
     name = models.CharField(max_length=50)
 
@@ -382,6 +388,9 @@ class Microsatellite(Target):
 class SNP(Target):
     mutation = models.CharField(max_length=10) #X>Y
     modified = models.CharField(max_length=10) #Y
+### -------------------------------------------------------------------------------------
+class RestrictionSite(Target):
+    restriction_type = models.ForeignKey(RestrictionSiteType)
 ### -------------------------------------------------------------------------------------
 class TargetEnrichmentType(models.Model):
     name = models.CharField(max_length=50)
