@@ -152,12 +152,13 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Organ': smart_str(cell.sampling.extraction.organ.name if cell.sampling else ''),
                         'Tissue': smart_str(cell.sampling.extraction.tissue.name if cell.sampling else ''),
                         'Sampling Event': smart_str(cell.sampling.name if cell.sampling else ''),
-                        'Group Color': color_map[cell],
+                        'Group Color': list(color_map[cell]),
                         'Sampling Comment': smart_str(cell.sampling.comment if cell.sampling else ''),
                         'Cell Type': smart_str(cell.composition.name),
                         'Plate': smart_str(loc.plate.name),
                         'Well': smart_str(loc.well)
                     }
+
 
 def print_cells_table(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
     cell_data_file = '{}cell_data.csv'.format(cell_folder)
