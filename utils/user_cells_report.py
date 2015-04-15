@@ -45,6 +45,7 @@ def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
             for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
                 report_dict[partner.username][individual.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, individual.cell_set.filter(classification=cls)[0])
                 report_dict[partner.username][individual.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+individual.cell_set.filter(classification=cls).count()]
+                report_dict[partner.username][individual.name][str(cls)]['Cells_classification_string'] = cls
                 cellrow += individual.cell_set.filter(classification=cls).count()
         report_dict[partner.username][individual.name]['Collaborator_table'] = None
         if individuals.count() > 1:
@@ -59,6 +60,7 @@ def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
                         if se.cell_set.filter(classification=cls):
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_date'] = se.date
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_details'] = se.comment
+                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_classification_string'] = cls
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.filter(classification=cls)[0])
                             report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.filter(classification=cls).count()]
                             cellrow += se.cell_set.filter(classification=cls).count()
