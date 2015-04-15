@@ -388,7 +388,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
             filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
         if right_restriction_site:
             return right_restriction_site[0]
-        return self.right_restriction_site(restriction_type, max_seek=max_seek*2)
+        return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
 
     def get_surrounding_restriction(self, restriction_type):
         left = self.get_left_surrounding_restriction(restriction_type)
