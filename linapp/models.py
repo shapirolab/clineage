@@ -164,6 +164,11 @@ class RestrictionSiteType(models.Model):
     sequence = models.CharField(max_length=50)
     cut_delta = models.IntegerField()
     sticky_bases = models.IntegerField()
+    sequence_len = models.PositiveIntegerField()
+
+    def save(self, *args, **kwargs):
+        self.sequence_len = len(self.sequence)
+        return super(RestrictionSiteType, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -348,7 +353,6 @@ class Target(models.Model):#Target is a locus on a reference genome.
     end_pos = models.IntegerField(db_index=True)
     referencevalue = models.ForeignKey(Sequence)
     partner = models.ManyToManyField(User, null=True)
-    # unique_together = (("chromosome", "start_pos"),)
 
     def get_referencevalue(self):
         return self.chromosome.getdna(self.start_pos, self.end_pos)
@@ -373,33 +377,10 @@ class Target(models.Model):#Target is a locus on a reference genome.
         raise SearchMarginesDoesNotExist
 
 
-    def ot_get_left_surrounding_restriction(self, restriction_type, max_seek=100):
-        left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            .filter(chromosome=self.chromosome).\
-            filter(start_pos__lte=self.start_pos-len(restriction_type.sequence)).\
-            filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
-        if left_restriction_site:
-            return left_restriction_site[0]
-        return self.get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
-
-    def ot_get_right_surrounding_restriction(self, restriction_type, max_seek=100):
-        right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            .filter(chromosome=self.chromosome).\
-            filter(end_pos__gte=self.end_pos+len(restriction_type.sequence)).\
-            filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
-        if right_restriction_site:
-            return right_restriction_site[0]
-        return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
-
-    def ot_get_surrounding_restriction(self, restriction_type):
-        left = self.ot_get_left_surrounding_restriction(restriction_type)
-        right = self.ot_get_right_surrounding_restriction(restriction_type)
-        return left, right
-
     def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
         left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
             .filter(chromosome=self.chromosome).\
-            filter(end_pos__lte=self.start_pos).\
+            filter(start_pos__lte=self.start_pos-restriction_type.sequence_len).\
             filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
         if left_restriction_site:
             return left_restriction_site[0]
@@ -408,7 +389,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
     def get_right_surrounding_restriction(self, restriction_type, max_seek=100):
         right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
             .filter(chromosome=self.chromosome).\
-            filter(start_pos__gte=self.end_pos).\
+            filter(end_pos__gte=self.end_pos+restriction_type.sequence_len).\
             filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
         if right_restriction_site:
             return right_restriction_site[0]
