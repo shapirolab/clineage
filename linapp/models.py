@@ -372,6 +372,30 @@ class Target(models.Model):#Target is a locus on a reference genome.
             return pos
         raise SearchMarginesDoesNotExist
 
+
+    def ot_get_left_surrounding_restriction(self, restriction_type, max_seek=100):
+        left_restriction_site = Target.objects.filter(chromosome=self.chromosome).\
+            filter(end_pos__lte=self.start_pos).\
+            filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
+        if left_restriction_site and RestrictionSite.objects.filter(pk=left_restriction_site[0].pk)\
+                .filter(restriction_type=restriction_type):
+            return RestrictionSite.objects.get(pk=left_restriction_site[0].pk)
+        return self.ot_get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+
+    def ot_get_right_surrounding_restriction(self, restriction_type, max_seek=100):
+        right_restriction_site = Target.objects.filter(chromosome=self.chromosome).\
+            filter(start_pos__gte=self.end_pos).\
+            filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
+        if right_restriction_site and RestrictionSite.objects.filter(pk=right_restriction_site[0].pk).\
+                filter(restriction_type=restriction_type):
+            return RestrictionSite.objects.get(pk=right_restriction_site[0].pk)
+        return self.ot_get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+
+    def ot_get_surrounding_restriction(self, restriction_type):
+        left = self.ot_get_left_surrounding_restriction(restriction_type)
+        right = self.ot_get_right_surrounding_restriction(restriction_type)
+        return left, right
+
     def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
         left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
             .filter(chromosome=self.chromosome).\
