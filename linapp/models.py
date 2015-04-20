@@ -159,6 +159,20 @@ class TargetType(models.Model):
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
+class RestrictionSiteType(models.Model):
+    name = models.CharField(max_length=50)
+    sequence = models.CharField(max_length=50)
+    cut_delta = models.IntegerField()
+    sticky_bases = models.IntegerField()
+    sequence_len = models.PositiveIntegerField()
+
+    def save(self, *args, **kwargs):
+        self.sequence_len = len(self.sequence)
+        return super(RestrictionSiteType, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
 class TargetVariantType(models.Model): #TODO: This might be useless. Decide.
     name = models.CharField(max_length=50)
 
@@ -325,6 +339,12 @@ class Protocol(models.Model):
     def __unicode__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
+class SearchMarginesDoesNotExist(Exception):
+    """
+    Attempt to query a position outside chromosome sequence
+    """
+    pass
+### -------------------------------------------------------------------------------------
 class Target(models.Model):#Target is a locus on a reference genome.
     name = models.CharField(max_length=50)
     type = models.ForeignKey(TargetType) #Microsatellite / SNP / etc...
@@ -333,7 +353,6 @@ class Target(models.Model):#Target is a locus on a reference genome.
     end_pos = models.IntegerField(db_index=True)
     referencevalue = models.ForeignKey(Sequence)
     partner = models.ManyToManyField(User, null=True)
-    # unique_together = (("chromosome", "start_pos"),)
 
     def get_referencevalue(self):
         return self.chromosome.getdna(self.start_pos, self.end_pos)
@@ -349,6 +368,37 @@ class Target(models.Model):#Target is a locus on a reference genome.
                                 .filter(left__end_pos__lte=self.start_pos)\
                                 .filter(right__start_pos__gte=self.end_pos):
             te.update_enriched_targets()
+
+    def get_margine(self, pos):
+        if self.chromosome.cyclic:
+            return pos
+        if 0 <= pos <= self.chromosome.sequence_length:
+            return pos
+        raise SearchMarginesDoesNotExist
+
+
+    def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
+        left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
+            .filter(chromosome=self.chromosome).\
+            filter(start_pos__lte=self.start_pos-restriction_type.sequence_len).\
+            filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
+        if left_restriction_site:
+            return left_restriction_site[0]
+        return self.get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+
+    def get_right_surrounding_restriction(self, restriction_type, max_seek=100):
+        right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
+            .filter(chromosome=self.chromosome).\
+            filter(end_pos__gte=self.end_pos+restriction_type.sequence_len).\
+            filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
+        if right_restriction_site:
+            return right_restriction_site[0]
+        return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+
+    def get_surrounding_restriction(self, restriction_type):
+        left = self.get_left_surrounding_restriction(restriction_type)
+        right = self.get_right_surrounding_restriction(restriction_type)
+        return left, right
 ### -------------------------------------------------------------------------------------
 class PrimerTail(models.Model):
     tail = models.CharField(max_length=50, null=True)
@@ -382,6 +432,9 @@ class Microsatellite(Target):
 class SNP(Target):
     mutation = models.CharField(max_length=10) #X>Y
     modified = models.CharField(max_length=10) #Y
+### -------------------------------------------------------------------------------------
+class RestrictionSite(Target):
+    restriction_type = models.ForeignKey(RestrictionSiteType)
 ### -------------------------------------------------------------------------------------
 class TargetEnrichmentType(models.Model):
     name = models.CharField(max_length=50)

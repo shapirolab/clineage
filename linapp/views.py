@@ -746,7 +746,8 @@ def longview(request):
 
 def partner_cells_table_view(request, partner_name,
                              cell_folder=settings.S_MAIN,
-                             individual_name=None):
+                             individual_name=None,
+                             palette_name='hls'):
     response = HttpResponse(content_type='text/csv')
     try:
         p = User.objects.get(username__contains=partner_name)
@@ -779,9 +780,9 @@ def partner_cells_table_view(request, partner_name,
 
 
 
-def partner_cells_html_view(request, partner_name, individual_name=None):
+def partner_cells_html_view(request, partner_name, individual_name=None, palette_name='hls'):
     # response = HttpResponse(content_type='text/html')
     # response['content_type'] = 'application/liquid; charset=utf-8'
-    partner_dict = get_partner_report(partner_name, individual_name)
+    partner_dict = get_partner_report(partner_name, individual_name, palette_name=palette_name)
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)
