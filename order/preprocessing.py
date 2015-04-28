@@ -1,6 +1,5 @@
 from collections import defaultdict, Counter
-from binomial_sim import sim, dyn_prob
-from frogress import bar as tqdm
+from binomial_sim import dyn_prob
 from order.hist import Histogram
 from itertools import combinations
 import numpy as np
@@ -41,59 +40,6 @@ def generate_bin_hist_pure_optimized(d,
     nh.normalize()
     nh.clean_zero_entries()
     return nh
-
-
-def generate_bin_hist_pure(d,
-                           cycles,
-                           up=lambda x: 0.003,
-                           dw=lambda x: 0.022,
-                           sample_depth=10000,
-                           normalize=False,
-                           truncate=False,
-                           cut_peak=False,
-                           trim_extremes=False,
-                           **kwargs):
-    up_p = up(d)
-    dw_p = dw(d)
-    z = sim(cycles, up_p, dw_p)
-    zpdf = z.get_piecewise_pdf()
-    h = Histogram(
-        Counter(
-            {i: zpdf.findSegment(i).f for i in zpdf.getBreaks()}
-        ),
-        normalize=normalize,
-        nsamples=sample_depth,
-        truncate=truncate,
-        cut_peak=cut_peak,
-        trim_extremes=trim_extremes
-    )
-    h.truncate(p=0.0001)
-    h.normalize()
-    h.clean_zero_entries()
-    return h
-
-
-def generate_bin_hist(d,
-                      cycles,
-                      up=lambda x: 0.003,
-                      dw=lambda x: 0.022,
-                      sample_depth=10000,
-                      normalize=True,
-                      truncate=False,
-                      cut_peak=False,
-                      trim_extremes=False,
-                      **kwargs):
-    up_p = up(d)
-    dw_p = dw(d)
-    z = sim(cycles, up_p, dw_p)
-    return Histogram(
-        Counter(z.rand(sample_depth)),
-        normalize=normalize,
-        nsamples=sample_depth,
-        truncate=truncate,
-        cut_peak=cut_peak,
-        trim_extremes=trim_extremes
-    )
 
 
 def generate_dyn_hist(d,
@@ -146,8 +92,6 @@ def generate_mat_hist(d,
 def get_method(method):
     if method == 'bon':
         return generate_bin_hist_pure_optimized
-    if method == 'bin':
-        return generate_bin_hist_pure
     if method == 'dyn':
         return generate_dyn_hist
     if method == 'mat':

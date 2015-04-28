@@ -25,11 +25,10 @@ if '__main__' == __name__:
     parser.add_argument('-sm', '--shiftmargins', type=int, dest='shiftmargins', default=15, help='number of attempted shifts to either side of the histogram median')
     parser.add_argument('-bd', '--simulationmethod', type=str, dest='simulationmethod', default='bin', help='method of MS histogram simulation')
     parser.add_argument('-w', '--workers', type=int, dest='workers', default=1, help='Number of working processes')
-    #TODO: document those:
-    parser.add_argument('-ma', '--maxalleles', type=int, dest='max_alleles', default=2, help='number of attempted shifts to either side of the histogram median')
-    parser.add_argument('-sd', '--sampledepth', type=int, dest='sample_depth', default=10000, help='number of attempted shifts to either side of the histogram median')
-    parser.add_argument('-ml', '--maxmslength', type=int, dest='max_ms_length', default=60, help='number of attempted shifts to either side of the histogram median')
-    parser.add_argument('-md', '--mediandistance', type=int, dest='max_distance_from_median', default=10, help='number of attempted shifts to either side of the histogram median')
+    parser.add_argument('-ma', '--maxalleles', type=int, dest='max_alleles', default=2, help='maximum number of alleles to consider. *This drastically increase runtime!')
+    parser.add_argument('-sd', '--sampledepth', type=int, dest='sample_depth', default=10000, help='in non-deterministic simulations, this determines the sampling depth of the model histogram')
+    parser.add_argument('-ml', '--maxmslength', type=int, dest='max_ms_length', default=60, help='maximum ms length to consider')
+    parser.add_argument('-md', '--mediandistance', type=int, dest='max_distance_from_median', default=10, help='maximum distance from the median value to take into account')
 
     args = parser.parse_args()
     normalize = args.normalize
