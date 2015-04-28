@@ -69,8 +69,8 @@ def generate_dyn_hist(d,
 
 def generate_mat_hist(d,
                       cycles,
-                      up=lambda x: 0.003,
-                      dw=lambda x: 0.022,
+                      up=(lambda x: 0.003,),
+                      dw=(lambda x: 0.022,),
                       sample_depth=10000,
                       normalize=True,
                       truncate=False,
@@ -79,11 +79,11 @@ def generate_mat_hist(d,
                       **kwargs):
     values = dyn_mat_model(up, dw, d, cycles)
     h = Histogram({i: values[i] for i in range(100)},
-               nsamples=sample_depth,
-               normalize=normalize,
-               truncate=truncate,
-               cut_peak=cut_peak,
-               trim_extremes=trim_extremes)
+                  nsamples=sample_depth,
+                  normalize=normalize,
+                  truncate=truncate,
+                  cut_peak=cut_peak,
+                  trim_extremes=trim_extremes)
     h.truncate(p=0.0001)
     h.normalize()
     h.clean_zero_entries()
