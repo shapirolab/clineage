@@ -53,9 +53,11 @@
                             </ul>
                         {% else %}
                             {% for cls in individual|get_keys %}
-                                {% with cl=individual|find_val:cls %}
-                                    <p><mark style="background-color:#{{cl|color:'Cells_color'}}"><u>Cells</u>: {{cl|find_val:'Cells_pos'|find_val:0}} - {{cl|find_val:'Cells_pos'|find_val:1}}</mark></p>
-                                {% endwith %}
+                                {% if cls != 'Database_table' and cls != 'Collaborator_table' and cls != 'name' and cls != 'cells_list' %}
+                                    {% with cl=individual|find_val:cls %}
+                                        <p><mark style="background-color:#{{cl|color:'Cells_color'}}"><u>Cells</u>: {{cl|find_val:'Cells_pos'|find_val:0}} - {{cl|find_val:'Cells_pos'|find_val:1}}</mark></p>
+                                    {% endwith %}
+                                {% endif %}
                             {%  endfor %}
                         {% endif %}
                     {% endwith %}

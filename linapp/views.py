@@ -779,7 +779,6 @@ def partner_cells_table_view(request, partner_name,
     return response
 
 
-
 def partner_cells_html_view(request, partner_name, individual_name=None, palette_name='hls'):
     # response = HttpResponse(content_type='text/html')
     # response['content_type'] = 'application/liquid; charset=utf-8'
