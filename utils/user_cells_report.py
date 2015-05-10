@@ -93,6 +93,12 @@ def get_cells(partner_name, individual_name=None, cell_groups=None):
 
 def sorted_cells(individual):
     cell_list = []
+    if not individual.extractionevent_set.all() or \
+            not individual.extractionevent_set.all()[0].extraction_set.all() or \
+            not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
+        for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
+            for cell in individual.cell_set.filter(classification=cls):
+                cell_list.append(cell)
     for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
         for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
             for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
