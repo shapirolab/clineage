@@ -43,5 +43,5 @@ def get_probs_n(mat, n):
     return [mat[n, i] for i in xrange(mat.shape[0])]
 
 
-def dyn_mat_model(fu, fd, ms_len, cycles):
-    return get_probs_n(matrix_power(markovian_matrix(fu, fd), cycles), ms_len)
+def dyn_mat_model(fus, fds, ms_len, cycles, n=100):
+    return get_probs_n(matrix_power(markovian_matrix(fus, fds, n=n), cycles), ms_len)
