@@ -5,12 +5,12 @@ from itertools import combinations
 import numpy as np
 from optimize_probs import dyn_mat_model
 from scipy.stats import binom
-
+from frogress import bar
 
 def generate_bin_hist_pure_optimized(d,
                            cycles,
-                           up=lambda x: 0.003,
-                           dw=lambda x: 0.022,
+                           up,
+                           dw,
                            margines = 20,
                            sample_depth=10000,
                            normalize=False,
@@ -44,8 +44,8 @@ def generate_bin_hist_pure_optimized(d,
 
 def generate_dyn_hist(d,
                       cycles,
-                      up=lambda x: 0.003,
-                      dw=lambda x: 0.022,
+                      up,
+                      dw,
                       sample_depth=10000,
                       normalize=True,
                       truncate=False,
@@ -69,25 +69,26 @@ def generate_dyn_hist(d,
 
 def generate_mat_hist(d,
                       cycles,
-                      up=lambda x: 0.003,
-                      dw=lambda x: 0.022,
+                      ups,
+                      dws,
                       sample_depth=10000,
                       normalize=True,
                       truncate=False,
                       cut_peak=False,
                       trim_extremes=False,
                       **kwargs):
-    values = dyn_mat_model(up, dw, d, cycles)
+    values = dyn_mat_model(ups, dws, d, cycles)
     h = Histogram({i: values[i] for i in range(100)},
-               nsamples=sample_depth,
-               normalize=normalize,
-               truncate=truncate,
-               cut_peak=cut_peak,
-               trim_extremes=trim_extremes)
+                  nsamples=sample_depth,
+                  normalize=normalize,
+                  truncate=truncate,
+                  cut_peak=cut_peak,
+                  trim_extremes=trim_extremes)
     h.truncate(p=0.0001)
     h.normalize()
     h.clean_zero_entries()
     return h - d
+
 
 def get_method(method):
     if method == 'bon':
@@ -110,7 +111,7 @@ def generate_sim_hists(max_ms_length=60,
                        method='bin',
                        **kwargs):
     sim_hists = defaultdict(dict)
-    for d in tqdm(range(max_ms_length)):
+    for d in bar(range(max_ms_length)):
         for cycles in range(max_cycles):
             sim_hists[d][cycles] = generate_hist(d, cycles, method, **kwargs)
     return sim_hists
@@ -121,7 +122,7 @@ def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     for allele_number in range(1, max_alleles+1):
         for seeds in combinations(sim_hists.keys(), allele_number):
             shift = int(np.mean(seeds))
-            for cycles in tqdm(sim_hists[0].keys()):#TODO: get sim_hists parameters in call?
+            for cycles in bar(sim_hists[0].keys()):  # TODO: get sim_hists parameters in call?
                 first_seed = seeds[0]
                 sum_hist = sim_hists[first_seed][cycles] + first_seed
                 for seed in seeds[1:]:
@@ -135,8 +136,8 @@ def generate_sim_hists_of_up_to_k_alleles(**kwargs):
         method='bin'
         max_ms_length=60,
         max_cycles=90,
-        up=lambda x: 0.003,
-        dw=lambda x: 0.022,
+        ups=[lambda x: 0.003],
+        dws=[lambda x: 0.022],
         sample_depth=10000,
         normalize=True,
         truncate=False,
