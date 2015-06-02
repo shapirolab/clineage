@@ -14,7 +14,24 @@ def create_amplicons_for_primer3(target, margins):
     return amplicon
 
 
-def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, margins=100, seq_region=100):
+def primer3_log_file(input_name, primer_num_rerun, margins, seq_region, input_folder):
+    # Print log file of Primer3 run - preparing
+    log_name = ("{}/log_file.txt".format(str(input_folder)))
+    with open(log_name, 'w+') as log_file:
+        log_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
+                                    'PRIMER_MAX_SIZE=27\nPRIMER_PRODUCT_SIZE_RANGE=30-1000\nP3_FILE_FLAG=0\n'
+                                    'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
+                                    'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
+                                    'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\nAMPLICON_LENGTH={}'
+                                    'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}'.format(primer_num_rerun,
+                                                                                            margins*2+1,
+                                                                                            seq_region,
+                                                                                            margins*2+1-seq_region,
+                                                                                            seq_region))
+    return
+
+
+def primer3_design(obj_list, input_name, output_name, input_folder, primer_num_rerun=10000, margins=100, seq_region=100):
     primer3_input = ("{}.txt".format(str(input_name)))
     with open(primer3_input, 'w+') as primer3_file:
         primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
@@ -24,6 +41,8 @@ def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, ma
                                     'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n'.format(primer_num_rerun))
         for target in obj_list:
             amplicon = create_amplicons_for_primer3(target, margins)
+            # assert len(target)+margins*2 > 470:
+
             primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
                                'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}\n=\n'.format(target.id,
                                                                                             amplicon,
@@ -31,10 +50,11 @@ def primer3_design(obj_list, input_name, output_name, primer_num_rerun=10000, ma
                                                                                             len(amplicon)-seq_region,
                                                                                             seq_region))
 
-    #Run the primer3 on the input
+    # Run the primer3 on the input
     primer3_output = ("{}_primer3.txt".format(str(output_name)))
     s = '{} < {} > {}'.format(settings.PRIMER3_PATH, primer3_input, primer3_output)
     os.system(s)
+    primer3_log_file(input_folder, primer_num_rerun, margins, seq_region)
     return primer3_output
 
 

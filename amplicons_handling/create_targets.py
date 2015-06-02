@@ -148,15 +148,23 @@ def proccess_input_target_file(input_file):
 if '__main__' == __name__:
     parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
     parser.add_argument('-i', '--input', type=str, dest='input_file', help='path for target table file')
+    parser.add_argument('-p', '--input', type=str, dest='input_folder', help='path for target folder')
     parser.add_argument('-n', '--name', type=str, dest='input_name', help='files prefix for the targets')
     parser.add_argument('-o', '--output', type=str, dest='output_name', help='output file name prefix for the targets')
     parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for bowtie2_index files')
     parser.add_argument('-t', '--tails', type=bool, dest='tails', help='primers have tails?')
+    parser.add_argument('-r', '--primerNumReRun', type=int, dest='primer_num_rerun', default=10000, help='number of pair primers to constract')
+    parser.add_argument('-m', '--margins', type=int, dest='margins', default=100, help='margins for the desired quancing region')
+    parser.add_argument('-s', '--primerRegion', type=int, dest='seq_region', default=100, help='rigeon margin to look for primers')
     args = parser.parse_args()
     input_file = args.input_file
+    input_folder = args.input_folder
     input_name = args.input_name
     output_name = args.output_name
     bowtie2_index = args.bowtie2_index
+    primer_num_rerun = args.primer_num_rerun
+    margins = args.margins
+    seq_region = args.seq_region
     xls_name = ("PrimerOrder{}.xls".format(str(output_name)))
     is_tails = args.tails
     no_tails_te_type, tails_te_type = TargetEnrichmentType.objects.all()
@@ -165,7 +173,7 @@ if '__main__' == __name__:
     else:
         te_type = no_tails_te_type
     obj_list = proccess_input_target_file(input_file)
-    primer3_name_file = primer3_design(obj_list, input_name, output_name)
+    primer3_name_file = primer3_design(obj_list, input_name, output_name, primer_num_rerun, margins, seq_region, input_folder)
     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
     ptf, ptr = PrimerTail.objects.all()

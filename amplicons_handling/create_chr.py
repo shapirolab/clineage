@@ -15,7 +15,7 @@ chr1 = Chromosome.objects.filter(assembly=hg19).get(name='1')
 chr1.get_abs_path()
 
 
-%mm9
+# mm9
 chr_list = ['10',
 '18',
 '6',
@@ -37,7 +37,7 @@ chr_list = ['10',
 '17',
 '5',]
 
-%mm10
+# mm10
 chr_list = ['1',
 '2',
 '3',
