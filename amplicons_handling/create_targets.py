@@ -154,8 +154,8 @@ if '__main__' == __name__:
     parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for bowtie2_index files')
     parser.add_argument('-t', '--tails', type=bool, dest='tails', help='primers have tails?')
     parser.add_argument('-r', '--primerNumReRun', type=int, dest='primer_num_rerun', default=10000, help='number of pair primers to constract')
-    parser.add_argument('-m', '--margins', type=int, dest='margins', default=100, help='margins for the desired quancing region')
-    parser.add_argument('-s', '--primerRegion', type=int, dest='seq_region', default=100, help='rigeon margin to look for primers')
+    parser.add_argument('-m', '--margins', type=int, dest='margins', default=100, help='margins for the desired sequencing region')
+    parser.add_argument('-s', '--primerRegion', type=int, dest='seq_region', default=100, help='region margin to look for primers')
     args = parser.parse_args()
     input_file = args.input_file
     input_folder = args.input_folder

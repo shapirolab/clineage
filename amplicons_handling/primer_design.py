@@ -35,14 +35,12 @@ def primer3_design(obj_list, input_name, output_name, input_folder, primer_num_r
     primer3_input = ("{}.txt".format(str(input_name)))
     with open(primer3_input, 'w+') as primer3_file:
         primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
-                                    'PRIMER_MAX_SIZE=27\nPRIMER_PRODUCT_SIZE_RANGE=30-1000\nP3_FILE_FLAG=0\n'
+                                    'PRIMER_MAX_SIZE=27\nPRIMER_PRODUCT_SIZE_RANGE=130-300\nP3_FILE_FLAG=0\n'
                                     'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
                                     'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
                                     'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n'.format(primer_num_rerun))
         for target in obj_list:
             amplicon = create_amplicons_for_primer3(target, margins)
-            # assert len(target)+margins*2 > 470:
-
             primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
                                'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST=1,{},{},{}\n=\n'.format(target.id,
                                                                                             amplicon,
