@@ -64,10 +64,27 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     return (pf_s, pf_e), (pr_s, pr_e)
 
 
+def insilico_test():
 
-def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_type=TargetType.objects.get(name='Flank'), pf_tail=None, pr_tail=None, margins=200):
+    return True
+
+def create_one_primer(start, end, tail, target, primer_type, refseq, seq):
+    primer, created = Primer.objects.get_or_create(start_pos=start,
+                             end_pos=end,
+                             tail=tail,
+                             chromosome=target.chromosome,
+                             defaults={'name': target.name + '_fwd',
+                                       'type': primer_type,
+                                       'referencevalue': refseq,
+                                       'strand': '+',
+                                       'sequence': seq,
+                                       })
+    return primer, created
+
+
+def create_primers_in_db(chosen_target_primers, target_enrichment_type, margins=200, in_silico=True,
+                         pf_tail=None, pr_tail=None, primer_type=TargetType.objects.get(name='Flank')):
     colliding_amplicons = []
-    create_primer_pairs = []
     te_list = []
     for target_id in bar(chosen_target_primers):
         target = Target.objects.get(pk=target_id)
@@ -94,28 +111,11 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
             pf_seq = get_or_create_sequence(primer_left_sequence)
             pr_seq = get_or_create_sequence(primer_right_sequence)
         TargetType.objects.get(name='Flank')
-        primer_fwd, created_fw = Primer.objects.get_or_create(start_pos=pf_s,
-                                        end_pos=pf_e,
-                                        tail=pf_tail,
-                                        chromosome=target.chromosome,
-                                        defaults={'name': target.name + '_fwd',
-                                                  'type': primer_type,
-                                                  'referencevalue': pf_refseq,
-                                                  'strand': '+',
-                                                  'sequence': pf_seq,
-                                                  })
+        primer_fwd, created_fw = create_one_primer(pf_s, pf_e, pf_tail, target, primer_type, pf_refseq, pf_seq)
         # print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
-        primer_rev, created_rv = Primer.objects.get_or_create(start_pos=pr_s,
-                                        end_pos=pr_e,
-                                        tail=pr_tail,
-                                        chromosome=target.chromosome,
-                                        defaults={'name': target.name + '_rev',
-                                                  'type': primer_type,
-                                                  'referencevalue': pr_refseq,
-                                                  'strand': '-',
-                                                  'sequence': pr_seq,
-                                                  })
+        primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq)
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
+
         assert primer_rev.end_pos - primer_fwd.start_pos < 300
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
@@ -131,4 +131,10 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, primer_t
                     })
         te_made.update_enriched_targets()
         te_list.append(te_made)
+
+    if in_silico:
+        for primer_pair in te_list:
+            validated_primer = insilico_test(primer_pair)
+            assert validated_primer
+
     return te_list
