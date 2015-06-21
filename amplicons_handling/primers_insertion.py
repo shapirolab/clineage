@@ -39,7 +39,7 @@ class AmpliconCollisionError(Exception):
         super(AmpliconCollisionError, self).__init__(msg)
 
 
-def check_primers(target, primer_left_sequence, primer_right_sequence, target_enrichment_type, margins=120):
+def check_primers(target, primer_left_sequence, primer_right_sequence, target_enrichment_type, margins):
     """
     Search given primer sequences surrounding a Target object in the reference genome
     of the target. Checks for existing overlapping amplicons.
