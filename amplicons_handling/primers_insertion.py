@@ -91,8 +91,8 @@ def create_one_primer(start, end, tail, target, primer_type, refseq, seq):
     return primer, created
 
 
-def create_primers_in_db(chosen_target_primers, target_enrichment_type, margins=200, in_silico=True,
-                         pf_tail=None, pr_tail=None, primer_type=TargetType.objects.get(name='Flank')):
+def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silico=True,
+                         pf_tail=None, pr_tail=None, margins=200, primer_type=TargetType.objects.get(name='Flank')):
     colliding_amplicons = []
     te_list = []
     for target_id in bar(chosen_target_primers):
