@@ -92,7 +92,7 @@ def create_one_primer(start, end, tail, target, primer_type, refseq, seq):
 
 
 def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silico=True,
-                         pf_tail=None, pr_tail=None, margins=200, primer_type=TargetType.objects.get(name='Flank')):
+                         pf_tail=None, pr_tail=None, margins=400, primer_type=TargetType.objects.get(name='Flank')):
     colliding_amplicons = []
     te_list = []
     for target_id in bar(chosen_target_primers):
@@ -125,7 +125,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq)
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
 
-        assert primer_rev.end_pos - primer_fwd.start_pos < 300
+        assert primer_rev.end_pos - primer_fwd.start_pos > 300
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
@@ -141,8 +141,8 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         te_made.update_enriched_targets()
         te_list.append(te_made)
 
-    if in_silico:
-        assem = te_list[0].chromosome.assembly()
+    if in_silico and te_list:
+        assem = te_list[0].chromosome.assembly.friendly_name
         session, genome = ucsc.use(assem)
         for primer_pair in te_list:
             validated_primer = insilico_test(primer_pair, genome)
