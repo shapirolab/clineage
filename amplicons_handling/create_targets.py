@@ -67,6 +67,7 @@ if '__main__' == __name__:
                                        margins)
     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
+    print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
     ptf, ptr = PrimerTail.objects.all()
     te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
     pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
