@@ -77,12 +77,12 @@ def insilico_test(pair, genome):
     return True
 
 
-def create_one_primer(start, end, tail, target, primer_type, refseq, seq):
+def create_one_primer(start, end, tail, target, primer_type, refseq, seq, name_tail):
     primer, created = Primer.objects.get_or_create(start_pos=start,
                              end_pos=end,
                              tail=tail,
                              chromosome=target.chromosome,
-                             defaults={'name': target.name + '_fwd',
+                             defaults={'name': target.name + name_tail,
                                        'type': primer_type,
                                        'referencevalue': refseq,
                                        'strand': '+',
@@ -92,7 +92,7 @@ def create_one_primer(start, end, tail, target, primer_type, refseq, seq):
 
 
 def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silico=True,
-                         pf_tail=None, pr_tail=None, margins=400, primer_type=TargetType.objects.get(name='Flank')):
+                         pf_tail=None, pr_tail=None, margins=300, primer_type=TargetType.objects.get(name='Flank')):
     colliding_amplicons = []
     te_list = []
     for target_id in bar(chosen_target_primers):
@@ -120,9 +120,9 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
             pf_seq = get_or_create_sequence(primer_left_sequence)
             pr_seq = get_or_create_sequence(primer_right_sequence)
         TargetType.objects.get(name='Flank')
-        primer_fwd, created_fw = create_one_primer(pf_s, pf_e, pf_tail, target, primer_type, pf_refseq, pf_seq)
+        primer_fwd, created_fw = create_one_primer(pf_s, pf_e, pf_tail, target, primer_type, pf_refseq, pf_seq, '_fwd')
         # print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
-        primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq)
+        primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq, '_rev')
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         print 'Assert: ', primer_rev.end_pos - primer_fwd.start_pos
         assert primer_rev.end_pos - primer_fwd.start_pos < 300
