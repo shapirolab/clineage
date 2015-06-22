@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import ks_2samp
+from emd import emd
 from math import sqrt, log10
 from hist import get_lims
 
@@ -43,6 +44,14 @@ def pop_dist_ks_2samp(hist1, hist2, reads, sample_depth):
     pop2 = inflate_hist(hist2, sample_depth)
     d, p = ks_2samp(pop1, pop2)
     return 1-p
+
+
+def pop_dist_emd(hist1, hist2):
+    """
+    Calculate the distance between two populations in the form of histograms
+    Uses
+    """
+    return emd(hist1.keys(), hist2.keys(), hist1.values(), hist2.values())
 
 
 def pop_dist_corr(hist1, hist2):
@@ -120,6 +129,8 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
         return pop_dist_sub(hist1, hist2)
     if method == 'sp':
         return pop_dist_subpeaks(hist1, hist2)
+    if method == 'emd':
+        return pop_dist_emd(hist1, hist2)
     if method == 'ks':
         return pop_dist_ks_2samp(hist1, hist2, reads, sample_depth)
     if method == 'cor':

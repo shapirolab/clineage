@@ -13,9 +13,12 @@ from itertools import repeat, izip, imap
 
 def load_or_create_calling(callingfile):
     try:
+        print 'loading existing calling'
         f = open(callingfile, 'rb').read()
         calling = loads(f)
+        print 'done loading existing calling'
     except:
+        print 'initializing new calling'
         calling = defaultdict(lambda: defaultdict(dict))
     return calling
 

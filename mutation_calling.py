@@ -4,7 +4,7 @@ from order.utils.output_formatters import generate_calling_file, \
     generate_output_file, \
     load_or_create_simulations_file, \
     save_calling_file
-
+import numpy
 
 if '__main__' == __name__:
     parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
@@ -53,11 +53,25 @@ if '__main__' == __name__:
     SIGNALS_CALLING_PATH = args.callingfile
     workers = args.workers
 
+    # AC #
+    ups = [numpy.poly1d([0.00026892, -0.00205025])]
+    dws = [numpy.poly1d([0.00191615, -0.01174076]),
+           numpy.poly1d([0.00027444, -0.00220836]),
+           numpy.poly1d([0.0001768, -0.00199328])]
+
+    #'AC'
+    # ups = [lambda d: 0.0*d**2 + 3.63701136e-04*d - 3.49979857e-03]
+    # dws = [lambda d: 2.57826596e-05*d**2 + 1.41367146e-03*d - 9.06688104e-03]
+
+    # 'AG'
+    # ups = [lambda d: 0.0*d**2 + 4.78854812e-04*d - 3.47850504e-03]
+    # dws = [lambda d: 7.45380877e-05*d**2 + 8.41224155e-04*d - 9.37967125e-03]
+
     sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
                                                 method=sim_method,
                                                 max_cycles=cycles_threshold,
-                                                up=lambda d: 0.00005*d**2 - 0.0009*d + 0.0036,
-                                                dw=lambda d: 0.00009*d**2 - 0.00003*d - 0.0013,
+                                                ups=ups,
+                                                dws=dws,
                                                 max_ms_length=max_ms_length,
                                                 sample_depth=sample_depth,
                                                 max_alleles=max_alleles,
