@@ -131,13 +131,13 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
                     left=primer_fwd,
                     right=primer_rev,
                     defaults={
-                    'type': target_enrichment_type,
-                    'amplicon': target.chromosome.getdna(primer_fwd.start_pos, primer_rev.end_pos),
-                    'passed_validation': None,
-                    'validation_failure': None,
-                    'validation_date': None,
-                    'comment': None,
-                    })
+                        'type': target_enrichment_type,
+                        'amplicon': target.chromosome.getdna(primer_fwd.start_pos, primer_rev.end_pos),
+                        'passed_validation': None,
+                        'validation_failure': None,
+                        'validation_date': None,
+                        'comment': None,
+                        })
         te_made.update_enriched_targets()
         te_list.append(te_made)
 
