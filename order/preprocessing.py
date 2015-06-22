@@ -1,16 +1,16 @@
 from collections import defaultdict, Counter
-from binomial_sim import dyn_prob
+from order.binomial_sim import dyn_prob
 from order.hist import Histogram
-from itertools import combinations
+from itertools import combinations, product
 import numpy as np
-from optimize_probs import dyn_mat_model
+from order.optimize_probs import dyn_mat_model
 from scipy.stats import binom
 from frogress import bar
 
 def generate_bin_hist_pure_optimized(d,
                            cycles,
-                           up,
-                           dw,
+                           ups,
+                           dws,
                            margines = 20,
                            sample_depth=10000,
                            normalize=False,
@@ -18,7 +18,10 @@ def generate_bin_hist_pure_optimized(d,
                            cut_peak=False,
                            trim_extremes=False,
                            **kwargs):
-    
+    # ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
+    # dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
+    up = ups[0]
+    dw = dws[0]
     upb = binom(cycles, min(max(0, up(d)),1.0))
     dwb = binom(cycles, min(max(0, dw(d)),1.0))
     max_mean = max(upb.mean(), dwb.mean())
@@ -110,6 +113,14 @@ def generate_sim_hists(max_ms_length=60,
                        max_cycles=90,
                        method='bin',
                        **kwargs):
+    """
+    Creates a dictionary of simulated histogram indexed by [original_length][amplification_cycle]
+    :param max_ms_length:
+    :param max_cycles:
+    :param method:
+    :param kwargs:
+    :return:
+    """
     sim_hists = defaultdict(dict)
     for d in bar(range(max_ms_length)):
         for cycles in range(max_cycles):
@@ -120,16 +131,37 @@ def generate_sim_hists(max_ms_length=60,
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     dup_sim_hist = defaultdict(lambda: defaultdict(dict))
     for allele_number in range(1, max_alleles+1):
-        for seeds in combinations(sim_hists.keys(), allele_number):
+        for seeds in combinations(sim_hists.keys(), allele_number):  # iterate over all possible original lengths
             shift = int(np.mean(seeds))
-            for cycles in bar(sim_hists[0].keys()):  # TODO: get sim_hists parameters in call?
-                first_seed = seeds[0]
-                sum_hist = sim_hists[first_seed][cycles] + first_seed
+            for cycles in bar(sim_hists[0].keys()):
+                first_seed = seeds[0]  # initial microsatellite length (length = seed[0]
+                sum_hist = sim_hists[first_seed][cycles] + first_seed  # add generated histogram based on seed and shift it on the x axis according to the seed's value (simulated microsatellite length
                 for seed in seeds[1:]:
-                    sum_hist = sum_hist + (sim_hists[seed][cycles] + seed)
-                dup_sim_hist[frozenset(seeds)][cycles] = sum_hist - shift
+                    sum_hist = sum_hist + (sim_hists[seed][cycles] + seed)  # iteratively add generated histograms shifted acoording to their simulated seed
+                dup_sim_hist[frozenset(seeds)][cycles] = sum_hist - shift  # shift the sum of all histograms so that thier based around zero. The shift
     return dup_sim_hist
 
+
+def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, **kwargs):
+    assert sum(proprtions) == 1
+    assert len(seeds) == len(cycles) == len(proprtions)
+    signals = []
+    for seed, cycles, proportion in zip(seeds, cycles, proprtions):
+        hist = generate_hist(seed, cycles, method, **kwargs).ymul(proportion) + seed
+        signals.append(hist)
+    hist_sum = signals[0]
+    for signal in signals[1:]:
+        hist_sum = hist_sum.asym_add(signal)
+    hist_sum.normalize()
+    shift = int(np.mean(seeds))
+    return hist_sum - shift
+
+
+def generate_biallelic_reads_of_multiple_proportions(max_ms_length=60, max_cycles=90, method='bin', **kwargs):
+    for seeds in combinations(range(max_ms_length), 2):
+        for cycles in range(max_cycles):
+            for p1 in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                dup_sim_hist[frozenset(seeds)][cycles][p1] = generate_simulated_proportional_alleles(seeds, cycles, [p1, 1-p1], method, **kwargs)
 
 def generate_sim_hists_of_up_to_k_alleles(**kwargs):
     """
