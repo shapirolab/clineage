@@ -5,22 +5,9 @@ from preprocessing import flatten_index, inflate_index
 from fitting import match_cycles
 from hist import Histogram
 from itertools import combinations
-from collections import defaultdict
-from pickle import loads
 import concurrent.futures
 from itertools import repeat, izip, imap
-
-
-def load_or_create_calling(callingfile):
-    try:
-        print 'loading existing calling'
-        f = open(callingfile, 'rb').read()
-        calling = loads(f)
-        print 'done loading existing calling'
-    except:
-        print 'initializing new calling'
-        calling = defaultdict(lambda: defaultdict(dict))
-    return calling
+from frogress import bar
 
 
 def call_multi_hist(hist,
@@ -128,3 +115,34 @@ def generate_hist_calls(input_file,
                                    )):
             loc, cell, row_hist, res = result
             yield loc, cell, row_hist, res
+
+
+def generate_calling_file(input_file,
+                          sim_hists,
+                          calling,
+                          **kwargs):
+    """
+        workers=1,
+        max_alleles=2,
+        max_distance_from_median=30,
+        reads_threshold=50
+        shift_margins=3
+        nsamples=None
+        method='cor',
+        score_threshold=0.006,
+        min_cycles=0,
+        max_cycles=80,
+        max_ms_length=60
+        normalize=True,
+        truncate=False,
+        cut_peak=False,
+        trim_extremes=False):
+    :param input_file:
+    :param sim_hists:
+    :param calling:
+    :param kwargs:
+    :return:
+    """
+    for loc, cell, row_hist, res in bar(generate_hist_calls(input_file, sim_hists, calling, **kwargs)):
+        calling[loc][cell] = res
+    return calling

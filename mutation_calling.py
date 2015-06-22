@@ -1,6 +1,6 @@
 import argparse
-from order.calling import load_or_create_calling
-from order.utils.output_formatters import generate_calling_file, \
+from order.calling import generate_calling_file
+from order.utils.output_formatters import load_or_create_calling, \
     generate_output_file, \
     load_or_create_simulations_file, \
     save_calling_file
