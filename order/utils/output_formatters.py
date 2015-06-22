@@ -8,7 +8,7 @@ from order.calling import generate_hist_calls
 
 def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
-        method='bin',
+        method='bon',
         max_cycles=90,
         ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
         dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
@@ -29,12 +29,15 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
         print 'loading existing simulations'
         sim_hists = loads(f)
         print 'done loading existing simulations'
-    except:
+    except IOError, e:
         print 'generating simulated histograms'
         sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
         with open(simulationsfile, 'wb') as f:
             f.write(dumps(sim_hists))
         print 'done generating simulated histograms'
+    except:
+        print 'Somethig really unexpected happened'
+        raise
     return sim_hists
 
 
