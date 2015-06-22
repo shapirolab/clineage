@@ -47,7 +47,6 @@ def primer3_design(obj_list, input_name, output_name,
 
 
 def parse_primer3_output(output_name):
-    print output_name
     fasta_output_file = open(output_name, 'rb')
     primer3_output = fasta_output_file.read()
     fasta_string = primer3_output.split('\n=\n')
@@ -88,32 +87,37 @@ def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
 
 def primer_count_from_sam_file(sam_file):
     samfile = pysam.Samfile(sam_file, "r")
-    primers_names = []
+    primer_keys = []
+    primers_names = defaultdict(lambda: defaultdict(int))
     for sam_primer in samfile:
-        primers_names.append(sam_primer.qname)
-    name_count = Counter(primers_names)
-    return name_count
+        primer_keys.append(sam_primer.qname)
+        primers_names[sam_primer.qname]['Start_pos'] = sam_primer.reference_start
+        primers_names[sam_primer.qname]['End_pos'] = sam_primer.reference_end-1
+    name_count = Counter(primer_keys)
+    return name_count, primers_names
 
 
-def sort_unique_primers(sam_file, target_primers):
-    name_count = primer_count_from_sam_file(sam_file)
+def sort_unique_primers(sam_file, target_primers, margins=300):
+    name_count, primers_names = primer_count_from_sam_file(sam_file)
     chosen_target_primers = defaultdict(lambda: defaultdict(str))
     discarded_targets = []
     for target_id in target_primers.keys():
-        #left
         left_primer = None
-        for primer_number in sorted(target_primers[target_id]['LEFT'].keys()):
-            bowtie2_key = 'PRIMER_LEFT_{}_{}'.format(primer_number, target_id)
-            if name_count[bowtie2_key] == 1:
-                left_primer = target_primers[target_id]['LEFT'][primer_number]
-                break
-        #right
-        right_primer = None
-        for primer_number in sorted(target_primers[target_id]['LEFT'].keys()):
-            bowtie2_key = 'PRIMER_RIGHT_{}_{}'.format(primer_number, target_id)
-            if name_count[bowtie2_key] == 1:
-                right_primer = target_primers[target_id]['RIGHT'][primer_number]
-                break
+        for primer_number_fr in sorted(target_primers[target_id]['LEFT'].keys()):
+            bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number_fr, target_id)
+            if name_count[bowtie2_key_left] == 1:
+                left_primer = target_primers[target_id]['LEFT'][primer_number_fr]
+                right_primer = None
+                for primer_number_rv in sorted(target_primers[target_id]['RIGHT'].keys()):
+                    bowtie2_key_right = 'PRIMER_RIGHT_{}_{}'.format(primer_number_rv, target_id)
+                    if name_count[bowtie2_key_right] == 1:
+                        right_primer = target_primers[target_id]['RIGHT'][primer_number_rv]
+                        left_pos = primers_names[bowtie2_key_left]['Start_pos']
+                        right_pos = primers_names[bowtie2_key_right]['End_pos']
+                        if right_pos - left_pos <= margins:
+                            break
+                        else:
+                            right_primer = None
 
         if left_primer and right_primer:
             chosen_target_primers[target_id]['LEFT'] = left_primer
@@ -135,7 +139,7 @@ if '__main__' == __name__:
     parser.add_argument('-r', '--primerNumReRun', type=int, dest='primer_num_rerun', default=10000, help='number of pair primers to constract')
     parser.add_argument('-m', '--margins', type=int, dest='margins', default=0, help='margins for the desired sequencing region')
     parser.add_argument('-a', '--minSize', type=int, dest='min_size', default=130, help='minimus amplicon size')
-    parser.add_argument('-z', '--maxSize', type=int, dest='max_size', default=400, help='maximum amplicon size')
+    parser.add_argument('-z', '--maxSize', type=int, dest='max_size', default=300, help='maximum amplicon size')
     parser.add_argument('-s', '--inSilico', type=bool, dest='insilico_test', default=True, help='Run in silico test for primers')
     args = parser.parse_args()
     obj_list = args.obj_list
@@ -164,7 +168,8 @@ if '__main__' == __name__:
                                        primer_num_rerun,
                                        margins)
     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
-    chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers)
+    chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
+    print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
     ptf, ptr = PrimerTail.objects.all()
     te_list = create_primers_in_db(chosen_target_primers, te_type, margins, insilico_test, pf_tail=ptf, pr_tail=ptr)
     pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
