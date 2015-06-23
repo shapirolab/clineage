@@ -52,7 +52,8 @@ if '__main__' == __name__:
     insilico_test = args.insilico_test
     xls_name = ("PrimerOrder{}.xls".format(str(output_name)))
     is_tails = args.tails
-    no_tails_te_type, tails_te_type = TargetEnrichmentType.objects.all()
+    no_tails_te_type = TargetEnrichmentType.objects.get(name='PCR')
+    tails_te_type = TargetEnrichmentType.objects.get(name='PCR_with_tails')
     if is_tails:
         te_type = tails_te_type
     else:

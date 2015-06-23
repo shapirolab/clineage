@@ -125,7 +125,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq, '_rev')
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         print 'Assert: ', primer_rev.end_pos - primer_fwd.start_pos
-        assert primer_rev.end_pos - primer_fwd.start_pos < 300
+        assert primer_rev.end_pos - primer_fwd.start_pos < margins
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
