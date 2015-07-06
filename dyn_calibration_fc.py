@@ -14,11 +14,11 @@ def inputs_generator(cycles_range):
     alg = 'con'
     optimizer_method = "L-BFGS-B"
     bounds = [(0.0, 0.0001), (-0.005, 0.005), (-0.05, 0.05), (0.0, 0.0001), (-0.005, 0.005), (-0.05, 0.05)]
-    optimizer_options = {'eps' : 1e-5, 'disp' : False}
+    optimizer_options = {'eps': 1e-5, 'disp': False}
     # initial_guess = [0.00005,  -0.0009, 0.0036, 0.00009, -0.00003, -0.0013]
     initial_guess = [0.0,  0.0, 0.0, 0.0, 0.0, 0.0]
-    iterations=100
-    sim='mat'
+    iterations = 100
+    sim = 'mat'
     # optimizer_method = "Nelder-Mead"
     # optimizer_method = "TNC"
     # optimizer_method = "L-BFGS-B"
@@ -46,11 +46,11 @@ if __name__ == '__main__':
     c2_max = args.c2_max
     
     assert n/(c1_max-c1_min) <= c2_max-c2_min
-    c1 = c1_min + n%(c1_max-c1_min)
-    c2 = c2_min + n/(c1_max-c1_min)
+    c1 = c1_min + n % (c1_max-c1_min)
+    c2 = c2_min + n / (c1_max-c1_min)
     results = []
-    print c1,c2
-    for result in map(optimize_across_lengths, inputs_generator(cycles_range=((c1, c1+1),(c2, c2+1)))):
+    print c1, c2
+    for result in map(optimize_across_lengths, inputs_generator(cycles_range=((c1, c1+1), (c2, c2+1)))):
         results.append(result)
         alg, sim, optimizer_method, cycles_tup, ms_lengths, res = result
         print alg, sim, optimizer_method, cycles_tup, ms_lengths, res

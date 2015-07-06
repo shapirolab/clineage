@@ -42,6 +42,7 @@ def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_pair, dist
 
 def optimize_across_lengths(input_tuple):
     alg, sim, optimizer_method, hist_pairs, cycles_tup, bounds, initial_guess, iterations, optimizer_options = input_tuple
+
     def nmes(x):
         assert len(x) % 2 == 0
         up_params = list(x)[:len(x)/2]
