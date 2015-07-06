@@ -107,14 +107,17 @@ class Histogram(object):
         return [k for k in self.keys()
                 for i in xrange(int(self.nsamples*self[k]))]
 
+    def random_sample(self, k):
+        return Histogram(Counter(np.random.choice(self._hist.keys(), k, p=self._hist.values())))
+
     # Operators
     def normalize(self):
-        self.sq_normalize()
-        # s = float(sum(self.values()))
-        # if not s:
-            # return
-        # for k in self.keys():
-            # self._hist[k] /= s
+        # self.sq_normalize()
+        s = float(sum(self.values()))
+        if not s:
+            return
+        for k in self.keys():
+            self._hist[k] /= s
     
     def sq_normalize(self, axis=-1, order=2):
         tuples_list = self._hist.items()
