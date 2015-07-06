@@ -2,7 +2,7 @@ import csv
 import gzip
 from frogress import bar
 from cloud.serialization.cloudpickle import loads, dumps
-from order.preprocessing import generate_sim_hists_of_up_to_k_alleles
+from order.preprocessing import generate_sim_hists_of_up_to_k_alleles, generate_biallelic_reads_of_multiple_proportions
 from collections import defaultdict
 from pickle import loads
 
@@ -22,6 +22,7 @@ def load_or_create_calling(callingfile):
 def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
         method='bon',
+        min_cycles=20,
         max_cycles=90,
         ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
         dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
@@ -44,7 +45,8 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
         print 'done loading existing simulations'
     except IOError, e:
         print 'generating simulated histograms'
-        sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
+        # sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
+        sim_hists = generate_biallelic_reads_of_multiple_proportions(**kwargs)
         with open(simulationsfile, 'wb') as f:
             f.write(dumps(sim_hists))
         print 'done generating simulated histograms'

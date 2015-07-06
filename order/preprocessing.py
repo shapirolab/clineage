@@ -1,29 +1,30 @@
 from collections import defaultdict, Counter
 from order.binomial_sim import dyn_prob
 from order.hist import Histogram
-from itertools import combinations, product
+from itertools import combinations, product, combinations_with_replacement
 import numpy as np
 from order.optimize_probs import dyn_mat_model
 from scipy.stats import binom
 from frogress import bar
 
+
 def generate_bin_hist_pure_optimized(d,
-                           cycles,
-                           ups,
-                           dws,
-                           margines = 20,
-                           sample_depth=10000,
-                           normalize=False,
-                           truncate=False,
-                           cut_peak=False,
-                           trim_extremes=False,
-                           **kwargs):
+                                     cycles,
+                                     ups,
+                                     dws,
+                                     margines=20,
+                                     sample_depth=10000,
+                                     normalize=False,
+                                     truncate=False,
+                                     cut_peak=False,
+                                     trim_extremes=False,
+                                     **kwargs):
     # ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
     # dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
     up = ups[0]
     dw = dws[0]
-    upb = binom(cycles, min(max(0, up(d)),1.0))
-    dwb = binom(cycles, min(max(0, dw(d)),1.0))
+    upb = binom(cycles, min(max(0, up(d)), 1.0))
+    dwb = binom(cycles, min(max(0, dw(d)), 1.0))
     max_mean = max(upb.mean(), dwb.mean())
     try:
         bin_margines = int(round(max_mean)) + margines
@@ -31,7 +32,7 @@ def generate_bin_hist_pure_optimized(d,
         print up(d), dw(d), d, cycles, upb.mean(), dwb.mean()
         raise
     n = np.convolve(upb.pmf(range(bin_margines)), dwb.pmf(range(bin_margines))[::-1])
-    nd = {i:n[i] for i in range(bin_margines*2-1)}
+    nd = {i: n[i] for i in range(bin_margines*2-1)}
     nh = Histogram(nd,
                    normalize=normalize,
                    nsamples=sample_depth,
@@ -157,11 +158,15 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
     return hist_sum - shift
 
 
-def generate_biallelic_reads_of_multiple_proportions(max_ms_length=60, max_cycles=90, method='bin', **kwargs):
-    for seeds in combinations(range(max_ms_length), 2):
-        for cycles in range(max_cycles):
+def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', **kwargs):
+    print min_ms_length, max_ms_length, min_cycles, max_cycles
+    sim_hists = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    for seeds in bar(list(combinations_with_replacement(range(min_ms_length, max_ms_length), 2))):
+        for cycles in range(min_cycles, max_cycles):
             for p1 in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                dup_sim_hist[frozenset(seeds)][cycles][p1] = generate_simulated_proportional_alleles(seeds, cycles, [p1, 1-p1], method, **kwargs)
+                sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles,cycles), (p1, 1 - p1), method, **kwargs)
+    return sim_hists
+
 
 def generate_sim_hists_of_up_to_k_alleles(**kwargs):
     """
