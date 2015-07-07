@@ -164,7 +164,8 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Sampling Comment': smart_str(cell.sampling.comment if cell.sampling else ''),
                         'Cell Type': smart_str(cell.composition.name),
                         'Plate': smart_str(loc.plate.name),
-                        'Well': smart_str(loc.well)
+                        'Well': smart_str(loc.well),
+                        'Plate Location': smart_str(loc.plate.platestorage_set.all()[0])
                     }
 
 
@@ -176,6 +177,7 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None, pale
                       'Cell Type',
                       'Plate',
                       'Well',
+                      'Plate Location',
                       'Cell Group',
                       'Group Color',
                       'Sampling Event',
