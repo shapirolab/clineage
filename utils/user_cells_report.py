@@ -1,7 +1,7 @@
 import os
 import csv
 from django.utils.encoding import smart_str
-import seaborn as sns
+import seaborn as sns  # development
 from collections import defaultdict
 from linapp.models import User, Cell, Individual, UserReport
 
@@ -27,6 +27,55 @@ def hex_to_rgb(color_map, cell):
     return rgb
 
 
+def extraction_events_for_individual(indi):
+    for ee in sorted(list(indi.extractionevent_set.all()), key=lambda i: i.name):
+        yield ee
+
+
+def extractions_for_individual(indi):
+    for ee in extraction_events_for_individual(indi):
+        for e in sorted(list(ee.extraction_set.all()), key=lambda i: i.name):
+            yield e, ee
+
+
+def sampling_event_for_individual(indi, report_dict):
+    for e, ee in extractions_for_individual(indi):
+        report_dict[indi.name][ee.name][e.name]['Extraction_date'] = ee.date
+        if e.samplingevent_set.all():
+            for se in sorted(list(e.samplingevent_set.all()), key=lambda i: i.name):
+                yield se, e, ee
+        else:
+            yield None, e, ee
+
+
+def cells_for_individual(indi, report_dict):
+    for se, e, ee in sampling_event_for_individual(indi, report_dict):
+        if se:
+            for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
+                if se.cell_set.filter(classification=cls):
+                    yield cls, se, e, ee
+
+
+def populate_report_dict(indi, report_dict, cellrow, color_map):
+    for cls, se, e, ee in cells_for_individual(indi, report_dict):
+        report_dict[indi.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_date'] = se.date
+        report_dict[indi.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_details'] = se.comment
+        report_dict[indi.name][ee.name][e.name][se.name][str(cls)]['Cells_classification_string'] = cls
+        report_dict[indi.name][ee.name][e.name][se.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.filter(classification=cls)[0])
+        report_dict[indi.name][ee.name][e.name][se.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.filter(classification=cls).count()]
+        cellrow += se.cell_set.filter(classification=cls).count()
+    return report_dict, cellrow
+
+
+def collect_cells_without_clasification(report_dict, indi, cellrow, color_map):
+    report_dict[indi.name]['cells_list'] = 1 #temporary workaround TODO:revise
+    for cls in sorted(list(set([cell.classification for cell in indi.cell_set.all()]))):
+        report_dict[indi.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, indi.cell_set.filter(classification=cls)[0])
+        report_dict[indi.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+indi.cell_set.filter(classification=cls).count()]
+        report_dict[indi.name][str(cls)]['Cells_classification_string'] = cls
+        cellrow += indi.cell_set.filter(classification=cls).count()
+    return report_dict, cellrow
+
 def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
     cellrow = 1
     report_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))))
@@ -38,32 +87,14 @@ def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
     report_dict['ID'] = ur.pk
     for individual in sorted(list(individuals), key=lambda i: i.name):
         report_dict[partner.username][individual.name]['name'] = individual.name
-        if not individual.extractionevent_set.all() or \
-                not individual.extractionevent_set.all()[0].extraction_set.all() or \
-                not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-            report_dict[partner.username][individual.name]['cells_list'] = 1 #temporary workaround TODO:revise
-            for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
-                report_dict[partner.username][individual.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, individual.cell_set.filter(classification=cls)[0])
-                report_dict[partner.username][individual.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+individual.cell_set.filter(classification=cls).count()]
-                report_dict[partner.username][individual.name][str(cls)]['Cells_classification_string'] = cls
-                cellrow += individual.cell_set.filter(classification=cls).count()
+        if not individual.extractionevent_set.all():
+            report_dict[partner.username], cellrow = collect_cells_without_clasification(report_dict[partner.username], individual, cellrow, color_map)
         report_dict[partner.username][individual.name]['Collaborator_table'] = None
         if individuals.count() > 1:
             report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_cell_data.csv'.format(partner.username)
         else:
             report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_{}_cell_data.csv'.format(partner.username, individual.name)
-        for ee in sorted(list(individual.extractionevent_set.all()), key=lambda i: i.name):
-            for e in sorted(list(ee.extraction_set.all()), key=lambda i: i.name):
-                report_dict[partner.username][individual.name][ee.name][e.name]['Extraction_date'] = ee.date
-                for se in sorted(list(e.samplingevent_set.all()), key=lambda i: i.name):
-                    for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
-                        if se.cell_set.filter(classification=cls):
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_date'] = se.date
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_separation_details'] = se.comment
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_classification_string'] = cls
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, se.cell_set.filter(classification=cls)[0])
-                            report_dict[partner.username][individual.name][ee.name][e.name][se.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+se.cell_set.filter(classification=cls).count()]
-                            cellrow += se.cell_set.filter(classification=cls).count()
+        report_dict[partner.username], cellrow = populate_report_dict(individual, report_dict[partner.username], cellrow, color_map)
     return report_dict
 
 
@@ -135,8 +166,9 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
 def get_cells_color_map(cell_groups, palette_name='hls'):
     if len(set(cell_groups.values())) == 1:
         return {cell: (0, 0.5, 0.5) for cell in cell_groups}
-    palette = sns.color_palette(palette_name, len(set(cell_groups.values())))
-    return {cell: palette[cell_groups[cell]] for cell in cell_groups}
+    palette = sns.color_palette(palette_name, len(set(cell_groups.values())))  # development
+    return {cell: palette[cell_groups[cell]] for cell in cell_groups}  # development
+    # return {cell: (0, 0.5, 0.5) for cell in cell_groups}
 
 
 def user_cells_table_values(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
