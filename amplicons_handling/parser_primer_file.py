@@ -53,7 +53,7 @@ def parse_commons(row_dict):
     start_pos = int(row_dict['Start'])
     end_pos = int(row_dict['End'])
     partner = None
-    if partner in row_dict['Partner']:
+    if 'Partner' in row_dict:
         try:
             partner = User.objects.get(username=row_dict['Partner'])
         except User.DoesNotExist:
