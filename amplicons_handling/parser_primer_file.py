@@ -110,11 +110,14 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
                   'type': tgtype,
                   'chromosome': chrom,
                   'referencevalue': sequence,
-                  'partner': partner,
                   'repeat_unit_len': repeat_unit_length,
                   'repeat_unit_type': repeat_type,
                   'repeat_number': repeat_len}
     )
+    if partner in obj.partner.all():
+        return obj, created
+    obj.partner.add(partner)
+    obj.save()
     return obj, created
 
 
