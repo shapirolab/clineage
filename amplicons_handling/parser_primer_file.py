@@ -9,12 +9,12 @@ columns_case_dict = {
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name'):'NoSec',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence'):'Plain',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'SNP'):'SNP',
-                    ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_length'):'MicroSatellite',
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_Length'):'MicroSatellite',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Partner'):'Nameless',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name'):'NoSec',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence'):'Plain',
                     ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence', 'SNP'):'SNP',
-                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_length'):'MicroSatellite'
+                    ('Assembly', 'Chromosome', 'Start', 'End', 'Partner', 'Name', 'Sequence', 'Repeat_Type', 'Repeat_Unit_Length', 'Repeat_Length'):'MicroSatellite'
                     }
 
 
