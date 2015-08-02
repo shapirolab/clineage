@@ -164,6 +164,6 @@ def process_row(row_dict, case, margins=10):
         return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
     if case in ['MicroSatellite']:
-        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner)
+        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins)
 
     return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
