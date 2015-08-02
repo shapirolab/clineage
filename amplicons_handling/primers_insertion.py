@@ -3,7 +3,7 @@ __author__ = 'ofirr'
 import re
 import hashlib
 import sys
-import ucsc
+# import ucsc
 from django.core.management import setup_environ
 sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
@@ -65,16 +65,16 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     return (pf_s, pf_e), (pr_s, pr_e)
 
 
-def insilico_test(pair, genome):
-    ref = genome.Interval(pair.left.start_pos, pair.left.end_pos, chrom='chr{}'.format(pair.chromosome.name))
-    ref_seq = ref.sequence
-    if not pair.left.sequence.sequence == ref_seq:
-        return False
-    ref = genome.Interval(pair.right.start_pos, pair.right.end_pos, chrom='chr{}'.format(pair.chromosome.name))
-    ref_seq = ref.sequence
-    if not pair.right.sequence.sequence == ref_seq:
-        return False
-    return True
+# def insilico_test(pair, genome):
+#     ref = genome.Interval(pair.left.start_pos, pair.left.end_pos, chrom='chr{}'.format(pair.chromosome.name))
+#     ref_seq = ref.sequence
+#     if not pair.left.sequence.sequence == ref_seq:
+#         return False
+#     ref = genome.Interval(pair.right.start_pos, pair.right.end_pos, chrom='chr{}'.format(pair.chromosome.name))
+#     ref_seq = ref.sequence
+#     if not pair.right.sequence.sequence == ref_seq:
+#         return False
+#     return True
 
 
 def create_one_primer(start, end, tail, target, primer_type, refseq, seq, name_tail):
@@ -141,11 +141,11 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         te_made.update_enriched_targets()
         te_list.append(te_made)
 
-    if in_silico and te_list:
-        assem = te_list[0].chromosome.assembly.friendly_name
-        session, genome = ucsc.use(assem)
-        for primer_pair in te_list:
-            validated_primer = insilico_test(primer_pair, genome)
-            assert validated_primer
+    # if in_silico and te_list:
+    #     assem = te_list[0].chromosome.assembly.friendly_name
+    #     session, genome = ucsc.use(assem)
+    #     for primer_pair in te_list:
+    #         validated_primer = insilico_test(primer_pair, genome)
+    #         assert validated_primer
 
     return te_list
