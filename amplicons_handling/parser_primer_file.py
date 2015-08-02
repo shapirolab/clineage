@@ -82,13 +82,13 @@ def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, part
     return obj, created
 
 
-def locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins):
+def locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins):
     try:
         ms_s, ms_e = chrom.locate(start_pos,
                                   end_pos,
                                   sequence.sequence,
                                   padding=margins)
-        if ms_s != start_pos or ms_e != end_pos :
+        if ms_s != start_pos or ms_e != end_pos:
             print 'WARN: input indexes are off and were corrected'
     except ValueError:
         try:
@@ -96,29 +96,29 @@ def locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins):
                                       end_pos,
                                       complement(sequence.sequence)[::-1],
                                       padding=margins)
-            if ms_s != start_pos or ms_e != end_pos :
+            if ms_s != start_pos or ms_e != end_pos:
                 print 'WARN: input indexes are off and were corrected'
         except ValueError:
+            print chrom.name, chrom.assembly, start_pos, end_pos, sequence.sequence
             raise PrimerLocationError
     return ms_s, ms_e
 
-def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins):
+
+def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner):
     repeat_type = row_dict['Repeat_Type']
     repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
     repeat_len = int(row_dict['Repeat_Length'])
     ######################################
-    ms_s, ms_e = locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins)
-    
     if Microsatellite.objects.filter(chromosome=chrom)\
-                             .filter(start_pos__lte=ms_s)\
-                             .filter(end_pos__gte=ms_s) or \
+                             .filter(start_pos__lte=start_pos)\
+                             .filter(end_pos__gte=start_pos) or \
         Microsatellite.objects.filter(chromosome=chrom)\
-                              .filter(start_pos__lte=ms_e)\
-                              .filter(end_pos__gte=ms_e):
+                              .filter(start_pos__lte=end_pos)\
+                              .filter(end_pos__gte=end_pos):
         print 'WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom
     ######################################
     obj, created = Microsatellite.objects.get_or_create(
-        start_pos=ms_s, end_pos=ms_e,
+        start_pos=start_pos, end_pos=end_pos,
         defaults={'name': name,
                   'type': tgtype,
                   'chromosome': chrom,
@@ -158,12 +158,12 @@ def process_row(row_dict, case, margins=10):
 
     if case in ['Plain', 'SNP', 'MicroSatellite']:
         sequence = get_or_create_sequence(row_dict['Sequence'])
-        start_pos, end_pos = locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins)
+        start_pos, end_pos = locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins)
 
     if case in ['SNP']:
         return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
     if case in ['MicroSatellite']:
-        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins)
+        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
     return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
