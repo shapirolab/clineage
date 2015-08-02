@@ -74,7 +74,7 @@ def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, part
                   'mutation':mutation,
                   'modified':modified}
     )
-    if partner and partner in obj.partner.all():
+    if not partner or partner in obj.partner.all():
         return obj, created
     obj.partner.add(partner)
     obj.save()
@@ -114,7 +114,7 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
                   'repeat_unit_type': repeat_type,
                   'repeat_number': repeat_len}
     )
-    if partner and partner in obj.partner.all():
+    if not partner or partner in obj.partner.all():
         return obj, created
     obj.partner.add(partner)
     obj.save()
