@@ -1,8 +1,9 @@
 __author__ = 'veronika'
 import re
 import hashlib
-from primers_insertion import  get_or_create_sequence
+from primers_insertion import get_or_create_sequence, PrimerLocationError
 from linapp.models import TargetType, Assembly, Target, Chromosome, Microsatellite, SNP, User
+from utils.SequenceManipulations import complement
 
 columns_case_dict = {
                     ('Assembly', 'Chromosome', 'Start', 'End'):'Nameless',
@@ -94,7 +95,15 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
         if ms_s != start_pos or ms_e != end_pos :
             print 'WARN: input indexes are off and were corrected'
     except ValueError:
-        raise PrimerLocationError
+        try:
+            ms_s, ms_e = chrom.locate(start_pos,
+                                      end_pos,
+                                      complement(sequence.sequence)[::-1],
+                                      padding=margins)
+            if ms_s != start_pos or ms_e != end_pos :
+                print 'WARN: input indexes are off and were corrected'
+        except ValueError:
+            raise PrimerLocationError
     
     if Microsatellite.objects.filter(chromosome=chrom)\
                              .filter(start_pos__lte=ms_s)\
