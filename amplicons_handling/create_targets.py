@@ -12,7 +12,7 @@ from linapp.models import TargetEnrichmentType, PrimerTail
 setup_environ(settings)
 
 
-def proccess_input_target_file(input_file):
+def proccess_input_target_file(input_file, margins):
     obj_list = []
     with open(input_file, 'rb') as f:
         dialect = csv.Sniffer().sniff(f.read(1000))
@@ -20,7 +20,7 @@ def proccess_input_target_file(input_file):
         rdr = csv.DictReader(f, dialect=dialect)
         row_case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
-            obj, created = process_row(row, row_case)
+            obj, created = process_row(row, row_case, margins)
             obj_list.append(obj)
             print "Target {} INFO: {}".format(obj, created)
     return obj_list
@@ -58,7 +58,7 @@ if '__main__' == __name__:
         te_type = tails_te_type
     else:
         te_type = no_tails_te_type
-    obj_list = proccess_input_target_file(input_file)
+    obj_list = proccess_input_target_file(input_file, margins)
     primer3_name_file = primer3_design(obj_list,
                                        input_name,
                                        output_name,

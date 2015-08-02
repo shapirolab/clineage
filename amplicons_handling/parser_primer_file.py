@@ -82,11 +82,7 @@ def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, part
     return obj, created
 
 
-def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins=10):
-    repeat_type = row_dict['Repeat_Type']
-    repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
-    repeat_len = int(row_dict['Repeat_Length'])
-    ######################################
+def locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins):
     try:
         ms_s, ms_e = chrom.locate(start_pos,
                                   end_pos,
@@ -104,6 +100,14 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
                 print 'WARN: input indexes are off and were corrected'
         except ValueError:
             raise PrimerLocationError
+    return ms_s, ms_e
+
+def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins):
+    repeat_type = row_dict['Repeat_Type']
+    repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
+    repeat_len = int(row_dict['Repeat_Length'])
+    ######################################
+    ms_s, ms_e = locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins)
     
     if Microsatellite.objects.filter(chromosome=chrom)\
                              .filter(start_pos__lte=ms_s)\
@@ -142,7 +146,7 @@ def nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner):
     return obj, created
 
 
-def process_row(row_dict, case):
+def process_row(row_dict, case, margins=10):
     chrom, start_pos, end_pos, partner = parse_commons(row_dict)
     name = '{}_{}_{}'.format(chrom.name, start_pos, end_pos)
 
@@ -154,7 +158,7 @@ def process_row(row_dict, case):
 
     if case in ['Plain', 'SNP', 'MicroSatellite']:
         sequence = get_or_create_sequence(row_dict['Sequence'])
-        start_pos, end_pos = chrom.locate(start_pos, end_pos, sequence.sequence)
+        start_pos, end_pos = locate_sequanse_on_strand(chrom, start_pos, end_pos, sequence, margins)
 
     if case in ['SNP']:
         return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
