@@ -89,7 +89,7 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
     try:
         ms_s, ms_e = chrom.locate(start_pos,
                                   end_pos,
-                                  sequence,
+                                  sequence.sequence,
                                   padding=margins)
         if ms_s != start_pos or ms_e != end_pos :
             print 'WARN: input indexes are off and were corrected'
