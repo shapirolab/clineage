@@ -71,7 +71,7 @@ if '__main__' == __name__:
     print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
     ptf, ptr = PrimerTail.objects.all()
     te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
-    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
+    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly='mm9')
     create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 
 

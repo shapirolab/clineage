@@ -53,7 +53,7 @@ def parse_commons(row_dict):
     start_pos = int(row_dict['Start'])
     end_pos = int(row_dict['End'])
     partner = None
-    if row_dict['Partner']:
+    if partner in row_dict['Partner']:
         try:
             partner = User.objects.get(username=row_dict['Partner'])
         except User.DoesNotExist:
@@ -81,20 +81,39 @@ def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, part
     return obj, created
 
 
-def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner):
+def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner, margins=10):
     repeat_type = row_dict['Repeat_Type']
     repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
     repeat_len = int(row_dict['Repeat_Length'])
+    ######################################
+    try:
+        ms_s, ms_e = chrom.locate(start_pos,
+                                  end_pos,
+                                  sequence,
+                                  padding=margins)
+        if ms_s != start_pos or ms_e != end_pos :
+            print 'WARN: input indexes are off and were corrected'
+    except ValueError:
+        raise PrimerLocationError
+    
+    if Microsatellite.objects.filter(chromosome=chrom)\
+                             .filter(start_pos__lte=ms_s)\
+                             .filter(end_pos__gte=ms_s) or \
+        Microsatellite.objects.filter(chromosome=chrom)\
+                              .filter(start_pos__lte=ms_e)\
+                              .filter(end_pos__gte=ms_e):
+        print 'WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom
+    ######################################
     obj, created = Microsatellite.objects.get_or_create(
-        start_pos=start_pos, end_pos=end_pos,
-        defaults={'name':name,
-                  'type':tgtype,
-                  'chromosome':chrom,
-                  'referencevalue':sequence,
+        start_pos=ms_s, end_pos=ms_e,
+        defaults={'name': name,
+                  'type': tgtype,
+                  'chromosome': chrom,
+                  'referencevalue': sequence,
                   'partner': partner,
-                  'repeat_unit_len':repeat_unit_length,
-                  'repeat_unit_type':repeat_type,
-                  'repeat_number':repeat_len}
+                  'repeat_unit_len': repeat_unit_length,
+                  'repeat_unit_type': repeat_type,
+                  'repeat_number': repeat_len}
     )
     return obj, created
 
