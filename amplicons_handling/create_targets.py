@@ -15,7 +15,7 @@ setup_environ(settings)
 def proccess_input_target_file(input_file, margins):
     obj_list = []
     with open(input_file, 'rb') as f:
-        dialect = csv.Sniffer().sniff(f.read(1000))
+        dialect = csv.Sniffer().sniff(f.read(10000))
         f.seek(0)
         rdr = csv.DictReader(f, dialect=dialect)
         row_case = get_case_from_columns(rdr.fieldnames)
@@ -60,20 +60,20 @@ if '__main__' == __name__:
     else:
         te_type = no_tails_te_type
     obj_list, assembly = proccess_input_target_file(input_file, margins)
-    primer3_name_file = primer3_design(obj_list,
-                                       input_name,
-                                       output_name,
-                                       min_size,
-                                       max_size,
-                                       primer_num_rerun,
-                                       margins)
-    sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
-    chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
-    print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
-    ptf, ptr = PrimerTail.objects.all()
-    te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
-    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly)
-    create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
+    # primer3_name_file = primer3_design(obj_list,
+    #                                    input_name,
+    #                                    output_name,
+    #                                    min_size,
+    #                                    max_size,
+    #                                    primer_num_rerun,
+    #                                    margins)
+    # sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
+    # chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
+    # print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
+    # ptf, ptr = PrimerTail.objects.all()
+    # te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
+    # pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly)
+    # create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 
 
 
