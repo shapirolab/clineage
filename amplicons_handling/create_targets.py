@@ -19,8 +19,8 @@ def proccess_input_target_file(input_file, margins):
         f.seek(0)
         rdr = csv.DictReader(f, dialect=dialect)
         row_case = get_case_from_columns(rdr.fieldnames)
-        assembly = rdr[1]['Assembly']
         for row in rdr:
+            assembly = row['Assembly']
             obj, created = process_row(row, row_case, margins)
             obj_list.append(obj)
             print "Target {} INFO: {}".format(obj, created)
