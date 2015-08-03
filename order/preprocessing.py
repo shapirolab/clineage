@@ -158,13 +158,14 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
     return hist_sum - shift
 
 
-def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', **kwargs):
+def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', steps=100,  **kwargs):
     print min_ms_length, max_ms_length, min_cycles, max_cycles
     sim_hists = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     for seeds in bar(list(combinations_with_replacement(range(min_ms_length, max_ms_length), 2))):
         for cycles in range(min_cycles, max_cycles):
-            for p1 in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles,cycles), (p1, 1 - p1), method, **kwargs)
+            for p1 in [float(x)/steps for x in xrange(1, steps-1)]:
+                print p1
+                sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles, cycles), (p1, 1 - p1), method, **kwargs)
     return sim_hists
 
 
