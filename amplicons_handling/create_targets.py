@@ -20,10 +20,10 @@ def proccess_input_target_file(input_file, margins):
         rdr = csv.DictReader(f, dialect=dialect)
         row_case = get_case_from_columns(rdr.fieldnames)
         for row in rdr:
-            obj, created = process_row(row, row_case, margins)
+            obj, created , assembly = process_row(row, row_case, margins)
             obj_list.append(obj)
             print "Target {} INFO: {}".format(obj, created)
-    return obj_list
+    return obj_list, assembly
 
 
 if '__main__' == __name__:
@@ -58,7 +58,7 @@ if '__main__' == __name__:
         te_type = tails_te_type
     else:
         te_type = no_tails_te_type
-    obj_list = proccess_input_target_file(input_file, margins)
+    obj_list, assembly = proccess_input_target_file(input_file, margins)
     primer3_name_file = primer3_design(obj_list,
                                        input_name,
                                        output_name,
@@ -71,7 +71,7 @@ if '__main__' == __name__:
     print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
     ptf, ptr = PrimerTail.objects.all()
     te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
-    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly='mm9')
+    pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly)
     create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 
 

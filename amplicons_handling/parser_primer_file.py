@@ -49,6 +49,7 @@ def clean_chromosome_name(raw_chr_name):
 
 def parse_commons(row_dict):
     assem = Assembly.objects.get(friendly_name=row_dict['Assembly'])
+    assembly = row_dict['Assembly']
     chromosome_name = clean_chromosome_name(row_dict['Chromosome'])
     chrom = Chromosome.objects.get(name=chromosome_name, assembly=assem)
     start_pos = int(row_dict['Start'])
@@ -60,7 +61,7 @@ def parse_commons(row_dict):
         except User.DoesNotExist:
             #warning
             partner = None
-    return chrom, start_pos, end_pos, partner
+    return chrom, start_pos, end_pos, partner, assembly
 
 
 def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner):
@@ -109,13 +110,14 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
     repeat_unit_length = int(row_dict['Repeat_Unit_Length'])
     repeat_len = int(row_dict['Repeat_Length'])
     ######################################
+    overlapping = False
     if Microsatellite.objects.filter(chromosome=chrom)\
                              .filter(start_pos__lte=start_pos)\
                              .filter(end_pos__gte=start_pos) or \
         Microsatellite.objects.filter(chromosome=chrom)\
                               .filter(start_pos__lte=end_pos)\
                               .filter(end_pos__gte=end_pos):
-        print 'WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom
+        overlapping = True
     ######################################
     obj, created = Microsatellite.objects.get_or_create(
         start_pos=start_pos, end_pos=end_pos,
@@ -127,6 +129,8 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
                   'repeat_unit_type': repeat_type,
                   'repeat_number': repeat_len}
     )
+    if overlapping and created:
+        print 'WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom
     if not partner or partner in obj.partner.all():
         return obj, created
     obj.partner.add(partner)
@@ -147,7 +151,7 @@ def nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner):
 
 
 def process_row(row_dict, case, margins=10):
-    chrom, start_pos, end_pos, partner = parse_commons(row_dict)
+    chrom, start_pos, end_pos, partner, assembly = parse_commons(row_dict)
     name = '{}_{}_{}'.format(chrom.name, start_pos, end_pos)
 
     sequence = get_or_create_sequence(chrom.getdna(start_pos, end_pos))
@@ -161,9 +165,9 @@ def process_row(row_dict, case, margins=10):
         start_pos, end_pos = locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins)
 
     if case in ['SNP']:
-        return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
+        return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
 
     if case in ['MicroSatellite']:
-        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner)
+        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
 
-    return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
+    return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
