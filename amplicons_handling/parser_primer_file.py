@@ -49,7 +49,6 @@ def clean_chromosome_name(raw_chr_name):
 
 def parse_commons(row_dict):
     assem = Assembly.objects.get(friendly_name=row_dict['Assembly'])
-    assembly = row_dict['Assembly']
     chromosome_name = clean_chromosome_name(row_dict['Chromosome'])
     chrom = Chromosome.objects.get(name=chromosome_name, assembly=assem)
     start_pos = int(row_dict['Start'])
@@ -61,7 +60,7 @@ def parse_commons(row_dict):
         except User.DoesNotExist:
             #warning
             partner = None
-    return chrom, start_pos, end_pos, partner, assembly
+    return chrom, start_pos, end_pos, partner
 
 
 def snp_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner):
@@ -151,7 +150,7 @@ def nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner):
 
 
 def process_row(row_dict, case, margins=10):
-    chrom, start_pos, end_pos, partner, assembly = parse_commons(row_dict)
+    chrom, start_pos, end_pos, partner = parse_commons(row_dict)
     name = '{}_{}_{}'.format(chrom.name, start_pos, end_pos)
 
     sequence = get_or_create_sequence(chrom.getdna(start_pos, end_pos))
@@ -165,9 +164,9 @@ def process_row(row_dict, case, margins=10):
         start_pos, end_pos = locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins)
 
     if case in ['SNP']:
-        return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
+        return snp_object(row_dict, sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
     if case in ['MicroSatellite']:
-        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
+        return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
-    return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner), assembly
+    return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
