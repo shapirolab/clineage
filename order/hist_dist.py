@@ -1,14 +1,21 @@
 import numpy as np
 from scipy import stats
+from emd import emd
 from math import sqrt, log10
 from hist import get_lims
+
+
 
 
 def inflate_hist(hist, reads):
     pop = []
     for k in hist.keys():
-        for i in range(int(hist[k]*reads)):
-            pop.append(k)
+        pop.extend([k]*int(hist[k]*reads))
+    if not pop:
+        print 'ERROR: empty histogram'
+        print reads
+        print hist
+        raise
     return pop
 
 
@@ -32,6 +39,30 @@ def pop_dist_subpeaks(hist1, hist2):
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
     score = float(sum(deltas))/len(range(li, ri))
     return score
+
+
+def pop_dist_ks_alon(hist1, hist2, reads):
+    """
+    Calculate the distance between two populations in the form of histograms
+    Uses
+    """
+    li, ri = get_lims(hist1, hist2)
+    cdf1 = np.cumsum([hist1[i] for i in xrange(li,ri)])
+    cdf2 = np.cumsum([hist2[i] for i in xrange(li,ri)])
+    d = np.max(np.abs(cdf1-cdf2))
+    return 1-stats.distributions.kstwobign.sf(d*np.sqrt(reads))
+
+
+def pop_dist_ks_alon_one(hist1, hist2, reads):
+    """
+    Calculate the distance between two populations in the form of histograms
+    Uses
+    """
+    li, ri = get_lims(hist1, hist2)
+    cdf1 = np.cumsum([hist1[i] for i in xrange(li, ri)])
+    cdf2 = np.cumsum([hist2[i] for i in xrange(li, ri)])
+    d = np.max(np.abs(cdf1-cdf2))
+    return 1-(stats.distributions.ksone.sf(d, reads)*2)
 
 
 def pop_dist_ks_2samp(hist1, hist2, reads, sample_depth):
@@ -161,6 +192,10 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
         return alt_ks_2samp(hist1, hist2, reads, sample_depth)
     if method == 'a2ks':
         return alt2_ks_2samp(hist1, hist2, reads)
+    if method == 'ksa':
+        return pop_dist_ks_alon(hist1, hist2, reads)
+    if method == 'kso':
+        return pop_dist_ks_alon_one(hist1, hist2, reads)
     if method == 'cor':
         return pop_dist_corr(hist1, hist2)
     if method == 'con':
