@@ -73,7 +73,7 @@ if '__main__' == __name__:
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
     print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
     ptf, ptr = PrimerTail.objects.all()
-    te_list = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
+    te_list, colliding_amplicons = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
     pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly)
     create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
 

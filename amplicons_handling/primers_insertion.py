@@ -105,7 +105,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
             print 'Unresolved primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
             continue
         except AmpliconCollisionError:
-            print 'Colliding primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
+            print 'Colliding primers for target {}, pf:{}, pr:{}, type:{}'.format(target.id, primer_left_sequence, primer_right_sequence, target.type)
             colliding_amplicons.append(target)
             continue
         left_primer_indexes, right_primer_indexes = primers_indexes_tuple
@@ -148,4 +148,4 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
     #         validated_primer = insilico_test(primer_pair, genome)
     #         assert validated_primer
 
-    return te_list
+    return te_list, colliding_amplicons
