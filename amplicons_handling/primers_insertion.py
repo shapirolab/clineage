@@ -56,12 +56,14 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     except ValueError:
         raise PrimerLocationError
     colliding_te = TargetEnrichment.objects.filter(type=target_enrichment_type)\
-                                      .filter(chromosome=target.chromosome)\
-                                      .filter(left__start_pos__lte=pr_e)\
-                                      .filter(right__end_pos__gte=pf_s)
+                                           .filter(chromosome=target.chromosome)\
+                                           .filter(left__start_pos__lte=pr_e)\
+                                           .filter(right__end_pos__gte=pf_s)
     if colliding_te:
-        print colliding_te
-        raise AmpliconCollisionError
+        for co in colliding_te:
+            if co.physical_locations.all() or co.targets.filter(name__contains='TTAA'):
+                print 'The Targets {} colaides with location {} or TTAA site {}'.format(colliding_te, co.physical_locations.all(), co.targets.all())
+                raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
 
 
