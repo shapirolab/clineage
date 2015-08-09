@@ -61,10 +61,16 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
                                            .filter(right__end_pos__gte=pf_s)
     if colliding_te:
         for co in colliding_te:
-            if co.physical_locations.all() or co.targets.filter(name__contains='TTAA'):
-                print 'The Targets {} colaides with location {} or TTAA site {}'.format(colliding_te, co.physical_locations.all(), co.targets.all())
+            if co.physical_locations.all():
+                print 'The Targets {} collides with location {}'.format(colliding_te, co.physical_locations.all())
                 raise AmpliconCollisionError
+    target_e = target.primer_pair.all()
+    for te in target_e:
+        if te.targets.filter(name__contains='TTAA'):
+            print 'The Targets {} colaides with  TTAA site {}'.format(target.pk, te.targets.all())
+            raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
+
 
 
 # def insilico_test(pair, genome):
