@@ -88,6 +88,12 @@ def get_targets_by_aar(aar_plate):
                        str(loc.well)]
 
 
+def get_mpxs_by_aar(aar_plate):
+    mpxs = []
+    for loc in SampleLocation.objects.filter(plate=aar_plate):
+        mpx = loc.reagent
+        mpxs.append(mpx)
+    return mpxs
 # def get_targets_for_aar7(panel): #temporary query 08.06.14 for aar7
 #     mpxs = []
 #     mpxs += list(PrimersMultiplex.objects.filter(physical_locations__plate__name='MM_MPX_w/o_LB_P3').filter(name__endswith='40'))
