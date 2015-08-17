@@ -2,7 +2,7 @@ __author__ = 'ofirr'
 
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
 from linapp.models import Microsatellite, PrimersMultiplex, SampleLocation, TargetEnrichment, Plate
-
+from collections import defaultdict
 
 def get_targets_by_panel(panel):
     for te in panel.targets.select_related('left', 'right', 'left__sequence', 'right__sequence', 'left__referencevalue',
@@ -94,6 +94,52 @@ def get_mpxs_by_aar(aar_plate):
         mpx = loc.reagent
         mpxs.append(mpx)
     return mpxs
+
+
+def map_te_to_mpx(mpxs):
+    m = {}
+    for mpx in mpxs:
+        for te in mpx.primers.all():
+            m[te] = mpx
+    return m
+
+
+def add_calling(uc, nc):
+    for loc in nc:
+        for cell in nc[loc]:
+            uc[loc][cell] = nc[loc][cell]
+    return uc
+
+
+def loc_key_to_object(loc):
+    return TargetEnrichment.objects.get(pk=int(loc.split(":")[0]))
+
+
+def calling_in_objects(uc):
+    calling = defaultdict(dict)
+    for loc in uc:
+        te = loc_key_to_object(loc)
+        calling[te] = uc[loc]
+    return calling
+
+
+def calling_by_mpx(uc, te_to_mpx_map):
+    calling_by_mpx = defaultdict(dict)
+    for loc in uc:
+        calling_by_mpx[te_to_mpx_map[loc]][loc] = uc[loc]
+    return calling_by_mpx
+
+
+def aggregate_reads_lists(mpx_calling):
+    mpxs_reads_lists = dict()
+    for mpx in mpx_calling:
+        mpx_l = []
+        for loc in mpx_calling[mpx]:
+            for cell in mpx_calling[mpx][loc]:
+                if mpx_calling[mpx][loc][cell]:
+                    mpx_l.append(mpx_calling[mpx][loc][cell]['reads'])
+        mpxs_reads_lists[mpx] = mpx_l
+    return mpxs_reads_lists
 # def get_targets_for_aar7(panel): #temporary query 08.06.14 for aar7
 #     mpxs = []
 #     mpxs += list(PrimersMultiplex.objects.filter(physical_locations__plate__name='MM_MPX_w/o_LB_P3').filter(name__endswith='40'))
