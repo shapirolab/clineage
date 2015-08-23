@@ -41,10 +41,15 @@ SIMULATED_HISTS_PATH = '/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR3/
 SIGNALS_CALLING_PATH = '/net/mraid11/export/data/dcsoft/home/LINEAGE/Hiseq/NSR3/fastq_human/Calling/NSR3_AC_nonX_mat_2a_prop.pickle'
 
 
-ups = [numpy.poly1d([0.00026892, -0.00205025])]
-dws = [numpy.poly1d([0.00191615, -0.01174076]),
-       numpy.poly1d([0.00027444, -0.00220836]),
-       numpy.poly1d([0.0001768, -0.00199328])]
+class hashable_poly1d(numpy.poly1d):
+    def __hash__(self):
+        return hash((tuple(self.coeffs), self.order, self.variable))
+
+
+ups = [hashable_poly1d([0.00026892, -0.00205025])]
+dws = [hashable_poly1d([0.00191615, -0.01174076]),
+       hashable_poly1d([0.00027444, -0.00220836]),
+       hashable_poly1d([0.0001768, -0.00199328])]
 
 sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
                                             method=sim_method,
