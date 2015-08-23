@@ -6,6 +6,7 @@ import numpy as np
 from order.optimize_probs import dyn_mat_model
 from scipy.stats import binom
 from frogress import bar
+from pylru import lrudecorator
 
 
 def generate_bin_hist_pure_optimized(d,
@@ -105,6 +106,7 @@ def get_method(method):
     raise
 
 
+@lrudecorator(1000)
 def generate_hist(d, cycles, method, **kwargs):
     generate_method_hist = get_method(method)
     return generate_method_hist(d, cycles, **kwargs)
@@ -154,7 +156,24 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
     for signal in signals[1:]:
         hist_sum = hist_sum.asym_add(signal)
     hist_sum.normalize()
-    shift = int(np.mean(seeds))
+    shift = int(np.mean(list(seeds)))
+    return hist_sum - shift
+
+
+def generate_simulated_proportional_alleles_precalculated(seeds, seeds_hists, cycles, proprtions):
+    assert sum(proprtions) == 1
+    assert len(seeds) == len(cycles) == len(proprtions)
+    signals = []
+    for seed, cycles, proportion in zip(seeds, cycles, proprtions):
+        if proportion == 0.0:
+            continue
+        hist = seeds_hists[seed][cycles].ymul(proportion) + seed
+        signals.append(hist)
+    hist_sum = signals[0]
+    for signal in signals[1:]:
+        hist_sum = hist_sum.asym_add(signal)
+    hist_sum.normalize()
+    shift = int(np.mean(list(seeds)))
     return hist_sum - shift
 
 
