@@ -9,7 +9,8 @@ from collections import defaultdict
 from collections import Counter
 from primers_insertion import create_primers_in_db
 from positioning import insertion_plates_to_db, create_primer_order_file_xls
-from linapp.models import TargetEnrichmentType, PrimerTail
+from primers_insertion import check_primers
+from linapp.models import Target, TargetEnrichment, TargetEnrichmentType, PrimerTail
 
 
 def create_amplicons_for_primer3(target):
@@ -120,8 +121,12 @@ def sort_unique_primers(sam_file, target_primers, margins=300):
                             right_primer = None
 
         if left_primer and right_primer:
-            chosen_target_primers[target_id]['LEFT'] = left_primer
-            chosen_target_primers[target_id]['RIGHT'] = right_primer
+            target = Target.objects.get(pk=target_id)
+            if check_primers(target, left_primer, right_primer, target_enrichment_type=TargetEnrichmentType.objects.get(name='PCR_with_tails'), margins=margins):
+                chosen_target_primers[target_id]['LEFT'] = left_primer
+                chosen_target_primers[target_id]['RIGHT'] = right_primer
+            else:
+                discarded_targets.append(target_id)
         else:
             discarded_targets.append(target_id)
 
