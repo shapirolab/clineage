@@ -1,5 +1,6 @@
 import re
-from linapp.models import *
+from wet_storage.models import Plate, PlateType, SampleLocation
+from linapp.models import Protocol
 from utils.wells import *
 from collections import defaultdict
 from decimal import Decimal

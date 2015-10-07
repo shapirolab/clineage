@@ -8,7 +8,7 @@ from django.core.management import setup_environ
 sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
 setup_environ(settings)
-from linapp.models import Target, TargetEnrichment, Primer, TargetType, Sequence
+from genomes.models import Target, TargetEnrichment, Primer, TargetType, Sequence
 from utils.SequenceManipulations import complement
 from frogress import bar
 

@@ -22,6 +22,10 @@ from utils.wells import num2abc
 from utils.user_cells_report import user_cells_table_values, get_partner_report, query_partner_individuals
 from linapp.forms import *
 from linapp.models import *
+from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
+from sampling.models import FACS, LaserCapture, CellContentType, SampleComposition
+from misc.models import Taxa
+from genomes.models import Assembly, TargetEnrichment, Microsatellite, TargetEnrichmentType
 from utils.plate_string_description import *
 from linapp.DBUtils import DBUtils
 

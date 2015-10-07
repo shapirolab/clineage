@@ -1,6 +1,5 @@
 import re
-from linapp.models import TargetType, Assembly, Target, Primer, Sequence, Chromosome
-from SequenceManipulations import complement
+from genomes.models import TargetType, Assembly, Target, Sequence, Chromosome
 import hashlib
 
 def add_target(name, target_type, assembly, chromosome, start_pos, end_pos, seq):

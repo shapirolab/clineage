@@ -1,7 +1,9 @@
 __author__ = 'ofirr'
 
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
-from linapp.models import Microsatellite, PrimersMultiplex, SampleLocation, TargetEnrichment, Plate
+from genomes.models import Microsatellite, TargetEnrichment
+from wet_storage.models import SampleLocation
+from lib_prep.models import PrimersMultiplex
 from collections import defaultdict
 
 def get_targets_by_panel(panel):

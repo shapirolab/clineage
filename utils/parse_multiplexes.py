@@ -1,6 +1,8 @@
 
 import re
-from linapp.models import *
+from wet_storage.models import Plate, PlateType, SampleLocation
+from genomes.models import Target
+from lib_prep.models import PrimersMultiplex
 import hashlib
 from collections import defaultdict
 from django.db.models import Max, Count

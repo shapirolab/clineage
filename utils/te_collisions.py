@@ -1,5 +1,5 @@
 __author__ = 'ofirr'
-from linapp.models import Chromosome, TargetEnrichment
+from genomes.models import TargetEnrichment
 
 def delete_overlapping_tes(te_queryset):
     tes_conflict = []

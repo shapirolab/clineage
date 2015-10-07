@@ -2,7 +2,9 @@
 # encoding: utf8
 
 from django.views.decorators.csrf import csrf_exempt
-from linapp.models import Microsatellite, TargetEnrichmentType, Target, Panel, Assembly, Chromosome, Plate
+from genomes.models import Microsatellite, TargetEnrichmentType, Target, Assembly, Chromosome
+from wet_storage.models import Plate
+from lib_prep.models import Panel
 from spyne.server.django import DjangoApplication
 from spyne.model.primitive import String, Integer, AnyDict
 from spyne.model.complex import Iterable

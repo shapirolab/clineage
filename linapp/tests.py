@@ -1,5 +1,6 @@
 from django.test import TestCase
-from linapp.models import Taxa, Assembly, Chromosome
+from misc.models import Taxa
+from genomes.models import Assembly, Chromosome
 import os
 
 

@@ -1,5 +1,6 @@
 import os
 from Bio import SeqIO
+from genomes.models import Assembly, Chromosome
 
 os.chdir('/net/mraid11/export/data/dcsoft/home/LINEAGE/GenomesData/Mouse/mm10/')
 mm10 = Assembly.objects.all()[2]

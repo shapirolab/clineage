@@ -1,6 +1,14 @@
 from dojango.forms import *
 #from django import forms
-from linapp.models import *
+from django.contrib.auth.models import User
+from linapp.models import UserProfile, Experiment, ExperimentFile, ExperimentLog, ExperimentUser, Protocol, Algorithm, \
+    AlgorithmRun, AlgorithmParameter, AlgorithmRunParameters, RawData, CorrectedRawData, FailedTargetValue, \
+    SequenceDistribution, TargetAnalysis, TargetVariant, GenSig, DM, CellTreeNode
+from sampling.models import GeneticBackground, Coordinates, Location, Individual, Extraction, SamplingEvent, Cell, \
+    SampleComposition, SampleStatus, CellContent
+from genomes.models import Target
+from lib_prep.models import Panel, Machine, Sequencing
+from wet_storage.models import Plate, PlateType, PlateStorage, StorageBox, SampleLocation
 from linapp.widgets import *
 #### -------------------------------------------------------------------------------------
 #### Users/Roles Management

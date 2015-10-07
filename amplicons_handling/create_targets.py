@@ -8,7 +8,7 @@ from django.core.management import setup_environ
 import sys
 sys.path.append('/home/ofirr/CLineage')
 from clineage import settings
-from linapp.models import TargetEnrichmentType, PrimerTail
+from genomes.models import TargetEnrichmentType, PrimerTail
 setup_environ(settings)
 
 

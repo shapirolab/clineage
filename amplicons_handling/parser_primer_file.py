@@ -2,7 +2,8 @@ __author__ = 'veronika'
 import re
 import hashlib
 from primers_insertion import get_or_create_sequence, PrimerLocationError
-from linapp.models import TargetType, Assembly, Target, Chromosome, Microsatellite, SNP, User
+from django.contrib.auth.models import User
+from genomes.models import TargetType, Assembly, Target, Chromosome, Microsatellite, SNP
 from utils.SequenceManipulations import complement
 
 columns_case_dict = {

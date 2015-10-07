@@ -2,7 +2,7 @@ __author__ = 'ofirr'
 import xlwt
 import xlrd
 from utils.wells import index2str, str2index
-from linapp.models import SampleLocation, Assembly, Plate, PlateType
+from wet_storage.models import SampleLocation, Plate, PlateType
 
 
 def chunks(l, n):

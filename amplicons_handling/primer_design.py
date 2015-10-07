@@ -11,7 +11,7 @@ from frogress import bar
 from primers_insertion import create_primers_in_db
 from positioning import insertion_plates_to_db, create_primer_order_file_xls
 from primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
-from linapp.models import Target, TargetEnrichment, TargetEnrichmentType, PrimerTail
+from genomes.models import Target, TargetEnrichmentType, PrimerTail
 
 
 def create_amplicons_for_primer3(target):
