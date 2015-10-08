@@ -111,3 +111,6 @@ class SampleLocation(models.Model):
         index_together = [
             ["content_type", "object_id"],
         ]
+        #unique_together = (
+        #    ("plate", "well"),
+        #)
