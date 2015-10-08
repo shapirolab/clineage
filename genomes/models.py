@@ -296,4 +296,23 @@ class TargetEnrichment(models.Model):
         return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
 ### -------------------------------------------------------------------------------------
 
+### -------------------------------------------------------------------------------------
+### New
+### -------------------------------------------------------------------------------------
+class DNABarcode(models.Model):
+    #TODO: add boundries for actual DNA content.
+    sequencing_primer = models.ForeignKey(SequencingPrimer)
+    barcode = models.ForeignKey(Sequence)
+    adaptor = models.ForeignKey(Adaptor)
+    physical_locations = fields.GenericRelation('SampleLocation',
+                                             content_type_field='content_type',
+                                             object_id_field='object_id')
+
+### -------------------------------------------------------------------------------------
+class SequencingPrimer(models.Model):
+    value = models.ForeignKey(Sequence)
+### -------------------------------------------------------------------------------------
+class Adaptor(models.Model):
+    value = models.ForeignKey(Sequence)
+
 
