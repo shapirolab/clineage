@@ -81,7 +81,8 @@ class Location(models.Model):  # Freetext location
         return self.name
 ### -------------------------------------------------------------------------------------
 
-
+class CellContentProtocol(Protocol):
+    pass
 
 ### -------------------------------------------------------------------------------------
 ### Sampling Hierarchy
@@ -186,13 +187,13 @@ class Cell(models.Model):
 
 ### -------------------------------------------------------------------------------------
 class CellContent(models.Model):  # aka DNA
-    parent = models.ForeignKey('CellContent', null=True, blank=True)
+    # parent = models.ForeignKey('CellContent', null=True, blank=True)
     cell = models.ForeignKey(Cell)
-    panel = models.ForeignKey(Panel, null=True, blank=True)
+    # panel = models.ForeignKey(Panel, null=True, blank=True)
     type = models.ForeignKey(CellContentType)
     name = models.CharField(max_length=50, null=True, blank=True)
-    protocol = models.ForeignKey(Protocol, null=True, blank=True)
-    seq_ready = models.BooleanField(default=False)
+    protocol = models.ForeignKey(CellContentProtocol, null=True, blank=True)
+    # seq_ready = models.BooleanField(default=False)
     user = models.ForeignKey(User, null=True, blank=True)
     comment = models.TextField()
     physical_locations = fields.GenericRelation('SampleLocation',
@@ -214,5 +215,3 @@ class CellContent(models.Model):  # aka DNA
         #print self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')
         #return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
 ### -------------------------------------------------------------------------------------
-
-
