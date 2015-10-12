@@ -152,7 +152,7 @@ class Target(models.Model):#Target is a locus on a reference genome.
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
     referencevalue = models.ForeignKey(Sequence)
-    partner = models.ManyToManyField(User, null=True)
+    partner = models.ManyToManyField(User, null=True) # TODO: external table.
 
     def get_referencevalue(self):
         return self.chromosome.getdna(self.start_pos, self.end_pos)

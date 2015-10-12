@@ -42,11 +42,11 @@ class PlatePlastica(models.Model): #The plate's physical form. e.g. deepwell squ
     def __unicode__(self):
         return u"%s" %self.description
 ### -------------------------------------------------------------------------------------
-class PlateType(models.Model):
+class PlateType(models.Model):  # TODO: kill and modify as follows:
     code = models.AutoField(primary_key=True)
     friendly = models.CharField(max_length=100)
-    context = models.ForeignKey(PlateContext, null=True)
-    plastic = models.ForeignKey(PlatePlastica, null=True)
+    context = models.ForeignKey(PlateContext, null=True)  # TODO: kill and modify to plate inheritance
+    plastic = models.ForeignKey(PlatePlastica, null=True)  # TODO: relocate as field of Plate
     def __unicode__(self):
         return u"%s" % self.friendly
 ### -------------------------------------------------------------------------------------

@@ -58,6 +58,7 @@ class TamirWF48(models.Model):
     workflow384 = models.ForeignKey(TamirWF384)
     #TODO: enforce plate types
     aar = models.ForeignKey(Plate)
+    # TODO: panel?
     barcode_plate = models.ForeignKey(Plate)
     dilution_plate = models.ForeignKey(Plate)
 
