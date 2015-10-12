@@ -6,14 +6,15 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 
+from sampling.models import CellContent
 from lib_prep.models import WorkFlowCell
-from linapp.models import Protocol
+from genomes.models import Target
 
 ### -------------------------------------------------------------------------------------
 
 class NGSRun(models.Model):
     wfcs = models.ManyToManyField(WorkFlowCell)
-    directory = models.FilePathField(blank=True, null=True)
+    directory = models.FilePathField(null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     # TODO: add seqeuencing primers. kit?
@@ -22,12 +23,12 @@ class NGSRun(models.Model):
 
 class DemultiplexedReads(models.Model):
     ngs_run = models.ForeignKey(NGSRun)
-    directory = models.FilePathField(blank=True, null=True)
+    directory = models.FilePathField(null=True)
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
 
 class MergedReads(models.Model):
     demux_reads = models.ForeignKey(DemultiplexedReads)
-    directory = models.FilePathField(blank=True, null=True)
+    directory = models.FilePathField(null=True)
     merge_scheme = models.ForeignKey(MergingScheme)
 ### -------------------------------------------------------------------------------------
 class DemultiplexingScheme(models.Model):
@@ -55,6 +56,15 @@ class Machine(models.Model):
         return self.type.__unicode__() + '_' + self.machineid
 
 ### -------------------------------------------------------------------------------------
-
 class SequencingData(models.Model): # This contains the actual data.
-    pass
+    cell_content = models.ForeignKey(CellContent)
+    merged_reads = models.ForeignKey(MergedReads)
+    target = models.ForeignKey(Target)
+    target_offset = models.IntegerField(null=True)
+    fastq = models.FilePathField(null=True)
+    vcf = models.FilePathField(null=True)
+
+    class Meta:
+        index_together = (
+            ("cell_content", "merged_reads", "target")
+        )
