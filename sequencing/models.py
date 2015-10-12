@@ -6,18 +6,45 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 
-from linapp.models import Protocol, RawData
 from lib_prep.models import WorkFlowCell
+from linapp.models import Protocol
 
 ### -------------------------------------------------------------------------------------
-### Sequencing
+
+class NGSRun(models.Model):
+    wfcs = models.ManyToManyField(WorkFlowCell)
+    directory = models.FilePathField(blank=True, null=True)
+    name = models.CharField(max_length=100, unique=True)
+    machine = models.ForeignKey(Machine)
+    # TODO: add seqeuencing primers. kit?
+    user = models.ForeignKey(User)
+    date = models.DateField()
+
+class DemultiplexedReads(models.Model):
+    ngs_run = models.ForeignKey(NGSRun)
+    directory = models.FilePathField(blank=True, null=True)
+    demux_scheme = models.ForeignKey(DemultiplexingScheme)
+
+class MergedReads(models.Model):
+    demux_reads = models.ForeignKey(DemultiplexedReads)
+    directory = models.FilePathField(blank=True, null=True)
+    merge_scheme = models.ForeignKey(MergingScheme)
 ### -------------------------------------------------------------------------------------
+class DemultiplexingScheme(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+class MergingScheme(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
+
     def __unicode__(self):
         return self.company + '_' + self.model
-### -------------------------------------------------------------------------------------
+
 class Machine(models.Model):
     machineid = models.CharField(max_length=50)
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -26,34 +53,7 @@ class Machine(models.Model):
 
     def __unicode__(self):
         return self.type.__unicode__() + '_' + self.machineid
-### -------------------------------------------------------------------------------------
-class NGSRun(models.Model):
-    # data = models.ForeignKey(RawData, related_name='sequencing_event', null=True, blank=True)
-    wfcs = models.ManyToManyField(WorkFlowCell)
-    name = models.CharField(max_length=100, unique=True)
-    machine = models.ForeignKey(Machine)
-    protocol = models.ForeignKey(Protocol)
-    user = models.ForeignKey(User)
-    date = models.DateField()
 
-#    def experiment(self):
-#        experiments = []
-#        for sample in self.samples.all():
-#            if sample.experiment() not in experiments:
-#                experiments.append(sample.experiment())
-#        if len(experiments) <> 1:
-#            raise
-#        return experiments[0]
-    def directory(self):
-        path = '%s/%s'%(settings.NGS_RUNS,self.name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        return path
-    def __unicode__(self):
-        return self.name
-@receiver(post_save, sender=Sequencing)
-def on_save(sender, **kwargs):
-    kwargs['instance'].directory()
 ### -------------------------------------------------------------------------------------
 
 class SequencingData(models.Model): # This contains the actual data.
