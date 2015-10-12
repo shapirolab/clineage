@@ -15,16 +15,6 @@ class WorkFlowCell(models.Model): # cell + barcode
                                              content_type_field='content_type',
                                              object_id_field='object_id')
 
-class Library(models.Model): # prepared for sequencing
-    physical_locations = fields.GenericRelation('SampleLocation',
-                                         content_type_field='content_type',
-                                         object_id_field='object_id')
-
-class TamirLib(Library):
-    workflow384 = models.ForeignKey(TamirWF384)
-    wfcs = models.ManyToManyField(TamirWFC,through=TamirLibCells)
-    bluepippin_length = models.IntegerField()
-
 class TamirLibCells(models.Model):
     wfc = models.ForeignKey(TamirWFC)
     lib = models.ForeignKey(TamirLib)
@@ -65,6 +55,7 @@ class TamirWF48(models.Model):
 class TamirWF384(models.Model):
     #TODO: enforce plate type
     final_plate = models.ForeignKey(Plate)
+    bluepippin_length = models.IntegerField()
 
 ### -------------------------------------------------------------------------------------
 class BarcodePair(models.Model):

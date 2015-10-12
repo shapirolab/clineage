@@ -6,8 +6,8 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 
-from lib_prep.models import Library
 from linapp.models import Protocol, RawData
+from lib_prep.models import WorkFlowCell
 
 ### -------------------------------------------------------------------------------------
 ### Sequencing
@@ -28,8 +28,8 @@ class Machine(models.Model):
         return self.type.__unicode__() + '_' + self.machineid
 ### -------------------------------------------------------------------------------------
 class NGSRun(models.Model):
-    library = models.ForeignKey(Library)
     # data = models.ForeignKey(RawData, related_name='sequencing_event', null=True, blank=True)
+    wfcs = models.ManyToManyField(WorkFlowCell)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     protocol = models.ForeignKey(Protocol)
