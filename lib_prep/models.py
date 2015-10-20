@@ -3,14 +3,15 @@ from django.db import models
 from django.contrib.contenttypes import fields
 from django.contrib.auth.models import User
 
-from genomes.models import TargetEnrichment, DNABarcode
+from genomes.models import TargetEnrichment
 from linapp.models import Protocol
 from wet_storage.models import SampleLocation, Plate
 from sampling.models import CellContent
+from primers.parts.models import DNABarcode1, DNABarcode2
 
 class BarcodePair(models.Model):
-    left = models.ForeignKey(DNABarcode,related_name="left")
-    right = models.ForeignKey(DNABarcode,related_name="right")
+    left = models.ForeignKey(DNABarcode1)
+    right = models.ForeignKey(DNABarcode2)
 
 
 class WorkFlowCell(models.Model): # cell + barcode

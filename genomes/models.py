@@ -10,12 +10,14 @@ from utils.SequenceManipulations import *
 from misc.models import Taxa
 from linapp.models import Protocol
 from wet_storage.models import SampleLocation
+from misc.models import DNA
 
 class SearchMarginesDoesNotExist(Exception):
     """
     Attempt to query a position outside chromosome sequence
     """
     pass
+
 
 class Assembly(models.Model):
     taxa = models.ForeignKey(Taxa)
@@ -48,6 +50,7 @@ class Chromosome(models.Model):
     def get_abs_path(self):
         return os.path.join(settings.CHROMOSOMES_PATH, self.get_path())
 
+    # TODO: decide indexing method
     def getdna(self, start, stop):
         if start > 0 \
            and stop > 0 \
@@ -103,79 +106,36 @@ class Sequence(models.Model):
     sequence = models.TextField()
     hash = models.CharField(max_length=32, unique=True) #md5(sequence) for enabling uniqueness and fast comparison.
 
-### -------------------------------------------------------------------------------------
-### Types and descriptors
-### -------------------------------------------------------------------------------------
-class TargetType(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class RestrictionSiteType(models.Model):
-    name = models.CharField(max_length=50)
-    sequence = models.CharField(max_length=50)
-    cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
-    sticky_bases = models.IntegerField()
-    sequence_len = models.PositiveIntegerField()
-
-    def save(self, *args, **kwargs):
-        self.sequence_len = len(self.sequence)
-        return super(RestrictionSiteType, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class TargetEnrichmentFailureType(models.Model):
-    """
-    1 = No product
-    2 = Primer dimer is wider, equal or  close to the same band width of expected product
-    3 = Smear or more than 3 products  (other than the primer dimer which can be purified). If less than 3, real product
-        has to be wider than byproducts.
-    4 = More than 1 product is in the range of correct size.
-    5 = NGS failure - Primer pair did not work in the context of a successful NGS run (amplified and sequenced).
-    """
-    name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-
-
-### -------------------------------------------------------------------------------------
-### Targets?
-### -------------------------------------------------------------------------------------
-class Target(models.Model):#Target is a locus on a reference genome.
-    name = models.CharField(max_length=50)
-    type = models.ForeignKey(TargetType) #Microsatellite / SNP / etc...
+###
+# New!
+###
+class DNASlice(models.Model):
     chromosome = models.ForeignKey(Chromosome)
+    # TODO: decide indexing method
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
-    referencevalue = models.ForeignKey(Sequence)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+    _sequence = models.ForeignKey(Sequence,null=True,default=None)
 
-    def get_referencevalue(self):
-        return self.chromosome.getdna(self.start_pos, self.end_pos)
+    @property
+    def sequence(self):
+        if self._sequence is not None:
+            return self._sequence
+        else:
+            return self._get_seq()
 
-    def __unicode__(self):
-        return self.name
+    def _get_seq(self):
+        self.chromosome.get_dna(self.start_pos,self.end_pos)
 
-    def validate_reference(self):
-        assert self.referencevalue.sequence == self.get_referencevalue()
-
-    def update_primers(self):
-        for te in TargetEnrichment.objects.filter(chromosome=self.chromosome)\
-                                .filter(left__end_pos__lte=self.start_pos)\
-                                .filter(right__start_pos__gte=self.end_pos):
-            te.update_enriched_targets()
+    def cache(self):
+        self._sequence = self._get_seq()
+        self.save()
 
     def get_margine(self, pos):
         if self.chromosome.cyclic:
             return pos
         if 0 <= pos <= self.chromosome.sequence_length:
             return pos
-        raise SearchMarginesDoesNotExist
-
+        raise SearchMarginesDoesNotExist()
 
     def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
         left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
@@ -199,118 +159,43 @@ class Target(models.Model):#Target is a locus on a reference genome.
         left = self.get_left_surrounding_restriction(restriction_type)
         right = self.get_right_surrounding_restriction(restriction_type)
         return left, right
+
 ### -------------------------------------------------------------------------------------
-class PrimerTail(models.Model):
-    tail = models.CharField(max_length=50, null=True)
-### -------------------------------------------------------------------------------------
-class Primer(Target):
-    PLUS = '+'
-    MINUS = '-'
-    STRANDS = (
-        (PLUS, 'Plus'),
-        (MINUS, 'Minus'),
-    )
-    strand = models.CharField(max_length=1, choices=STRANDS, null=True)
-    sequence = models.ForeignKey(Sequence)
-    tail = models.ForeignKey(PrimerTail, null=True)
-    physical_locations = fields.GenericRelation('SampleLocation',
-                                             content_type_field='content_type',
-                                             object_id_field='object_id')
-    def validate_reference(self):
-        if self.strand == self.PLUS:
-            assert self.referencevalue.sequence == self.get_referencevalue()
-            assert self.sequence.sequence[-(self.end_pos-self.start_pos+1):] == self.get_referencevalue()
-        if self.strand == self.MINUS:
-            assert self.referencevalue.sequence == self.get_referencevalue()
-            assert complement(self.sequence.sequence[-(self.end_pos-self.start_pos+1):])[::-1] == self.get_referencevalue()
+class Target(models.Model):
+    name = models.CharField(max_length=50)
+    slice = models.ForeignKey(DNASlice)
+    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+
 ### -------------------------------------------------------------------------------------
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
-### -------------------------------------------------------------------------------------
+
 class SNP(Target):
     mutation = models.CharField(max_length=10) #X>Y
     modified = models.CharField(max_length=10) #Y
+
+
+#TODO add in_del
+
+
 ### -------------------------------------------------------------------------------------
-class RestrictionSite(Target):
-    restriction_type = models.ForeignKey(RestrictionSiteType)
+
 ### -------------------------------------------------------------------------------------
-class TargetEnrichmentType(models.Model):
+class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
-    protocol = models.ForeignKey(Protocol, null=True)
+    sequence = models.CharField(max_length=50) # TODO: DNAField
+    cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
+    sticky_bases = models.IntegerField()
+    sequence_len = models.PositiveIntegerField()
+    sites = models.ManyToManyField(DNASlice)
+
+    def save(self, *args, **kwargs):
+        self.sequence_len = len(self.sequence)
+        return super(RestrictionEnzyme, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
-### -------------------------------------------------------------------------------------
-class TargetEnrichment(models.Model):
-    type = models.ForeignKey(TargetEnrichmentType)
-    chromosome = models.ForeignKey(Chromosome)
-    left = models.ForeignKey(Primer, related_name='left_primer')
-    right = models.ForeignKey(Primer, related_name='right_primer')
-    amplicon = models.CharField(max_length=500)
-    passed_validation = models.NullBooleanField()
-    validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
-    validation_date = models.DateField(null=True, blank=True)
-    comment = models.CharField(max_length=50, blank=True, null=True)
-    physical_locations = fields.GenericRelation('SampleLocation',
-                                                 content_type_field='content_type',
-                                                 object_id_field='object_id')
-    targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
-    partner = models.ManyToManyField(User, null=True)
-
-    def update_enriched_targets(self):  # return queryset of targets between the two primers and updates the m2m targets field
-        assert self.left.chromosome == self.right.chromosome
-        assert self.chromosome == self.left.chromosome
-        self.targets = Target.objects.filter(chromosome=self.chromosome, start_pos__gte=self.left.start_pos)\
-            .filter(end_pos__lte=self.right.end_pos)\
-            .exclude(pk__in=Primer.objects.all().values('pk'))
-        self.save()
-        return self.targets.all()
-
-    def amplicon_indices(self):
-        return (self.left.start_pos, self.right.end_pos)
-
-    def get_internal_restriction(self, restriction):
-        return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
-
-    def get_surrounding_restriction(self, restriction, max_seek=5000):
-        for x in range(0, max_seek, 10):
-            lamplicon = self.chromosome.getdna(self.amplicon_indices()[0]-x, self.amplicon_indices()[0])
-            lttaas = [self.amplicon_indices()[0] - m.start() for m in re.finditer(restriction, lamplicon)]
-            if lttaas:
-                break
-
-        for x in range(0, max_seek, 10):
-            ramplicon = self.chromosome.getdna(self.amplicon_indices()[1], self.amplicon_indices()[1]+x)
-            rttaas = [self.amplicon_indices()[1] + m.start() for m in re.finditer(restriction, ramplicon)]
-            if rttaas:
-                break
-
-        if lttaas and rttaas:
-            return max(lttaas), min(rttaas)
-        return None
-
-
-    def __unicode__(self):
-        return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
-### -------------------------------------------------------------------------------------
 
 ### -------------------------------------------------------------------------------------
-### New
-### -------------------------------------------------------------------------------------
-class SequencingPrimer(models.Model):
-    value = models.ForeignKey(Sequence)
-### -------------------------------------------------------------------------------------
-class Adaptor(models.Model):
-    value = models.ForeignKey(Sequence)
-### -------------------------------------------------------------------------------------
-class DNABarcode(models.Model):
-    #TODO: add boundries for actual DNA content.
-    sequencing_primer = models.ForeignKey(SequencingPrimer)
-    barcode = models.ForeignKey(Sequence)
-    adaptor = models.ForeignKey(Adaptor)
-    physical_locations = fields.GenericRelation('SampleLocation',
-                                             content_type_field='content_type',
-                                             object_id_field='object_id')
-
