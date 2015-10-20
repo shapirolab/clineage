@@ -78,7 +78,8 @@ class BarcodePairBarcodePlate(models.Model):
 
 
 ### -------------------------------------------------------------------------------------
-class Panel(models.Model):#collection of targets
+class Panel(models.Model):#collection of targets  # TODO: kill and replace with PanelPlate
+                                                # TODO: m2m pri_mux, well on the m2m table.
     name = models.CharField(max_length=50)
     targets = models.ManyToManyField(TargetEnrichment, related_name='panels')
     #TODO: add comment field
@@ -90,7 +91,7 @@ class Panel(models.Model):#collection of targets
 ### -------------------------------------------------------------------------------------
 ### Primers Multiplex
 ### -------------------------------------------------------------------------------------
-class PrimersMultiplex(models.Model):
+class PrimersMultiplex(models.Model): # TODO: move to primers, m2m to TER.
     name = models.CharField(max_length=20)
     primers = models.ManyToManyField(TargetEnrichment)
     physical_locations = fields.GenericRelation(SampleLocation,
