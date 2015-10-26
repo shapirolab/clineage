@@ -54,6 +54,6 @@ if __name__ == '__main__':
         results.append(result)
         alg, sim, optimizer_method, cycles_tup, ms_lengths, res = result
         print alg, sim, optimizer_method, cycles_tup, ms_lengths, res
-    with open('out/{}_{}_{}.pickle'.format(unique_id, n,user_id),'wb') as f:
+    with open('out/{}_{}_{}.pickle'.format(unique_id, n, user_id),'wb') as f:
         f.write(dumps(results))
     
