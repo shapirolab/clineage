@@ -3,6 +3,9 @@ from ..hist_dist import pop_dist
 from scipy import optimize
 import numpy
 
+class hashable_poly1d(numpy.poly1d):
+    def __hash__(self):
+        return hash((tuple(self.coeffs), self.order, self.variable))
 
 def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='con', **kwargs):
     """
@@ -15,7 +18,7 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     :return:
     """
     up, dw, method = msmodel
-    model_hist = generate_hist(syn_len, cycles, method, up=up, dw=dw, **kwargs)
+    model_hist = generate_hist(syn_len, cycles, method, ups=up, dws=dw, **kwargs)
     for h in [model_hist, syn_hist]:
         h.sq_normalize()
         if len(h.keys()) == 0:
@@ -45,10 +48,10 @@ def optimize_across_lengths(input_tuple):
 
     def nmes(x):
         assert len(x) % 2 == 0
-        up_params = list(x)[:len(x)/2]
-        dw_params = list(x)[len(x)/2:]
-        up = numpy.poly1d(up_params)
-        dw = numpy.poly1d(dw_params)
+        up_params = list(x)[0]
+        dw_params = list(x)[1:]
+        up = hashable_poly1d(up_params)
+        dw = hashable_poly1d(dw_params)
         msmodel = (up, dw, sim)
         return distance_from_model_across_lengths(msmodel, hist_pairs, cycles_tup, distance_measure=alg)
 
