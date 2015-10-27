@@ -2,16 +2,30 @@ import csv
 import gzip
 from frogress import bar
 from cloud.serialization.cloudpickle import loads, dumps
+from order.preprocessing import generate_sim_hists_of_up_to_k_alleles, generate_biallelic_reads_of_multiple_proportions
+from collections import defaultdict
+from pickle import loads
 
-from order.preprocessing import generate_sim_hists_of_up_to_k_alleles
-from order.calling import generate_hist_calls
+
+def load_or_create_calling(callingfile):
+    try:
+        print 'loading existing calling'
+        f = open(callingfile, 'rb').read()
+        calling = loads(f)
+        print 'done loading existing calling'
+    except:
+        print 'initializing new calling'
+        calling = defaultdict(lambda: defaultdict(dict))
+    return calling
+
 
 def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
-        method='bin',
+        method='bon',
+        min_cycles=20,
         max_cycles=90,
-        up=lambda d:0.00005*d**2 - 0.0009*d + 0.0036,
-        dw=lambda d:0.00009*d**2 - 0.00003*d - 0.0013,
+        ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
+        dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
         normalize=True,
         truncate=False,
         cut_peak=False,
@@ -29,44 +43,17 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
         print 'loading existing simulations'
         sim_hists = loads(f)
         print 'done loading existing simulations'
-    except:
+    except IOError, e:
         print 'generating simulated histograms'
-        sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
+        # sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
+        sim_hists = generate_biallelic_reads_of_multiple_proportions(**kwargs)
         with open(simulationsfile, 'wb') as f:
             f.write(dumps(sim_hists))
         print 'done generating simulated histograms'
+    except:
+        print 'Somethig really unexpected happened'
+        raise
     return sim_hists
-
-
-def generate_calling_file(input_file,
-                          sim_hists,
-                          calling,
-                          **kwargs):
-    """
-        workers=1,
-        max_alleles=2,
-        max_distance_from_median=30,
-        reads_threshold=50
-        shift_margins=3
-        nsamples=None
-        method='cor',
-        score_threshold=0.006,
-        min_cycles=0,
-        max_cycles=80,
-        max_ms_length=60
-        normalize=True,
-        truncate=False,
-        cut_peak=False,
-        trim_extremes=False):
-    :param input_file:
-    :param sim_hists:
-    :param calling:
-    :param kwargs:
-    :return:
-    """
-    for loc, cell, row_hist, res in bar(generate_hist_calls(input_file, sim_hists, calling, **kwargs)):
-        calling[loc][cell] = res
-    return calling
 
 
 def generate_output_file(input_file,

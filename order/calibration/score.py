@@ -3,6 +3,9 @@ from ..hist_dist import pop_dist
 from scipy import optimize
 import numpy
 
+class hashable_poly1d(numpy.poly1d):
+    def __hash__(self):
+        return hash((tuple(self.coeffs), self.order, self.variable))
 
 def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='con', **kwargs):
     """

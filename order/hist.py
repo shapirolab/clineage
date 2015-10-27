@@ -23,14 +23,17 @@ def vnormalized(a, axis=-1, order=2):
 class Histogram(object):
     def __init__(self, h, normalize=False, nsamples=None, truncate=False, cut_peak=False, trim_extremes=False, **kwargs):
         if isinstance(h,list):
-            h = Counter({i+3:x for i,x in enumerate(h)})
+            self._hist = Counter({i+3:x for i,x in enumerate(h)})
         if isinstance(h,dict):
-            h = Counter(h)
-        self._hist = h
-        if nsamples is not None:
-            self.nsamples = nsamples
+            self._hist = Counter(h)
+        if isinstance(h, Histogram):
+            self._hist = h._hist.copy()
+            self.nsamples = h.nsamples
         else:
-            self.nsamples = sum(self.values())
+            if nsamples is not None:
+                self.nsamples = nsamples
+            else:
+                self.nsamples = sum(self.values())
         if trim_extremes:
             self.trim_extremes()
         if normalize:
@@ -51,12 +54,10 @@ class Histogram(object):
             if self[key] == 0:
                 del self._hist[key]
             
-            
     def trim_extremes(self, p=0.5):
         "Cleans extreme values over given percentage"
         extr_items = int(self.nsamples*p) if self.nsamples*p > 1.0 else 0
         self._hist = Counter(sorted(self.sample)[extr_items:-extr_items])
-            
         
     def truncate(self, p=.050):
         "Cleans noise below p"
@@ -64,7 +65,6 @@ class Histogram(object):
             if self[k]<p:
                 self.nsamples -= self[k]*self.nsamples
                 self[k] = 0
-
                 
     def cut_peak(self, n=1):
         "Cleans anything with n zen zeros between it and the maximum"
@@ -110,23 +110,24 @@ class Histogram(object):
         return [k for k in self.keys()
                 for i in xrange(int(self.nsamples*self[k]))]
 
+    def random_sample(self, k):
+        return Histogram(Counter(np.random.choice(self._hist.keys(), k, p=self._hist.values())))
+
     # Operators
     def normalize(self):
+        # self.sq_normalize()
         s = float(sum(self.values()))
         if not s:
             return
         for k in self.keys():
             self._hist[k] /= s
     
-    
     def sq_normalize(self, axis=-1, order=2):
         tuples_list = self._hist.items()
         keys = [t[0] for t in tuples_list]
         values = [t[1] for t in tuples_list]
         nvalues = vnormalized(values)[0]
-        self._hist = Counter({k: v for k,v in zip(keys, nvalues)})
-        
-    
+        self._hist = Counter({k: v for k, v in zip(keys, nvalues)})
     
     def __add__(self, other):
         if isinstance(other, (int, long, float)):
@@ -135,9 +136,12 @@ class Histogram(object):
             self.normalize()
             other.normalize()
             return Histogram({k:self[k]+other[k] for k in range(*get_lims(self, other))}, normalize=True)
-
         raise TypeError()
 
+    def asym_add(self, other):
+        if isinstance(other, Histogram):
+            return Histogram({k:self[k]+other[k] for k in range(*get_lims(self, other))})
+        raise TypeError()
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -166,7 +170,22 @@ class Histogram(object):
         if isinstance(other, (int, long, float)):
             return Histogram({i**other:self[i] for i in self.keys()}, nsamples=self.nsamples)
         raise TypeError()
-    
+
+    def ymul(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i:self[i]*other for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def ydiv(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i:self[i]/other for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
+    def ypow(self, other):
+        if isinstance(other, (int, long, float)):
+            return Histogram({i:self[i]**other for i in self.keys()}, nsamples=self.nsamples)
+        raise TypeError()
+
     # Statistical operators
     def mu(self):
         return sum(k*self[k] for k in self.keys())
@@ -178,7 +197,10 @@ class Histogram(object):
         if not sig(self):
             return 0
         return mu(((self-mu(self))/sig(self))**3)
-    
+
+    def copy(self, normalize=False):
+        return Histogram(self._hist, nsamples=self.nsamples, normalize=normalize)
+
     # Repr
     def __repr__(self):
         N = sum(self.values())
