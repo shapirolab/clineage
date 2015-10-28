@@ -68,3 +68,9 @@ class TargetEnrichment(models.Model):
     def __unicode__(self):
         return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
 ### ----------------
+class Panel(models.Model):#collection of targets  # TODO: add PanelPlate
+                                                # TODO: m2m pri_mux, well on the m2m table.
+    name = models.CharField(max_length=50)
+    targets = models.ManyToManyField(TargetEnrichment, related_name='panels')
+    def __unicode__(self):
+        return self.name
