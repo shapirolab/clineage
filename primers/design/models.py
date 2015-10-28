@@ -6,9 +6,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from genomes.models import DNASlice, Sequence, Chromosome, Target
-from primers.strand import StrandBaseMixin, StrandMinusMixin, StrandPlusMixin
+from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
-class UGS(models.Model,StrandBaseMixin):
+class UGS(models.Model,BaseStrandMixin):
     slice = models.ForeignKey(DNASlice)
     partner = models.ManyToManyField(User, null=True) # TODO: external table.
 
@@ -19,10 +19,10 @@ class UGS(models.Model,StrandBaseMixin):
     def ref_sequence(self):
         return self.slice.sequence
 
-class UGSPlus(UGS,StrandPlusMixin):
+class UGSPlus(UGS,PlusStrandMixin):
     pass
 
-class UGSMinus(UGS,StrandMinusMixin):
+class UGSMinus(UGS,MinusStrandMixin):
     pass
 
 class TargetEnrichment(models.Model):

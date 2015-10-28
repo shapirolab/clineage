@@ -1,7 +1,7 @@
 __author__ = 'ofirr'
 
 from django.db import models
-from primers.strand import StrandBaseMixin, StrandMinusMixin, StrandPlusMixin
+from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 from genomes.models import Sequence
 
 ### -------------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ from genomes.models import Sequence
 ### -------------------------------------------------------------------------------------
 
 
-class KitSynthetic(models.Model,StrandBaseMixin):
+class KitSynthetic(models.Model,BaseStrandMixin):
     name = models.CharField(max_length=50)
     _sequence = models.ForeignKey(Sequence)
 
@@ -42,10 +42,10 @@ class ReadingAdaptorCuts(models.Model):
     class Meta:
         abstract = True
 
-class IlluminaReadingAdaptor1(KitSynthetic,StrandPlusMixin):
+class IlluminaReadingAdaptor1(KitSynthetic,PlusStrandMixin):
     pass
 
-class IlluminaReadingAdaptor2(KitSynthetic,StrandMinusMixin):
+class IlluminaReadingAdaptor2(KitSynthetic,MinusStrandMixin):
     pass
 
 class IlluminaReadingAdaptor1Cuts(ReadingAdaptorCuts):
@@ -54,14 +54,14 @@ class IlluminaReadingAdaptor1Cuts(ReadingAdaptorCuts):
 class IlluminaReadingAdaptor2Cuts(ReadingAdaptorCuts):
     ira = models.ForeignKey(IlluminaReadingAdaptor2)
 
-class IlluminaFlowCellAdaptor1(KitSynthetic,StrandPlusMixin):
+class IlluminaFlowCellAdaptor1(KitSynthetic,PlusStrandMixin):
     pass
 
-class IlluminaFlowCellAdaptor2(KitSynthetic,StrandMinusMixin):
+class IlluminaFlowCellAdaptor2(KitSynthetic,MinusStrandMixin):
     pass
 
-class DNABarcode1(KitSynthetic,StrandPlusMixin):
+class DNABarcode1(KitSynthetic,PlusStrandMixin):
     pass
 
-class DNABarcode2(KitSynthetic,StrandMinusMixin):
+class DNABarcode2(KitSynthetic,MinusStrandMixin):
     pass

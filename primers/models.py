@@ -18,9 +18,9 @@ from django.contrib.contenttypes import fields
 from primers.parts.models import UGSPlus, UGSMinus, IlluminaReadingAdaptor1Cuts, \
     IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
     IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, TargetEnrichment
-from primers.strand import StrandBaseMixin, StrandMinusMixin, StrandPlusMixin
+from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
-class BasePrimer(models.Model,StrandBaseMixin):
+class BasePrimer(models.Model,BaseStrandMixin):
     """
     Any DNA that can act as a primer for PCR.
     Binds to the amplicon at the head (amplicon should begin with head)
@@ -51,17 +51,17 @@ class TargetedHeadMixin(object):
     def head(self):
         return self.ugs.sequence
 
-class TargetedNoTailPlusPrimer(BasePrimer,TargetedHeadMixin,StrandPlusMixin):
+class TargetedNoTailPlusPrimer(BasePrimer,TargetedHeadMixin,PlusStrandMixin):
     ugs = models.ForeignKey(UGSPlus)
 
-class TargetedNoTailMinusPrimer(BasePrimer,TargetedHeadMixin,StrandMinusMixin):
+class TargetedNoTailMinusPrimer(BasePrimer,TargetedHeadMixin,MinusStrandMixin):
     ugs = models.ForeignKey(UGSMinus)
 
 class PCR1TailMixin(object):
     def tail(self):
         return self.irac.primer1tail
 
-class PCR1PlusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,StrandPlusMixin):
+class PCR1PlusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,PlusStrandMixin):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the UGS leading to our target.
@@ -69,7 +69,7 @@ class PCR1PlusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,StrandPlusMixin)
     ugs = models.ForeignKey(UGSPlus)
     irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
 
-class PCR1MinusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,StrandMinusMixin):
+class PCR1MinusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,MinusStrandMixin):
     """
     Primer that appends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the (rev-comp) UGS following our target.
@@ -84,7 +84,7 @@ class PCR2Mixin(object):
     def tail(self):
         return self.ifca.sequence + self.barcode.sequence + self.irac.primer2tail
 
-class PCR2PlusPrimer(BasePrimer,PCR2Mixin,StrandPlusMixin):
+class PCR2PlusPrimer(BasePrimer,PCR2Mixin,PlusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, prepends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
@@ -93,7 +93,7 @@ class PCR2PlusPrimer(BasePrimer,PCR2Mixin,StrandPlusMixin):
     barcode = models.ForeignKey(DNABarcode1)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor1)
 
-class PCR2MinusPrimer(BasePrimer,PCR2Mixin,StrandMinusMixin):
+class PCR2MinusPrimer(BasePrimer,PCR2Mixin,MinusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, appends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
