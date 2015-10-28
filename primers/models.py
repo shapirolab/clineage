@@ -102,19 +102,6 @@ class PCR2MinusPrimer(BasePrimer,PCR2Mixin,MinusStrandMixin):
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
-class TargetedEnrichmentReagent(models.Model):
-    te = models.ForeignKey(TargetEnrichment)
-    passed_validation = models.NullBooleanField()
-    validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
-    validation_date = models.DateField(null=True, blank=True)
-    comment = models.CharField(max_length=50, blank=True, null=True)
-    physical_locations = fields.GenericRelation('SampleLocation',
-                                                 content_type_field='content_type',
-                                                 object_id_field='object_id')
-
-    class Meta:
-        abstract = True
-
 class PCR1PrimerPairTER(TargetedEnrichmentReagent):
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
