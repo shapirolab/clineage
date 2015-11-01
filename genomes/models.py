@@ -181,6 +181,13 @@ class SNP(Target):
 
 
 ### -------------------------------------------------------------------------------------
+class RestrictionSite(models.Model):
+    slice = models.ForeignKey(DNASlice)
+    enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
+
+    @property
+    def sequence(self):
+        return self.enzyme.sequence
 
 ### -------------------------------------------------------------------------------------
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
@@ -189,7 +196,6 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
     sticky_bases = models.IntegerField()
     sequence_len = models.PositiveIntegerField()
-    sites = models.ManyToManyField(DNASlice)
 
     def save(self, *args, **kwargs):
         self.sequence_len = len(self.sequence)
