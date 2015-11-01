@@ -2,11 +2,8 @@
 # encoding: utf8
 
 from django.views.decorators.csrf import csrf_exempt
-from genomes.models import Microsatellite, TargetEnrichmentType, Target, Assembly, Chromosome
-from wet_storage.models import Plate
-from lib_prep.models import Panel
 from spyne.server.django import DjangoApplication
-from spyne.model.primitive import String, Integer, AnyDict
+from spyne.model.primitive import String, Integer
 from spyne.model.complex import Iterable
 from spyne.service import ServiceBase
 from spyne.interface.wsdl import Wsdl11
@@ -15,7 +12,13 @@ from spyne.application import Application
 from spyne.decorator import rpc
 from spyne.error import *
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
+
+from genomes.models import Microsatellite, TargetEnrichmentType, Assembly, Chromosome
+from targeted_enrichment.planning.models import Target, Microsatellite
+from wet_storage.models import Plate
+from lib_prep.workflows.models import Panel
 from linapp.queries import get_targets_by_panel, get_targets_by_aar
+
 
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))

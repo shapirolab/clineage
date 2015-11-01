@@ -1,8 +1,10 @@
-from linapp.models import *
-from DBUtils import DBUtils
 from django.db.models import Q
 from django.contrib import admin
-from mptt.admin import MPTTModelAdmin
+
+from linapp.models import *
+from DBUtils import DBUtils
+from targeted_enrichment.planning.models import Target
+
 
 class ExperimentAdmin(admin.ModelAdmin):
 

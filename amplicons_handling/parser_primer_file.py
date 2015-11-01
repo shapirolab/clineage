@@ -3,7 +3,8 @@ import re
 import hashlib
 from primers_insertion import get_or_create_sequence, PrimerLocationError
 from django.contrib.auth.models import User
-from genomes.models import TargetType, Assembly, Target, Chromosome, Microsatellite, SNP
+from genomes.models import TargetType, Assembly, Chromosome, Microsatellite, SNP
+from targeted_enrichment.planning.models import Target, Microsatellite, SNP
 from utils.SequenceManipulations import complement
 
 columns_case_dict = {

@@ -10,22 +10,21 @@ from tabselection import *
 from dataminers import *
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.shortcuts import get_object_or_404
 from django.db.models import Count
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import Http404, HttpResponse
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
-from django.template import Template, loader
+from django.template import loader
 
 from utils.wells import num2abc
-from utils.user_cells_report import user_cells_table_values, get_partner_report, query_partner_individuals
+from utils.user_cells_report import user_cells_table_values, get_partner_report
 from linapp.forms import *
-from linapp.models import *
 from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
 from sampling.models import FACS, LaserCapture, CellContentType, SampleComposition
 from misc.models import Taxa
-from genomes.models import Assembly, TargetEnrichment, Microsatellite, TargetEnrichmentType
+from genomes.models import Assembly, TargetEnrichment
+from targeted_enrichment.planning.models import Microsatellite
 from utils.plate_string_description import *
 from linapp.DBUtils import DBUtils
 

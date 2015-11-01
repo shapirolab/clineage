@@ -1,10 +1,14 @@
 __author__ = 'ofirr'
 
-from Bio.SeqUtils.MeltingTemp import Tm_staluc
-from genomes.models import Microsatellite, TargetEnrichment
-from wet_storage.models import SampleLocation
-from lib_prep.models import PrimersMultiplex
 from collections import defaultdict
+
+from Bio.SeqUtils.MeltingTemp import Tm_staluc
+
+from genomes.models import TargetEnrichment
+from targeted_enrichment.planning.models import Microsatellite
+from wet_storage.models import SampleLocation
+from lib_prep.workflows.models import PrimersMultiplex
+
 
 def get_targets_by_panel(panel):
     for te in panel.targets.select_related('left', 'right', 'left__sequence', 'right__sequence', 'left__referencevalue',

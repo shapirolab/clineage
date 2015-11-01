@@ -1,11 +1,10 @@
-
-import re
-from wet_storage.models import Plate, PlateType, SampleLocation
-from genomes.models import Target
-from lib_prep.models import PrimersMultiplex
-import hashlib
 from collections import defaultdict
+
 from django.db.models import Max, Count
+
+from wet_storage.models import Plate, PlateType, SampleLocation
+from targeted_enrichment.planning.models import Target
+from lib_prep.workflows.models import PrimersMultiplex
 from utils.wells import *
 from utils.distribute_multiplex import *
 

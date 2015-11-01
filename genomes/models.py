@@ -2,15 +2,14 @@ import os
 import mmap
 
 from django.db import models
-from django.contrib.contenttypes import fields
 from django.contrib.auth.models import User
 from django.conf import settings
+
+from targeted_enrichment.planning.models import RestrictionSite
 
 from utils.SequenceManipulations import *
 from misc.models import Taxa
 from linapp.models import Protocol
-from wet_storage.models import SampleLocation
-from misc.models import DNA
 
 class SearchMarginesDoesNotExist(Exception):
     """
@@ -160,48 +159,3 @@ class DNASlice(models.Model):
         right = self.get_right_surrounding_restriction(restriction_type)
         return left, right
 
-### -------------------------------------------------------------------------------------
-class Target(models.Model):
-    name = models.CharField(max_length=50)
-    slice = models.ForeignKey(DNASlice)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
-
-### -------------------------------------------------------------------------------------
-class Microsatellite(Target):
-    repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
-    repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
-    repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
-
-class SNP(Target):
-    mutation = models.CharField(max_length=10) #X>Y
-    modified = models.CharField(max_length=10) #Y
-
-
-#TODO add in_del
-
-
-### -------------------------------------------------------------------------------------
-class RestrictionSite(models.Model):
-    slice = models.ForeignKey(DNASlice)
-    enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
-
-    @property
-    def sequence(self):
-        return self.enzyme.sequence
-
-### -------------------------------------------------------------------------------------
-class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
-    name = models.CharField(max_length=50)
-    sequence = models.CharField(max_length=50) # TODO: DNAField
-    cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
-    sticky_bases = models.IntegerField()
-    sequence_len = models.PositiveIntegerField()
-
-    def save(self, *args, **kwargs):
-        self.sequence_len = len(self.sequence)
-        return super(RestrictionEnzyme, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return self.name
-
-### -------------------------------------------------------------------------------------

@@ -6,8 +6,8 @@ from linapp.models import UserProfile, Experiment, ExperimentFile, ExperimentLog
     SequenceDistribution, TargetAnalysis, TargetVariant, GenSig, DM, CellTreeNode
 from sampling.models import GeneticBackground, Coordinates, Location, Individual, Extraction, SamplingEvent, Cell, \
     SampleComposition, SampleStatus, CellContent
-from genomes.models import Target
-from lib_prep.models import Panel, Machine, Sequencing
+from targeted_enrichment.planning.models import Target
+from lib_prep.workflows.models import Panel, Machine, Sequencing, CellContent
 from wet_storage.models import Plate, PlateType, PlateStorage, StorageBox, SampleLocation
 from linapp.widgets import *
 #### -------------------------------------------------------------------------------------
