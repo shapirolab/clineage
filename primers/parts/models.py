@@ -14,14 +14,14 @@ from genomes.models import Sequence
 
 class KitSynthetic(models.Model,BaseStrandMixin):
     name = models.CharField(max_length=50)
-    _sequence = models.ForeignKey(Sequence)
+    _sequence = models.CharField(max_length=250)#DNAField(Sequence)
 
     class Meta:
         abstract = True
 
     @property
     def ref_sequence(self):
-        return self._sequence
+        return DNA(self._sequence)
 
 class ReadingAdaptorCuts(models.Model):
     overlap_start = models.IntegerField()
@@ -29,15 +29,15 @@ class ReadingAdaptorCuts(models.Model):
 
     @property
     def primer1tail(self):
-        self.ira.sequence[self.overlap_start:]
+        return self.ira.sequence[self.overlap_start:]
 
     @property
     def overlap(self):
-        self.ira.sequence[self.overlap_start:self.overlap_end]
+        return self.ira.sequence[self.overlap_start:self.overlap_end]
 
     @property
     def primer2tail(self):
-        self.ira.sequence[:self.overlap_start]
+        return self.ira.sequence[:self.overlap_start]
 
     class Meta:
         abstract = True

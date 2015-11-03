@@ -58,4 +58,10 @@ class DNA(object):
         return DNA(self.seq[num_or_slice])
 
     def __str__(self):
-        return self.seq
+        return "< DNA: " + self.seq + " >"
+
+    def __unicode__(self):
+        return u"< DNA: " + self.seq.decode("ascii") + " >"
+
+    def __repr__(self):
+        return "DNA(\"%s\")" % (self.seq)
