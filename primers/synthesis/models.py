@@ -54,17 +54,18 @@ class TargetedHeadMixin(object):
     def head(self):
         return self.ugs.sequence
 
-class TargetedNoTailPlusPrimer(BasePrimer,TargetedHeadMixin,PlusStrandMixin):
+class TargetedNoTailPlusPrimer(TargetedHeadMixin,BasePrimer,PlusStrandMixin):
     ugs = models.ForeignKey(UGSPlus)
 
-class TargetedNoTailMinusPrimer(BasePrimer,TargetedHeadMixin,MinusStrandMixin):
+class TargetedNoTailMinusPrimer(TargetedHeadMixin,BasePrimer,MinusStrandMixin):
     ugs = models.ForeignKey(UGSMinus)
 
 class PCR1TailMixin(object):
+    @property
     def tail(self):
         return self.irac.primer1tail
 
-class PCR1PlusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,PlusStrandMixin):
+class PCR1PlusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,PlusStrandMixin):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the UGS leading to our target.
@@ -72,7 +73,7 @@ class PCR1PlusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,PlusStrandMixin)
     ugs = models.ForeignKey(UGSPlus)
     irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
 
-class PCR1MinusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,MinusStrandMixin):
+class PCR1MinusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,MinusStrandMixin):
     """
     Primer that appends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the (rev-comp) UGS following our target.
@@ -81,13 +82,15 @@ class PCR1MinusPrimer(BasePrimer,TargetedHeadMixin,PCR1TailMixin,MinusStrandMixi
     irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
 
 class PCR2Mixin(object):
+    @property
     def head(self):
         return self.irac.overlap
 
+    @property
     def tail(self):
         return self.ifca.sequence + self.barcode.sequence + self.irac.primer2tail
 
-class PCR2PlusPrimer(BasePrimer,PCR2Mixin,PlusStrandMixin):
+class PCR2PlusPrimer(PCR2Mixin,BasePrimer,PlusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, prepends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
@@ -96,7 +99,7 @@ class PCR2PlusPrimer(BasePrimer,PCR2Mixin,PlusStrandMixin):
     barcode = models.ForeignKey(DNABarcode1)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor1)
 
-class PCR2MinusPrimer(BasePrimer,PCR2Mixin,MinusStrandMixin):
+class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, appends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.

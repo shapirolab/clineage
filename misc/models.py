@@ -44,6 +44,11 @@ class DNA(object):
     def comp(self):
         return DNA(sm.complement(self.seq))
 
+    def __add__(self, other):
+        d = DNA(self.seq)
+        d += other
+        return d
+        
     def __iadd__(self, other):
         if not isinstance(other,DNA):
             raise TypeError("DNA")

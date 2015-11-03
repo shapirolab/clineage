@@ -9,6 +9,7 @@ from django.conf import settings
 
 from utils.SequenceManipulations import *
 from misc.models import Taxa
+from misc.models import DNA
 
 class SearchMarginesDoesNotExist(Exception):
     """
@@ -113,17 +114,17 @@ class DNASlice(models.Model):
     # TODO: decide indexing method
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
-    _sequence = models.ForeignKey(Sequence,null=True,default=None)
+    _sequence = models.CharField(max_length=250) #DNAField(Sequence,null=True,default=None)
 
     @property
     def sequence(self):
         if self._sequence is not None:
-            return self._sequence
+            return DNA(self._sequence)
         else:
-            return self._get_seq()
+            return DNA(self._get_seq())
 
     def _get_seq(self):
-        self.chromosome.get_dna(self.start_pos,self.end_pos)
+        return self.chromosome.getdna(self.start_pos,self.end_pos)
 
     def cache(self):
         self._sequence = self._get_seq()
