@@ -5,8 +5,6 @@ from targeted_enrichment.reagents.models import TargetedEnrichmentReagent, PCR1P
     PCR1PrimerPairTERDeprecated
 from wet_storage.models import SampleLocation
 
-__author__ = 'ofirr'
-
 ### -------------------------------------------------------------------------------------
 ### Primers Multiplex
 ### -------------------------------------------------------------------------------------
@@ -17,7 +15,7 @@ __author__ = 'ofirr'
 
 class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
     name = models.CharField(max_length=20)
-    primers = models.ManyToManyField(TargetedEnrichmentReagent)
+    # primers = models.ManyToManyField(TargetedEnrichmentReagent)
     physical_locations = fields.GenericRelation(SampleLocation,
                                content_type_field='content_type',
                                object_id_field='object_id')

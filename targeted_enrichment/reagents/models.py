@@ -4,6 +4,20 @@ from django.db import models
 from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
 from targeted_enrichment.planning.models import TargetEnrichment
 
+class TargetEnrichmentFailureType(models.Model):
+    """
+    1 = No product
+    2 = Primer dimer is wider, equal or  close to the same band width of expected product
+    3 = Smear or more than 3 products  (other than the primer dimer which can be purified). If less than 3, real product
+        has to be wider than byproducts.
+    4 = More than 1 product is in the range of correct size.
+    5 = NGS failure - Primer pair did not work in the context of a successful NGS run (amplified and sequenced).
+    """
+    name = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 class TargetedEnrichmentReagent(models.Model):
     te = models.ForeignKey(TargetEnrichment)
@@ -34,17 +48,3 @@ class PCR1PrimerPairTERDeprecated(TargetedEnrichmentReagent): #TODO: kill?
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
-class TargetEnrichmentFailureType(models.Model):
-    """
-    1 = No product
-    2 = Primer dimer is wider, equal or  close to the same band width of expected product
-    3 = Smear or more than 3 products  (other than the primer dimer which can be purified). If less than 3, real product
-        has to be wider than byproducts.
-    4 = More than 1 product is in the range of correct size.
-    5 = NGS failure - Primer pair did not work in the context of a successful NGS run (amplified and sequenced).
-    """
-    name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
-
-    def __unicode__(self):
-        return self.name
