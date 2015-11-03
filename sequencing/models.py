@@ -16,5 +16,5 @@ class SequencingData(models.Model): # This contains the actual data.
 
     class Meta:
         index_together = (
-            ("cell_content", "merged_reads", "target")
+            ("cell_content", "merged_reads", "target"),
         )

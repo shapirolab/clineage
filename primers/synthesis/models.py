@@ -21,6 +21,8 @@ from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
+from wet_storage.models import SampleLocation
+
 class BasePrimer(models.Model,BaseStrandMixin):
     """
     Any DNA that can act as a primer for PCR.
@@ -28,7 +30,7 @@ class BasePrimer(models.Model,BaseStrandMixin):
     and optionally prepends the tail to the new amplicon.
     """
     name = models.CharField(max_length=50)
-    physical_locations = fields.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation(SampleLocation,
                                              content_type_field='content_type',
                                              object_id_field='object_id')
 

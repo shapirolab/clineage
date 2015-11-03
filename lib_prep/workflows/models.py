@@ -52,7 +52,6 @@ class CellContent(models.Model):  # aka DNA
     #    return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
 
 
-
 class WorkFlowCell(models.Model): # cell + barcode
     content = models.ForeignKey(CellContent)
     barcodes = models.ForeignKey(BarcodePair)

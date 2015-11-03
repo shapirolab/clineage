@@ -4,6 +4,8 @@ from django.db import models
 from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
 from targeted_enrichment.planning.models import TargetEnrichment
 
+from wet_storage.models import SampleLocation
+
 class TargetEnrichmentFailureType(models.Model):
     """
     1 = No product
@@ -25,7 +27,7 @@ class TargetedEnrichmentReagent(models.Model):
     validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
     validation_date = models.DateField(null=True, blank=True)
     comment = models.CharField(max_length=50, blank=True, null=True)
-    physical_locations = fields.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation(SampleLocation,
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
 
