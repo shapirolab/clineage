@@ -27,6 +27,11 @@ class UGSPlus(UGS,PlusStrandMixin):
 class UGSMinus(UGS,MinusStrandMixin):
     pass
 
+class Target(models.Model):
+    name = models.CharField(max_length=50)
+    slice = models.ForeignKey(DNASlice)
+    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+
 class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     left = models.ForeignKey(UGSPlus)
@@ -70,16 +75,6 @@ class TargetEnrichment(models.Model):
     def __unicode__(self):
         return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
 
-
-class RestrictionSite(models.Model):
-    slice = models.ForeignKey(DNASlice)
-    enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
-
-    @property
-    def sequence(self):
-        return self.enzyme.sequence
-
-
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
     sequence = models.CharField(max_length=50) # TODO: DNAField
@@ -94,11 +89,13 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     def __unicode__(self):
         return self.name
 
-class Target(models.Model):
-    name = models.CharField(max_length=50)
+class RestrictionSite(models.Model):
     slice = models.ForeignKey(DNASlice)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+    enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
 
+    @property
+    def sequence(self):
+        return self.enzyme.sequence
 
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer

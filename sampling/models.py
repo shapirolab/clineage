@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 
 from misc.models import Taxa
-from linapp.models import Protocol
 from wet_storage.models import SampleLocation
 
 
@@ -37,13 +36,6 @@ class SampleComposition(models.Model):#e.g. single cell or bulk
 
     def __unicode__(self):
         return self.name
-### -------------------------------------------------------------------------------------
-class CellContentType(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-
 ### -------------------------------------------------------------------------------------
 
 class SampleStatus(models.Model):

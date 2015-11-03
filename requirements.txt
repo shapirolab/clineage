@@ -20,3 +20,4 @@ virtualenv==1.11.6
 wsgiref==0.1.2
 xlrd==0.9.3
 xlwt==0.7.5
+biopython==1.65

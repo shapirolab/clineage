@@ -5,11 +5,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
-from targeted_enrichment.planning.models import RestrictionSite
+#from targeted_enrichment.planning.models import RestrictionSite
 
 from utils.SequenceManipulations import *
 from misc.models import Taxa
-from linapp.models import Protocol
 
 class SearchMarginesDoesNotExist(Exception):
     """
@@ -18,6 +17,9 @@ class SearchMarginesDoesNotExist(Exception):
     pass
 
 
+### -------------------------------------------------------------------------------------
+### Full Genomes
+### -------------------------------------------------------------------------------------
 class Assembly(models.Model):
     taxa = models.ForeignKey(Taxa)
     name = models.CharField(max_length=50)
@@ -31,9 +33,7 @@ class Assembly(models.Model):
 
     def get_path(self):
         return os.path.join(self.taxa.friendly_name, self.friendly_name)
-### -------------------------------------------------------------------------------------
-### Full Genomes
-### -------------------------------------------------------------------------------------
+
 class Chromosome(models.Model):
     name = models.CharField(max_length=50)
     assembly = models.ForeignKey(Assembly)
@@ -95,7 +95,7 @@ class Chromosome(models.Model):
 ### -------------------------------------------------------------------------------------
 class Sequence(models.Model):
     def create(_length=0, _sequence='', _hash=hashlib.md5('').hexdigest()):
-        if _length > 0 and _sequence <> '' and _hash <> ''\
+        if _length > 0 and _sequence != '' and _hash != ''\
            and _length == len(_sequence) and _hash == hashlib.md5(_sequence).hexdigest():
             return Sequence(length=_length, sequence=_sequence, hash=_hash)
         return Sequence(length=len(_sequence), sequence=_sequence, hash=hashlib.md5(_sequence).hexdigest())
@@ -136,23 +136,23 @@ class DNASlice(models.Model):
             return pos
         raise SearchMarginesDoesNotExist()
 
-    def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
-        left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            .filter(chromosome=self.chromosome).\
-            filter(start_pos__lte=self.start_pos-restriction_type.cut_delta).\
-            filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
-        if left_restriction_site:
-            return left_restriction_site[0]
-        return self.get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+    #def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
+        #left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
+            #.filter(chromosome=self.chromosome).\
+            #filter(start_pos__lte=self.start_pos-restriction_type.cut_delta).\
+            #filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
+        #if left_restriction_site:
+            #return left_restriction_site[0]
+        #return self.get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
 
-    def get_right_surrounding_restriction(self, restriction_type, max_seek=100):
-        right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            .filter(chromosome=self.chromosome).\
-            filter(end_pos__gte=self.end_pos+(restriction_type.sequence_len-restriction_type.cut_delta)).\
-            filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
-        if right_restriction_site:
-            return right_restriction_site[0]
-        return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
+    #def get_right_surrounding_restriction(self, restriction_type, max_seek=100):
+        #right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
+            #.filter(chromosome=self.chromosome).\
+            #filter(end_pos__gte=self.end_pos+(restriction_type.sequence_len-restriction_type.cut_delta)).\
+            #filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
+        #if right_restriction_site:
+            #return right_restriction_site[0]
+        #return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
 
     def get_surrounding_restriction(self, restriction_type):
         left = self.get_left_surrounding_restriction(restriction_type)
