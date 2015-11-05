@@ -43,10 +43,16 @@ class DNA(object):
         return DNA(self.seq[num_or_slice])
 
     def __str__(self):
-        return "< DNA: " + self.seq + " >"
+        return self.seq
 
     def __unicode__(self):
-        return u"< DNA: " + self.seq.decode("ascii") + u" >"
+        return self.seq.decode("ascii")
 
     def __repr__(self):
         return "DNA(\"%s\")" % (self.seq)
+
+    def __eq__(self, other):
+        if not isinstance(other,DNA):
+            raise TypeError("unsupported operand type(s) for ==: '%s' and '%s'"
+                            % (type(self), type(other)))
+        return self.seq == other.seq
