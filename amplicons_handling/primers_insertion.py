@@ -156,4 +156,4 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
     #         validated_primer = insilico_test(primer_pair, genome)
     #         assert validated_primer
 
-    return te_list, colliding_amplicons
+    return list(set(te_list)), colliding_amplicons
