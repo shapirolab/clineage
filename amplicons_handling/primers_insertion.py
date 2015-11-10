@@ -72,7 +72,6 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     return (pf_s, pf_e), (pr_s, pr_e)
 
 
-
 # def insilico_test(pair, genome):
 #     ref = genome.Interval(pair.left.start_pos, pair.left.end_pos, chrom='chr{}'.format(pair.chromosome.name))
 #     ref_seq = ref.sequence
@@ -133,7 +132,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq, '_rev')
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
         print 'Assert: ', primer_rev.end_pos - primer_fwd.start_pos
-        assert primer_rev.end_pos - primer_fwd.start_pos < margins
+        assert primer_rev.end_pos - primer_fwd.start_pos <= margins
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,
                     left=primer_fwd,
