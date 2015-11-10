@@ -139,11 +139,10 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
 
 def nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner):
     obj, created = Target.objects.get_or_create(
-        start_pos=start_pos, end_pos=end_pos,
-        defaults={'name':name,
-                  'type':tgtype,
-                  'chromosome':chrom,
-                  'referencevalue':sequence,
+        start_pos=start_pos, end_pos=end_pos, chromosome=chrom,
+        defaults={'name': name,
+                  'type': tgtype,
+                  'referencevalue': sequence,
                   'partner': partner}
         )
     return obj, created
