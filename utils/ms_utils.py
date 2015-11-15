@@ -2,6 +2,14 @@ __author__ = 'ofirr'
 from linapp.models import Sequence, Microsatellite
 from math import floor
 import hashlib
+from SequenceManipulations import complement
+
+
+def ms_type_permutations(ms_type_str):
+    for i in xrange(len(ms_type_str)):
+        perm = ms_type_str[i:] + ms_type_str[:i]
+        yield perm
+        yield complement(perm)
 
 
 def save_sequence(sequence):
