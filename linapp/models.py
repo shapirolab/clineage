@@ -428,6 +428,7 @@ class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
+
 ### -------------------------------------------------------------------------------------
 class SNP(Target):
     mutation = models.CharField(max_length=10) #X>Y

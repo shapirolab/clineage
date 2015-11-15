@@ -71,18 +71,17 @@ def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
     target_primers = parse_primer3_output(output_name)
     out_string = ''
     for seq_id in target_primers.keys():
-        print seq_id
         for primer_number in target_primers[seq_id]['LEFT'].keys():
             out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['LEFT'][primer_number])
             out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['RIGHT'][primer_number])
     primer_data_check = '{}.fa'.format(str(input_fasta_file))
-    primers_output = open(primer_data_check, 'w+')
-    primers_output.write(out_string)
-    primers_output.close()
+    print 'writing primers fasta file {}'.format(primer_data_check)
+    with open(primer_data_check, 'w+') as primers_output:
+        primers_output.write(out_string)
     sam_file = '{}.sam'.format(str(output_file))
+    print 'running bowtie sam file output:{}'.format(sam_file)
     s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
     os.system(s)
-    
     return sam_file, primer_data_check, target_primers
 
 

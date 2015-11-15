@@ -68,7 +68,7 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     for te in target_e:
         if te.targets.filter(name__contains='TTAA'):
             print 'The Targets {} colaides with  TTAA site {}'.format(target.pk, te.targets.all())
-            raise AmpliconCollisionError
+            # raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
 
 
