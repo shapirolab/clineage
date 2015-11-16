@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 from genomes.models import TargetEnrichment
 from linapp.models import Protocol
 from wet_storage.models import SampleLocation
-from sampling.models import CellContent
+#from sampling.models import CellContent
 
 
 ### -------------------------------------------------------------------------------------
@@ -56,8 +56,8 @@ class Machine(models.Model):
         return self.type.__unicode__() + '_' + self.machineid
 ### -------------------------------------------------------------------------------------
 class Sequencing(models.Model):
-    samples = models.ManyToManyField(CellContent)
-    data = models.ForeignKey('RawData', related_name='sequencing_event', null=True, blank=True)
+    samples = models.ManyToManyField('sampling.CellContent')
+    #data = models.ForeignKey('RawData', related_name='sequencing_event', null=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     protocol = models.ForeignKey(Protocol)

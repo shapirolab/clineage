@@ -9,12 +9,27 @@ from django.conf import settings
 from utils.SequenceManipulations import *
 from misc.models import Taxa
 from linapp.models import Protocol
+from wet_storage.models import SampleLocation
 
 class SearchMarginesDoesNotExist(Exception):
     """
     Attempt to query a position outside chromosome sequence
     """
     pass
+
+class Assembly(models.Model):
+    taxa = models.ForeignKey(Taxa)
+    name = models.CharField(max_length=50)
+    friendly_name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.friendly_name
+
+    class Meta:
+        verbose_name_plural = 'Assemblies'
+
+    def get_path(self):
+        return os.path.join(self.taxa.friendly_name, self.friendly_name)
 ### -------------------------------------------------------------------------------------
 ### Full Genomes
 ### -------------------------------------------------------------------------------------
@@ -75,19 +90,6 @@ class Chromosome(models.Model):
 
         return start - l + index, start - l + index + len(sequence) - 1
 ### -------------------------------------------------------------------------------------
-class Assembly(models.Model):
-    taxa = models.ForeignKey(Taxa)
-    name = models.CharField(max_length=50)
-    friendly_name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.friendly_name
-
-    class Meta:
-        verbose_name_plural = 'Assemblies'
-
-    def get_path(self):
-        return os.path.join(self.taxa.friendly_name, self.friendly_name)
 ### -------------------------------------------------------------------------------------
 class Sequence(models.Model):
     def create(_length=0, _sequence='', _hash=hashlib.md5('').hexdigest()):
@@ -100,6 +102,50 @@ class Sequence(models.Model):
     length = models.IntegerField()
     sequence = models.TextField()
     hash = models.CharField(max_length=32, unique=True) #md5(sequence) for enabling uniqueness and fast comparison.
+
+### -------------------------------------------------------------------------------------
+### Types and descriptors
+### -------------------------------------------------------------------------------------
+class TargetType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class RestrictionSiteType(models.Model):
+    name = models.CharField(max_length=50)
+    sequence = models.CharField(max_length=50)
+    cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
+    sticky_bases = models.IntegerField()
+    sequence_len = models.PositiveIntegerField()
+
+    def save(self, *args, **kwargs):
+        self.sequence_len = len(self.sequence)
+        return super(RestrictionSiteType, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class TargetVariantType(models.Model): #TODO: This might be useless. Decide.
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+ ### -------------------------------------------------------------------------------------
+class TargetEnrichmentFailureType(models.Model):
+    """
+    1 = No product
+    2 = Primer dimer is wider, equal or  close to the same band width of expected product
+    3 = Smear or more than 3 products  (other than the primer dimer which can be purified). If less than 3, real product
+        has to be wider than byproducts.
+    4 = More than 1 product is in the range of correct size.
+    5 = NGS failure - Primer pair did not work in the context of a successful NGS run (amplified and sequenced).
+    """
+    name = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
 
 
 ### -------------------------------------------------------------------------------------
@@ -257,46 +303,3 @@ class TargetEnrichment(models.Model):
 ### -------------------------------------------------------------------------------------
 
 
-### -------------------------------------------------------------------------------------
-### Types and descriptors
-### -------------------------------------------------------------------------------------
-class TargetType(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class RestrictionSiteType(models.Model):
-    name = models.CharField(max_length=50)
-    sequence = models.CharField(max_length=50)
-    cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
-    sticky_bases = models.IntegerField()
-    sequence_len = models.PositiveIntegerField()
-
-    def save(self, *args, **kwargs):
-        self.sequence_len = len(self.sequence)
-        return super(RestrictionSiteType, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class TargetVariantType(models.Model): #TODO: This might be useless. Decide.
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
- ### -------------------------------------------------------------------------------------
-class TargetEnrichmentFailureType(models.Model):
-    """
-    1 = No product
-    2 = Primer dimer is wider, equal or  close to the same band width of expected product
-    3 = Smear or more than 3 products  (other than the primer dimer which can be purified). If less than 3, real product
-        has to be wider than byproducts.
-    4 = More than 1 product is in the range of correct size.
-    5 = NGS failure - Primer pair did not work in the context of a successful NGS run (amplified and sequenced).
-    """
-    name = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------

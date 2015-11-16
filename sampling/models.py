@@ -7,8 +7,81 @@ from django.conf import settings
 from django.db.models import Count
 
 from misc.models import Taxa
-from linapp.models import Protocol, Experiment
+from linapp.models import Protocol
 from lib_prep.models import Panel
+from wet_storage.models import SampleLocation
+
+
+### -------------------------------------------------------------------------------------
+### Types and descriptors
+### -------------------------------------------------------------------------------------
+class GeneticBackground(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class Organ(models.Model):
+    name = models.CharField(max_length=50)
+    #rank = models.IntegerField()
+    #parent = models.IntegerField()
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class Tissue(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class SampleComposition(models.Model):#e.g. single cell or bulk
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class CellContentType(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
+
+### -------------------------------------------------------------------------------------
+
+class SampleStatus(models.Model):
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Sample status'
+        verbose_name_plural = 'Samples status'
+
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+
+### -------------------------------------------------------------------------------------
+class Coordinates(models.Model):#XYZ coordinates of laser capture.
+    x = models.DecimalField(max_digits=10, decimal_places=4)
+    y = models.DecimalField(max_digits=10, decimal_places=4)
+    z = models.DecimalField(max_digits=10, decimal_places=4)
+    #TODO: discuss Z vs slides
+    def __unicode__(self):
+        return '(x={0},y={1},z={2})'.format(self.x,self.y,self.z)
+### -------------------------------------------------------------------------------------
+class FACSMarker(models.Model):
+    name = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.name
+### -------------------------------------------------------------------------------------
+class Location(models.Model):  # Freetext location
+    name = models.CharField(max_length=50)
+
+    def __unicode__(self):#TODO: exapnd
+        return self.name
+### -------------------------------------------------------------------------------------
+
+
 
 ### -------------------------------------------------------------------------------------
 ### Sampling Hierarchy
@@ -100,7 +173,7 @@ class Cell(models.Model):
     individual = models.ForeignKey(Individual)
     sampling = models.ForeignKey(SamplingEvent, null=True)
     name = models.CharField(max_length=50)
-    experiment = models.ManyToManyField(Experiment, related_name='cells', null=True, blank=True)
+    #experiment = models.ManyToManyField(Experiment, related_name='cells', null=True, blank=True)
     composition = models.ForeignKey(SampleComposition)#single cell or bulk
     status = models.ForeignKey(SampleStatus, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
@@ -137,77 +210,9 @@ class CellContent(models.Model):  # aka DNA
             return "%s_%s_%s" % self.cell.name, self.protocol.initials, 'seqready'
         return "%s_%s" % self.cell.name, self.protocol.initials
 
-    def experiment(self):
-        print self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')
-        return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
+    #def experiment(self):
+        #print self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')
+        #return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
 ### -------------------------------------------------------------------------------------
 
 
-### -------------------------------------------------------------------------------------
-class Coordinates(models.Model):#XYZ coordinates of laser capture.
-    x = models.DecimalField(max_digits=10, decimal_places=4)
-    y = models.DecimalField(max_digits=10, decimal_places=4)
-    z = models.DecimalField(max_digits=10, decimal_places=4)
-    #TODO: discuss Z vs slides
-    def __unicode__(self):
-        return '(x={0},y={1},z={2})'.format(self.x,self.y,self.z)
-### -------------------------------------------------------------------------------------
-class FACSMarker(models.Model):
-    name = models.CharField(max_length=50)
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class Location(models.Model):  # Freetext location
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):#TODO: exapnd
-        return self.name
-### -------------------------------------------------------------------------------------
-
-### -------------------------------------------------------------------------------------
-### Types and descriptors
-### -------------------------------------------------------------------------------------
-class GeneticBackground(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class Organ(models.Model):
-    name = models.CharField(max_length=50)
-    #rank = models.IntegerField()
-    #parent = models.IntegerField()
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class Tissue(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class SampleComposition(models.Model):#e.g. single cell or bulk
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
-class CellContentType(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __unicode__(self):
-        return self.name
-
-### -------------------------------------------------------------------------------------
-
-class SampleStatus(models.Model):
-    name = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name = 'Sample status'
-        verbose_name_plural = 'Samples status'
-
-    def __unicode__(self):
-        return self.name
-### -------------------------------------------------------------------------------------
