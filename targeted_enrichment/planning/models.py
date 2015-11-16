@@ -36,15 +36,17 @@ class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     left = models.ForeignKey(UGSPlus)
     right = models.ForeignKey(UGSMinus)
-    amplicon = models.CharField(max_length=500) # TODO: DNASlice
+    amplicon = models.CharField(max_length=500) # TODO: unwrapper/DNASlice
+    # slice = models.ForeignKey(DNASlice)
     targets = models.ManyToManyField(Target)
     partner = models.ManyToManyField(User, null=True) # TODO: external table.
 
     def update_enriched_targets(self): # return queryset of targets between the two primers and updates the m2m targets field
-        assert self.left.chromosome == self.right.chromosome
-        assert self.chromosome == self.left.chromosome
-        self.targets = Target.objects.filter(chromosome=self.chromosome, start_pos__gte=self.left.start_pos)\
-            .filter(end_pos__lte=self.right.end_pos)
+        assert self.left.slice.chromosome == self.right.slice.chromosome
+        assert self.chromosome == self.left.slice.chromosome
+        # TODO: change to slice query.
+        self.targets = Target.objects.filter(slice__chromosome=self.chromosome, slice__start_pos__gte=self.left.slice.start_pos)\
+            .filter(slice__end_pos__lte=self.right.slice.end_pos)
         self.save()
         return self.targets.all()
 
