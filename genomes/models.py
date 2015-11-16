@@ -123,6 +123,9 @@ class DNASlice(models.Model):
         else:
             return DNA(self._get_seq())
 
+    def __len__(self):
+        return self.end_pos-self.start_pos+1
+
     def _get_seq(self):
         return self.chromosome.getdna(self.start_pos,self.end_pos)
 
