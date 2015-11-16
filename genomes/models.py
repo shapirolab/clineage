@@ -299,6 +299,12 @@ class TargetEnrichment(models.Model):
 ### -------------------------------------------------------------------------------------
 ### New
 ### -------------------------------------------------------------------------------------
+class SequencingPrimer(models.Model):
+    value = models.ForeignKey(Sequence)
+### -------------------------------------------------------------------------------------
+class Adaptor(models.Model):
+    value = models.ForeignKey(Sequence)
+### -------------------------------------------------------------------------------------
 class DNABarcode(models.Model):
     #TODO: add boundries for actual DNA content.
     sequencing_primer = models.ForeignKey(SequencingPrimer)
@@ -307,12 +313,4 @@ class DNABarcode(models.Model):
     physical_locations = fields.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')
-
-### -------------------------------------------------------------------------------------
-class SequencingPrimer(models.Model):
-    value = models.ForeignKey(Sequence)
-### -------------------------------------------------------------------------------------
-class Adaptor(models.Model):
-    value = models.ForeignKey(Sequence)
-
 

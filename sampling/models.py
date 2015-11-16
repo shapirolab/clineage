@@ -8,7 +8,6 @@ from django.db.models import Count
 
 from misc.models import Taxa
 from linapp.models import Protocol
-from lib_prep.models import Panel
 from wet_storage.models import SampleLocation
 
 
@@ -189,7 +188,6 @@ class Cell(models.Model):
 class CellContent(models.Model):  # aka DNA
     # parent = models.ForeignKey('CellContent', null=True, blank=True)
     cell = models.ForeignKey(Cell)
-    # panel = models.ForeignKey(Panel, null=True, blank=True)
     type = models.ForeignKey(CellContentType)
     name = models.CharField(max_length=50, null=True, blank=True)
     protocol = models.ForeignKey(CellContentProtocol, null=True, blank=True)
