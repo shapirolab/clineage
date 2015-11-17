@@ -36,7 +36,6 @@ class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     left = models.ForeignKey(UGSPlus)
     right = models.ForeignKey(UGSMinus)
-    amplicon = models.CharField(max_length=500) # TODO: unwrapper/DNASlice
     # slice = models.ForeignKey(DNASlice)
     targets = models.ManyToManyField(Target)
     partner = models.ManyToManyField(User, null=True) # TODO: external table.
@@ -52,6 +51,10 @@ class TargetEnrichment(models.Model):
 
     def amplicon_indices(self): # TODO: kill
         return (self.left.start_pos, self.right.end_pos)
+
+    @property
+    def amplicon(self):
+        return self.chromosome.getdna(*self.amplicon_indices())
 
     def get_internal_restriction(self, restriction):
         return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
