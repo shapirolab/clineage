@@ -24,6 +24,9 @@ class UGS(models.Model,BaseStrandMixin):
     def __unicode__(self):
         return u"{}({})".format(self.slice, self.strand)
 
+    def __len__(self):
+        return len(self.slice)
+
 class UGSPlus(UGS,PlusStrandMixin):
     pass
 
