@@ -40,3 +40,8 @@ class Panel(models.Model):#collection of targets
     tes = models.ManyToManyField(TargetEnrichment, related_name='panels')
     def __unicode__(self):
         return self.name
+
+class PCR1MultiplexCollection(models.Model):
+    mpxs = models.ManyToManyField(PCR1Multiplex)
+    panel = models.ForeignKey(Panel)
+

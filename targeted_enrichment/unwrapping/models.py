@@ -10,6 +10,16 @@ class Unwrapper(models.Model):
 
     @property
     def left_margin(self):
+        raise NotImplementedError()
+
+    @property
+    def right_margin(self):
+        raise NotImplementedError()
+
+class RawUnwrapper(Unwrapper):
+
+    @property
+    def left_margin(self):
         return DNA()
 
     @property
@@ -20,6 +30,9 @@ class TargetedUnwrapper(Unwrapper):
 
     def infer_slice(self):
         raise NotImplementedError()
+
+    class Meta:
+        abstract = True
 
 class PCR1Unwrapper(TargetedUnwrapper):
     ter = models.OneToOne(PCR1PrimerPairTER)
@@ -43,5 +56,5 @@ class PCR1Unwrapper(TargetedUnwrapper):
             end_pos=right,
         )
         self.slice = s
-        self.save()
+        #self.save()
 

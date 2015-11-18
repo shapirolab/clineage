@@ -1,13 +1,13 @@
 from django.db import models
 
-from lib_prep.workflows.models import CellContent
+from lib_prep.workflows.models import AmplifiedContent
 from sequencing.runs.models import MergedReads
 from targeted_enrichment.planning.models import Target
 
 
 ### -------------------------------------------------------------------------------------
 class SequencingData(models.Model): # This contains the actual data.
-    cell_content = models.ForeignKey(CellContent)
+    cell_content = models.ForeignKey(AmplifiedContent)
     merged_reads = models.ForeignKey(MergedReads)
     target = models.ForeignKey(Target)
     target_offset = models.IntegerField(null=True)

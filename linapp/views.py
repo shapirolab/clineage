@@ -191,18 +191,18 @@ class CellDelete(DeleteView):
     model = Cell
 
 class CellContentCreate(JsonFormMixin, CreateView):
-    model = CellContent
+    model = AmplifiedContent
     fields = "__all__"
 
 class CellContentUpdate(JsonFormMixin, UpdateView):
-    model = CellContent
+    model = AmplifiedContent
     fields = "__all__"
 
 class CellContentDetail(DetailView):
-    model = CellContent
+    model = AmplifiedContent
 
 class CellContentDelete(DeleteView):
-    model = CellContent
+    model = AmplifiedContent
 
 
 class PlateCreate(JsonFormMixin, CreateView):
@@ -293,7 +293,7 @@ def plate_input(request):
                         composition=well_composition,
                         comment=plate_form.cleaned_data['comment'] + '\r\ncomposition comment:%s' % cell_value,
                     )
-                    new_cell_content = CellContent.objects.create(
+                    new_cell_content = AmplifiedContent.objects.create(
                         cell=new_cell,
                         type=plate_content_type,
                         name=plate_form.cleaned_data['cells_name_prefix'] + index2str(index),
@@ -376,7 +376,7 @@ def plate_input_with_names(request):
                         composition=SampleComposition.objects.get(name='Single Cell'),
                         comment=plate_form.cleaned_data['comment'] + '\r\ncomposition comment:%s' % cell_value,
                     )
-                    new_cell_content = CellContent.objects.create(
+                    new_cell_content = AmplifiedContent.objects.create(
                         cell=new_cell,
                         type=plate_content_type,
                         name=cell_value,
