@@ -1,47 +1,47 @@
-from django.conf.urls import *
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns('',
-    (r'^login/$',
+    url(r'^login/$',
      'django.contrib.auth.views.login',
-         {'template_name': 'registration/login.html'}),
+         {'template_name': 'registration/login.html'}, name='login'),
 
-    (r'^logout/$',
+    url(r'^logout/$',
      'django.contrib.auth.views.logout',
-         {'template_name': 'registration/logout.html'}),
+         {'template_name': 'registration/logout.html'}, name='logout'),
 
-    (r'^password_change/$',
-     'django.contrib.auth.views.password_change',
+    url(r'^password_change/$',
+     'django.contrib.auth.views.password_change', name='password_change'
 #         {'template_name': 'registration/password_change_form.html'}
         ),
 
-    (r'^password_change/done/$',
-     'django.contrib.auth.views.password_change_done',
+    url(r'^password_change/done/$',
+     'django.contrib.auth.views.password_change_done', name='password_change_done'
 #         {'template_name': 'registration/password_change_done.html'}
         ),
 
-    (r'^password_reset/$',
-     'django.contrib.auth.views.password_reset',
+    url(r'^password_reset/$',
+     'django.contrib.auth.views.password_reset', name='password_reset'
 #         {'template_name': 'registration/password_reset_form.html',
 #          'email_template_name': 'accounts/password_reset_email.html'}
         ),
 
-    (r'^password_reset/done/$',
-     'django.contrib.auth.views.password_reset_done',
+    url(r'^password_reset/done/$',
+     'django.contrib.auth.views.password_reset_done', name='password_reset_done'
 #         {'template_name': 'registration/password_reset_done.html'}
         ),
 
-    (r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
-     'django.contrib.auth.views.password_reset_confirm',
+    url(r'^reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
+     'django.contrib.auth.views.password_reset_confirm', name='password_reset_confirm'
 #         {'template_name': 'registration/password_reset_confirm.html'}
         ),
 
-    (r'^reset/done/$',
-     'django.contrib.auth.views.password_reset_complete',
+    url(r'^reset/done/$',
+     'django.contrib.auth.views.password_reset_complete', name='password_reset_complete'
 #         {'template_name': 'registration/password_reset_complete.html'}
         ),
 
-    (r'^register/$',
-     'accounts.views.register'
+    url(r'^register/$',
+     'accounts.views.register', name='register'
         ),
 
 

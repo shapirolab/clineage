@@ -262,9 +262,11 @@ class JsonFormMixin(object):
 
 class IndividualCreate(JsonFormMixin, CreateView):
     model = Individual
+    fields = "__all__"
 
 class IndividualUpdate(JsonFormMixin, UpdateView):
     model = Individual
+    fields = "__all__"
 
 class IndividualDetail(DetailView):
     model = Individual
@@ -274,9 +276,11 @@ class IndividualDelete(DeleteView):
 
 class ExtractionEventCreate(JsonFormMixin, CreateView):
     model = ExtractionEvent
+    fields = "__all__"
 
 class ExtractionEventUpdate(JsonFormMixin, UpdateView):
     model = ExtractionEvent
+    fields = "__all__"
 
 class ExtractionEventDetail(DetailView):
     model = ExtractionEvent
@@ -286,21 +290,25 @@ class ExtractionEventDelete(DeleteView):
 
 class ExtractionCreate(JsonFormMixin, CreateView):
     model = Extraction
+    fields = "__all__"
 
 class ExtractionDetail(DetailView):
     model = Extraction
 
 class ExtractionUpdate(JsonFormMixin, UpdateView):
     model = Extraction
+    fields = "__all__"
 
 class ExtractionDelete(DeleteView):
     model = Extraction
 
 class SamplingEventCreate(JsonFormMixin, CreateView):
     model = SamplingEvent
+    fields = "__all__"
 
 class SamplingEventUpdate(JsonFormMixin, UpdateView):
     model = SamplingEvent
+    fields = "__all__"
 
 class SamplingEventDetail(DetailView):
     model = SamplingEvent
@@ -310,9 +318,11 @@ class SamplingEventDelete(DeleteView):
 
 class FACSCreate(JsonFormMixin, CreateView):
     model = FACS
+    fields = "__all__"
 
 class FACSUpdate(JsonFormMixin, UpdateView):
     model = FACS
+    fields = "__all__"
 
 class FACSDetail(DetailView):
     model = FACS
@@ -322,9 +332,11 @@ class FACSDelete(DeleteView):
 
 class LaserCaptureCreate(JsonFormMixin, CreateView):
     model = LaserCapture
+    fields = "__all__"
 
 class LaserCaptureUpdate(JsonFormMixin, UpdateView):
     model = LaserCapture
+    fields = "__all__"
 
 class LaserCaptureDetail(DetailView):
     model = LaserCapture
@@ -334,9 +346,11 @@ class LaserCaptureDelete(DeleteView):
 
 class CellCreate(JsonFormMixin, CreateView):
     model = Cell
+    fields = "__all__"
 
 class CellUpdate(JsonFormMixin, UpdateView):
     model = Cell
+    fields = "__all__"
     template_name_suffix = '_update_form'
 
 class CellDetail(DetailView):
@@ -347,9 +361,11 @@ class CellDelete(DeleteView):
 
 class CellContentCreate(JsonFormMixin, CreateView):
     model = CellContent
+    fields = "__all__"
 
 class CellContentUpdate(JsonFormMixin, UpdateView):
     model = CellContent
+    fields = "__all__"
 
 class CellContentDetail(DetailView):
     model = CellContent
@@ -359,9 +375,11 @@ class CellContentDelete(DeleteView):
 
 class AlgorithmCreate(JsonFormMixin, CreateView):
     model = Algorithm
+    fields = "__all__"
 
 class AlgorithmUpdate(JsonFormMixin, UpdateView):
     model = Algorithm
+    fields = "__all__"
 
 class AlgorithmDetail(DetailView):
     model = Algorithm
@@ -371,36 +389,44 @@ class AlgorithmDelete(DeleteView):
 
 class AlgorithmRunCreate(JsonFormMixin, CreateView):
     model = AlgorithmRun
+    fields = "__all__"
 
 class AlgorithmRunUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmRun
+    fields = "__all__"
 
 class AlgorithmRunDelete(DeleteView):
     model = AlgorithmRun
 
 class AlgorithmParameterCreate(JsonFormMixin, CreateView):
     model = AlgorithmParameter
+    fields = "__all__"
 
 class AlgorithmParameterUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmParameter
+    fields = "__all__"
 
 class AlgorithmParameterDelete(DeleteView):
     model = AlgorithmParameter
 
 class AlgorithmRunParametersCreate(JsonFormMixin, CreateView):
     model = AlgorithmRunParameters
+    fields = "__all__"
 
 class AlgorithmRunParametersUpdate(JsonFormMixin, UpdateView):
     model = AlgorithmRunParameters
+    fields = "__all__"
 
 class AlgorithmRunParametersDelete(DeleteView):
     model = AlgorithmRunParameters
 
 class PlateCreate(JsonFormMixin, CreateView):
     model = Plate
+    fields = "__all__"
 
 class PlateUpdate(JsonFormMixin, UpdateView):
     model = Plate
+    fields = "__all__"
 
 class PlateDelete(DeleteView):
     model = Plate

@@ -8,6 +8,7 @@ from linapp.widgets import *
 class UserProfileForm(ModelForm):
     class Meta:
         model = UserProfile
+        fields = "__all__"
 #    user = models.OneToOneField(User)
 #    institute = models.CharField(max_length=50)
 #    comment = models.TextField()
@@ -19,6 +20,7 @@ class UserProfileForm(ModelForm):
 class ExperimentForm(ModelForm):
     class Meta:
         model = Experiment
+        fields = "__all__"
 #    users = models.ManyToManyField(User, related_name='experiments', through='ExperimentUser')
 #    name = models.CharField(max_length=50)
 #    created_date = models.DateField(auto_now_add=True) #Automatically set the field to now when the object is first created.
@@ -28,6 +30,7 @@ class ExperimentForm(ModelForm):
 class ExperimentFileForm(ModelForm):
     class Meta:
         model = ExperimentFile
+        fields = "__all__"
 #    title = models.CharField(max_length=50)
 #    experiment = models.ForeignKey(Experiment)
 #    file_name = models.CharField(max_length=50)
@@ -40,6 +43,7 @@ class ExperimentFileForm(ModelForm):
 class ExperimentLogForm(ModelForm):
     class Meta:
         model =ExperimentLog
+        fields = "__all__"
 #    user = models.ForeignKey(User)
 #    experiment = models.ForeignKey(Experiment, related_name='comments')
 #    date = models.DateTimeField(auto_now=True)
@@ -60,11 +64,13 @@ class ExperimentUserForm(ModelForm):
 class GeneticBackgroundForm(ModelForm):
     class Meta:
         model =GeneticBackground
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 
 class ProtocolForm(ModelForm):
     class Meta:
         model = Protocol
+        fields = "__all__"
 #    name = models.CharField(max_length=100)
 #    abstract = models.TextField()
 #    fulldescription = models.TextField()
@@ -74,6 +80,7 @@ class ProtocolForm(ModelForm):
 class TargetForm(ModelForm):
     class Meta:
         model = Target
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 #    type = models.ForeignKey(TargetType) #Microsatellite / SNP / etc...
 #    assembly = models.ForeignKey(Assembly)
@@ -85,6 +92,7 @@ class TargetForm(ModelForm):
 class CoordinatesForm(ModelForm):
     class Meta:
         model = Coordinates
+        fields = "__all__"
 #    x = models.DecimalField(max_digits=10, decimal_places=4)
 #    y = models.DecimalField(max_digits=10, decimal_places=4)
 #    z = models.DecimalField(max_digits=10, decimal_places=4)
@@ -92,12 +100,14 @@ class CoordinatesForm(ModelForm):
 class PanelForm(ModelForm):
     class Meta:
         model = Panel
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 #    targets = models.ManyToManyField(Target, related_name='panels')
 
 class LocationForm(ModelForm):
     class Meta:
         model = Location
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 
 
@@ -107,6 +117,7 @@ class LocationForm(ModelForm):
 class AlgorithmForm(ModelForm):
     class Meta:
         model = Algorithm
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 #    type = models.ForeignKey(AlgorithmType)
 #    version = models.CharField(max_length=50)
@@ -115,12 +126,14 @@ class AlgorithmForm(ModelForm):
 class AlgorithmParameterForm(ModelForm):
     class Meta:
         model = AlgorithmParameter
+        fields = "__all__"
 #    algorithm = models.ManyToManyField(Algorithm, related_name='parameters')
 #    name = models.CharField(max_length=50)
 
 class AlgorithmRunForm(ModelForm):
     class Meta:
         model = AlgorithmRun
+        fields = "__all__"
 #    algorithm = models.ForeignKey(Algorithm, related_name='runs')
 #    runname = models.CharField(max_length=50, null=True)
 #    parameters = models.ManyToManyField(AlgorithmParameter, through='AlgorithmRunParameters')
@@ -131,6 +144,7 @@ class AlgorithmRunForm(ModelForm):
 class AlgorithmRunParametersForm(ModelForm):
     class Meta:
         model = AlgorithmRunParameters
+        fields = "__all__"
 #    run = models.ForeignKey(AlgorithmRun)
 #    parameter = models.ForeignKey(AlgorithmParameter)
 #    value = models.CharField(max_length=50)
@@ -142,6 +156,7 @@ class AlgorithmRunParametersForm(ModelForm):
 class IndividualForm(ModelForm):
     class Meta:
         model = Individual
+        fields = "__all__"
 #    GENDER = (('M', 'Male'),('F', 'Female'),)
 #    taxa = models.ForeignKey(Taxa)
 #    name = models.CharField(max_length=50)
@@ -154,6 +169,7 @@ class IndividualForm(ModelForm):
 class ExtractionForm(ModelForm):
     class Meta:
         model = Extraction
+        fields = "__all__"
 #    individual = models.ForeignKey(Individual)
 #    name = models.CharField(max_length=50)
 #    user = models.ForeignKey(User)
@@ -164,6 +180,7 @@ class ExtractionForm(ModelForm):
 class SamplingEventForm(ModelForm):
     class Meta:
         model = SamplingEvent
+        fields = "__all__"
 #    name = models.CharField(max_length=50)
 #    organ = models.ForeignKey(Organ)
 #    extraction = models.ForeignKey(Extraction)
@@ -175,6 +192,7 @@ class SamplingEventForm(ModelForm):
 class CellForm(ModelForm):
     class Meta:
         model = Cell
+        fields = "__all__"
 #    sampling = models.ForeignKey(SamplingEvent)
 #    name = models.CharField(max_length=50)
 #    experiment = models.ManyToManyField(Experiment, related_name='cells')
@@ -231,6 +249,7 @@ class PlateInputForm(forms.Form):
 class CellContentForm(ModelForm):
     class Meta:
         model = CellContent
+        fields = "__all__"
 #    parent = models.ForeignKey('CellContent', null=True, blank=True)
 #    cell = models.ForeignKey(Cell)
 #    panel = models.ForeignKey(Panel, null=True, blank=True)
@@ -247,12 +266,14 @@ class CellContentForm(ModelForm):
 class MachineForm(ModelForm):
     class Meta:
         model = Machine
+        fields = "__all__"
 #    machineid = models.CharField(max_length=50)
 #    type = models.ForeignKey(MachineType)
 
 class SequencingForm(ModelForm):
     class Meta:
         model = Sequencing
+        fields = "__all__"
 #    sample = models.ForeignKey(CellContent)
 #    data = models.ForeignKey('RawData', related_name='sequencing_event') #we add '' brackets in order to resolve precedence issue
 #    machine = models.ForeignKey(Machine)
@@ -267,12 +288,14 @@ class SequencingForm(ModelForm):
 class RawDataForm(ModelForm):
     class Meta:
         model = RawData
+        fields = "__all__"
 #    sequencing = models.ForeignKey(Sequencing)
 #    file = models.ForeignKey(ExperimentFile)
 
 class CorrectedRawDataForm(ModelForm):
     class Meta:
         model = CorrectedRawData
+        fields = "__all__"
 #    rawdata = models.ForeignKey(RawData)
 #    file = models.ForeignKey(ExperimentFile)
 #    creation = models.ForeignKey(AlgorithmRun, related_name = 'crd')
@@ -284,11 +307,13 @@ class CorrectedRawDataForm(ModelForm):
 class FailedTargetValueForm(ModelForm):
     class Meta:
         model = FailedTargetValue
+        fields = "__all__"
 #    comment = models.TextField()
 
 class SequenceDistributionForm(ModelForm):
     class Meta:
         model = SequenceDistribution
+        fields = "__all__"
 #    target = models.ManyToManyField(Target, through = 'TargetAnalysis')
 #    value = models.TextField()
 #    count = models.IntegerField()
@@ -297,6 +322,7 @@ class SequenceDistributionForm(ModelForm):
 class TargetAnalysisForm(ModelForm):
     class Meta:
         model = TargetAnalysis
+        fields = "__all__"
 #    target = models.ForeignKey(Target)
 #    distribution = models.ForeignKey(SequenceDistribution)
 #    creation = models.ForeignKey(AlgorithmRun, related_name='targetsdistributions')
@@ -305,6 +331,7 @@ class TargetAnalysisForm(ModelForm):
 class TargetVariantForm(ModelForm):
     class Meta:
         model = TargetVariant
+        fields = "__all__"
 #    ts = models.ForeignKey(TrueSequence)
 #    creation = models.ForeignKey(AlgorithmRun,related_name='targetsvariants')
 #    type = models.ForeignKey(TargetVariantType)
@@ -313,6 +340,7 @@ class TargetVariantForm(ModelForm):
 class GenSigForm(ModelForm):
     class Meta:
         model = GenSig
+        fields = "__all__"
 #    variants = models.ManyToManyField(TargetVariant)
 #    creation = models.ForeignKey(AlgorithmRun,related_name='gensigs')
 #    value = models.TextField() #vector
@@ -320,6 +348,7 @@ class GenSigForm(ModelForm):
 class DMForm(ModelForm):
     class Meta:
         model = DM
+        fields = "__all__"
 #    cell1 = models.ForeignKey(GenSig, related_name='+')
 #    cell2 = models.ForeignKey(GenSig, related_name='+')
 #    distance = models.DecimalField(max_digits=10, decimal_places=4)
@@ -328,6 +357,7 @@ class DMForm(ModelForm):
 class CellTreeNodeForm(ModelForm): #TODO: This might be MPTTForm
     class Meta:
         model = CellTreeNode
+        fields = "__all__"
 #    cell = models.ForeignKey(Cell)
 #    parent = TreeForeignKey('self', null=True, blank = True, related_name='children')
 #    distance = models.DecimalField(max_digits=10, decimal_places=4)
@@ -343,6 +373,7 @@ class CellTreeNodeForm(ModelForm): #TODO: This might be MPTTForm
 class PlateForm(ModelForm):
     class Meta:
         model = Plate
+        fields = "__all__"
 #    code = models.AutoField(primary_key=True)
 #    type = models.ForeignKey(PlateType)
 #    name = models.CharField(max_length=200, blank=True)
@@ -354,6 +385,7 @@ class PlateForm(ModelForm):
 class PlateStorageForm(ModelForm):
     class Meta:
         model = PlateStorage
+        fields = "__all__"
 #    storageBox = models.ForeignKey(StorageBox)
 #    plate = models.ForeignKey(Plate)
 #    notes = models.CharField(max_length=250, blank=True)
@@ -361,6 +393,7 @@ class PlateStorageForm(ModelForm):
 class SampleLocationForm(ModelForm):
     class Meta:
         model = SampleLocation
+        fields = "__all__"
 #    plate = models.ForeignKey(Plate)
 #    well = models.CharField(max_length=3, blank=True)
 #    sample = models.ForeignKey(CellContent)

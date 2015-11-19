@@ -6,8 +6,8 @@ from mptt.admin import MPTTModelAdmin
 
 class ExperimentAdmin(admin.ModelAdmin):
 
-    def queryset(self, request):
-        qs = super(ExperimentAdmin, self).queryset(request)
+    def get_queryset(self, request):
+        qs = super(ExperimentAdmin, self).get_queryset(request)
         if request.user.is_superuser:
             return qs
         else:
