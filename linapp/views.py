@@ -1,27 +1,39 @@
 import json
-from django.shortcuts import render, render_to_response, redirect, get_object_or_404
-from django.template.context import RequestContext
-from linapp.forms import *
-from linapp.models import *
-from utils.plate_string_description import *
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from linapp.DBUtils import DBUtils
+from functools import wraps
 from datetime import datetime
+import csv
+import time
+
 from dojango.decorators import json_response, expect_post_request
-from django.template import Template, Context, loader
 from datables import *
 from tabselection import *
 from dataminers import *
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
+from django.db.models import Count
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
+from django.template import Template, loader
+
 from utils.wells import num2abc
 from utils.user_cells_report import user_cells_table_values, get_partner_report, query_partner_individuals
-from django.shortcuts import get_object_or_404
-from django.db.models import Count
+from linapp.forms import *
+from linapp.models import *
+from utils.plate_string_description import *
+from linapp.DBUtils import DBUtils
 
-import csv
-import time
+@wraps(loader.render_to_string)
+def render_to_response(*args,**kwargs):
+    """
+    Override bug in django.shortcuts.
+    """
+    #FIXME
+    content_type = kwargs.pop("content_type",None)
+    status = kwargs.pop("status",None)
+    return HttpResponse(loader.render_to_string(*args,**kwargs),content_type=content_type,status=status)
 
 def index(request):
     """
@@ -33,7 +45,7 @@ def index(request):
         privateexp = Experiment.objects.filter(users = request.user)
     except Experiment.DoesNotExist:
         raise Http404
-    return render_to_response('userbase.html', context_instance=RequestContext(request,{'privateexperiments': privateexp, 'publicexperiments': publicexp}))
+    return render_to_response('userbase.html', context={'privateexperiments': privateexp, 'publicexperiments': publicexp},request=request)
 
 
 def homepage(request, tab='individuals'):
@@ -67,7 +79,7 @@ def homepage(request, tab='individuals'):
     if platestable.willHandle(request):
         return platestable.handleRequest(request)
     return render_to_response(
-        'homepage.html', context_instance=RequestContext(request, {
+        'homepage.html', context={
             'privateexperiments': privateexp,
             'publicexperiments': publicexp,
             'selectedtab': selectedtab,
@@ -78,7 +90,7 @@ def homepage(request, tab='individuals'):
             'samplestable': samplestable,
             'algorithmstable': algorithmstable,
             'platestable': platestable
-        }))
+        },request=request)
 
 
 def algorithm(request, alg_id, tab='general'):
@@ -99,13 +111,13 @@ def algorithm(request, alg_id, tab='general'):
     if algparamstable.willHandle(request):
         return algparamstable.handleRequest(request)
     return render_to_response('algorithm.html',
-        context_instance=RequestContext(request,{'alg':alg,
+        context={'alg':alg,
              'developers':developers,
              'privateexperiments': privateexp,
              'publicexperiments': publicexp,
              'selectedtab':selectedtab,
              'algrunstable':algrunstable,
-             'algparamstable':algparamstable}))
+             'algparamstable':algparamstable},request=request)
 
 
 def experiment(request, exp_id, tab='general'):
@@ -170,7 +182,7 @@ def experiment(request, exp_id, tab='general'):
 #    if algorithmsrunstable.willHandle(request):
 #        return algorithmsrunstable.handleRequest(request)
     return render_to_response('experiment.html',
-        context_instance=RequestContext(request,{'exp':exp,
+        context={'exp':exp,
              'userrole': userrole,
              'privateexperiments': privateexp,
              'publicexperiments': publicexp,
@@ -187,8 +199,9 @@ def experiment(request, exp_id, tab='general'):
              'individualstable': individualstable,
              'filestable': filestable,
 #             'algorithmsrunstable':algorithmsrunstable
-        }
-    ))
+        },
+        request=request
+    )
 
 
 @expect_post_request
@@ -228,7 +241,7 @@ def commentPost(request, exp_id):#Handle POST request from experiment messages  
     comment = ExperimentLog(user=request.user, experiment = exp, date =datetime.now(), comment=request.POST['comment'])
     comment.save()
     t = loader.get_template('comments.html')
-    return {'success': True, 'commentsHTML': t.render(Context({'exp': exp}))}
+    return {'success': True, 'commentsHTML': t.render({'exp': exp})}
 
 
 @expect_post_request
@@ -637,7 +650,7 @@ def algrunform(request, alg_id = None): #TODO: check for permissions
     except Algorithm.DoesNotExist:
         print 'failed to retrieve Algorithm where pk = '+str(alg_id)
         form = AlgorithmRunForm(prefix='algrun')
-    return render_to_response('forms/genericformdisp.html',context_instance=RequestContext(request,{'form':form, 'resurl':reverse(algrunform, args=alg_id)}))
+    return render_to_response('forms/genericformdisp.html',context={'form':form, 'resurl':reverse(algrunform, args=alg_id)},request=request)
 
 
 def memberform(request, exp_id, mem_id = None):
@@ -657,14 +670,14 @@ def memberform(request, exp_id, mem_id = None):
 #    expblankuser = ExperimentUser(experiment = exp)
     if not mem_id:
         form = ExperimentUserForm(prefix='exp') #, instance = expblankuser
-        return render_to_response('forms/genericformdisp.html',context_instance=RequestContext(request,{'form':form, 'resurl':reverse(memberform, args=exp_id)}))
+        return render_to_response('forms/genericformdisp.html',context={'form':form, 'resurl':reverse(memberform, args=exp_id)},request=request)
     try:
         eu = ExperimentUser.objects.get(pk = mem_id)
         form = ExperimentUserForm(instance = eu, prefix='exp') #, instance = expblankuser
     except ExperimentUser.DoesNotExist:
         print 'failed to retrieve ExperimentUser where pk = '+str(mem_id)
         form = ExperimentUserForm(prefix='exp') #, instance = expblankuser
-    return render_to_response('forms/genericformdisp.html', context_instance=RequestContext(request,{'form':form, 'resurl':reverse(memberform, args=exp_id)}))
+    return render_to_response('forms/genericformdisp.html', context={'form':form, 'resurl':reverse(memberform, args=exp_id)},request=request)
 
 
 def targets_tdv(request, taxa, assem):
@@ -752,7 +765,7 @@ def plate_well_selection(request, plate_plastica_id):
     plate_plastica = get_object_or_404(PlatePlastica, pk=plate_plastica_id)
     rows = [num2abc(row) for row in range(1, plate_plastica.rows+1)]
     columns = range(1, plate_plastica.columns+1)
-    return render_to_response('forms/plate_boolean_form.html', context_instance=RequestContext(request, {'rows': rows, 'columns': columns}))
+    return render_to_response('forms/plate_boolean_form.html', context={'rows': rows, 'columns': columns},request=request)
 
 
 @expect_post_request

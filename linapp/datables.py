@@ -115,7 +115,7 @@ def getalgrunstable(alg):
                 DateTimeColumn('timestamp', width=150),
                 ],
         ),
-        objectpath=reverse('linapp.views.algrunform')
+        objectpath=reverse('algrunform_base')
     )
 
 def getalgparamstable(alg):

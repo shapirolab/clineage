@@ -1,9 +1,9 @@
-Django==1.7
+Django==1.8
 Fabric==1.10.0
 cython==0.20.1
 django-debug-toolbar==1.0.1
 django-extensions==1.5.9
-django-mptt==0.7.0
+django-mptt==0.7.4
 # dojango==0.5.7
 -e git+https://github.com/amosonn/dojango.git@aaaead3e1c3d50cb1251b6951aeed71228018075#egg=dojango-master
 -e git+https://github.com/ofirr/dojango-datable.git@04dce2169ed638175e2cfa4967e3ae9f996aeca5#egg=dojango_datable-master

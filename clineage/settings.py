@@ -4,7 +4,6 @@ import sys
 
 # DEBUG = True
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -93,24 +92,34 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '=2+%-adu_uhtgb*!%-m91pf$_s3+=ifcs*#l4+jk8vg74*4u!4'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-    'django.contrib.auth.context_processors.auth',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            PROJECT_PATH + '/templates/',
+            PROJECT_PATH + '/templates/forms',
+            PROJECT_PATH + '/dojango/templates/',
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+            ],
+            'debug': DEBUG,
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+        }
+    }
+]
 
 MIDDLEWARE_CLASSES = (
 #    'dojango.middleware.DojoCollector',
@@ -128,10 +137,6 @@ ROOT_URLCONF = 'clineage.urls'
 
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__) + '/..')
 
-TEMPLATE_DIRS = (PROJECT_PATH + '/templates/',
-                 PROJECT_PATH + '/templates/forms',
-                 PROJECT_PATH + '/dojango/templates/',
-    )
 
 LOGIN_EXEMPT_URLS = [r'^soap/',
                      r'^media/',
