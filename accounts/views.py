@@ -17,5 +17,5 @@ def register(request):
 
 @login_required
 def profile(request):
-    user_profile = request.user.get_profile()
+    user_profile = request.user.userprofile
     url = user_profile.url

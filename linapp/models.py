@@ -4,7 +4,7 @@ import os
 
 from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes import fields
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models import Count
@@ -413,7 +413,7 @@ class Primer(Target):
     strand = models.CharField(max_length=1, choices=STRANDS, null=True)
     sequence = models.ForeignKey(Sequence)
     tail = models.ForeignKey(PrimerTail, null=True)
-    physical_locations = generic.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation('SampleLocation',
                                              content_type_field='content_type',
                                              object_id_field='object_id')
     def validate_reference(self):
@@ -454,7 +454,7 @@ class TargetEnrichment(models.Model):
     validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
     validation_date = models.DateField(null=True, blank=True)
     comment = models.CharField(max_length=50, blank=True, null=True)
-    physical_locations = generic.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation('SampleLocation',
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
     targets = models.ManyToManyField(Target, related_name='primer_pair', null=True, blank=True)
@@ -631,7 +631,7 @@ class Extraction(models.Model):
     organ = models.ForeignKey(Organ)
     tissue = models.ForeignKey(Tissue)
     comment = models.TextField(null=True, blank=True)
-    physical_locations = generic.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation('SampleLocation',
                                content_type_field='content_type',
                                object_id_field='object_id')
     def __unicode__(self):
@@ -698,7 +698,7 @@ class CellContent(models.Model):  # aka DNA
     seq_ready = models.BooleanField(default=False)
     user = models.ForeignKey(User, null=True, blank=True)
     comment = models.TextField()
-    physical_locations = generic.GenericRelation('SampleLocation',
+    physical_locations = fields.GenericRelation('SampleLocation',
                                content_type_field='content_type',
                                object_id_field='object_id')
     def __unicode__(self):
@@ -1024,7 +1024,7 @@ class SampleLocation(models.Model):
     well = models.CharField(max_length=3, blank=True, db_index=True)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(db_index=True)
-    reagent = generic.GenericForeignKey('content_type', 'object_id')
+    reagent = fields.GenericForeignKey('content_type', 'object_id')
     volume = models.DecimalField(null=True, max_digits=10, decimal_places=3, blank=True)
     concentration = models.DecimalField(null=True, max_digits=10, decimal_places=5, blank=True)
     timestamp = models.DateTimeField(auto_now=True)
@@ -1041,7 +1041,7 @@ class SampleLocation(models.Model):
 class PrimersMultiplex(models.Model):
     name = models.CharField(max_length=20)
     primers = models.ManyToManyField(TargetEnrichment)
-    physical_locations = generic.GenericRelation(SampleLocation,
+    physical_locations = fields.GenericRelation(SampleLocation,
                                content_type_field='content_type',
                                object_id_field='object_id')
 
