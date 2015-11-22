@@ -159,7 +159,6 @@ INSTALLED_APPS = (
     'soap',
 #    'phylogeny',
     'django_extensions',
-    'south'
 )
 
 # A sample logging configuration. The only tangible logging

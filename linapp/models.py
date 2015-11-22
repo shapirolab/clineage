@@ -111,14 +111,16 @@ class FileContext(models.Model):
 
     def __unicode__(self):
         return self.name
+
+### -------------------------------------------------------------------------------------
+def expriment_file_path(self, filename):
+    return settings.MEDIA_ROOT+'/CLineageFiles/'+self.experiment.name+'/'+filename
 ### -------------------------------------------------------------------------------------
 class ExperimentFile(models.Model):
-    def path(self, filename):
-        return settings.MEDIA_ROOT+'/CLineageFiles/'+self.experiment.name+'/'+filename
     title = models.CharField(max_length=50)
     experiment = models.ForeignKey(Experiment)
     file_name = models.CharField(max_length=50)
-    file = models.FileField(upload_to=path)
+    file = models.FileField(upload_to=expriment_file_path)
     context = models.ForeignKey(FileContext)
     upload_date = models.DateField()
     user = models.ForeignKey(User)
@@ -639,16 +641,18 @@ class Extraction(models.Model):
 
     def get_absolute_url(self):
         return reverse('extraction_detail', kwargs={'pk': self.pk})
+
+### -------------------------------------------------------------------------------------
+def sampling_event_path(self, filename):
+    return settings.MEDIA_ROOT+'/CLineageFiles/sampling_events/'+self.name+'/'+filename
 ### -------------------------------------------------------------------------------------
 class SamplingEvent(models.Model):
-    def path(self, filename):
-        return settings.MEDIA_ROOT+'/CLineageFiles/sampling_events/'+self.name+'/'+filename
     name = models.CharField(max_length=50)
     extraction = models.ForeignKey(Extraction)
     date = models.DateField(null=True, blank=True)
     user = models.ForeignKey(User, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
-    attachment = models.FileField(upload_to=path, null=True, blank=True)
+    attachment = models.FileField(upload_to=sampling_event_path, null=True, blank=True)
     def __unicode__(self):
         return u'{}>{}'.format(unicode(self.extraction), self.name)
 

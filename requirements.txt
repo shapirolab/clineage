@@ -1,9 +1,8 @@
 Django==1.7
 Fabric==1.10.0
-South==0.8.4
 cython==0.20.1
 django-debug-toolbar==1.0.1
-django-extensions==1.3.3
+django-extensions==1.5.9
 django-mptt==0.7.0
 # dojango==0.5.7
 -e git+https://github.com/amosonn/dojango.git@aaaead3e1c3d50cb1251b6951aeed71228018075#egg=dojango-master
