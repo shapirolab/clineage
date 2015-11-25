@@ -1,15 +1,15 @@
 from django.db import models
 
-from lib_prep.workflows.models import AmplifiedContent
+from lib_prep.workflows.models import BarcodedContent
 from sequencing.runs.models import MergedReads
-from targeted_enrichment.planning.models import Target
+from targeted_enrichment.unwrappers.models import Unwrapper
 
 
 ### -------------------------------------------------------------------------------------
 class SequencingData(models.Model): # This contains the actual data.
-    cell_content = models.ForeignKey(AmplifiedContent)
+    barcoded_content = models.ForeignKey(BarcodedContent)
     merged_reads = models.ForeignKey(MergedReads)
-    target = models.ForeignKey(Target)
+    unwrapper = models.ForeignKey(Unwrapper)
     target_offset = models.IntegerField(null=True)
     fastq = models.FilePathField(null=True)
     vcf = models.FilePathField(null=True)

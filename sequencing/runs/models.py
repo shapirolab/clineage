@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from lib_prep.workflows.models import BarcodedContent
+from lib_prep.workflows.models import Library
 
 __author__ = 'ofirr'
 
@@ -23,7 +23,7 @@ class Machine(models.Model):
 
 
 class NGSRun(models.Model):
-    wfcs = models.ManyToManyField(BarcodedContent)
+    libraries = models.ManyToManyField(Library)
     directory = models.FilePathField(null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
