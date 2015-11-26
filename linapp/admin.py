@@ -92,90 +92,90 @@ class ExperimentAdmin(admin.ModelAdmin):
 
 
 ### Users/Roles Management
-admin.site.register(LineageRole)
-admin.site.register(UserProfile)
+# FIXME admin.site.register(LineageRole)
+# FIXME admin.site.register(UserProfile)
 
 ### Experiment Management
-admin.site.register(Experiment)
-admin.site.register(ExperimentLog)
-admin.site.register(FileContext)
-admin.site.register(ExperimentFile)
-admin.site.register(ExperimentUser)
+# FIXME admin.site.register(Experiment)
+# FIXME admin.site.register(ExperimentLog)
+# FIXME admin.site.register(FileContext)
+# FIXME admin.site.register(ExperimentFile)
+# FIXME admin.site.register(ExperimentUser)
 
 ### Types and descriptors
-admin.site.register(ProtocolType)
-admin.site.register(SampleComposition)#e.g. single cell or bulk
-admin.site.register(CellContentType)
-admin.site.register(TargetType)
-admin.site.register(TargetVariantType) #TODO: This might be useless. Decide.admin.site.register(SampleStatus)
-admin.site.register(TargetEnrichmentFailureType)
+# FIXME admin.site.register(ProtocolType)
+# FIXME admin.site.register(SampleComposition)#e.g. single cell or bulk
+# FIXME admin.site.register(CellContentType)
+# FIXME admin.site.register(TargetType)
+# FIXME admin.site.register(TargetVariantType) #TODO: This might be useless. Decide.admin.site.register(SampleStatus)
+# FIXME admin.site.register(TargetEnrichmentFailureType)
 
 ### Generic Biological Objects
-admin.site.register(Taxa)
-admin.site.register(GeneticBackground)
-admin.site.register(Organ)
-admin.site.register(Tissue)
-admin.site.register(Assembly)
+# FIXME admin.site.register(Taxa)
+# FIXME admin.site.register(GeneticBackground)
+# FIXME admin.site.register(Organ)
+# FIXME admin.site.register(Tissue)
+# FIXME admin.site.register(Assembly)
 
 #admin.site.register(Kit)
-admin.site.register(Protocol)
-admin.site.register(Sequence)
-admin.site.register(Target)#Target is a locus on a reference genome.
-admin.site.register(Primer)
-admin.site.register(Microsatellite)
-admin.site.register(TargetEnrichmentType)
-admin.site.register(TargetEnrichment)
-admin.site.register(Coordinates)
+# FIXME admin.site.register(Protocol)
+# FIXME admin.site.register(Sequence)
+# FIXME admin.site.register(Target)#Target is a locus on a reference genome.
+# FIXME admin.site.register(Primer)
+# FIXME admin.site.register(Microsatellite)
+# FIXME admin.site.register(TargetEnrichmentType)
+# FIXME admin.site.register(TargetEnrichment)
+# FIXME admin.site.register(Coordinates)
 
 #XYZ coordinates of laser capture.
-admin.site.register(FACSMarker)
-admin.site.register(Panel)#collection of targets
-admin.site.register(Location)  # Freetext location
+# FIXME admin.site.register(FACSMarker)
+# FIXME admin.site.register(Panel)#collection of targets
+# FIXME admin.site.register(Location)  # Freetext location
 
 ### Algorithms description
-admin.site.register(AlgorithmType)#e.g. raw data to consensus data
-admin.site.register(Algorithm)
-admin.site.register(AlgorithmParameter)
-admin.site.register(AlgorithmRun)
-admin.site.register(AlgorithmRunParameters)
+# FIXME admin.site.register(AlgorithmType)#e.g. raw data to consensus data
+# FIXME admin.site.register(Algorithm)
+# FIXME admin.site.register(AlgorithmParameter)
+# FIXME admin.site.register(AlgorithmRun)
+# FIXME admin.site.register(AlgorithmRunParameters)
 
 ### Sampling Hierarchy
-admin.site.register(Individual)
-admin.site.register(ExtractionEvent)
-admin.site.register(Extraction)
-admin.site.register(SamplingEvent)
-admin.site.register(FACS)
-admin.site.register(LaserCapture)
-admin.site.register(CellSelector)
-admin.site.register(Cell)
-admin.site.register(CellContent)  # aka DNA
+# FIXME admin.site.register(Individual)
+# FIXME admin.site.register(ExtractionEvent)
+# FIXME admin.site.register(Extraction)
+# FIXME admin.site.register(SamplingEvent)
+# FIXME admin.site.register(FACS)
+# FIXME admin.site.register(LaserCapture)
+# FIXME admin.site.register(CellSelector)
+# FIXME admin.site.register(Cell)
+# FIXME admin.site.register(CellContent)  # aka DNA
 
 ### Sequencing
-admin.site.register(MachineType)
-admin.site.register(Machine)
-admin.site.register(Sequencing)
+# FIXME admin.site.register(MachineType)
+# FIXME admin.site.register(Machine)
+# FIXME admin.site.register(Sequencing)
 
 ### Sequencing Data classes
-admin.site.register(RawData)
-admin.site.register(CorrectedRawData)
+# FIXME admin.site.register(RawData)
+# FIXME admin.site.register(CorrectedRawData)
 
 ### Targets Hierarchy
-admin.site.register(FailedTargetValue)
-admin.site.register(SequenceDistribution)
-admin.site.register(TargetAnalysis)
-admin.site.register(TargetVariant)
-admin.site.register(GenSig)
-admin.site.register(DM)
-admin.site.register(CellTreeNode)
+# FIXME admin.site.register(FailedTargetValue)
+# FIXME admin.site.register(SequenceDistribution)
+# FIXME admin.site.register(TargetAnalysis)
+# FIXME admin.site.register(TargetVariant)
+# FIXME admin.site.register(GenSig)
+# FIXME admin.site.register(DM)
+# FIXME admin.site.register(CellTreeNode)
 
 ### Optional storage mapping
-admin.site.register(StorageType)
-admin.site.register(StorageBox)
-admin.site.register(PlateContext) #The plate's context in use. e.g. pcr
-admin.site.register(PlatePlastica) #The plate's physical form. e.g. deepwell square
-admin.site.register(PlateType)
-admin.site.register(Plate)
-admin.site.register(PlateStorage)
-admin.site.register(SampleLocation)
+# FIXME admin.site.register(StorageType)
+# FIXME admin.site.register(StorageBox)
+# FIXME admin.site.register(PlateContext) #The plate's context in use. e.g. pcr
+# FIXME admin.site.register(PlatePlastica) #The plate's physical form. e.g. deepwell square
+# FIXME admin.site.register(PlateType)
+# FIXME admin.site.register(Plate)
+# FIXME admin.site.register(PlateStorage)
+# FIXME admin.site.register(SampleLocation)
 ### Primers Multiplex
-admin.site.register(PrimersMultiplex)
+# FIXME admin.site.register(PrimersMultiplex)

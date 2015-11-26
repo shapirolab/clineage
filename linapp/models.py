@@ -61,6 +61,13 @@ class Protocol(models.Model):
         return self.name
 ### -------------------------------------------------------------------------------------
 
+# NOTE: these are required by linapp.migrations.0001_initial
+def expriment_file_path(self, filename):
+    return settings.MEDIA_ROOT+'/CLineageFiles/'+self.experiment.name+'/'+filename
+
+def sampling_event_path(self, filename):
+    return settings.MEDIA_ROOT+'/CLineageFiles/sampling_events/'+self.name+'/'+filename
+
 ###----------------------------------------------------------------------------------------
 ### User Report Data and Tables
 ###----------------------------------------------------------------------------------------
