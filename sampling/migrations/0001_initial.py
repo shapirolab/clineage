@@ -265,6 +265,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.SeparateDatabaseAndState(
-            state_operations=state_ops
+            state_operations=state_ops,
         ),
     ]
