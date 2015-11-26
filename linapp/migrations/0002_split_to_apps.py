@@ -275,6 +275,14 @@ class Migration(migrations.Migration):
             model_name='sequencing',
             name='user',
         ),
+        migrations.RemoveField(
+            model_name='userreport',
+            name='cells',
+        ),
+        migrations.RemoveField(
+            model_name='userreport',
+            name='individual',
+        ),
         migrations.DeleteModel(
             name='Assembly',
         ),
