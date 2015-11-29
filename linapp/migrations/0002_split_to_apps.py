@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from utils.content_type_operation import AlterContentType
+
 
 class Migration(migrations.Migration):
 
@@ -428,185 +430,415 @@ class Migration(migrations.Migration):
             name='Assembly',
             table='genomes_assembly',
         ),
+        AlterContentType(
+            from_model='assembly',
+            to_app='genomes',
+            to_model='assembly',
+        ),
         migrations.AlterModelTable(
             name='Chromosome',
             table='genomes_chromosome',
+        ),
+        AlterContentType(
+            from_model='chromosome',
+            to_app='genomes',
+            to_model='chromosome',
         ),
         migrations.AlterModelTable(
             name='PrimerTail',
             table='genomes_primertail',
         ),
+        AlterContentType(
+            from_model='primertail',
+            to_app='genomes',
+            to_model='primertail',
+        ),
         migrations.AlterModelTable(
             name='RestrictionSiteType',
             table='genomes_restrictionsitetype',
+        ),
+        AlterContentType(
+            from_model='restrictionsitetype',
+            to_app='genomes',
+            to_model='restrictionsitetype',
         ),
         migrations.AlterModelTable(
             name='Sequence',
             table='genomes_sequence',
         ),
+        AlterContentType(
+            from_model='sequence',
+            to_app='genomes',
+            to_model='sequence',
+        ),
         migrations.AlterModelTable(
             name='Target',
             table='genomes_target',
+        ),
+        AlterContentType(
+            from_model='target',
+            to_app='genomes',
+            to_model='target',
         ),
         migrations.AlterModelTable(
             name='TargetEnrichment',
             table='genomes_targetenrichment',
         ),
+        AlterContentType(
+            from_model='targetenrichment',
+            to_app='genomes',
+            to_model='targetenrichment',
+        ),
         migrations.AlterModelTable(
             name='TargetEnrichmentFailureType',
             table='genomes_targetenrichmentfailuretype',
+        ),
+        AlterContentType(
+            from_model='targetenrichmentfailuretype',
+            to_app='genomes',
+            to_model='targetenrichmentfailuretype',
         ),
         migrations.AlterModelTable(
             name='TargetEnrichmentType',
             table='genomes_targetenrichmenttype',
         ),
+        AlterContentType(
+            from_model='targetenrichmenttype',
+            to_app='genomes',
+            to_model='targetenrichmenttype',
+        ),
         migrations.AlterModelTable(
             name='TargetType',
             table='genomes_targettype',
+        ),
+        AlterContentType(
+            from_model='targettype',
+            to_app='genomes',
+            to_model='targettype',
         ),
         migrations.AlterModelTable(
             name='Microsatellite',
             table='genomes_microsatellite',
         ),
+        AlterContentType(
+            from_model='microsatellite',
+            to_app='genomes',
+            to_model='microsatellite',
+        ),
         migrations.AlterModelTable(
             name='Primer',
             table='genomes_primer',
+        ),
+        AlterContentType(
+            from_model='primer',
+            to_app='genomes',
+            to_model='primer',
         ),
         migrations.AlterModelTable(
             name='RestrictionSite',
             table='genomes_restrictionsite',
         ),
+        AlterContentType(
+            from_model='restrictionsite',
+            to_app='genomes',
+            to_model='restrictionsite',
+        ),
         migrations.AlterModelTable(
             name='SNP',
             table='genomes_snp',
+        ),
+        AlterContentType(
+            from_model='snp',
+            to_app='genomes',
+            to_model='snp',
         ),
         migrations.AlterModelTable(
             name='Machine',
             table='lib_prep_machine',
         ),
+        AlterContentType(
+            from_model='machine',
+            to_app='lib_prep',
+            to_model='machine',
+        ),
         migrations.AlterModelTable(
             name='MachineType',
             table='lib_prep_machinetype',
+        ),
+        AlterContentType(
+            from_model='machinetype',
+            to_app='lib_prep',
+            to_model='machinetype',
         ),
         migrations.AlterModelTable(
             name='Panel',
             table='lib_prep_panel',
         ),
+        AlterContentType(
+            from_model='panel',
+            to_app='lib_prep',
+            to_model='panel',
+        ),
         migrations.AlterModelTable(
             name='PrimersMultiplex',
             table='lib_prep_primersmultiplex',
+        ),
+        AlterContentType(
+            from_model='primersmultiplex',
+            to_app='lib_prep',
+            to_model='primersmultiplex',
         ),
         migrations.AlterModelTable(
             name='Sequencing',
             table='lib_prep_sequencing',
         ),
+        AlterContentType(
+            from_model='sequencing',
+            to_app='lib_prep',
+            to_model='sequencing',
+        ),
         migrations.AlterModelTable(
             name='Taxa',
             table='misc_taxa',
+        ),
+        AlterContentType(
+            from_model='taxa',
+            to_app='misc',
+            to_model='taxa',
         ),
         migrations.AlterModelTable(
             name='Cell',
             table='sampling_cell',
         ),
+        AlterContentType(
+            from_model='cell',
+            to_app='sampling',
+            to_model='cell',
+        ),
         migrations.AlterModelTable(
             name='CellContent',
             table='sampling_cellcontent',
+        ),
+        AlterContentType(
+            from_model='cellcontent',
+            to_app='sampling',
+            to_model='cellcontent',
         ),
         migrations.AlterModelTable(
             name='CellContentType',
             table='sampling_cellcontenttype',
         ),
+        AlterContentType(
+            from_model='cellcontenttype',
+            to_app='sampling',
+            to_model='cellcontenttype',
+        ),
         migrations.AlterModelTable(
             name='Coordinates',
             table='sampling_coordinates',
+        ),
+        AlterContentType(
+            from_model='coordinates',
+            to_app='sampling',
+            to_model='coordinates',
         ),
         migrations.AlterModelTable(
             name='Extraction',
             table='sampling_extraction',
         ),
+        AlterContentType(
+            from_model='extraction',
+            to_app='sampling',
+            to_model='extraction',
+        ),
         migrations.AlterModelTable(
             name='ExtractionEvent',
             table='sampling_extractionevent',
+        ),
+        AlterContentType(
+            from_model='extractionevent',
+            to_app='sampling',
+            to_model='extractionevent',
         ),
         migrations.AlterModelTable(
             name='FACSMarker',
             table='sampling_facsmarker',
         ),
+        AlterContentType(
+            from_model='facsmarker',
+            to_app='sampling',
+            to_model='facsmarker',
+        ),
         migrations.AlterModelTable(
             name='GeneticBackground',
             table='sampling_geneticbackground',
+        ),
+        AlterContentType(
+            from_model='geneticbackground',
+            to_app='sampling',
+            to_model='geneticbackground',
         ),
         migrations.AlterModelTable(
             name='Individual',
             table='sampling_individual',
         ),
+        AlterContentType(
+            from_model='individual',
+            to_app='sampling',
+            to_model='individual',
+        ),
         migrations.AlterModelTable(
             name='Location',
             table='sampling_location',
+        ),
+        AlterContentType(
+            from_model='location',
+            to_app='sampling',
+            to_model='location',
         ),
         migrations.AlterModelTable(
             name='Organ',
             table='sampling_organ',
         ),
+        AlterContentType(
+            from_model='organ',
+            to_app='sampling',
+            to_model='organ',
+        ),
         migrations.AlterModelTable(
             name='SampleComposition',
             table='sampling_samplecomposition',
+        ),
+        AlterContentType(
+            from_model='samplecomposition',
+            to_app='sampling',
+            to_model='samplecomposition',
         ),
         migrations.AlterModelTable(
             name='SampleStatus',
             table='sampling_samplestatus',
         ),
+        AlterContentType(
+            from_model='samplestatus',
+            to_app='sampling',
+            to_model='samplestatus',
+        ),
         migrations.AlterModelTable(
             name='SamplingEvent',
             table='sampling_samplingevent',
+        ),
+        AlterContentType(
+            from_model='samplingevent',
+            to_app='sampling',
+            to_model='samplingevent',
         ),
         migrations.AlterModelTable(
             name='Tissue',
             table='sampling_tissue',
         ),
+        AlterContentType(
+            from_model='tissue',
+            to_app='sampling',
+            to_model='tissue',
+        ),
         migrations.AlterModelTable(
             name='CellSelector',
             table='sampling_cellselector',
+        ),
+        AlterContentType(
+            from_model='cellselector',
+            to_app='sampling',
+            to_model='cellselector',
         ),
         migrations.AlterModelTable(
             name='FACS',
             table='sampling_facs',
         ),
+        AlterContentType(
+            from_model='facs',
+            to_app='sampling',
+            to_model='facs',
+        ),
         migrations.AlterModelTable(
             name='LaserCapture',
             table='sampling_lasercapture',
+        ),
+        AlterContentType(
+            from_model='lasercapture',
+            to_app='sampling',
+            to_model='lasercapture',
         ),
         migrations.AlterModelTable(
             name='Plate',
             table='wet_storage_plate',
         ),
+        AlterContentType(
+            from_model='plate',
+            to_app='wet_storage',
+            to_model='plate',
+        ),
         migrations.AlterModelTable(
             name='PlateContext',
             table='wet_storage_platecontext',
+        ),
+        AlterContentType(
+            from_model='platecontext',
+            to_app='wet_storage',
+            to_model='platecontext',
         ),
         migrations.AlterModelTable(
             name='PlatePlastica',
             table='wet_storage_plateplastica',
         ),
+        AlterContentType(
+            from_model='plateplastica',
+            to_app='wet_storage',
+            to_model='plateplastica',
+        ),
         migrations.AlterModelTable(
             name='PlateStorage',
             table='wet_storage_platestorage',
+        ),
+        AlterContentType(
+            from_model='platestorage',
+            to_app='wet_storage',
+            to_model='platestorage',
         ),
         migrations.AlterModelTable(
             name='PlateType',
             table='wet_storage_platetype',
         ),
+        AlterContentType(
+            from_model='platetype',
+            to_app='wet_storage',
+            to_model='platetype',
+        ),
         migrations.AlterModelTable(
             name='SampleLocation',
             table='wet_storage_samplelocation',
+        ),
+        AlterContentType(
+            from_model='samplelocation',
+            to_app='wet_storage',
+            to_model='samplelocation',
         ),
         migrations.AlterModelTable(
             name='StorageBox',
             table='wet_storage_storagebox',
         ),
+        AlterContentType(
+            from_model='storagebox',
+            to_app='wet_storage',
+            to_model='storagebox',
+        ),
         migrations.AlterModelTable(
             name='StorageType',
             table='wet_storage_storagetype',
+        ),
+        AlterContentType(
+            from_model='storagetype',
+            to_app='wet_storage',
+            to_model='storagetype',
         ),
     ]
 
