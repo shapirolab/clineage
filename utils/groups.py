@@ -2,7 +2,7 @@ __author__ = 'ofirr'
 
 import math
 from random import randint
-from collections import defaultdict
+
 def random_groups(groups, random_groups_keys, group_sizes_range=(10,24)):
     """create a dict representing groups with random sizes within range"""
     for group in random_groups_keys:

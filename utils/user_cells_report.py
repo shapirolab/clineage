@@ -197,7 +197,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Cell Type': smart_str(cell.composition.name),
                         'Plate': smart_str(loc.plate.name),
                         'Well': smart_str(loc.well),
-                        'Plate Location': smart_str(loc.plate.platestorage_set.all()[0])
+                        'Plate Location': smart_str(loc.plate.platestorage_set.all()[0] if loc.plate.platestorage_set.all() else '')
                     }
 
 
