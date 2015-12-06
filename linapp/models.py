@@ -683,7 +683,7 @@ class Cell(models.Model):
     comment = models.TextField(null=True, blank=True)
     classification = models.CharField(max_length=50, null=True, blank=True)
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.sampling), self.name)
+        return u'{}>{}'.format(unicode(self.sampling if self.sampling else self.individual), self.name)
 
     def get_absolute_url(self):
         return reverse('cell_detail', kwargs={'pk': self.pk})
