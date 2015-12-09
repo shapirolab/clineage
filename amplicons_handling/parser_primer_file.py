@@ -142,9 +142,12 @@ def nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner):
         start_pos=start_pos, end_pos=end_pos, chromosome=chrom,
         defaults={'name': name,
                   'type': tgtype,
-                  'referencevalue': sequence,
-                  'partner': partner}
+                  'referencevalue': sequence}
         )
+    if not partner or partner in obj.partner.all():
+        return obj, created
+    obj.partner.add(partner)
+    obj.save()
     return obj, created
 
 
@@ -168,4 +171,4 @@ def process_row(row_dict, case, margins=10):
     if case in ['MicroSatellite']:
         return microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, chrom, partner)
 
-    return nosec_object(sequence.sequence, start_pos, end_pos, name, tgtype, chrom, partner)
+    return nosec_object(sequence, start_pos, end_pos, name, tgtype, chrom, partner)

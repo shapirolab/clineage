@@ -126,7 +126,6 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         else:
             pf_seq = get_or_create_sequence(primer_left_sequence)
             pr_seq = get_or_create_sequence(primer_right_sequence)
-        TargetType.objects.get(name='Flank')
         primer_fwd, created_fw = create_one_primer(pf_s, pf_e, pf_tail, target, primer_type, pf_refseq, pf_seq, '_fwd')
         # print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
         primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq, '_rev')

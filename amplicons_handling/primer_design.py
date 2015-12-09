@@ -7,6 +7,7 @@ import pysam
 from django.conf import settings
 from collections import defaultdict
 from collections import Counter
+from frogress import bar
 from primers_insertion import create_primers_in_db
 from positioning import insertion_plates_to_db, create_primer_order_file_xls
 from primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
@@ -101,7 +102,7 @@ def sort_unique_primers(sam_file, target_primers, margins=300):
     name_count, primers_names = primer_count_from_sam_file(sam_file)
     chosen_target_primers = defaultdict(lambda: defaultdict(str))
     discarded_targets = []
-    for target_id in target_primers.keys():
+    for target_id in bar(target_primers.keys()):
         left_primer = None
         for primer_number_fr in sorted(target_primers[target_id]['LEFT'].keys()):
             bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number_fr, target_id)
