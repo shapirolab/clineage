@@ -1,0 +1,124 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
+from django.conf import settings
+import primers.strand
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('genomes', '0002_auto_20151214_1536'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='RestrictionEnzyme',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('sequence', models.CharField(max_length=50)),
+                ('cut_delta', models.IntegerField()),
+                ('sticky_bases', models.IntegerField()),
+                ('sequence_len', models.PositiveIntegerField()),
+            ],
+        ),
+        migrations.CreateModel(
+            name='RestrictionSite',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('enzyme', models.ForeignKey(related_name='sites', to='planning.RestrictionEnzyme')),
+                ('slice', models.ForeignKey(to='genomes.DNASlice')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Target',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TargetEnrichment',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('amplicon', models.CharField(max_length=500)),
+                ('chromosome', models.ForeignKey(to='genomes.Chromosome')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='UGSMinus',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True)),
+                ('slice', models.ForeignKey(to='genomes.DNASlice')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='UGSPlus',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True)),
+                ('slice', models.ForeignKey(to='genomes.DNASlice')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='Microsatellite',
+            fields=[
+                ('target_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='planning.Target')),
+                ('repeat_unit_len', models.PositiveIntegerField()),
+                ('repeat_unit_type', models.CharField(max_length=50)),
+                ('repeat_number', models.DecimalField(null=True, max_digits=5, decimal_places=1)),
+            ],
+            bases=('planning.target',),
+        ),
+        migrations.CreateModel(
+            name='SNP',
+            fields=[
+                ('target_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='planning.Target')),
+                ('mutation', models.CharField(max_length=10)),
+                ('modified', models.CharField(max_length=10)),
+            ],
+            bases=('planning.target',),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='left',
+            field=models.ForeignKey(to='planning.UGSPlus'),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='partner',
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='right',
+            field=models.ForeignKey(to='planning.UGSMinus'),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='targets',
+            field=models.ManyToManyField(to='planning.Target'),
+        ),
+        migrations.AddField(
+            model_name='target',
+            name='partner',
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True),
+        ),
+        migrations.AddField(
+            model_name='target',
+            name='slice',
+            field=models.ForeignKey(to='genomes.DNASlice'),
+        ),
+    ]

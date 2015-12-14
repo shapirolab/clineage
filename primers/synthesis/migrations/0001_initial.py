@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
+import primers.synthesis.models
+import primers.strand
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('planning', '0001_initial'),
+        ('parts', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='PCR1MinusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor2Cuts')),
+                ('ugs', models.ForeignKey(to='planning.UGSMinus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1TailMixin, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='PCR1PlusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor1Cuts')),
+                ('ugs', models.ForeignKey(to='planning.UGSPlus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1TailMixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='PCR2MinusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('barcode', models.ForeignKey(to='parts.DNABarcode2')),
+                ('ifca', models.ForeignKey(to='parts.IlluminaFlowCellAdaptor2')),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor2Cuts')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.PCR2Mixin, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='PCR2PlusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('barcode', models.ForeignKey(to='parts.DNABarcode1')),
+                ('ifca', models.ForeignKey(to='parts.IlluminaFlowCellAdaptor1')),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor1Cuts')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.PCR2Mixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='TargetedNoTailMinusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('ugs', models.ForeignKey(to='planning.UGSMinus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='TargetedNoTailPlusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('ugs', models.ForeignKey(to='planning.UGSPlus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+    ]
