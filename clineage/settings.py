@@ -177,6 +177,8 @@ INSTALLED_APPS = (
     'soap',
 #    'phylogeny',
     'django_extensions',
+    # Migrations legacy
+    'lib_prep',
 )
 
 # A sample logging configuration. The only tangible logging
