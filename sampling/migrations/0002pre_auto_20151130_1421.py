@@ -40,28 +40,24 @@ class Migration(migrations.Migration):
     dependencies = [
         ('linapp', '0003_auto_20151127_0133'),
         ('sampling', '0001_initial'),
-        ('sampling', '0002pre_auto_20151130_1421'),
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='CellContentProtocol',
-            fields=[
-                ('protocol_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='linapp.Protocol')),
-            ],
-            bases=('linapp.protocol',),
-        ),
-        migrations.AddField(
+        migrations.RemoveField(
             model_name='cellcontent',
-            name='protocol',
-            field=models.ForeignKey(blank=True, to='sampling.CellContentProtocol', null=True),
-        ),
-        migrations.RunPython(
-            code=populate_cell_content_protocol,
-            reverse_code=populate_protocol,
+            name='panel',
         ),
         migrations.RemoveField(
             model_name='cellcontent',
-            name='old_protocol',
+            name='parent',
+        ),
+        migrations.RemoveField(
+            model_name='cellcontent',
+            name='seq_ready',
+        ),
+        migrations.RenameField(
+            model_name='cellcontent',
+            old_name='protocol',
+            new_name='old_protocol',
         ),
     ]
