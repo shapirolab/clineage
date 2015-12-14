@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('genomes', '0002_auto_20151214_1536'),
+        ('genomes', '0003_split_targets_etc'),
         ('lib_prep', '0003_kill'),
         ('sampling', '0002_auto_20151130_1421'),
     ]
