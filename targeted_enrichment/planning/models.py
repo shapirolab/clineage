@@ -109,7 +109,7 @@ class Microsatellite(Target):
 
 
 class SNP(Target):
-    mutation = models.CharField(max_length=10) #X>Y
-    modified = models.CharField(max_length=10) #Y
+    mutation = models.CharField(max_length=10, null=True) #X>Y
+    modified = models.CharField(max_length=10, null=True) #Y
 
 # TODO: add indel

@@ -86,8 +86,8 @@ class Migration(migrations.Migration):
             name='SNP',
             fields=[
                 ('target_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='planning.Target')),
-                ('mutation', models.CharField(max_length=10)),
-                ('modified', models.CharField(max_length=10)),
+                ('mutation', models.CharField(max_length=10, null=True)),
+                ('modified', models.CharField(max_length=10, null=True)),
             ],
             bases=('planning.target',),
         ),
