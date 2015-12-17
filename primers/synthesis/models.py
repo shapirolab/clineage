@@ -65,6 +65,11 @@ class PCR1TailMixin(object):
     def tail(self):
         return self.irac.primer1tail
 
+class PCR1WithCompanyTagTailMixin(object):
+    @property
+    def tail(self):
+        return self.irac.primer1tail + self.tag
+
 class PCR1PlusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,PlusStrandMixin):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
@@ -79,6 +84,26 @@ class PCR1MinusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,MinusStrandMixi
     amplicon, binding at the (rev-comp) UGS following our target.
     """
     ugs = models.ForeignKey(UGSMinus)
+    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+
+class PCR1WithCompanyTagPlusPrimer(TargetedHeadMixin,PCR1WithCompanyTagTailMixin,BasePrimer,PlusStrandMixin):
+    """
+    Primer that prepends (part of) the Illumina Read Adaptor, and a random tag
+    for identifying the company producing it, to a targeted amplicon, binding
+    at the UGS leading to our target.
+    """
+    ugs = models.ForeignKey(UGSPlus)
+    tag = models.CharField(max_length=1) # DNAField
+    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+
+class PCR1WithCompanyTagMinusPrimer(TargetedHeadMixin,PCR1WithCompanyTagTailMixin,BasePrimer,MinusStrandMixin):
+    """
+    Primer that appends (part of) the Illumina Read Adaptor, and a random tag
+    for identifying the company producing it, to a targeted amplicon, binding
+    at the (rev-comp) UGS following our target.
+    """
+    ugs = models.ForeignKey(UGSMinus)
+    tag = models.CharField(max_length=1) # DNAField
     irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
 
 class PCR2Mixin(object):

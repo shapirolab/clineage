@@ -41,6 +41,34 @@ class Migration(migrations.Migration):
             bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1TailMixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
+            name='PCR1WithCompanyTagMinusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor2Cuts')),
+                ('tag', models.CharField(max_length=1)),
+                ('ugs', models.ForeignKey(to='planning.UGSMinus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1WithCompanyTagTailMixin, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
+            name='PCR1WithCompanyTagPlusPrimer',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
+                ('irac', models.ForeignKey(to='parts.IlluminaReadingAdaptor1Cuts')),
+                ('tag', models.CharField(max_length=1)),
+                ('ugs', models.ForeignKey(to='planning.UGSPlus')),
+            ],
+            options={
+                'abstract': False,
+            },
+            bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1WithCompanyTagTailMixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+        ),
+        migrations.CreateModel(
             name='PCR2MinusPrimer',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
