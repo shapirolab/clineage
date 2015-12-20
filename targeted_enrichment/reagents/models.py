@@ -1,7 +1,7 @@
 
 from django.contrib.contenttypes import fields
 from django.db import models
-from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
+from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
 from targeted_enrichment.planning.models import TargetEnrichment
 
 from wet_storage.models import SampleLocation
@@ -35,7 +35,21 @@ class TargetedEnrichmentReagent(models.Model):
         abstract = True
 
 
-class PCR1PrimerPairTER(TargetedEnrichmentReagent):
+class PCR1PrimerPairTERBase(TargetedEnrichmentReagent):
+    pass
+
+
+class PCR1PrimerPairTER(PCR1PrimerPairTERBase):
+    left_primer = models.ForeignKey(PCR1PlusPrimer)
+    right_primer = models.ForeignKey(PCR1MinusPrimer)
+
+
+class PCR1WithCompanyTagPrimerPairTER(PCR1PrimerPairTERBase):
+    left_primer = models.ForeignKey(PCR1WithCompanyTagPlusPrimer)
+    right_primer = models.ForeignKey(PCR1WithCompanyTagMinusPrimer)
+
+
+class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
@@ -43,10 +57,3 @@ class PCR1PrimerPairTER(TargetedEnrichmentReagent):
 class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent):
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
-
-
-class PCR1PrimerPairTERDeprecated(TargetedEnrichmentReagent): #TODO: kill?
-    left_primer = models.ForeignKey(PCR1PlusPrimer)
-    right_primer = models.ForeignKey(PCR1MinusPrimer)
-
-

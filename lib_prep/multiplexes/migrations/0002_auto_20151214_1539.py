@@ -16,12 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pcr1multiplex',
             name='primers',
-            field=models.ManyToManyField(to='reagents.PCR1PrimerPairTER'),
-        ),
-        migrations.AddField(
-            model_name='pcr1deprecatedmultiplex',
-            name='primers',
-            field=models.ManyToManyField(to='reagents.PCR1PrimerPairTERDeprecated'),
+            field=models.ManyToManyField(to='reagents.PCR1PrimerPairTERBase'),
         ),
         migrations.AddField(
             model_name='panel',

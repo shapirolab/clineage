@@ -1,8 +1,7 @@
 from django.contrib.contenttypes import fields
 from django.db import models
 from targeted_enrichment.planning.models import TargetEnrichment
-from targeted_enrichment.reagents.models import TargetedEnrichmentReagent, PCR1PrimerPairTER, \
-    PCR1PrimerPairTERDeprecated
+from targeted_enrichment.reagents.models import PCR1PrimerPairTERBase
 from wet_storage.models import SampleLocation
 
 ### -------------------------------------------------------------------------------------
@@ -28,12 +27,7 @@ class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
 
 
 class PCR1Multiplex(TERMultiplex):
-    primers = models.ManyToManyField(PCR1PrimerPairTER)
-    #TODO: physical_locations(MPXPlate)
-
-
-class PCR1DeprecatedMultiplex(TERMultiplex):
-    primers = models.ManyToManyField(PCR1PrimerPairTERDeprecated)
+    primers = models.ManyToManyField(PCR1PrimerPairTERBase)
     #TODO: physical_locations(MPXPlate)
 
 
