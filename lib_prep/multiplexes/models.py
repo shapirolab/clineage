@@ -14,7 +14,7 @@ from wet_storage.models import SampleLocation
 
 class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
     name = models.CharField(max_length=20)
-    # primers = models.ManyToManyField(TargetedEnrichmentReagent)
+    # ters = models.ManyToManyField(TargetedEnrichmentReagent)
     physical_locations = fields.GenericRelation(SampleLocation,
                                content_type_field='content_type',
                                object_id_field='object_id')
@@ -27,7 +27,10 @@ class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
 
 
 class PCR1Multiplex(TERMultiplex):
-    primers = models.ManyToManyField(PCR1PrimerPairTERBase)
+    ters = models.ManyToManyField(PCR1PrimerPairTERBase)
+    #physical_locations = fields.GenericRelation(SampleLocation,
+                               #content_type_field='content_type',
+                               #object_id_field='object_id')
     #TODO: physical_locations(MPXPlate)
 
 

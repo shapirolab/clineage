@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='pcr1multiplex',
-            name='primers',
+            name='ters',
             field=models.ManyToManyField(to='reagents.PCR1PrimerPairTERBase'),
         ),
         migrations.AddField(
