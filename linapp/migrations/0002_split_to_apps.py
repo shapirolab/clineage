@@ -26,28 +26,12 @@ class Migration(migrations.Migration):
             name='type',
         ),
         migrations.RemoveField(
-            model_name='targetenrichment',
-            name='chromosome',
-        ),
-        migrations.RemoveField(
             model_name='extractionevent',
             name='user_documented',
         ),
         migrations.RemoveField(
-            model_name='targetenrichment',
-            name='validation_failure',
-        ),
-        migrations.RemoveField(
             model_name='cellcontent',
             name='protocol',
-        ),
-        migrations.RemoveField(
-            model_name='targetenrichmenttype',
-            name='protocol',
-        ),
-        migrations.RemoveField(
-            model_name='restrictionsite',
-            name='target_ptr',
         ),
         migrations.AlterIndexTogether(
             name='samplelocation',
@@ -62,20 +46,12 @@ class Migration(migrations.Migration):
             name='status',
         ),
         migrations.RemoveField(
-            model_name='restrictionsite',
-            name='restriction_type',
-        ),
-        migrations.RemoveField(
             model_name='facs',
             name='marker',
         ),
         migrations.RemoveField(
             model_name='platetype',
             name='plastic',
-        ),
-        migrations.RemoveField(
-            model_name='primer',
-            name='tail',
         ),
         migrations.RemoveField(
             model_name='cell',
@@ -102,31 +78,15 @@ class Migration(migrations.Migration):
             name='storage_type',
         ),
         migrations.RemoveField(
-            model_name='primer',
-            name='sequence',
-        ),
-        migrations.RemoveField(
             model_name='cell',
             name='individual',
-        ),
-        migrations.RemoveField(
-            model_name='target',
-            name='chromosome',
         ),
         migrations.RemoveField(
             model_name='extractionevent',
             name='individual',
         ),
         migrations.RemoveField(
-            model_name='primersmultiplex',
-            name='primers',
-        ),
-        migrations.RemoveField(
             model_name='panel',
-            name='targets',
-        ),
-        migrations.RemoveField(
-            model_name='targetenrichment',
             name='targets',
         ),
         migrations.RemoveField(
@@ -138,24 +98,8 @@ class Migration(migrations.Migration):
             name='location',
         ),
         migrations.RemoveField(
-            model_name='target',
-            name='partner',
-        ),
-        migrations.RemoveField(
-            model_name='primer',
-            name='target_ptr',
-        ),
-        migrations.RemoveField(
             model_name='facs',
             name='samplingevent_ptr',
-        ),
-        migrations.RemoveField(
-            model_name='targetenrichment',
-            name='type',
-        ),
-        migrations.RemoveField(
-            model_name='snp',
-            name='target_ptr',
         ),
         migrations.RemoveField(
             model_name='extraction',
@@ -190,10 +134,6 @@ class Migration(migrations.Migration):
             name='extraction_event',
         ),
         migrations.RemoveField(
-            model_name='targetenrichment',
-            name='left',
-        ),
-        migrations.RemoveField(
             model_name='assembly',
             name='taxa',
         ),
@@ -206,20 +146,12 @@ class Migration(migrations.Migration):
             name='samplingevent_ptr',
         ),
         migrations.RemoveField(
-            model_name='targetenrichment',
-            name='partner',
-        ),
-        migrations.RemoveField(
             model_name='individual',
             name='background',
         ),
         migrations.RemoveField(
             model_name='chromosome',
             name='assembly',
-        ),
-        migrations.RemoveField(
-            model_name='target',
-            name='type',
         ),
         migrations.RemoveField(
             model_name='machine',
@@ -230,10 +162,6 @@ class Migration(migrations.Migration):
             name='user',
         ),
         migrations.RemoveField(
-            model_name='target',
-            name='referencevalue',
-        ),
-        migrations.RemoveField(
             model_name='cellcontent',
             name='type',
         ),
@@ -242,16 +170,8 @@ class Migration(migrations.Migration):
             name='plate',
         ),
         migrations.RemoveField(
-            model_name='targetenrichment',
-            name='right',
-        ),
-        migrations.RemoveField(
             model_name='lasercapture',
             name='samplingevent_ptr',
-        ),
-        migrations.RemoveField(
-            model_name='microsatellite',
-            name='target_ptr',
         ),
         migrations.RemoveField(
             model_name='platetype',
@@ -261,6 +181,16 @@ class Migration(migrations.Migration):
             model_name='sequencing',
             name='user',
         ),
+        # Removing fks from models which stay here to models which move,
+        # will be added again after the move.
+        migrations.RemoveField(
+            model_name='target',
+            name='chromosome',
+        ),
+        migrations.RemoveField(
+            model_name='targetenrichment',
+            name='chromosome',
+        ),
         migrations.RemoveField(
             model_name='userreport',
             name='cells',
@@ -269,6 +199,7 @@ class Migration(migrations.Migration):
             model_name='userreport',
             name='individual',
         ),
+        # Up to here.
         migrations.DeleteModel(
             name='Assembly',
         ),
@@ -321,9 +252,6 @@ class Migration(migrations.Migration):
             name='MachineType',
         ),
         migrations.DeleteModel(
-            name='Microsatellite',
-        ),
-        migrations.DeleteModel(
             name='Organ',
         ),
         migrations.DeleteModel(
@@ -343,24 +271,6 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='PlateType',
-        ),
-        migrations.DeleteModel(
-            name='Primer',
-        ),
-        migrations.DeleteModel(
-            name='PrimerTail',
-        ),
-        migrations.DeleteModel(
-            name='PrimersMultiplex',
-        ),
-        migrations.DeleteModel(
-            name='RestrictionSite',
-        ),
-        migrations.DeleteModel(
-            name='RestrictionSiteType',
-        ),
-        migrations.DeleteModel(
-            name='SNP',
         ),
         migrations.DeleteModel(
             name='SampleComposition',
@@ -385,21 +295,6 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='StorageType',
-        ),
-        migrations.DeleteModel(
-            name='Target',
-        ),
-        migrations.DeleteModel(
-            name='TargetEnrichment',
-        ),
-        migrations.DeleteModel(
-            name='TargetEnrichmentFailureType',
-        ),
-        migrations.DeleteModel(
-            name='TargetEnrichmentType',
-        ),
-        migrations.DeleteModel(
-            name='TargetType',
         ),
         migrations.DeleteModel(
             name='Taxa',
@@ -429,24 +324,6 @@ class Migration(migrations.Migration):
             to_model='chromosome',
         ),
         migrations.AlterModelTable(
-            name='PrimerTail',
-            table='genomes_primertail',
-        ),
-        AlterContentType(
-            from_model='primertail',
-            to_app='genomes',
-            to_model='primertail',
-        ),
-        migrations.AlterModelTable(
-            name='RestrictionSiteType',
-            table='genomes_restrictionsitetype',
-        ),
-        AlterContentType(
-            from_model='restrictionsitetype',
-            to_app='genomes',
-            to_model='restrictionsitetype',
-        ),
-        migrations.AlterModelTable(
             name='Sequence',
             table='genomes_sequence',
         ),
@@ -454,87 +331,6 @@ class Migration(migrations.Migration):
             from_model='sequence',
             to_app='genomes',
             to_model='sequence',
-        ),
-        migrations.AlterModelTable(
-            name='Target',
-            table='genomes_target',
-        ),
-        AlterContentType(
-            from_model='target',
-            to_app='genomes',
-            to_model='target',
-        ),
-        migrations.AlterModelTable(
-            name='TargetEnrichment',
-            table='genomes_targetenrichment',
-        ),
-        AlterContentType(
-            from_model='targetenrichment',
-            to_app='genomes',
-            to_model='targetenrichment',
-        ),
-        migrations.AlterModelTable(
-            name='TargetEnrichmentFailureType',
-            table='genomes_targetenrichmentfailuretype',
-        ),
-        AlterContentType(
-            from_model='targetenrichmentfailuretype',
-            to_app='genomes',
-            to_model='targetenrichmentfailuretype',
-        ),
-        migrations.AlterModelTable(
-            name='TargetEnrichmentType',
-            table='genomes_targetenrichmenttype',
-        ),
-        AlterContentType(
-            from_model='targetenrichmenttype',
-            to_app='genomes',
-            to_model='targetenrichmenttype',
-        ),
-        migrations.AlterModelTable(
-            name='TargetType',
-            table='genomes_targettype',
-        ),
-        AlterContentType(
-            from_model='targettype',
-            to_app='genomes',
-            to_model='targettype',
-        ),
-        migrations.AlterModelTable(
-            name='Microsatellite',
-            table='genomes_microsatellite',
-        ),
-        AlterContentType(
-            from_model='microsatellite',
-            to_app='genomes',
-            to_model='microsatellite',
-        ),
-        migrations.AlterModelTable(
-            name='Primer',
-            table='genomes_primer',
-        ),
-        AlterContentType(
-            from_model='primer',
-            to_app='genomes',
-            to_model='primer',
-        ),
-        migrations.AlterModelTable(
-            name='RestrictionSite',
-            table='genomes_restrictionsite',
-        ),
-        AlterContentType(
-            from_model='restrictionsite',
-            to_app='genomes',
-            to_model='restrictionsite',
-        ),
-        migrations.AlterModelTable(
-            name='SNP',
-            table='genomes_snp',
-        ),
-        AlterContentType(
-            from_model='snp',
-            to_app='genomes',
-            to_model='snp',
         ),
         migrations.AlterModelTable(
             name='Machine',
@@ -562,15 +358,6 @@ class Migration(migrations.Migration):
             from_model='panel',
             to_app='lib_prep',
             to_model='panel',
-        ),
-        migrations.AlterModelTable(
-            name='PrimersMultiplex',
-            table='lib_prep_primersmultiplex',
-        ),
-        AlterContentType(
-            from_model='primersmultiplex',
-            to_app='lib_prep',
-            to_model='primersmultiplex',
         ),
         migrations.AlterModelTable(
             name='Sequencing',
@@ -1052,7 +839,8 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='TargetVariantType',
         ),
-        # Fields removed from models which survive.
+        # Fields removed from models which survive but move, and will not to be
+        # added back on the other side.
         migrations.RemoveField(
             model_name='sequencing',
             name='protocol',

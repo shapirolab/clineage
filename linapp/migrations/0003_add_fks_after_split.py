@@ -12,6 +12,17 @@ class Migration(migrations.Migration):
     ]
 
     state_ops = [
+        # Readding fields removed because their targets moved.
+        migrations.AddField(
+            model_name='target',
+            name='chromosome',
+            field=models.ForeignKey(to='genomes.Chromosome'),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='chromosome',
+            field=models.ForeignKey(to='genomes.Chromosome'),
+        ),
         migrations.AddField(
             model_name='userreport',
             name='cells',
