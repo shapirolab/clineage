@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lib_prep', '0003_kill'),
+        ('linapp', '0003_add_fks_after_split'),
         ('genomes', '0002_create_dnaslice'),
         ('reagents', '0001_initial'),
         ('synthesis', '0001_initial'),
