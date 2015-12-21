@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
         ('linapp', '0002_split_to_apps'),
         ('misc', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('lib_prep', '0001_initial'),
     ]
 
     state_ops = [

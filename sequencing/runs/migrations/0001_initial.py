@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('workflows', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('lib_prep', '0003_kill'),
     ]
 
     state_ops = [

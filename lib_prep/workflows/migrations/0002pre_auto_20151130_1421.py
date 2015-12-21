@@ -9,7 +9,7 @@ from frogress import bar
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('linapp', '0003_auto_20151127_0133'),
+        ('linapp', '0003_add_fks_after_split'),
         ('workflows', '0001_initial'),
     ]
 

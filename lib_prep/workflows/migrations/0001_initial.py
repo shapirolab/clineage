@@ -9,9 +9,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('parts', '0001_initial'),
-        ('linapp', '0003_auto_20151127_0133'),
+        ('linapp', '0003_add_fks_after_split'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('sampling', '0003_auto_20151214_1536'),
     ]
 
     state_ops = [

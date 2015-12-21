@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('linapp', '0002_split_to_apps'),
-        ('contenttypes', '0002_remove_content_type_name'),
     ]
 
     state_ops = [
