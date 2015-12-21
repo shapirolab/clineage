@@ -38,9 +38,9 @@ def populate_protocol(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('linapp', '0003_auto_20151127_0133'),
+        ('linapp', '0003_add_fks_after_split'),
         ('workflows', '0001_initial'), # NOTE: for when we merge with 0002pre
-        ('workflows', '0002pre_auto_20151130_1421'),
+        ('workflows', '0002pre_subclass_cell_content_protocol'),
     ]
 
     operations = [
