@@ -37,6 +37,6 @@ class PCR1Multiplex(TERMultiplex):
 class Panel(models.Model):#collection of targets
                                                 # TODO: m2m pri_mux, well on the m2m table.
     name = models.CharField(max_length=50)
-    targets = models.ManyToManyField(TargetEnrichment, related_name='panels')
+    tes = models.ManyToManyField(TargetEnrichment, related_name='panels')
     def __unicode__(self):
         return self.name

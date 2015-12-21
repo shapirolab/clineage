@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='panel',
-            name='targets',
+            name='tes',
             field=models.ManyToManyField(related_name='panels', to='planning.TargetEnrichment'),
         ),
     ]
