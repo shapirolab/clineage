@@ -111,11 +111,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='illuminareadingadaptor1cuts',
             name='old_tail',
-            field=models.ForeignKey(to='genomes.PrimerTail'),
+            field=models.ForeignKey(to='linapp.PrimerTail'),
         ),
         migrations.AddField(
             model_name='illuminareadingadaptor2cuts',
             name='old_tail',
-            field=models.ForeignKey(to='genomes.PrimerTail'),
+            field=models.ForeignKey(to='linapp.PrimerTail'),
         ),
     ]

@@ -125,11 +125,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='target',
             name='old_target',
-            field=models.ForeignKey(to='genomes.Target'),
+            field=models.ForeignKey(to='linapp.Target'),
         ),
         migrations.AddField(
             model_name='targetenrichment',
             name='old_te',
-            field=models.ForeignKey(to='genomes.TargetEnrichment'),
+            field=models.ForeignKey(to='linapp.TargetEnrichment'),
         ),
     ]
