@@ -74,10 +74,6 @@ class Migration(migrations.Migration):
             name='panel',
         ),
         migrations.RemoveField(
-            model_name='sequencing',
-            name='protocol',
-        ),
-        migrations.RemoveField(
             model_name='platetype',
             name='plastic',
         ),
@@ -188,10 +184,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='individual',
             name='partner',
-        ),
-        migrations.RemoveField(
-            model_name='sequencing',
-            name='samples',
         ),
         migrations.RemoveField(
             model_name='cellcontent',
@@ -554,20 +546,20 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelTable(
             name='Machine',
-            table='lib_prep_machine',
+            table='runs_machine',
         ),
         AlterContentType(
             from_model='machine',
-            to_app='lib_prep',
+            to_app='runs',
             to_model='machine',
         ),
         migrations.AlterModelTable(
             name='MachineType',
-            table='lib_prep_machinetype',
+            table='runs_machinetype',
         ),
         AlterContentType(
             from_model='machinetype',
-            to_app='lib_prep',
+            to_app='runs',
             to_model='machinetype',
         ),
         migrations.AlterModelTable(
@@ -590,12 +582,12 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelTable(
             name='Sequencing',
-            table='lib_prep_sequencing',
+            table='runs_ngsrun',
         ),
         AlterContentType(
             from_model='sequencing',
-            to_app='lib_prep',
-            to_model='sequencing',
+            to_app='runs',
+            to_model='ngsrun',
         ),
         migrations.AlterModelTable(
             name='Taxa',
@@ -843,6 +835,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Fields removed from or to models which are killed now.
         migrations.RemoveField(
             model_name='celltreenode',
             name='parent',
@@ -1066,6 +1059,15 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='TargetVariantType',
+        ),
+        # Fields removed from models which survive.
+        migrations.RemoveField(
+            model_name='sequencing',
+            name='protocol',
+        ),
+        migrations.RemoveField(
+            model_name='sequencing',
+            name='samples',
         ),
         migrations.SeparateDatabaseAndState(
             state_operations=state_ops,
