@@ -70,10 +70,6 @@ class Migration(migrations.Migration):
             name='marker',
         ),
         migrations.RemoveField(
-            model_name='cellcontent',
-            name='panel',
-        ),
-        migrations.RemoveField(
             model_name='platetype',
             name='plastic',
         ),
@@ -152,10 +148,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='facs',
             name='samplingevent_ptr',
-        ),
-        migrations.RemoveField(
-            model_name='cellcontent',
-            name='parent',
         ),
         migrations.RemoveField(
             model_name='targetenrichment',
@@ -609,20 +601,20 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelTable(
             name='CellContent',
-            table='sampling_cellcontent',
+            table='workflows_cellcontent',
         ),
         AlterContentType(
             from_model='cellcontent',
-            to_app='sampling',
+            to_app='workflows',
             to_model='cellcontent',
         ),
         migrations.AlterModelTable(
             name='CellContentType',
-            table='sampling_cellcontenttype',
+            table='workflows_cellcontenttype',
         ),
         AlterContentType(
             from_model='cellcontenttype',
-            to_app='sampling',
+            to_app='workflows',
             to_model='cellcontenttype',
         ),
         migrations.AlterModelTable(
@@ -1068,6 +1060,18 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='sequencing',
             name='samples',
+        ),
+        migrations.RemoveField(
+            model_name='cellcontent',
+            name='parent',
+        ),
+        migrations.RemoveField(
+            model_name='cellcontent',
+            name='panel',
+        ),
+        migrations.RemoveField(
+            model_name='cellcontent',
+            name='seq_ready',
         ),
         migrations.SeparateDatabaseAndState(
             state_operations=state_ops,

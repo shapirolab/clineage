@@ -16,13 +16,6 @@ class Migration(migrations.Migration):
 
     state_ops = [
         migrations.CreateModel(
-            name='CellContentProtocol',
-            fields=[
-                ('protocol_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='linapp.Protocol')),
-            ],
-            bases=('linapp.protocol',),
-        ),
-        migrations.CreateModel(
             name='CellContentType',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -36,7 +29,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50, null=True, blank=True)),
                 ('comment', models.TextField()),
                 ('cell', models.ForeignKey(to='sampling.Cell')),
-                ('protocol', models.ForeignKey(blank=True, to='workflows.CellContentProtocol', null=True)),
+                ('protocol', models.ForeignKey(blank=True, to='linapp.Protocol', null=True)),
                 ('type', models.ForeignKey(to='workflows.CellContentType')),
                 ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],

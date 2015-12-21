@@ -7,8 +7,8 @@ from frogress import bar
 
 def populate_cell_content_protocol(apps, schema_editor):
     print
-    CellContent = apps.get_model("sampling", "CellContent")
-    CellContentProtocol = apps.get_model("sampling", "CellContentProtocol")
+    CellContent = apps.get_model("workflows", "CellContent")
+    CellContentProtocol = apps.get_model("workflows", "CellContentProtocol")
     db_alias = schema_editor.connection.alias
     for cc in bar(CellContent.objects.using(db_alias).all()):
         protocol = cc.old_protocol
@@ -25,7 +25,7 @@ def populate_cell_content_protocol(apps, schema_editor):
 
 def populate_protocol(apps, schema_editor):
     print
-    CellContent = apps.get_model("sampling", "CellContent")
+    CellContent = apps.get_model("workflows", "CellContent")
     db_alias = schema_editor.connection.alias
     for cc in bar(CellContent.objects.using(db_alias).all()):
         protocol = cc.protocol
@@ -39,11 +39,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('linapp', '0003_auto_20151127_0133'),
-        ('sampling', '0001_initial'),
-        ('sampling', '0002pre_auto_20151130_1421'),
+        ('workflows', '0001_initial'),
+        ('workflows', '0002pre_auto_20151130_1421'),
     ]
 
     operations = [
+        # NOTE: prev. migration is here because of bug in django deferred sql.
         migrations.CreateModel(
             name='CellContentProtocol',
             fields=[
@@ -54,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cellcontent',
             name='protocol',
-            field=models.ForeignKey(blank=True, to='sampling.CellContentProtocol', null=True),
+            field=models.ForeignKey(blank=True, to='workflows.CellContentProtocol', null=True),
         ),
         migrations.RunPython(
             code=populate_cell_content_protocol,

@@ -26,26 +26,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='CellContent',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=50, null=True, blank=True)),
-                ('seq_ready', models.BooleanField(default=False)),
-                ('comment', models.TextField()),
-                ('cell', models.ForeignKey(to='sampling.Cell')),
-                ('panel', models.ForeignKey(blank=True, to='lib_prep.Panel', null=True)),
-                ('parent', models.ForeignKey(blank=True, to='sampling.CellContent', null=True)),
-                ('protocol', models.ForeignKey(blank=True, to='linapp.Protocol', null=True)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='CellContentType',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=50)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Coordinates',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -230,16 +210,6 @@ class Migration(migrations.Migration):
             model_name='extraction',
             name='tissue',
             field=models.ForeignKey(to='sampling.Tissue'),
-        ),
-        migrations.AddField(
-            model_name='cellcontent',
-            name='type',
-            field=models.ForeignKey(to='sampling.CellContentType'),
-        ),
-        migrations.AddField(
-            model_name='cellcontent',
-            name='user',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='cell',
