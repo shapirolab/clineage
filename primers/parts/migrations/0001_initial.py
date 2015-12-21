@@ -107,6 +107,7 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        # Temporary fields to assist with the data migration.
         migrations.AddField(
             model_name='illuminareadingadaptor1cuts',
             name='old_tail',
