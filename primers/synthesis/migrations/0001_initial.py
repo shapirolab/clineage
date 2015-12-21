@@ -120,4 +120,35 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model, primers.synthesis.models.TargetedHeadMixin, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
         ),
+        # Temporary fields to assist with the data migration.
+        migrations.AddField(
+            model_name='pcr1plusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
+        migrations.AddField(
+            model_name='pcr1minusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
+        migrations.AddField(
+            model_name='pcr1withcompanytagplusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
+        migrations.AddField(
+            model_name='pcr1withcompanytagminusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
+        migrations.AddField(
+            model_name='targetednotailplusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
+        migrations.AddField(
+            model_name='targetednotailminusprimer',
+            name='old_primer',
+            field=models.ForeignKey(to='genomes.Primer'),
+        ),
     ]

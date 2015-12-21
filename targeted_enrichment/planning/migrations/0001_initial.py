@@ -121,4 +121,15 @@ class Migration(migrations.Migration):
             name='slice',
             field=models.ForeignKey(to='genomes.DNASlice'),
         ),
+        # Temporary fields to assist with the data migration.
+        migrations.AddField(
+            model_name='target',
+            name='old_target',
+            field=models.ForeignKey(to='genomes.Target'),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='old_te',
+            field=models.ForeignKey(to='genomes.TargetEnrichment'),
+        ),
     ]

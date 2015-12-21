@@ -107,4 +107,14 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.AddField(
+            model_name='illuminareadingadaptor1cuts',
+            name='old_tail',
+            field=models.ForeignKey(to='genomes.PrimerTail'),
+        ),
+        migrations.AddField(
+            model_name='illuminareadingadaptor2cuts',
+            name='old_tail',
+            field=models.ForeignKey(to='genomes.PrimerTail'),
+        ),
     ]
