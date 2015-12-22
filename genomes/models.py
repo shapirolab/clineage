@@ -94,18 +94,6 @@ class Chromosome(models.Model):
         return start - l + index, start - l + index + len(sequence) - 1
 ### -------------------------------------------------------------------------------------
 ### -------------------------------------------------------------------------------------
-class Sequence(models.Model):
-    def create(_length=0, _sequence='', _hash=hashlib.md5('').hexdigest()):
-        if _length > 0 and _sequence != '' and _hash != ''\
-           and _length == len(_sequence) and _hash == hashlib.md5(_sequence).hexdigest():
-            return Sequence(length=_length, sequence=_sequence, hash=_hash)
-        return Sequence(length=len(_sequence), sequence=_sequence, hash=hashlib.md5(_sequence).hexdigest())
-    create = staticmethod(create)
-
-    length = models.IntegerField()
-    sequence = models.TextField()
-    hash = models.CharField(max_length=32, unique=True) #md5(sequence) for enabling uniqueness and fast comparison.
-
 ###
 # New!
 ###
@@ -114,7 +102,7 @@ class DNASlice(models.Model):
     # TODO: decide indexing method
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
-    _sequence = models.CharField(max_length=250) #DNAField(Sequence,null=True,default=None)
+    _sequence = models.CharField(max_length=300,null=True,default=None)
 
     @property
     def sequence(self):

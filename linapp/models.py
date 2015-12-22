@@ -102,3 +102,16 @@ class UserReport(models.Model):
             ur.individual = individual
             ur.cells = cells
             return ur
+
+class Sequence(models.Model):
+    def create(_length=0, _sequence='', _hash=hashlib.md5('').hexdigest()):
+        if _length > 0 and _sequence != '' and _hash != ''\
+           and _length == len(_sequence) and _hash == hashlib.md5(_sequence).hexdigest():
+            return Sequence(length=_length, sequence=_sequence, hash=_hash)
+        return Sequence(length=len(_sequence), sequence=_sequence, hash=hashlib.md5(_sequence).hexdigest())
+    create = staticmethod(create)
+
+    length = models.IntegerField()
+    sequence = models.TextField()
+    hash = models.CharField(max_length=32, unique=True) #md5(sequence) for enabling uniqueness and fast comparison.
+

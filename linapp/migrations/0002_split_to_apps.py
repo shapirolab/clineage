@@ -285,9 +285,6 @@ class Migration(migrations.Migration):
             name='SamplingEvent',
         ),
         migrations.DeleteModel(
-            name='Sequence',
-        ),
-        migrations.DeleteModel(
             name='Sequencing',
         ),
         migrations.DeleteModel(
@@ -322,15 +319,6 @@ class Migration(migrations.Migration):
             from_model='chromosome',
             to_app='genomes',
             to_model='chromosome',
-        ),
-        migrations.AlterModelTable(
-            name='Sequence',
-            table='genomes_sequence',
-        ),
-        AlterContentType(
-            from_model='sequence',
-            to_app='genomes',
-            to_model='sequence',
         ),
         migrations.AlterModelTable(
             name='Machine',

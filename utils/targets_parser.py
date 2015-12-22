@@ -1,5 +1,6 @@
 import re
-from genomes.models import TargetType, Assembly, Sequence, Chromosome
+from linapp.models import Sequence
+from genomes.models import TargetType, Assembly, Chromosome
 from targeted_enrichment.planning.models import Target
 import hashlib
 

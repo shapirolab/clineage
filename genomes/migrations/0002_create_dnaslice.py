@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('start_pos', models.IntegerField(db_index=True)),
                 ('end_pos', models.IntegerField(db_index=True)),
-                ('_sequence', models.ForeignKey(default=None, to='genomes.Sequence', null=True)),
+                ('_sequence', models.CharField(max_length=300, default=None, null=True)),
                 ('chromosome', models.ForeignKey(to='genomes.Chromosome')),
             ],
         ),

@@ -36,15 +36,6 @@ class Migration(migrations.Migration):
                 ('assembly', models.ForeignKey(to='genomes.Assembly')),
             ],
         ),
-        migrations.CreateModel(
-            name='Sequence',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('length', models.IntegerField()),
-                ('sequence', models.TextField()),
-                ('hash', models.CharField(unique=True, max_length=32)),
-            ],
-        ),
     ]
 
     operations = [
