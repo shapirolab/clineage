@@ -20,6 +20,7 @@ from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
     IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
+from misc.dna import DNA
 
 from wet_storage.models import SampleLocation
 
@@ -36,11 +37,11 @@ class BasePrimer(models.Model,BaseStrandMixin):
 
     @property
     def head(self):
-        return ""
+        raise NotImplementedError()
 
     @property
     def tail(self):
-        return ""
+        raise NotImplementedError()
 
     @property
     def sequence(self):
@@ -54,55 +55,68 @@ class TargetedHeadMixin(object):
     def head(self):
         return self.ugs.sequence
 
-class TargetedNoTailPlusPrimer(TargetedHeadMixin,BasePrimer,PlusStrandMixin):
+class TargetedPlusPrimer(TargetedHeadMixin,BasePrimer,PlusStrandMixin):
     ugs = models.ForeignKey(UGSPlus)
 
-class TargetedNoTailMinusPrimer(TargetedHeadMixin,BasePrimer,MinusStrandMixin):
+    class Meta:
+        abstract = True
+
+class TargetedMinusPrimer(TargetedHeadMixin,BasePrimer,MinusStrandMixin):
     ugs = models.ForeignKey(UGSMinus)
+
+    class Meta:
+        abstract = True
+
+class NoTailMixin(object):
+    @property
+    def tail(self):
+        return DNA("")
+
+class TargetedNoTailPlusPrimer(NoTailMixin,TargetedPlusPrimer):
+    pass
+
+class TargetedNoTailMinusPrimer(NoTailMixin,TargetedMinusPrimer):
+    pass
 
 class PCR1TailMixin(object):
     @property
     def tail(self):
         return self.irac.primer1tail
 
-class PCR1WithCompanyTagTailMixin(object):
-    @property
-    def tail(self):
-        return self.irac.primer1tail + self.tag
-
-class PCR1PlusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,PlusStrandMixin):
+class PCR1PlusPrimer(PCR1TailMixin,TargetedPlusPrimer):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the UGS leading to our target.
     """
-    ugs = models.ForeignKey(UGSPlus)
     irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
 
-class PCR1MinusPrimer(TargetedHeadMixin,PCR1TailMixin,BasePrimer,MinusStrandMixin):
+class PCR1MinusPrimer(PCR1TailMixin,TargetedMinusPrimer):
     """
     Primer that appends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the (rev-comp) UGS following our target.
     """
-    ugs = models.ForeignKey(UGSMinus)
     irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
 
-class PCR1WithCompanyTagPlusPrimer(TargetedHeadMixin,PCR1WithCompanyTagTailMixin,BasePrimer,PlusStrandMixin):
+class PCR1WithCompanyTagTailMixin(object):
+    @property
+    def tail(self):
+        return self.irac.primer1tail + DNA(self.tag)
+
+class PCR1WithCompanyTagPlusPrimer(PCR1WithCompanyTagTailMixin,TargetedPlusPrimer):
     """
     Primer that prepends (part of) the Illumina Read Adaptor, and a random tag
     for identifying the company producing it, to a targeted amplicon, binding
     at the UGS leading to our target.
     """
-    ugs = models.ForeignKey(UGSPlus)
     tag = models.CharField(max_length=1) # DNAField
     irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
 
-class PCR1WithCompanyTagMinusPrimer(TargetedHeadMixin,PCR1WithCompanyTagTailMixin,BasePrimer,MinusStrandMixin):
+class PCR1WithCompanyTagMinusPrimer(PCR1WithCompanyTagTailMixin,TargetedMinusPrimer):
     """
     Primer that appends (part of) the Illumina Read Adaptor, and a random tag
     for identifying the company producing it, to a targeted amplicon, binding
     at the (rev-comp) UGS following our target.
     """
-    ugs = models.ForeignKey(UGSMinus)
     tag = models.CharField(max_length=1) # DNAField
     irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
 
