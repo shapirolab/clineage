@@ -44,7 +44,6 @@ class Migration(migrations.Migration):
             name='TargetEnrichment',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('amplicon', models.CharField(max_length=500)),
                 ('chromosome', models.ForeignKey(to='genomes.Chromosome')),
             ],
         ),
