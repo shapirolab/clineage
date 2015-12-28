@@ -9,7 +9,7 @@ from django.conf import settings
 
 from utils.SequenceManipulations import *
 from misc.models import Taxa
-from misc.models import DNA
+from misc.dna import DNA
 
 class SearchMarginesDoesNotExist(Exception):
     """

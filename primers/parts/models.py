@@ -3,6 +3,7 @@ __author__ = 'ofirr'
 from django.db import models
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 from genomes.models import Sequence
+from misc.dna import DNA
 
 ### -------------------------------------------------------------------------------------
 ### Types and descriptors
