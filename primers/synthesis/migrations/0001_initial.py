@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1TailMixin, models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.PCR1TailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
             name='PCR1PlusPrimer',
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1TailMixin, models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.PCR1TailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
             name='PCR1WithCompanyTagMinusPrimer',
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1WithCompanyTagTailMixin, models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.PCR1WithCompanyTagTailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
             name='PCR1WithCompanyTagPlusPrimer',
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.synthesis.models.PCR1WithCompanyTagTailMixin, models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.PCR1WithCompanyTagTailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
             name='PCR2MinusPrimer',
@@ -106,7 +106,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.strand.MinusStrandMixin, models.Model, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.NoTailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.MinusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         migrations.CreateModel(
             name='TargetedNoTailPlusPrimer',
@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(primers.synthesis.models.TargetedHeadMixin, primers.strand.PlusStrandMixin, models.Model, primers.strand.BaseStrandMixin),
+            bases=(primers.synthesis.models.NoTailMixin, primers.synthesis.models.TargetedHeadMixin, models.Model, primers.strand.PlusStrandMixin, primers.strand.BaseStrandMixin),
         ),
         # Temporary fields to assist with the data migration.
         migrations.AddField(
