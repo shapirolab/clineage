@@ -53,19 +53,29 @@ if '__main__' == __name__:
     SIGNALS_CALLING_PATH = args.callingfile
     workers = args.workers
 
-    # AC #
-    ups = [numpy.poly1d([0.00026892, -0.00205025])]
-    dws = [numpy.poly1d([0.00191615, -0.01174076]),
-           numpy.poly1d([0.00027444, -0.00220836]),
-           numpy.poly1d([0.0001768, -0.00199328])]
+    # AC (mat)#
+    # ups = [numpy.poly1d([0.00026892, -0.00205025])]
+    # dws = [numpy.poly1d([0.00191615, -0.01174076]),
+    #        numpy.poly1d([0.00027444, -0.00220836]),
+    #        numpy.poly1d([0.0001768, -0.00199328])]
 
-    #'AC'
+    # AC (bin)
     # ups = [lambda d: 0.0*d**2 + 3.63701136e-04*d - 3.49979857e-03]
     # dws = [lambda d: 2.57826596e-05*d**2 + 1.41367146e-03*d - 9.06688104e-03]
 
-    # 'AG'
+    # AG (bin)
     # ups = [lambda d: 0.0*d**2 + 4.78854812e-04*d - 3.47850504e-03]
     # dws = [lambda d: 7.45380877e-05*d**2 + 8.41224155e-04*d - 9.37967125e-03]
+
+    # G (bin)
+    # ups = [lambda d: 2.70999184e-05*d**2 - 4.58000391e-03*d - 4.58000390e-02]
+    # dws = [lambda d: -3.45158578e-10*d**2 + 9.92284649e-03*d -8.16959573e-02]
+
+    # A (mat)#
+    ups = [numpy.poly1d([0.00140512, -0.01120694])]
+    dws = [numpy.poly1d([0.00400177, -0.0356642]),
+           numpy.poly1d([0.0006561,  -0.0092359]),
+           numpy.poly1d([0.00025434, -0.0033739])]
 
     sim_hists = load_or_create_simulations_file(SIMULATED_HISTS_PATH,
                                                 method=sim_method,
