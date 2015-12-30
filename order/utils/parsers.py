@@ -25,9 +25,9 @@ def parse_input_file(input_file):
             yield loc, cell, row_hist
 
 
-def uncalled_inputs(input_file, calling, reads_threshold=0):
+def uncalled_inputs(input_file, calling=None, reads_threshold=0):
     for loc, cell, row_hist in parse_input_file(input_file):
-        if calling[loc][cell]:
+        if calling and calling[loc][cell]:
             continue
         if sum(row_hist.values()) < reads_threshold:
             continue

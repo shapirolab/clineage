@@ -6,7 +6,7 @@ import numpy as np
 from order.optimize_probs import dyn_mat_model
 from scipy.stats import binom
 from frogress import bar
-from pylru import lrudecorator
+# from pylru import lrudecorator
 
 
 def generate_bin_hist_pure_optimized(d,
@@ -106,7 +106,7 @@ def get_method(method):
     raise
 
 
-@lrudecorator(1000)
+# @lrudecorator(1000)
 def generate_hist(d, cycles, method, **kwargs):
     generate_method_hist = get_method(method)
     return generate_method_hist(d, cycles, **kwargs)
@@ -178,12 +178,12 @@ def generate_simulated_proportional_alleles_precalculated(seeds, seeds_hists, cy
 
 
 def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', steps=100,  **kwargs):
-    print min_ms_length, max_ms_length, min_cycles, max_cycles
+    # print min_ms_length, max_ms_length, min_cycles, max_cycles
     sim_hists = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     for seeds in bar(list(combinations_with_replacement(range(min_ms_length, max_ms_length), 2))):
         for cycles in range(min_cycles, max_cycles):
             for p1 in [float(x)/steps for x in xrange(1, steps-1)]:
-                print p1
+                # print p1
                 sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles, cycles), (p1, 1 - p1), method, **kwargs)
     return sim_hists
 

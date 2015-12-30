@@ -180,31 +180,35 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
     Calculate the distance between two populations in the form of histograms
     Method is given as a parameter 
     """
-    if method == 'sub':
-        return pop_dist_sub(hist1, hist2)
-    if method == 'sp':
-        return pop_dist_subpeaks(hist1, hist2)
-    if method == 'emd':
-        return pop_dist_emd(hist1, hist2)
-    if method == 'ks':
-        return pop_dist_ks_2samp(hist1, hist2, reads, sample_depth)
-    if method == 'aks':
-        return alt_ks_2samp(hist1, hist2, reads, sample_depth)
-    if method == 'a2ks':
-        return alt2_ks_2samp(hist1, hist2, reads)
-    if method == 'ksa':
-        return pop_dist_ks_alon(hist1, hist2, reads)
-    if method == 'kso':
-        return pop_dist_ks_alon_one(hist1, hist2, reads)
-    if method == 'cor':
-        return pop_dist_corr(hist1, hist2)
-    if method == 'con':
-        return pop_dist_corr_numpy(hist1, hist2)
-    if method == 'chi':
-        return pop_dist_chisq(hist1, hist2)
-    if method == 'kl':
-        return pop_dist_kl(hist1, hist2)
-    if method == 'pr':
-        return prob(hist1, hist2)
-    print 'unknown method'
-    raise
+    if hist1 and hist2:
+        if method == 'sub':
+            return pop_dist_sub(hist1, hist2)
+        if method == 'sp':
+            return pop_dist_subpeaks(hist1, hist2)
+        if method == 'emd':
+            return pop_dist_emd(hist1, hist2)
+        if method == 'ks':
+            return pop_dist_ks_2samp(hist1, hist2, reads, sample_depth)
+        if method == 'aks':
+            return alt_ks_2samp(hist1, hist2, reads, sample_depth)
+        if method == 'a2ks':
+            return alt2_ks_2samp(hist1, hist2, reads)
+        if method == 'ksa':
+            return pop_dist_ks_alon(hist1, hist2, reads)
+        if method == 'kso':
+            return pop_dist_ks_alon_one(hist1, hist2, reads)
+        if method == 'cor':
+            return pop_dist_corr(hist1, hist2)
+        if method == 'con':
+            return pop_dist_corr_numpy(hist1, hist2)
+        if method == 'chi':
+            return pop_dist_chisq(hist1, hist2)
+        if method == 'kl':
+            return pop_dist_kl(hist1, hist2)
+        if method == 'pr':
+            return prob(hist1, hist2)
+        print 'unknown method'
+        raise
+    else:
+        print 'empty hist object'
+        raise

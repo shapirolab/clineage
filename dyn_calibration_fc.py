@@ -70,10 +70,6 @@ def inputs_generator(cycles_range):
     #                  0, 0, 0,
     #                  0, 0, 0,]
     optimizer_method = "L-BFGS-B"
-    bounds = [(0.0, 0.0001), (-0.005, 0.005), (-0.05, 0.05), (0.0, 0.0001), (-0.005, 0.005), (-0.05, 0.05)]
-    optimizer_options = {'eps': 1e-5, 'disp': False}
-    # initial_guess = [0.00005,  -0.0009, 0.0036, 0.00009, -0.00003, -0.0013]
-    initial_guess = [0.0,  0.0, 0.0, 0.0, 0.0, 0.0]
     iterations = 100
     sim = 'mat'
     # optimizer_methods = ["Nelder-Mead", "TNC", "Powell", "COBYLA", "SLSQP", "L-BFGS-B"]
