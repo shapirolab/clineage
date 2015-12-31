@@ -52,6 +52,11 @@ class Migration(migrations.Migration):
             #field=models.ForeignKey(to='contenttypes.ContentType',null=True),
         ),
         migrations.AddField(
+            model_name='primer',
+            name='new_ugs_id',
+            field=models.PositiveIntegerField(db_index=True,null=True),
+        ),
+        migrations.AddField(
             model_name='targetenrichment',
             name='new_te',
             field=models.ForeignKey(to='planning.TargetEnrichment', null=True),
