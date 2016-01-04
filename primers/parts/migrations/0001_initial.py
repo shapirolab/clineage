@@ -8,6 +8,7 @@ import primers.strand
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('linapp', '0001_initial'),
     ]
 
     operations = [

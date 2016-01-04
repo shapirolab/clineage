@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('genomes', '0002_create_dnaslice'),
+        ('linapp', '0001_initial'),
     ]
 
     operations = [

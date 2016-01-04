@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('synthesis', '0001_initial'),
         ('planning', '0001_initial'),
+        ('linapp', '0001_initial'),
     ]
 
     operations = [
