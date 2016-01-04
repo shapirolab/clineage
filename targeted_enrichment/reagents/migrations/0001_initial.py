@@ -98,4 +98,15 @@ class Migration(migrations.Migration):
             name='validation_failure',
             field=models.ForeignKey(to='reagents.TargetEnrichmentFailureType', null=True),
         ),
+        # Temporary fields to assist with the data migration.
+        migrations.AddField(
+            model_name='targetednotailprimerpairter',
+            name='old_te',
+            field=models.ForeignKey(to='linapp.TargetEnrichment'),
+        ),
+        migrations.AddField(
+            model_name='pcr1primerpairterbase',
+            name='old_te',
+            field=models.ForeignKey(to='linapp.TargetEnrichment'),
+        ),
     ]
