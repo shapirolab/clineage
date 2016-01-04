@@ -7,6 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('reagents', '0002_remove_temp_fks'),
         ('planning', '0002_remove_temp_fks'),
         ('synthesis', '0002_remove_temp_fks'),
         ('parts', '0002_remove_temp_fks'),
