@@ -8,7 +8,7 @@ def get_targets_by_panel(panel):
     for te in panel.targets.select_related('left', 'right', 'left__sequence', 'right__sequence', 'left__referencevalue',
                                            'right__referencevalue', 'primersmultiplex_set__physical_locations',
                                            'primersmultiplex_set__physical_locations__plate'):
-        for tgt in te.targets.select_related('chromosome', 'type'):
+        for tgt in te.targets.select_related('chromosome', 'type').filter(restrictionsite__isnull=True):
             try:
                 ms = tgt.microsatellite
                 repeat_unit_len = str(ms.repeat_unit_len)
