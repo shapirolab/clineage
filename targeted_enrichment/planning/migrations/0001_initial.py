@@ -52,7 +52,6 @@ class Migration(migrations.Migration):
             name='UGSMinus',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True)),
                 ('slice', models.ForeignKey(to='genomes.DNASlice')),
             ],
             options={
@@ -64,7 +63,6 @@ class Migration(migrations.Migration):
             name='UGSPlus',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True)),
                 ('slice', models.ForeignKey(to='genomes.DNASlice')),
             ],
             options={

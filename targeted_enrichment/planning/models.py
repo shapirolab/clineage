@@ -12,7 +12,6 @@ from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
 class UGS(models.Model,BaseStrandMixin):
     slice = models.ForeignKey(DNASlice)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
 
     class Meta:
         abstract = True
