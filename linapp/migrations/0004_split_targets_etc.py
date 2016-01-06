@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         ('synthesis', '0001_initial'),
         ('parts', '0001_initial'),
         ('planning', '0001_initial'),
+        ('multiplexes', '0001_initial'),
     ]
 
     operations = [
