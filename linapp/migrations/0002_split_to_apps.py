@@ -86,10 +86,6 @@ class Migration(migrations.Migration):
             name='individual',
         ),
         migrations.RemoveField(
-            model_name='panel',
-            name='targets',
-        ),
-        migrations.RemoveField(
             model_name='sequencing',
             name='machine',
         ),
@@ -255,9 +251,6 @@ class Migration(migrations.Migration):
             name='Organ',
         ),
         migrations.DeleteModel(
-            name='Panel',
-        ),
-        migrations.DeleteModel(
             name='Plate',
         ),
         migrations.DeleteModel(
@@ -337,15 +330,6 @@ class Migration(migrations.Migration):
             from_model='machinetype',
             to_app='runs',
             to_model='machinetype',
-        ),
-        migrations.AlterModelTable(
-            name='Panel',
-            table='lib_prep_panel',
-        ),
-        AlterContentType(
-            from_model='panel',
-            to_app='lib_prep',
-            to_model='panel',
         ),
         migrations.AlterModelTable(
             name='Sequencing',
@@ -827,7 +811,7 @@ class Migration(migrations.Migration):
         migrations.DeleteModel(
             name='TargetVariantType',
         ),
-        # Fields removed from models which survive but move, and will not to be
+        # Fields removed from models which survive but move, and will not be
         # added back on the other side.
         migrations.RemoveField(
             model_name='sequencing',
