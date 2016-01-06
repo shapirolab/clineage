@@ -103,11 +103,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='targetednotailprimerpairter',
             name='old_te',
-            field=models.ForeignKey(to='linapp.TargetEnrichment'),
+            field=models.ForeignKey(to='linapp.TargetEnrichment', null=True),
         ),
         migrations.AddField(
             model_name='pcr1primerpairterbase',
             name='old_te',
-            field=models.ForeignKey(to='linapp.TargetEnrichment'),
+            field=models.ForeignKey(to='linapp.TargetEnrichment', null=True),
         ),
     ]
