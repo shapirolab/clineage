@@ -109,6 +109,9 @@ class Migration(migrations.Migration):
             name='Microsatellite',
         ),
         migrations.DeleteModel(
+            name='Panel',
+        ),
+        migrations.DeleteModel(
             name='Primer',
         ),
         migrations.DeleteModel(
