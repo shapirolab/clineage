@@ -7,6 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('linapp', '0004_split_targets_etc'),
         ('reagents', '0001_initial'),
     ]
 
