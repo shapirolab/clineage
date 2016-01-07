@@ -30,6 +30,10 @@ class Migration(migrations.Migration):
             name='target_ptr',
         ),
         migrations.RemoveField(
+            model_name='panel',
+            name='targets',
+        ),
+        migrations.RemoveField(
             model_name='primer',
             name='sequence',
         ),
