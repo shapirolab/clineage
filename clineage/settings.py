@@ -178,7 +178,7 @@ INSTALLED_APPS = (
 #    'phylogeny',
     'django_extensions',
     # Migrations legacy
-    'lib_prep',
+    #'lib_prep',
 )
 
 # A sample logging configuration. The only tangible logging
