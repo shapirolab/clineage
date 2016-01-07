@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sampling', '0001_initial'),
+        ('genomes', '0001_initial'),
         ('linapp', '0002_split_to_apps'),
     ]
 
