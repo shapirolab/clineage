@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('parts', '0001_initial'),
-        ('linapp', '0003_add_fks_after_split'),
+        ('linapp', '0002_split_to_apps'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
