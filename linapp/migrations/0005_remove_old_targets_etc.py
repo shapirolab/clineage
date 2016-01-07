@@ -25,10 +25,10 @@ class Migration(migrations.Migration):
             name='new_target',
         ),
         # Up to here.
-        migrations.RemoveField(
-            model_name='microsatellite',
-            name='target_ptr',
-        ),
+        #migrations.RemoveField(
+            #model_name='microsatellite',
+            #name='target_ptr',
+        #),
         migrations.RemoveField(
             model_name='panel',
             name='targets',
@@ -41,10 +41,10 @@ class Migration(migrations.Migration):
             model_name='primer',
             name='tail',
         ),
-        migrations.RemoveField(
-            model_name='primer',
-            name='target_ptr',
-        ),
+        #migrations.RemoveField(
+            #model_name='primer',
+            #name='target_ptr',
+        #),
         migrations.RemoveField(
             model_name='primersmultiplex',
             name='primers',
@@ -53,14 +53,14 @@ class Migration(migrations.Migration):
             model_name='restrictionsite',
             name='restriction_type',
         ),
-        migrations.RemoveField(
-            model_name='restrictionsite',
-            name='target_ptr',
-        ),
-        migrations.RemoveField(
-            model_name='snp',
-            name='target_ptr',
-        ),
+        #migrations.RemoveField(
+            #model_name='restrictionsite',
+            #name='target_ptr',
+        #),
+        #migrations.RemoveField(
+            #model_name='snp',
+            #name='target_ptr',
+        #),
         migrations.RemoveField(
             model_name='target',
             name='chromosome',
