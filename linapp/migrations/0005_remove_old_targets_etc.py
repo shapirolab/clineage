@@ -131,6 +131,9 @@ class Migration(migrations.Migration):
             name='RestrictionSiteType',
         ),
         migrations.DeleteModel(
+            name='Sequence',
+        ),
+        migrations.DeleteModel(
             name='SNP',
         ),
         migrations.DeleteModel(
