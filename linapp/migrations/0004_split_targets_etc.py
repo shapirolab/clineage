@@ -3,6 +3,21 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+def split_targets_etc(apps, schema_editor):
+    print
+    split_targets(apps, schema_editor)
+    split_target_enrichments(apps, schema_editor)
+    split_multiplexes(apps, schema_editor)
+    split_panels(apps, schema_editor)
+
+def rejoin_targets_etc(apps, schema_editor):
+    print
+    rejoin_targets(apps, schema_editor)
+    rejoin_restriction_sites(apps, schema_editor)
+    rejoin_primers(apps, schema_editor)
+    rejoin_target_enrichments(apps, schema_editor)
+    rejoin_multiplexes(apps, schema_editor)
+    rejoin_panels(apps, schema_editor)
 
 class Migration(migrations.Migration):
 
@@ -17,6 +32,48 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # All of these fields, up to the RunPython, are temporary, to assist
+        # with the data migration.
+        migrations.AddField(
+            model_name='target',
+            name='new_target',
+            field=models.ForeignKey(to='planning.Target', null=True),
+        ),
+        # GFK style.
+        migrations.AddField(
+            model_name='primer',
+            name='new_primer_id',
+            field=models.PositiveIntegerField(db_index=True,null=True),
+        ),
+        migrations.AddField(
+            model_name='primer',
+            name='new_primer_model',
+            #name='content_type',
+            field=models.CharField(max_length=30,null=True),
+            #field=models.ForeignKey(to='contenttypes.ContentType',null=True),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='new_te',
+            field=models.ForeignKey(to='planning.TargetEnrichment', null=True),
+        ),
+        # GFK style.
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='new_ter_id',
+            field=models.PositiveIntegerField(db_index=True,null=True),
+        ),
+        migrations.AddField(
+            model_name='targetenrichment',
+            name='new_ter_model',
+            #name='content_type',
+            field=models.CharField(max_length=50,null=True),
+            #field=models.ForeignKey(to='contenttypes.ContentType',null=True),
+        ),
+        migrations.RunPython(
+            code=split_targets_etc,
+            reverse_code=rejoin_targets_etc,
+        ),
         migrations.RemoveField(
             model_name='microsatellite',
             name='target_ptr',
