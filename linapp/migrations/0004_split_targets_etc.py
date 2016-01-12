@@ -4,14 +4,12 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 
 def split_targets_etc(apps, schema_editor):
-    print
     split_targets(apps, schema_editor)
     split_target_enrichments(apps, schema_editor)
     split_multiplexes(apps, schema_editor)
     split_panels(apps, schema_editor)
 
 def rejoin_targets_etc(apps, schema_editor):
-    print
     rejoin_targets(apps, schema_editor)
     rejoin_restriction_sites(apps, schema_editor)
     rejoin_primers(apps, schema_editor)
