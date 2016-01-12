@@ -16,7 +16,6 @@ class Machine(models.Model):
     machineid = models.CharField(max_length=50)
     name = models.CharField(max_length=100, null=True, blank=True)
     type = models.ForeignKey(MachineType)
-    ip = models.IPAddressField(null=True, blank=True)
 
     def __unicode__(self):
         return self.type.__unicode__() + '_' + self.machineid

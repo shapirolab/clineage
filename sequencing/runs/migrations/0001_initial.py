@@ -27,7 +27,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('machineid', models.CharField(max_length=50)),
                 ('name', models.CharField(max_length=100, null=True, blank=True)),
-                ('ip', models.IPAddressField(null=True, blank=True)),
                 ('type', models.ForeignKey(to='runs.MachineType')),
             ],
         ),

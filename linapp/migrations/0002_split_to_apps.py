@@ -833,6 +833,10 @@ class Migration(migrations.Migration):
             model_name='cellcontent',
             name='seq_ready',
         ),
+        migrations.RemoveField(
+            model_name='machine',
+            name='ip',
+        ),
         migrations.SeparateDatabaseAndState(
             state_operations=state_ops,
             database_operations=db_ops,
