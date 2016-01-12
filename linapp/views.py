@@ -752,7 +752,8 @@ def partner_cells_table_view(request, partner_name,
     try:
         p = User.objects.get(username__contains=partner_name)
         response['Content-Disposition'] = 'attachment; filename="{}_cell_data.csv"'.format(partner_name)
-        fieldnames = ['Cell ID',
+        fieldnames = ['CellContent ID'
+                      'Cell ID',
                       'Cell Name',
                       'Cell Type',
                       'Cell Group',

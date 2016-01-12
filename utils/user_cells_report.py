@@ -180,6 +180,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                 assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
                 for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
                     yield {
+                        'CellContent ID': smart_str(cell_cont.pk),
                         'Cell ID': smart_str(cell.pk),
                         'Sequencing File Name': smart_str(file_name),
                         'Cell Name': smart_str(cell.name),
@@ -204,7 +205,8 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
 def print_cells_table(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
     cell_data_file = '{}cell_data.csv'.format(cell_folder)
     with open(cell_data_file, 'w') as f:
-        fieldnames = ['Cell ID',
+        fieldnames = ['CellContent ID'
+                      'Cell ID',
                       'Cell Name',
                       'Cell Type',
                       'Plate',
