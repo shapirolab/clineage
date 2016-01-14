@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('planning', '0001_initial'),
         ('parts', '0001_initial'),
-        ('linapp', '0001_initial'),
+        ('linapp', '0003_add_fks_after_split'),
     ]
 
     operations = [

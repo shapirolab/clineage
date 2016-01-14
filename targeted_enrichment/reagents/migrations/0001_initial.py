@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('synthesis', '0001_initial'),
         ('planning', '0001_initial'),
-        ('linapp', '0001_initial'),
+        ('linapp', '0003_add_fks_after_split'),
     ]
 
     operations = [
