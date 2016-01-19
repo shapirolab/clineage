@@ -6,7 +6,8 @@ __author__ = 'ofirr'
 class DNA(object):
 
     def __init__(self,seq):
-        if isinstance(seq,str):
+        # FIXME: this should change when we fix the db to give us bytearray.
+        if isinstance(seq,(str,unicode)):
             s = seq.upper()
             for i in s:
                 if i not in "ACGT":
