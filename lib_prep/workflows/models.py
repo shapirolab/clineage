@@ -6,11 +6,7 @@ from django.contrib.contenttypes import fields
 from linapp.models import Protocol
 from wet_storage.models import SampleLocation
 from sampling.models import Cell
-from primers.parts.models import DNABarcode1, DNABarcode2
 
-class BarcodePair(models.Model):
-    left = models.ForeignKey(DNABarcode1)
-    right = models.ForeignKey(DNABarcode2)
 
 class CellContentType(models.Model):
     name = models.CharField(max_length=50)
@@ -51,10 +47,3 @@ class CellContent(models.Model):  # aka DNA
     #    print self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')
     #    return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
 
-
-class WorkFlowCell(models.Model): # cell + barcode
-    content = models.ForeignKey(CellContent)
-    barcodes = models.ForeignKey(BarcodePair)
-    physical_locations = fields.GenericRelation(SampleLocation,
-                                             content_type_field='content_type',
-                                             object_id_field='object_id')

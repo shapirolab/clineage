@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('linapp', '0003_add_fks_after_split'),
-        ('workflows', '0002_add_wfc'),
+        ('workflows', '0001_initial'),
     ]
 
     operations = [

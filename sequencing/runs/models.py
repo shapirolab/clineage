@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from lib_prep.workflows.models import WorkFlowCell
 
 __author__ = 'ofirr'
 
@@ -23,7 +22,6 @@ class Machine(models.Model):
 
 
 class NGSRun(models.Model):
-    # wfcs = models.ManyToManyField(WorkFlowCell)
     directory = models.FilePathField(null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)

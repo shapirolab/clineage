@@ -39,8 +39,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('linapp', '0003_add_fks_after_split'),
-        ('workflows', '0002_add_wfc'),  # NOTE: for when we merge with 0003pre
-        ('workflows', '0003pre_subclass_cell_content_protocol'),
+        ('workflows', '0001_initial'),  # NOTE: for when we merge with 0003pre
+        ('workflows', '0002pre_subclass_cell_content_protocol'),
     ]
 
     operations = [
