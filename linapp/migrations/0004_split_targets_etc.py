@@ -3,6 +3,19 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from linapp.migrations.mig_0004.split.targets import split_targets
+from linapp.migrations.mig_0004.split.target_enrichments import \
+    split_target_enrichments
+from linapp.migrations.mig_0004.split.multiplexes_and_panels import \
+    split_multiplexes, split_panels
+from linapp.migrations.mig_0004.rejoin.targets import rejoin_targets
+from linapp.migrations.mig_0004.rejoin.restriction_sites import rejoin_restriction_sites
+from linapp.migrations.mig_0004.rejoin.primers import rejoin_primers
+from linapp.migrations.mig_0004.rejoin.target_enrichments import \
+    rejoin_target_enrichments
+from linapp.migrations.mig_0004.rejoin.multiplexes_and_panels import \
+    rejoin_multiplexes, rejoin_panels
+
 def split_targets_etc(apps, schema_editor):
     split_targets(apps, schema_editor)
     split_target_enrichments(apps, schema_editor)
