@@ -1,9 +1,11 @@
 
 from django.contrib.contenttypes import fields
 from django.db import models
+
+from model_utils.managers import InheritanceManager
+
 from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
 from targeted_enrichment.planning.models import TargetEnrichment
-
 from wet_storage.models import SampleLocation
 
 class TargetEnrichmentFailureType(models.Model):
@@ -30,6 +32,8 @@ class TargetedEnrichmentReagent(models.Model):
     physical_locations = fields.GenericRelation(SampleLocation,
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
+
+    objects = InheritanceManager()
 
     class Meta:
         abstract = True
