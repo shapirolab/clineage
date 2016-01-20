@@ -126,18 +126,6 @@
         dojo.ready(bind_add_sample_plate_button);
         dojo.ready(bind_add_sample_plate_with_names_button);
 
-        {# Algorithm #}
-        function edit_algorithm_form_function(id){
-            dialog_form_function("Algorithm editing form", "{% url 'algorithm_add' %}".slice(0,-3)+id, algorithmstableRefresh);
-        }
-        function bind_add_algorithm_button(){
-            var button = dijit.byId("add_algorithm_button");
-            dojo.connect(button, "onClick", function(){
-                dialog_form_function("New Algorithm", "{% url 'algorithm_add' %}", algorithmstableRefresh);
-            });
-        }
-        dojo.ready(bind_add_algorithm_button);
-
         {# Plate #}
         function edit_plate_form_function(id){
             dialog_form_function("Plate editing form", "{% url 'plate_add' %}".slice(0,-3)+id, platestableRefresh);
@@ -240,19 +228,19 @@
         {% datable_dialog_on_click samplestable edit_cell_form_function %}
         <div id="samplestableGridContainer" class="datable_container"></div>
     </div>
-
+<!--
     <div id="tab6" dojoType="dijit.layout.ContentPane" title="Algorithms" style="padding:10px;display:none;">
         <button data-dojo-type="dijit.form.Button" id="add_algorithm_button">Add Algorithm</button>
         <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
-            {% datable_widget algorithmstable name %}
-            {% datable_widget algorithmstable version %}
-            {% datable_widget algorithmstable type %}
+            { % datable_widget algorithmstable name %}
+            { % datable_widget algorithmstable version %}
+            { % datable_widget algorithmstable type %}
         </div>
-        {% datable algorithmstable %}
-        {% datable_href_on_click algorithmstable %}
+        { % datable algorithmstable %}
+        { % datable_href_on_click algorithmstable %}
         <div id="algorithmstableGridContainer" class="datable_container"></div>
     </div>
-
+-->
     <div id="tab7" dojoType="dijit.layout.ContentPane" title="Plates" style="padding:10px;display:none;">
         <button data-dojo-type="dijit.form.Button" id="add_plate_button">Add Plate</button>
         <div dojoType="dijit.TitlePane" title="Filters" width="750px;">
