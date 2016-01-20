@@ -4,17 +4,6 @@ from django.conf.urls import url
 from linapp import views
 
 urlpatterns = [
-    url(r'^experiment/(?P<exp_id>\d+)/$', views.experiment),
-    url(r'^experiment/(?P<exp_id>\d+)/tab:(?P<tab>\w+)$', views.experiment),
-    url(r'^experiment/workflow/(?P<exp_id>\d+)$', views.experimentworkflow),
-    url(r'^comment/(?P<exp_id>\d+)/$', views.commentPost),
-    url(r'^postexperiment/(?P<exp_id>\d+)/$', views.experimentPost),
-    url(r'^postfile/(?P<exp_id>\d+)/$', views.filesPost),
-    url(r'^algorithms/(?P<alg_id>\d+)/$', views.algorithm, name='algorithm-details'),
-    url(r'^algorithms/(?P<alg_id>\d+)/tab:(?P<tab>\w+)$', views.algorithm),
-    url(r'^treedata/$', views.testtree),
-    url(r'^algform/$', views.algrunform, name='algrunform_base'),
-    url(r'^algform/(?P<alg_id>\d+)$', views.algrunform, name='algrunform_detail'),
     url(r'^taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', views.targets_tdv),
     url(r'^existing/taxa:(?P<taxa>\d+)/assembly:(?P<assem>\w+)$', views.existing_primer_pairs_tdv),
 
@@ -71,24 +60,11 @@ urlpatterns = [
     url(r'^forms/cell/add_cells_plate$', views.plate_input, name='cells_plate_add'),
     url(r'^forms/cell/add_cells_plate_with_names$', views.plate_input_with_names, name='cells_plate_add_with_names'),
 
-    #algorithm
-    url(r'^forms/algorithm/add$', views.AlgorithmCreate.as_view(), name='algorithm_add'),
-    url(r'^details/algorithm/(?P<pk>\d+)$', views.AlgorithmUpdate.as_view(), name='algorithm_detail'),
-    url(r'^forms/algorithm/(?P<pk>\d+)$', views.AlgorithmUpdate.as_view(), name='algorithm_update'),
-    url(r'^forms/algorithm/delete/(?P<pk>\d+)$', views.AlgorithmDelete.as_view(), name='algorithm_delete'),
-
     #plate
     url(r'^forms/plate/add$',views.PlateCreate.as_view(), name='plate_add'),
     url(r'^details/plate/(?P<pk>\d+)$',views.PlateUpdate.as_view(), name='plate_detail'),
     url(r'^forms/plate/(?P<pk>\d+)$',views.PlateUpdate.as_view(), name='plate_update'),
     url(r'^forms/plate/delete/(?P<pk>\d+)$',views.PlateDelete.as_view(), name='plate_delete'),
-
-    url(r'^plate_wells_selection/(?P<plate_plastica_id>\d+)$', views.plate_well_selection),
-
-    # url(r'^cell/$',views.cellform),
-    # url(r'^cell/(?P<cell_id>\d+)$',views.cellform),
-    url(r'^experiment/(?P<exp_id>\d+)/member/$', views.memberform),
-    url(r'^experiment/(?P<exp_id>\d+)/member/(?P<mem_id>\d+)$', views.memberform),
 
     # collaborators_reports
     url(r'^csv_view/partner_name:(?P<partner_name>\w+)$', views.partner_cells_table_view),

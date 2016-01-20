@@ -1,5 +1,5 @@
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.views.generic import TemplateView
 from django.contrib import admin
 
@@ -8,18 +8,18 @@ import clineage.settings as settings
 # Uncomment the next two lines to enable the admin:
 #admin.autodiscover()
 
-urlpatterns = patterns('',
-     url(r'^CLineage/', include('linapp.urls')),
+urlpatterns = [
+    url(r'^CLineage/', include('linapp.urls')),
 
     #Homepage
-    (r'^$', 'linapp.views.homepage'),
-    (r'^tab:(?P<tab>\w+)$', 'linapp.views.homepage'),
+    url(r'^$', 'linapp.views.homepage'),
+    url(r'^tab:(?P<tab>\w+)$', 'linapp.views.homepage'),
 
     # Login/Logout/Register Account
-    (r'^accounts/', include('accounts.urls')),
+    url(r'^accounts/', include('accounts.urls')),
 
     # Dojango path
-    (r'^dojango/', include('dojango.urls')),
+    url(r'^dojango/', include('dojango.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -27,18 +27,10 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 
-    #Tree test
-    ('^treetest/$', TemplateView.as_view(template_name='treetest.html')),
-
     #TriStateCheckbox tests
-    ('^tristatecheckboxtest/$', TemplateView.as_view(template_name='tristatecheckboxtest.html')),
-    ('^externaltristatecheckboxtest/$', TemplateView.as_view(template_name='external_tristatecheckboxtest.html')),
-    #TriStateCheckbox tests
-    ('^success_page_background/$', TemplateView.as_view(template_name='success_page_background.html')),
+    url('^success_page_background/$', TemplateView.as_view(template_name='success_page_background.html')),
 
     #soap test
-    (r'^soap/', include('soap.urls')),
+    url(r'^soap/', include('soap.urls')),
+]
 
-    #test
-    ('^long_view/$', 'linapp.views.longview'),
-)

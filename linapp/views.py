@@ -17,14 +17,16 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.template import loader
 
+from clineage import settings
 from utils.wells import num2abc
 from utils.user_cells_report import user_cells_table_values, get_partner_report
-from linapp.forms import *
+from linapp.forms import PlateInputForm, MultipleCellForm
 from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
-from sampling.models import FACS, LaserCapture, CellContentType, SampleComposition
+from sampling.models import FACS, LaserCapture, SampleComposition
+from lib_prep.workflows.models import CellContentType, CellContent
 from misc.models import Taxa
-from genomes.models import Assembly, TargetEnrichment
-from targeted_enrichment.planning.models import Microsatellite
+from genomes.models import Assembly
+from targeted_enrichment.planning.models import Microsatellite, TargetEnrichment
 from utils.plate_string_description import *
 from linapp.DBUtils import DBUtils
 
@@ -38,27 +40,15 @@ def render_to_response(*args,**kwargs):
     status = kwargs.pop("status",None)
     return HttpResponse(loader.render_to_string(*args,**kwargs),content_type=content_type,status=status)
 
-def index(request):
-    """
-    Main index function - show list of experiments
-    """
-
-    try:
-        publicexp = Experiment.objects.filter(is_public=True)
-        privateexp = Experiment.objects.filter(users = request.user)
-    except Experiment.DoesNotExist:
-        raise Http404
-    return render_to_response('userbase.html', context={'privateexperiments': privateexp, 'publicexperiments': publicexp},request=request)
-
 
 def homepage(request, tab='individuals'):
     # from utils.parse_multiplexes import *
     # test_multiplex()
-    try:
-        publicexp = Experiment.objects.filter(is_public=True)
-        privateexp = Experiment.objects.filter(users=request.user)
-    except Experiment.DoesNotExist:
-        raise Http404
+    #try:
+        #publicexp = Experiment.objects.filter(is_public=True)
+        #privateexp = Experiment.objects.filter(users=request.user)
+    #except Experiment.DoesNotExist:
+        #raise Http404
     selectedtab = gethomepagetab(tab)
     individualstable = getindividualstable()
     if individualstable.willHandle(request):
@@ -75,194 +65,20 @@ def homepage(request, tab='individuals'):
     samplestable = getsamplestable()
     if samplestable.willHandle(request):
         return samplestable.handleRequest(request)
-    algorithmstable = getalgorithmstable()
-    if algorithmstable.willHandle(request):
-        return algorithmstable.handleRequest(request)
     platestable = getplatestable()
     if platestable.willHandle(request):
         return platestable.handleRequest(request)
     return render_to_response(
         'homepage.html', context={
-            'privateexperiments': privateexp,
-            'publicexperiments': publicexp,
             'selectedtab': selectedtab,
             'individualstable': individualstable,
             'extractionstable': extractionstable,
             'extractioneventstable': extractioneventstable,
             'samplingeventstable': samplingeventstable,
             'samplestable': samplestable,
-            'algorithmstable': algorithmstable,
             'platestable': platestable
         },request=request)
 
-
-def algorithm(request, alg_id, tab='general'):
-    try:
-        publicexp = Experiment.objects.filter(is_public=True)
-        privateexp = Experiment.objects.filter(users = request.user)
-        alg = Algorithm.objects.get(pk=alg_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-    developers = alg.developers.all()
-    selectedtab = getalgorithmtab(tab)
-
-    algrunstable = getalgrunstable(alg)
-    if algrunstable.willHandle(request):
-        return algrunstable.handleRequest(request)
-
-    algparamstable = getalgparamstable(alg)
-    if algparamstable.willHandle(request):
-        return algparamstable.handleRequest(request)
-    return render_to_response('algorithm.html',
-        context={'alg':alg,
-             'developers':developers,
-             'privateexperiments': privateexp,
-             'publicexperiments': publicexp,
-             'selectedtab':selectedtab,
-             'algrunstable':algrunstable,
-             'algparamstable':algparamstable},request=request)
-
-
-def experiment(request, exp_id, tab='general'):
-    try:
-        exp = Experiment.objects.get(pk = exp_id)
-        publicexp = Experiment.objects.filter(is_public=True)
-        privateexp = Experiment.objects.filter(users = request.user)
-    except Experiment.DoesNotExist:
-        raise Http404
-
-    selectedtab = getexperimenttab(tab)
-
-    userrole = DBUtils.getrole(request.user, exp)
-    if not userrole.read:
-        return render_to_response('accessDenied.html')
-
-    memberstable = getmemberstable(exp)
-    if memberstable.willHandle(request):
-        return memberstable.handleRequest(request)
-
-    samplestable = getsamplestable()
-    if samplestable.willHandle(request):
-        return samplestable.handleRequest(request)
-
-    pDNAtable = getpDNAtable(exp)
-    if pDNAtable.willHandle(request):
-        return pDNAtable.handleRequest(request)
-
-    targetAnalysistable = gettargetAnalysistable(exp)
-    if targetAnalysistable.willHandle(request):
-        return targetAnalysistable.handleRequest(request)
-
-    # trueSequencestable = gettrueSequencestable(exp)
-    # if trueSequencestable.willHandle(request):
-    #     return trueSequencestable.handleRequest(request)
-
-    targetsVariantstable = gettargetsVariantstable(exp)
-    if targetsVariantstable.willHandle(request):
-        return targetsVariantstable.handleRequest(request)
-
-    genSigstable = getgenSigstable(exp)
-    if genSigstable.willHandle(request):
-        return genSigstable.handleRequest(request)
-
-    DMtable = getDMtable(exp)
-    if DMtable.willHandle(request):
-        return DMtable.handleRequest(request)
-
-    sequencingtable = getsequencingtable(exp)
-    if sequencingtable.willHandle(request):
-        return sequencingtable.handleRequest(request)
-
-    individualstable = getindividualstable(exp)
-    if individualstable.willHandle(request):
-        return individualstable.handleRequest(request)
-
-    filestable = getfilestable(exp)
-    if filestable.willHandle(request):
-        return filestable.handleRequest(request)
-
-#    algorithmsrunstable = getalgorithmsrunstable(exp)
-#    if algorithmsrunstable.willHandle(request):
-#        return algorithmsrunstable.handleRequest(request)
-    return render_to_response('experiment.html',
-        context={'exp':exp,
-             'userrole': userrole,
-             'privateexperiments': privateexp,
-             'publicexperiments': publicexp,
-             'selectedtab': selectedtab,
-             'memberstable': memberstable,
-             'samplestable': samplestable,
-             'pDNAtable': pDNAtable,
-             'targetAnalysistable': targetAnalysistable,
-             # 'trueSequencestable': trueSequencestable,
-             'targetsVariantstable': targetsVariantstable,
-             'genSigstable': genSigstable,
-             'DMtable': DMtable,
-             'sequencingtable': sequencingtable,
-             'individualstable': individualstable,
-             'filestable': filestable,
-#             'algorithmsrunstable':algorithmsrunstable
-        },
-        request=request
-    )
-
-
-@expect_post_request
-@json_response
-def experimentPost(request, exp_id): #Handle POST request from experiment general tab.
-    try:
-        exp = Experiment.objects.get(pk = exp_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-    desc=request.POST['description']
-    check = request.POST['is_public']
-    exp.description = desc
-    if check == 'true':
-        exp.is_public = True
-    else:
-        exp.is_public = False
-    exp.save()
-    return {'success':True, 'experimentdescription':exp.description, 'is_public':exp.is_public}
-
-
-@json_response
-def experimentworkflow(request, exp_id): #tree view of Individual -> extractions -> samples -> cells
-    try:
-        exp = Experiment.objects.get(pk=exp_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-    return workflowstore(exp)
-
-
-@expect_post_request
-@json_response
-def commentPost(request, exp_id):#Handle POST request from experiment messages  tab.
-    try:
-        exp = Experiment.objects.get(pk = exp_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-    comment = ExperimentLog(user=request.user, experiment = exp, date =datetime.now(), comment=request.POST['comment'])
-    comment.save()
-    t = loader.get_template('comments.html')
-    return {'success': True, 'commentsHTML': t.render({'exp': exp})}
-
-
-@expect_post_request
-def filesPost(request, exp_id):  # Handle POST request from experiment repository tab.
-    try:
-        exp = Experiment.objects.get(pk = exp_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-#   for postedFile in request.FILES.getlist('uploadedfiles[]'):
-#   newFile = ExperimentFile(title = 'TITLE', experiment = exp, filename = postedFile.name, file = postedFile,  upload_date =datetime.now(), user=request.user,  description='DESCRIPTION')
-#   newFile.save();
-    print 'file posted!'
-    print 'user:' + str(request.user)
-    print 'experiment:' + str(exp)
-    for postedFile in request.FILES.getlist('uploadedfiles[]'):
-        print 'file name:' + postedFile.name
-        print 'file size:' + str(postedFile.size)
-    return {'success':True}
 
 
 class JsonFormMixin(object):
@@ -389,52 +205,6 @@ class CellContentDetail(DetailView):
 class CellContentDelete(DeleteView):
     model = CellContent
 
-class AlgorithmCreate(JsonFormMixin, CreateView):
-    model = Algorithm
-    fields = "__all__"
-
-class AlgorithmUpdate(JsonFormMixin, UpdateView):
-    model = Algorithm
-    fields = "__all__"
-
-class AlgorithmDetail(DetailView):
-    model = Algorithm
-
-class AlgorithmDelete(DeleteView):
-    model = Algorithm
-
-class AlgorithmRunCreate(JsonFormMixin, CreateView):
-    model = AlgorithmRun
-    fields = "__all__"
-
-class AlgorithmRunUpdate(JsonFormMixin, UpdateView):
-    model = AlgorithmRun
-    fields = "__all__"
-
-class AlgorithmRunDelete(DeleteView):
-    model = AlgorithmRun
-
-class AlgorithmParameterCreate(JsonFormMixin, CreateView):
-    model = AlgorithmParameter
-    fields = "__all__"
-
-class AlgorithmParameterUpdate(JsonFormMixin, UpdateView):
-    model = AlgorithmParameter
-    fields = "__all__"
-
-class AlgorithmParameterDelete(DeleteView):
-    model = AlgorithmParameter
-
-class AlgorithmRunParametersCreate(JsonFormMixin, CreateView):
-    model = AlgorithmRunParameters
-    fields = "__all__"
-
-class AlgorithmRunParametersUpdate(JsonFormMixin, UpdateView):
-    model = AlgorithmRunParameters
-    fields = "__all__"
-
-class AlgorithmRunParametersDelete(DeleteView):
-    model = AlgorithmRunParameters
 
 class PlateCreate(JsonFormMixin, CreateView):
     model = Plate
@@ -636,51 +406,6 @@ def plate_input_with_names(request):
     return render(request, 'plate_cells_form.html', {'form': plate_form})
 
 
-#@json_response
-def algrunform(request, alg_id = None): #TODO: check for permissions
-    if request.method == 'POST':
-        form = AlgorithmRunForm(request.POST, prefix='algrun')
-        if form.is_valid():
-            form.save()
-            return {'success':True} #TODO: consider success page instead of json.
-        return {'success':False}
-    if not alg_id:
-        form = AlgorithmRunForm(prefix='algrun')
-        return render_to_response('forms/genericformdisp.html',{'form':form,  'resurl':reverse(algrunform, args=alg_id)})
-    try:
-        alg = Algorithm.objects.get(pk=alg_id)
-        form = AlgorithmRunForm(instance =alg, prefix='algrun')
-    except Algorithm.DoesNotExist:
-        print 'failed to retrieve Algorithm where pk = '+str(alg_id)
-        form = AlgorithmRunForm(prefix='algrun')
-    return render_to_response('forms/genericformdisp.html',context={'form':form, 'resurl':reverse(algrunform, args=alg_id)},request=request)
-
-
-def memberform(request, exp_id, mem_id = None):
-    try:
-        exp = Experiment.objects.get(pk = exp_id)
-    except Experiment.DoesNotExist:
-        raise Http404
-    #TODO: check permissions
-    if request.method == 'POST':
-        form = ExperimentUserForm(request.POST, prefix='exp')
-        if form.is_valid():
-            form.save(commit=False)
-            form.experiment = exp
-            form.save()
-            return {'success':True} #TODO: consider success page instead of json.
-        return {'success':False}
-#    expblankuser = ExperimentUser(experiment = exp)
-    if not mem_id:
-        form = ExperimentUserForm(prefix='exp') #, instance = expblankuser
-        return render_to_response('forms/genericformdisp.html',context={'form':form, 'resurl':reverse(memberform, args=exp_id)},request=request)
-    try:
-        eu = ExperimentUser.objects.get(pk = mem_id)
-        form = ExperimentUserForm(instance = eu, prefix='exp') #, instance = expblankuser
-    except ExperimentUser.DoesNotExist:
-        print 'failed to retrieve ExperimentUser where pk = '+str(mem_id)
-        form = ExperimentUserForm(prefix='exp') #, instance = expblankuser
-    return render_to_response('forms/genericformdisp.html', context={'form':form, 'resurl':reverse(memberform, args=exp_id)},request=request)
 
 
 def targets_tdv(request, taxa, assem):
@@ -771,21 +496,6 @@ def plate_well_selection(request, plate_plastica_id):
     return render_to_response('forms/plate_boolean_form.html', context={'rows': rows, 'columns': columns},request=request)
 
 
-@expect_post_request
-@json_response
-def testtree(request):
-    roots_query = CellTreeNode.objects.filter(parent__isnull=True)
-    print roots_query
-    if roots_query:
-        return {'newick': newickify(roots_query[0])}
-    return {'newick': ''}
-
-@json_response
-def longview(request):
-    time.sleep(60)
-    return {'ok': '1'}
-
-
 def partner_cells_table_view(request, partner_name,
                              cell_folder=settings.S_MAIN,
                              individual_name=None,
@@ -832,3 +542,4 @@ def partner_cells_html_view(request, partner_name, individual_name=None, palette
     partner_dict = get_partner_report(partner_name, individual_name, palette_name=palette_name)
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)
+
