@@ -4,10 +4,9 @@ from collections import defaultdict
 
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
 
-from genomes.models import TargetEnrichment
-from targeted_enrichment.planning.models import Microsatellite
+from targeted_enrichment.planning.models import Microsatellite, TargetEnrichment
 from wet_storage.models import SampleLocation
-from lib_prep.workflows.models import PrimersMultiplex
+from lib_prep.multiplexes.models import TERMultiplex
 
 
 def get_targets_by_panel(panel):

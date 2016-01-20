@@ -13,10 +13,10 @@ from spyne.decorator import rpc
 from spyne.error import *
 from Bio.SeqUtils.MeltingTemp import Tm_staluc
 
-from genomes.models import Microsatellite, TargetEnrichmentType, Assembly, Chromosome
+from genomes.models import Assembly, Chromosome
 from targeted_enrichment.planning.models import Target, Microsatellite
 from wet_storage.models import Plate
-from lib_prep.workflows.models import Panel
+from lib_prep.multiplexes.models import Panel
 from linapp.queries import get_targets_by_panel, get_targets_by_aar
 
 
