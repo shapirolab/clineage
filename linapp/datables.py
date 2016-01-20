@@ -1,4 +1,4 @@
-from linapp.models import *
+#from linapp.models import *
 from datable.web.table import Table
 from datable.web.storage import Storage
 from datable.web.columns import StringColumn, DateTimeColumn
@@ -8,133 +8,20 @@ from datable.web.extra.widgets import DateTimeLessOrEqual
 from datable.web.extra.widgets import ForeignKeyComboBox
 from datable.web.extra.widgets import DateTimeGreaterOrEqual
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 
-def getmemberstable(exp):
-    return Table(
-        name='memberstable',
-        storage=Storage(
-            querySet=ExperimentUser.objects.filter(experiment=exp).select_related(),
-            columns=[
-                StringColumn('user'),
-                StringColumn('role'),
-                ],
-        ),
-    )
+from sampling.models import Individual, Extraction, ExtractionEvent, \
+    SamplingEvent, Cell, SampleComposition, SampleStatus, Location, \
+    Organ, Tissue
+from wet_storage.models import PlateType, Plate
 
-def gettargetAnalysistable(exp):
-    return Table(
-        name='targetAnalysistable',
-        storage=Storage(
-            querySet=exp.targetsanalysis().select_related(),
-            columns=[
-                StringColumn('target', width=100),
-                StringColumn('distribution', width=100),
-                StringColumn('creation', width=100),
-                StringColumn('sequencingdata', width=100),
-                ],
-        ),
-    )
-
-# def gettrueSequencestable(exp):
-#     return Table(
-#         name='trueSequencestable',
-#         storage=Storage(
-#             querySet=exp.truesequences().select_related(),
-#             columns=[
-#                 StringColumn('value', width=100),
-#                 StringColumn('creation', width=100),
-#                 StringColumn('distribution', width=100),
-#             ],
-#         ),
-#     )
-
-def gettargetsVariantstable(exp):
-    return Table(
-        name='targetsVariantstable',
-        storage=Storage(
-            querySet=exp.targetsvariants().select_related(),
-            columns=[
-                StringColumn('value', width=100),
-                StringColumn('type', width=100),
-                StringColumn('creation', width=100),
-                StringColumn('ts', width=100),
-            ],
-        ),
-    )
-
-def getgenSigstable(exp):
-    return Table(
-        name='genSigstable',
-        storage=Storage(
-            querySet=exp.gensigs().select_related(),
-            columns=[
-                StringColumn('value', width=100),
-                StringColumn('creation', width=100),
-                ],
-        ),
-    )
-
-def getDMtable(exp):
-    return Table(
-        name='DMtable',
-        storage=Storage(
-            querySet=exp.dms().select_related(),
-            columns=[
-                StringColumn('cell1', width=100),
-                StringColumn('cell2', width=100),
-                StringColumn('distance', width=100),
-                StringColumn('creation', width=100),
-                ],
-        ),
-    )
-
-def getfilestable(exp):
-    return Table(
-        name='filestable',
-        storage=Storage(
-            querySet=ExperimentFile.objects.filter(experiment=exp),
-            columns=[
-                StringColumn('title', width=100),
-                StringColumn('file_name', width=150),
-                StringColumn('context', width=150),
-                StringColumn('upload_date', width=150),
-                StringColumn('user', width=150),
-                StringColumn('description', width=150),
-                ],
-        ),
-    )
-
-def getalgrunstable(alg):
-    return Table(
-        name='algrunstable',
-        storage=Storage(
-            querySet=alg.runs.all(),
-            columns=[
-                StringColumn('runname', width=100),
-                StringColumn('user', width=150),
-                DateTimeColumn('timestamp', width=150),
-                ],
-        ),
-        objectpath=reverse('algrunform_base')
-    )
-
-def getalgparamstable(alg):
-    return Table(
-        name='algparamstable',
-        storage=Storage(
-            querySet=alg.parameters.all(),
-            columns=[
-                StringColumn('name', width=100),
-                ],
-        ),
-    )
-
-
-def getindividualstable(exp=None):
-    if exp:
-        query = exp.individuals()
-    else:
-        query = Individual.objects.order_by('-pk')
+#def getindividualstable(exp=None):
+    #if exp:
+        #query = exp.individuals()
+    #else:
+        #query = Individual.objects.order_by('-pk')
+def getindividualstable():
+    query = Individual.objects.order_by('-pk')
     return Table(
         name='individualstable',
         storage=Storage(
@@ -305,48 +192,24 @@ def getsamplestable():
     )
 
 
-def getpDNAtable(exp):
-    return Table(
-        name='pDNAtable',
-        storage=Storage(
-            querySet=exp.cellscontents().select_related(),
-            columns=[
-                StringColumn('name', width=100),
-                StringColumn('parent', width=100),
-                StringColumn('cell', width=150),
-                StringColumn('panel', width=150),
-                StringColumn('type', width=150),
-                StringColumn('protocol', width=150),
-                StringColumn('user', width=150),
-                StringColumn('comment', width=150),
-                ],
-        ),
-    )
+#def getpDNAtable(exp):
+    #return Table(
+        #name='pDNAtable',
+        #storage=Storage(
+            #querySet=exp.cellscontents().select_related(),
+            #columns=[
+                #StringColumn('name', width=100),
+                #StringColumn('parent', width=100),
+                #StringColumn('cell', width=150),
+                #StringColumn('panel', width=150),
+                #StringColumn('type', width=150),
+                #StringColumn('protocol', width=150),
+                #StringColumn('user', width=150),
+                #StringColumn('comment', width=150),
+                #],
+        #),
+    #)
 
-
-def getalgorithmstable():
-    return Table(
-        name='algorithmstable',
-        storage=Storage(
-            querySet=Algorithm.objects.all(),
-            columns=[
-                StringColumn('name', width=100),
-                StringColumn('type', width=150),
-                StringColumn('version', width=150),
-                ],
-            widgets=[
-                StringWidget('name', placeholder=_("Name")),
-                StringWidget('version', placeholder=_("Version")),
-                ForeignKeyComboBox(
-                    'type',
-                    otherSet=Organ.objects.all(),
-                    otherField='name',
-                    otherFormat='Type: %(name)s',
-                    placeholder=_("Type")),
-                ]
-        ),
-        objectpath='/CLineage/algorithms/',
-    )
 
 def getplatestable():
     return Table(
@@ -376,18 +239,18 @@ def getplatestable():
     )
 
 
-def getsequencingtable(exp):
-    return Table(
-        name='sequencingtable',
-        storage=Storage(
-            querySet=exp.sequencings(),
-            columns=[
-                StringColumn('sample', width=100),
-                StringColumn('data', width=150),
-                StringColumn('machine', width=150),
-                StringColumn('protocol', width=150),
-                StringColumn('user', width=150),
-                DateTimeColumn('date', width=150),
-                ],
-        ),
-    )
+#def getsequencingtable(exp):
+    #return Table(
+        #name='sequencingtable',
+        #storage=Storage(
+            #querySet=exp.sequencings(),
+            #columns=[
+                #StringColumn('sample', width=100),
+                #StringColumn('data', width=150),
+                #StringColumn('machine', width=150),
+                #StringColumn('protocol', width=150),
+                #StringColumn('user', width=150),
+                #DateTimeColumn('date', width=150),
+                #],
+        #),
+    #)
