@@ -1,9 +1,13 @@
 import os
 import csv
-from django.utils.encoding import smart_str
 import seaborn as sns  # development
 from collections import defaultdict
-from linapp.models import User, Cell, Individual, UserReport, FACS
+
+from django.utils.encoding import smart_str
+from django.contrib.auth.models import User
+
+from linapp.models import UserReport
+from sampling.models import Cell, Individual
 
 
 def query_partner_individuals(partner_name, individual_name=None):
