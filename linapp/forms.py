@@ -5,8 +5,8 @@ from sampling.models import Individual, SamplingEvent, SampleComposition, \
     SampleStatus
 from targeted_enrichment.planning.models import Target
 from lib_prep.multiplexes.models import Panel
+from lib_prep.workflows.models import CellContentProtocol
 from wet_storage.models import Plate, PlateType, StorageBox
-from linapp.models import Protocol 
 from linapp.widgets import *
 
 
@@ -52,4 +52,4 @@ class PlateInputForm(forms.Form):
     # logical fields
     user = ModelChoiceField(User.objects.all())
     timestamp = DateField()
-    protocol = ModelChoiceField(Protocol.objects.all(), required=False)
+    protocol = ModelChoiceField(CellContentProtocol.objects.all(), required=False)

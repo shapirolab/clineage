@@ -299,7 +299,7 @@ def plate_input(request):
                         type=plate_content_type,
                         name=plate_form.cleaned_data['cells_name_prefix'] + index2str(index),
                         protocol=cell_content_protocol,
-                        seq_ready=False,
+                        #seq_ready=False,
                         user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
@@ -382,7 +382,7 @@ def plate_input_with_names(request):
                         type=plate_content_type,
                         name=cell_value,
                         protocol=cell_content_protocol,
-                        seq_ready=False,
+                        #seq_ready=False,
                         user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
