@@ -72,3 +72,9 @@ class DNABarcode1(KitSynthetic,PlusStrandMixin):
 
 class DNABarcode2(KitSynthetic,MinusStrandMixin):
     pass
+
+class PadlockAmplificationPlusPrimer(KitSynthetic,PlusStrandMixin):
+    pass
+
+class PadlockAmplificationMinusPrimer(KitSynthetic,MinusStrandMixin):
+    pass

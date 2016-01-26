@@ -17,7 +17,8 @@ from django.contrib.contenttypes import fields
 
 from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
     IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
-    IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2
+    IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, \
+    PadlockAmplificationPlusPrimer, PadlockAmplificationMinusPrimer
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 from misc.dna import DNA
@@ -150,3 +151,104 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
+class BaseShortPadlock(models.Model):
+    """
+    A piece of DNA that selectively binds to the template in two locations,
+    and by filling in the gap gets a circular DNA containing the targeted
+    region.
+    Binds to the amplicon at left_region and right_region, and prepends
+    left_tail and append right_tail to the new amplicon.
+    Contains generic adaptors on each end, for amplification from oligomix.
+    """
+    name = models.CharField(max_length=50)
+    left_amp_primer = models.ForeignKey(PadlockAmplificationPlusPrimer)
+    right_amp_primer = models.ForeignKey(PadlockAmplificationMinusPrimer)
+    physical_locations = fields.GenericRelation(SampleLocation,
+                                             content_type_field='content_type',
+                                             object_id_field='object_id')
+
+    @property
+    def left_region(self):
+        raise NotImplementedError()
+
+    @property
+    def right_region(self):
+        raise NotImplementedError()
+
+    @property
+    def left_tail(self):
+        raise NotImplementedError()
+
+    @property
+    def right_tail(self):
+        raise NotImplementedError()
+
+    @property
+    def backbone(self):
+        raise NotImplementedError()
+
+    @property
+    def sequence(self):
+        return self.left_amp_primer.sequence + \
+            self.right_region + self.right_tail + \
+            self.backbone + \
+            self.left_tail + self.left_region + \
+            self.right_amp_primer.sequence
+
+    class Meta:
+        abstract = True
+
+class BaseLongPadlockTemplate(models.Model):
+    """
+    The original template from which a long padlock is generated, using stock
+    DNA as the backbone.
+    Contains the left and right targeting regions separated by a restriction
+    site, which is digested after annealing with the backbone.
+    """
+    name = models.CharField(max_length=50)
+    left_amp_primer = models.ForeignKey(PadlockAmplificationPlusPrimer)
+    right_amp_primer = models.ForeignKey(PadlockAmplificationMinusPrimer)
+    physical_locations = fields.GenericRelation(SampleLocation,
+                                             content_type_field='content_type',
+                                             object_id_field='object_id')
+
+    @property
+    def left_region(self):
+        raise NotImplementedError()
+
+    @property
+    def right_region(self):
+        raise NotImplementedError()
+
+    @property
+    def left_tail(self):
+        raise NotImplementedError()
+
+    @property
+    def right_tail(self):
+        raise NotImplementedError()
+
+    @property
+    def filler(self):
+        raise NotImplementedError()
+
+    @property
+    def left_backbone_adaptor(self):
+        raise NotImplementedError()
+
+    @property
+    def right_backbone_adaptor(self):
+        raise NotImplementedError()
+
+    @property
+    def sequence(self):
+        return self.right_backbone_adaptor + \
+            self.left_tail + self.left_region + \
+            self.right_amp_primer.sequence + \
+            self.filler + \
+            self.left_amp_primer.sequence + \
+            self.right_region + self.right_tail + \
+            self.left_backbone_adaptor
+
+    class Meta:
+        abstract = True
