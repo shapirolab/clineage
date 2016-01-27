@@ -1,13 +1,13 @@
 __author__ = 'ofirr'
 
-from linapp.models import TargetEnrichment
+from target_enrichments.planning.models import TargetEnrichment
 
 def other_target_enrichment_withing_margins(target_enrichment, existing_target_enrichments, margins=10000):
     """Check if the new amplicon collides with one of the existing amplicons within given margins"""
     existing_target_enrichment_pks = [te.pk for te in existing_target_enrichments]
     existing_target_enrichments_query = TargetEnrichment.objects.filter(pk__in=existing_target_enrichment_pks)
-    return existing_target_enrichments_query.filter(left__start_pos__lte=target_enrichment.right.end_pos+margins).\
-        filter(right__end_pos__gte=target_enrichment.left.start_pos-margins)
+    return existing_target_enrichments_query.filter(left__slice__start_pos__lte=target_enrichment.right.slice.end_pos+margins).\
+        filter(right__slice__end_pos__gte=target_enrichment.left.slice.start_pos-margins)
 
 
 def populate_conditioned_mpx(conditioned_mpx, target_enrichment, margins=10000):
