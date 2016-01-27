@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from model_utils.managers import InheritanceManager
 
 from genomes.models import DNASlice, Chromosome
+from misc.dna import DNA
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
 
@@ -93,10 +94,14 @@ class TargetEnrichment(models.Model):
 
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
-    sequence = models.CharField(max_length=50) # TODO: DNAField
+    _sequence = models.CharField(max_length=50) # TODO: DNAField
     cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
     sticky_bases = models.IntegerField()
     sequence_len = models.PositiveIntegerField()
+
+    @property
+    def sequence(self):
+        return DNA(self._sequence)
 
     def save(self, *args, **kwargs):
         self.sequence_len = len(self.sequence)
