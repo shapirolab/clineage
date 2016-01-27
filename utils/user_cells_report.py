@@ -3,7 +3,7 @@ import csv
 from django.utils.encoding import smart_str
 import seaborn as sns  # development
 from collections import defaultdict
-from linapp.models import User, Cell, Individual, UserReport
+from linapp.models import User, Cell, Individual, UserReport, FACS
 
 
 def query_partner_individuals(partner_name, individual_name=None):
@@ -178,6 +178,14 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
         for cell, file_name in get_cells_filenames_in_folder(sorted_cells(individual), cell_folder):
             for cell_cont in cell.cellcontent_set.all():
                 assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
+                sampling = cell.sampling
+                if sampling:
+                    try:
+                        facs = sampling.facs
+                    except FACS.DoesNotExist:
+                        facs = None
+                else:
+                    facs = None
                 for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
                     yield {
                         'CellContent ID': smart_str(cell_cont.pk),
@@ -187,6 +195,8 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Cell Group': smart_str(cell.classification),
                         'Individual Name': smart_str(cell.individual.name),
                         'Individual Comment': smart_str(cell.individual.comment),
+                        'Extraction Event': smart_str(cell.sampling.extraction.extraction_event.name if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
+                        'Extraction Event Comment': smart_str(cell.sampling.extraction.extraction_event.comment if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
                         'Gender': smart_str(cell.individual.sex),
                         'Sample Name': smart_str(cell.sampling.extraction.name if cell.sampling else ''),
                         'Sample Comment': smart_str(cell.sampling.extraction.comment if cell.sampling else ''),
@@ -195,6 +205,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
                         'Sampling Event': smart_str(cell.sampling.name if cell.sampling else ''),
                         'Group Color': str(color_map[cell]).replace('(', '[').replace(')', ']').replace(',', ''),
                         'Sampling Comment': smart_str(cell.sampling.comment if cell.sampling else ''),
+                        'FACS Marker': smart_str(facs.marker.name if facs else ''),
                         'Cell Type': smart_str(cell.composition.name),
                         'Plate': smart_str(loc.plate.name),
                         'Well': smart_str(loc.well),
