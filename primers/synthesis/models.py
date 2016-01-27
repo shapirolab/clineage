@@ -19,7 +19,8 @@ from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
     IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
     IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, \
     PadlockAmplificationPlusPrimer, PadlockAmplificationMinusPrimer
-from targeted_enrichment.planning.models import UGSPlus, UGSMinus
+from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
+    RestrictionEnzyme
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 from misc.dna import DNA
 
@@ -197,6 +198,34 @@ class BaseShortPadlock(models.Model):
 
     class Meta:
         abstract = True
+
+class ShortPadlockFirst(BaseShortPadlock):
+    left_ugs = models.ForeignKey(UGSPlus)
+    right_ugs = models.ForeignKey(UGSMinus)
+    irac1 = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    irac2 = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
+
+    @property
+    def left_region(self):
+        return self.left_ugs.ref_sequence
+
+    @property
+    def right_region(self):
+        return self.right_ugs.ref_sequence
+
+    @property
+    def left_tail(self):
+        return self.irac1.primer1tail
+
+    @property
+    def right_tail(self):
+        return self.irac2.primer1tail
+
+    @property
+    def backbone(self):
+        return self.restriction_enzyme.sequence
+
 
 class BaseLongPadlockTemplate(models.Model):
     """
