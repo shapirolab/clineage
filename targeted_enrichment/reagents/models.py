@@ -4,7 +4,9 @@ from django.db import models
 
 from model_utils.managers import InheritanceManager
 
-from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
+from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, \
+    PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
+    TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer, ShortPadlockFirst
 from targeted_enrichment.planning.models import TargetEnrichment
 from wet_storage.models import SampleLocation
 
@@ -66,3 +68,6 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
 class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
+
+class ShortPadlockFirstTER(TargetedEnrichmentReagent):
+    padlock = models.ForeignKey(ShortPadlockFirst)
