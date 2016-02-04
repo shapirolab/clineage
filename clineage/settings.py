@@ -165,7 +165,7 @@ INSTALLED_APPS = (
     'primers.parts',
     'primers.synthesis',
     'sampling',
-    'sequencing',
+    'sequencing.analysis',
     'sequencing.runs',
     'sequencing.unwrapping',
     'targeted_enrichment.planning',
