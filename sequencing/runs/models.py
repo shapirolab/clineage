@@ -21,10 +21,9 @@ class Machine(models.Model):
         return self.type.__unicode__() + '_' + self.machineid
 
 
-
 class NGSRun(models.Model):
     libraries = models.ManyToManyField(Library)
-    directory = models.FilePathField(null=True)
+    bcl_directory = models.FilePathField(allow_files=False, allow_folders=True, null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     # TODO: add seqeuencing primers. kit?
@@ -37,21 +36,27 @@ class DemultiplexingScheme(models.Model):
     description = models.TextField()
 
 
+class Demultiplexing(models.Model):
+    ngs_run = models.ForeignKey(NGSRun)
+    demux_scheme = models.ForeignKey(DemultiplexingScheme)
+
+
+class DemultiplexedReads(models.Model):
+    demux = models.ForeignKey(Demultiplexing)
+    barcoded_content = models.ForeignKey(BarcodedContent)
+    library = models.ForeignKey(Library)
+    fastq1 = models.FilePathField(null=True)
+    fastq2 = models.FilePathField(null=True)
+
+
 class MergingScheme(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
 
 
-
-class DemultiplexedReads(models.Model):
-    ngs_run = models.ForeignKey(NGSRun)
-    directory = models.FilePathField(null=True)
-    demux_scheme = models.ForeignKey(DemultiplexingScheme)
-
-
 class MergedReads(models.Model):
-    demux_reads = models.ForeignKey(DemultiplexedReads)
-    directory = models.FilePathField(null=True)
+    demux_read = models.ForeignKey(DemultiplexedReads)
     merge_scheme = models.ForeignKey(MergingScheme)
+    fastq = models.FilePathField(null=True)
 
 
