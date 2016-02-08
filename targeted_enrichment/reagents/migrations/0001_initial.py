@@ -110,4 +110,15 @@ class Migration(migrations.Migration):
             name='old_te',
             field=models.ForeignKey(to='linapp.TargetEnrichment', null=True),
         ),
+        # Temporary fields to assist with the migration of the adamiya.
+        migrations.AddField(
+            model_name='targetednotailprimerpairter',
+            name='old_adam_te_pk',
+            field=models.PositiveIntegerField(null=True),
+        ),
+        migrations.AddField(
+            model_name='pcr1primerpairterbase',
+            name='old_adam_te_pk',
+            field=models.PositiveIntegerField(null=True),
+        ),
     ]

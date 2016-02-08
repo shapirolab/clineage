@@ -32,6 +32,7 @@ class TargetedEnrichmentReagent(models.Model):
     physical_locations = fields.GenericRelation(SampleLocation,
                                                  content_type_field='content_type',
                                                  object_id_field='object_id')
+    old_adam_te_pk = models.PositiveIntegerField(null=True)
 
     objects = InheritanceManager()
 

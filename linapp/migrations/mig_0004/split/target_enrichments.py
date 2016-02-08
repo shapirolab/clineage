@@ -22,6 +22,7 @@ def create_te_and_ter(old_te, ter_model, apps, schema_editor):
         te=te,
         left_primer_id=old_left.new_primer_id,
         right_primer_id=old_right.new_primer_id,
+        old_adam_te_pk=old_te.id,  # Temporary field to assist with the migration of the adamiya.
         **{k: old_te.__dict__[k] for k in [
             "passed_validation",
             # Assumes the TargetEnrichmentFailureType-s have already been

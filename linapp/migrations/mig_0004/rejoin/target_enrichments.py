@@ -12,6 +12,14 @@ def create_target_enrichment(ter, type, apps, schema_editor):
     """
     db_alias = schema_editor.connection.alias
     OldTargetEnrichment = apps.get_model("linapp", "TargetEnrichment")
+    d = {k: ter.__dict__[k] for k in [
+            "passed_validation",
+            "validation_failure_id",
+            "validation_date",
+            "comment",
+    ]}
+    if ter.old_adam_te_pk is not None:
+        d["id"] = ter.old_adam_te_pk
     old_te = OldTargetEnrichment.objects.using(db_alias).create(
         type=type,
         amplicon=getdna(
@@ -22,12 +30,7 @@ def create_target_enrichment(ter, type, apps, schema_editor):
         chromosome_id=ter.te.chromosome_id,
         left_id=ter.left_primer.old_primer_id,
         right_id=ter.right_primer.old_primer_id,
-        **{k: ter.__dict__[k] for k in [
-            "passed_validation",
-            "validation_failure_id",
-            "validation_date",
-            "comment",
-        ]}
+        **d
     )
     target_ids = [target.old_target_id for target in \
         ter.te.targets.using(db_alias).all()]
@@ -36,7 +39,7 @@ def create_target_enrichment(ter, type, apps, schema_editor):
     ter.old_te = old_te
     ter.save()
     # To save select on old_te.
-    if ter.te.old_te_id is None:
+    if ter.te.old_te_id is None or ter.old_adam_te_pk is not None:
         ter.te.old_te = old_te
         ter.te.save()
     transfer_physical_locations(ter, old_te, apps, schema_editor)
