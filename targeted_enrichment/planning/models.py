@@ -38,6 +38,7 @@ class TargetEnrichment(models.Model):
     # slice = models.ForeignKey(DNASlice)
     targets = models.ManyToManyField(Target)
     partner = models.ManyToManyField(User, null=True) # TODO: external table.
+    planning_version = models.IntegerField()
 
     def update_enriched_targets(self): # return queryset of targets between the two primers and updates the m2m targets field
         assert self.left.slice.chromosome == self.right.slice.chromosome

@@ -7,7 +7,7 @@ from django.db.models import F
 from linapp.migrations.mig_0004.utils import transfer_physical_locations, \
     check_partition, NotCovering, NotMutuallyExclusive, get_partner_ids
 
-def create_te_and_ter(old_te, ter_model, apps, schema_editor):
+def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor):
     db_alias = schema_editor.connection.alias
     TargetEnrichment = apps.get_model("planning", "TargetEnrichment")
     TargetEnrichmentReagent = apps.get_model("reagents", ter_model)
@@ -17,6 +17,7 @@ def create_te_and_ter(old_te, ter_model, apps, schema_editor):
         chromosome_id=old_te.chromosome_id,
         left_id=old_left.new_ugs_id,
         right_id=old_right.new_ugs_id,
+        planning_version=planning_version,
     )
     ter = TargetEnrichmentReagent.objects.using(db_alias).create(
         te=te,
@@ -48,28 +49,28 @@ def convert_pcr1_target_enrichments(qs, apps, schema_editor):
     print
     print "Converting normal PCR1 target enrichments:"
     for old_te in bar(qs):
-        create_te_and_ter(old_te, "PCR1PrimerPairTER", apps, schema_editor)
+        create_te_and_ter(old_te, "PCR1PrimerPairTER", 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_pcr1_with_tag_target_enrichments(qs, apps, schema_editor):
     print
     print "Converting PCR1 target enrichments with company tag:"
     for old_te in bar(qs):
-        create_te_and_ter(old_te, "PCR1WithCompanyTagPrimerPairTER", apps, schema_editor)
+        create_te_and_ter(old_te, "PCR1WithCompanyTagPrimerPairTER", 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_deprecated_pcr1_target_enrichments(qs, apps, schema_editor):
     print
     print "Converting deprecated PCR1 target enrichments:"
     for old_te in bar(qs):
-        create_te_and_ter(old_te, "PCR1PrimerPairTERDeprecated", apps, schema_editor)
+        create_te_and_ter(old_te, "PCR1PrimerPairTERDeprecated", 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_no_tail_target_enrichments(qs, apps, schema_editor):
     print
     print "Converting no-tail target enrichments:"
     for old_te in bar(qs):
-        create_te_and_ter(old_te, "TargetedNoTailPrimerPairTER", apps, schema_editor)
+        create_te_and_ter(old_te, "TargetedNoTailPrimerPairTER", 0, apps, schema_editor)
 
 def split_target_enrichments(apps, schema_editor):
     db_alias = schema_editor.connection.alias
