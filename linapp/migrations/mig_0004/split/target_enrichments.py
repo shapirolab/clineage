@@ -4,8 +4,9 @@ from frogress import bar
 from django.db import IntegrityError, transaction
 from django.db.models import F
 
-from linapp.migrations.mig_0004.utils import transfer_physical_locations, \
-    check_partition, NotCovering, NotMutuallyExclusive, get_partner_ids
+from linapp.migrations.mig_0004.utils import get_physical_locations, \
+    alter_physical_locations, check_partition, NotCovering, \
+    NotMutuallyExclusive, get_partner_ids
 
 def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, force_loc=False):
     db_alias = schema_editor.connection.alias
@@ -25,7 +26,8 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, 
     te.partner.add(*get_partner_ids(old_te, apps, schema_editor))
     old_te.new_te = te
     ret = te
-    if old_te.physical_locations.using(db_alias).all():
+    locations = get_physical_locations(old_te, apps, schema_editor)
+    if locations:
         ter = TargetEnrichmentReagent.objects.using(db_alias).create(
             te=te,
             left_primer_id=old_left.new_primer_id,
@@ -43,7 +45,7 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, 
         ret = ter
         old_te.new_ter_id = ter.id
         old_te.new_ter_model = ter_model
-        transfer_physical_locations(old_te, ter, apps, schema_editor)
+        alter_physical_locations(ter, locations, apps, schema_editor)
     elif force_loc:
         raise IntegrityError("We have a bad TE without a physical_location, "
             "ex. {}".format(old_te.id))
