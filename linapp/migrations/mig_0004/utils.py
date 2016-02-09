@@ -9,23 +9,23 @@ class NotCovering(Exception):
 class NotMutuallyExclusive(Exception):
     pass
 
-@transaction.atomic
-def transfer_physical_locations(old_obj, new_obj, apps, schema_editor):
-    """
-    Transfer all physical locations (GFK in SampleLocation-s) pointing at
-    old_obj to point at new_obj.
-    """
+def get_physical_locations(old_obj, apps, schema_editor):
     db_alias = schema_editor.connection.alias
     ContentType = apps.get_model("contenttypes", "ContentType")
     SampleLocation = apps.get_model("wet_storage", "SampleLocation")
     # NOTE: this relies on get_for_model creating the new types if required,
     # since we don't have the new CTs available yet.
     old_ct = ContentType.objects.get_for_model(old_obj)
-    new_ct = ContentType.objects.get_for_model(new_obj)
     locations = SampleLocation.objects.using(db_alias).filter(
         content_type=old_ct,
         object_id=old_obj.id,
     )
+    return locations
+
+def alter_physical_locations(new_obj, locations, apps, schema_editor):
+    db_alias = schema_editor.connection.alias
+    ContentType = apps.get_model("contenttypes", "ContentType")
+    new_ct = ContentType.objects.get_for_model(new_obj)
     for location in locations:
         timestamp = [f for f in location._meta.fields if f.name=="timestamp"][0]
         timestamp.auto_now = False
@@ -33,6 +33,14 @@ def transfer_physical_locations(old_obj, new_obj, apps, schema_editor):
         location.object_id = new_obj.id
         location.save()
         timestamp.auto_now = True
+
+def transfer_physical_locations(old_obj, new_obj, apps, schema_editor):
+    """
+    Transfer all physical locations (GFK in SampleLocation-s) pointing at
+    old_obj to point at new_obj.
+    """
+    locations = get_physical_locations(old_obj, apps, schema_editor)
+    alter_physical_locations(new_obj, locations, apps, schema_editor)
 
 def get_partner_ids(obj, apps, schema_editor):
     """
