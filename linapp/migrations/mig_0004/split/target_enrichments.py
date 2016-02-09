@@ -7,7 +7,7 @@ from django.db.models import F
 from linapp.migrations.mig_0004.utils import transfer_physical_locations, \
     check_partition, NotCovering, NotMutuallyExclusive, get_partner_ids
 
-def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor):
+def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, force_loc=False):
     db_alias = schema_editor.connection.alias
     TargetEnrichment = apps.get_model("planning", "TargetEnrichment")
     TargetEnrichmentReagent = apps.get_model("reagents", ter_model)
@@ -19,30 +19,36 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor):
         right_id=old_right.new_ugs_id,
         planning_version=planning_version,
     )
-    ter = TargetEnrichmentReagent.objects.using(db_alias).create(
-        te=te,
-        left_primer_id=old_left.new_primer_id,
-        right_primer_id=old_right.new_primer_id,
-        old_adam_te_pk=old_te.id,  # Temporary field to assist with the migration of the adamiya.
-        **{k: old_te.__dict__[k] for k in [
-            "passed_validation",
-            # Assumes the TargetEnrichmentFailureType-s have already been
-            # migrated, preserving their id.
-            "validation_failure_id",
-            "validation_date",
-            "comment",
-        ]}
-    )
     target_ids = [old_target.new_target_id for old_target in \
         old_te.targets.using(db_alias).all()]
     te.targets.add(*target_ids)
     te.partner.add(*get_partner_ids(old_te, apps, schema_editor))
     old_te.new_te = te
-    old_te.new_ter_id = ter.id
-    old_te.new_ter_model = ter_model
+    ret = te
+    if old_te.physical_locations.using(db_alias).all():
+        ter = TargetEnrichmentReagent.objects.using(db_alias).create(
+            te=te,
+            left_primer_id=old_left.new_primer_id,
+            right_primer_id=old_right.new_primer_id,
+            old_adam_te_pk=old_te.id,  # Temporary field to assist with the migration of the adamiya.
+            **{k: old_te.__dict__[k] for k in [
+                "passed_validation",
+                # Assumes the TargetEnrichmentFailureType-s have already been
+                # migrated, preserving their id.
+                "validation_failure_id",
+                "validation_date",
+                "comment",
+            ]}
+        )
+        ret = ter
+        old_te.new_ter_id = ter.id
+        old_te.new_ter_model = ter_model
+        transfer_physical_locations(old_te, ter, apps, schema_editor)
+    elif force_loc:
+        raise IntegrityError("We have a bad TE without a physical_location, "
+            "ex. {}".format(old_te.id))
     old_te.save()
-    transfer_physical_locations(old_te, ter, apps, schema_editor)
-    return ter
+    return ret
 
 @transaction.atomic
 def convert_pcr1_target_enrichments(qs, apps, schema_editor):
@@ -63,7 +69,7 @@ def convert_deprecated_pcr1_target_enrichments(qs, apps, schema_editor):
     print
     print "Converting deprecated PCR1 target enrichments:"
     for old_te in bar(qs):
-        create_te_and_ter(old_te, "PCR1PrimerPairTERDeprecated", 1, apps, schema_editor)
+        create_te_and_ter(old_te, "PCR1PrimerPairTERDeprecated", 1, apps, schema_editor, force_loc=True)
 
 @transaction.atomic
 def convert_no_tail_target_enrichments(qs, apps, schema_editor):
