@@ -127,8 +127,9 @@ def convert_left_primer_tail(qs, apps, schema_editor):
                 primer = PCR1WithCompanyTagPlusPrimer.objects.using(db_alias) \
                     .create(**d)
             else:
-                raise IntegrityError("Bad left primer with tail: sequence and "
-                    "descriptive fields don't match.")
+                raise IntegrityError("Bad left primer with tail {}: "
+                    "sequence and descriptive fields don't match.".format(
+                        old_primer.id))
         old_primer.new_primer_id = primer.id
         old_primer.new_primer_model = primer._meta.model_name
         old_primer.save()
@@ -155,8 +156,9 @@ def convert_right_primer_tail(qs, apps, schema_editor):
                 primer = PCR1WithCompanyTagMinusPrimer.objects.using(db_alias) \
                     .create(**d)
             else:
-                raise IntegrityError("Bad right primer with tail: sequence and "
-                    "descriptive fields don't match.")
+                raise IntegrityError("Bad right primer with tail {}: "
+                    "sequence and descriptive fields don't match.".format(
+                        old_primer.id))
         old_primer.new_primer_id = primer.id
         old_primer.new_primer_model = primer._meta.model_name
         old_primer.save()
@@ -174,8 +176,8 @@ def convert_left_primer_notail(qs, apps, schema_editor):
         if check_left_primer(old_primer):
             primer = TargetedNoTailPlusPrimer.objects.using(db_alias).create(**d)
         else:
-            raise IntegrityError("Bad left primer without tail: sequence and "
-                "descriptive fields don't match.")
+            raise IntegrityError("Bad left primer without tail {}: sequence "
+                "and descriptive fields don't match.".format(old_primer.id))
         old_primer.new_primer_id = primer.id
         old_primer.new_primer_model = primer._meta.model_name
         old_primer.save()
@@ -193,8 +195,8 @@ def convert_right_primer_notail(qs, apps, schema_editor):
         if check_right_primer(old_primer):
             primer = TargetedNoTailMinusPrimer.objects.using(db_alias).create(**d)
         else:
-            raise IntegrityError("Bad right primer without tail: sequence and "
-                "descriptive fields don't match.")
+            raise IntegrityError("Bad right primer without tail {}: sequence "
+                "and descriptive fields don't match.".format(old_primer.id))
         old_primer.new_primer_id = primer.id
         old_primer.new_primer_model = primer._meta.model_name
         old_primer.save()
@@ -216,8 +218,9 @@ def convert_unknown_primer_notail(qs, apps, schema_editor):
             d = prepare_right_primer_dict(old_primer, apps, schema_editor)
             primer = TargetedNoTailMinusPrimer.objects.using(db_alias).create(**d)
         else:
-            raise IntegrityError("Bad primer without tail: sequence and "
-                "descriptive fields don't match, neither as left nor as right.")
+            raise IntegrityError("Bad primer without tail {}: sequence and "
+                "descriptive fields don't match, neither as left nor as "
+                "right.".format(old_primer.id))
         old_primer.new_primer_id = primer.id
         old_primer.new_primer_model = primer._meta.model_name
         old_primer.save()
