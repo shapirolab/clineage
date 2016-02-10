@@ -6,8 +6,9 @@ from django.db import IntegrityError, transaction
 from django.db.models import Count
 
 from linapp.migrations.mig_0004.split.common import get_or_create_slice
-from linapp.migrations.mig_0004.utils import transfer_physical_locations, \
-    check_partition, NotCovering, NotMutuallyExclusive, getdna, rc
+from linapp.migrations.mig_0004.utils import get_physical_locations, \
+    alter_physical_locations, check_partition, NotCovering, \
+    NotMutuallyExclusive, getdna, rc
 
 LEFT_TAIL = "CTACACGACGCTCTTCCGATCT" # FIXME!
 RIGHT_TAIL = "CAGACGTGTGCTCTTCCGATCT" # FIXME!
@@ -117,23 +118,29 @@ def convert_left_primer_tail(qs, apps, schema_editor):
     for old_target in bar(qs):
         old_primer = old_target.primer
         d = prepare_left_primer_dict(old_primer, apps, schema_editor)
-        d["irac"] = irac
         if check_left_primer(old_primer):
-            primer = PCR1PlusPrimer.objects.using(db_alias).create(**d)
+            Primer = PCR1PlusPrimer
         else:
             tag = get_left_primer_company_tag(old_primer)
             if tag:
                 d["tag"] = tag
-                primer = PCR1WithCompanyTagPlusPrimer.objects.using(db_alias) \
-                    .create(**d)
+                Primer = PCR1WithCompanyTagPlusPrimer
             else:
                 raise IntegrityError("Bad left primer with tail {}: "
                     "sequence and descriptive fields don't match.".format(
                         old_primer.id))
-        old_primer.new_primer_id = primer.id
-        old_primer.new_primer_model = primer._meta.model_name
+        locations = get_physical_locations(old_primer, apps, schema_editor)
+        if locations:
+            d["irac"] = irac
+            primer = Primer.objects.using(db_alias).create(**d)
+            old_primer.new_primer_id = primer.id
+            old_primer.new_primer_model = primer._meta.model_name
+            alter_physical_locations(primer, locations, apps, schema_editor)
+        elif not old_primer.left_primer.all():
+            raise IntegrityError("Bad primer {} with no location and no "
+                "TE.".format(old_primer.id))
+        # We still owe this save to prepare_left_primer_dict.
         old_primer.save()
-        transfer_physical_locations(old_primer, primer, apps, schema_editor)
 
 @transaction.atomic
 def convert_right_primer_tail(qs, apps, schema_editor):
@@ -146,23 +153,29 @@ def convert_right_primer_tail(qs, apps, schema_editor):
     for old_target in bar(qs):
         old_primer = old_target.primer
         d = prepare_right_primer_dict(old_primer, apps, schema_editor)
-        d["irac"] = irac
         if check_right_primer(old_primer):
-            primer = PCR1MinusPrimer.objects.using(db_alias).create(**d)
+            Primer = PCR1MinusPrimer
         else:
             tag = get_right_primer_company_tag(old_primer)
             if tag:
                 d["tag"] = tag
-                primer = PCR1WithCompanyTagMinusPrimer.objects.using(db_alias) \
-                    .create(**d)
+                Primer = PCR1WithCompanyTagMinusPrimer
             else:
                 raise IntegrityError("Bad right primer with tail {}: "
                     "sequence and descriptive fields don't match.".format(
                         old_primer.id))
-        old_primer.new_primer_id = primer.id
-        old_primer.new_primer_model = primer._meta.model_name
+        locations = get_physical_locations(old_primer, apps, schema_editor)
+        if locations:
+            d["irac"] = irac
+            primer = Primer.objects.using(db_alias).create(**d)
+            old_primer.new_primer_id = primer.id
+            old_primer.new_primer_model = primer._meta.model_name
+            alter_physical_locations(primer, locations, apps, schema_editor)
+        elif not old_primer.right_primer.all():
+            raise IntegrityError("Bad primer {} with no location and no "
+                "TE.".format(old_primer.id))
+        # We still owe this save to prepare_left_primer_dict.
         old_primer.save()
-        transfer_physical_locations(old_primer, primer, apps, schema_editor)
 
 @transaction.atomic
 def convert_left_primer_notail(qs, apps, schema_editor):
@@ -174,14 +187,19 @@ def convert_left_primer_notail(qs, apps, schema_editor):
         old_primer = old_target.primer
         d = prepare_left_primer_dict(old_primer, apps, schema_editor)
         if check_left_primer(old_primer):
-            primer = TargetedNoTailPlusPrimer.objects.using(db_alias).create(**d)
+            Primer = TargetedNoTailPlusPrimer
         else:
             raise IntegrityError("Bad left primer without tail {}: sequence "
                 "and descriptive fields don't match.".format(old_primer.id))
-        old_primer.new_primer_id = primer.id
-        old_primer.new_primer_model = primer._meta.model_name
+        locations = get_physical_locations(old_primer, apps, schema_editor)
+        if locations:
+            primer = Primer.objects.using(db_alias).create(**d)
+            old_primer.new_primer_id = primer.id
+            old_primer.new_primer_model = primer._meta.model_name
+            alter_physical_locations(primer, locations, apps, schema_editor)
+        # No else, these always have a TE.
+        # We still owe this save to prepare_left_primer_dict.
         old_primer.save()
-        transfer_physical_locations(old_primer, primer, apps, schema_editor)
 
 @transaction.atomic
 def convert_right_primer_notail(qs, apps, schema_editor):
@@ -193,14 +211,19 @@ def convert_right_primer_notail(qs, apps, schema_editor):
         old_primer = old_target.primer
         d = prepare_right_primer_dict(old_primer, apps, schema_editor)
         if check_right_primer(old_primer):
-            primer = TargetedNoTailMinusPrimer.objects.using(db_alias).create(**d)
+            Primer = TargetedNoTailMinusPrimer
         else:
             raise IntegrityError("Bad right primer without tail {}: sequence "
                 "and descriptive fields don't match.".format(old_primer.id))
-        old_primer.new_primer_id = primer.id
-        old_primer.new_primer_model = primer._meta.model_name
+        locations = get_physical_locations(old_primer, apps, schema_editor)
+        if locations:
+            primer = Primer.objects.using(db_alias).create(**d)
+            old_primer.new_primer_id = primer.id
+            old_primer.new_primer_model = primer._meta.model_name
+            alter_physical_locations(primer, locations, apps, schema_editor)
+        # No else, these always have a TE.
+        # We still owe this save to prepare_left_primer_dict.
         old_primer.save()
-        transfer_physical_locations(old_primer, primer, apps, schema_editor)
 
 @transaction.atomic
 def convert_unknown_primer_notail(qs, apps, schema_editor):
@@ -213,18 +236,26 @@ def convert_unknown_primer_notail(qs, apps, schema_editor):
         old_primer = old_target.primer
         if check_left_primer(old_primer):
             d = prepare_left_primer_dict(old_primer, apps, schema_editor)
-            primer = TargetedNoTailPlusPrimer.objects.using(db_alias).create(**d)
+            Primer = TargetedNoTailPlusPrimer
         elif check_right_primer(old_primer):
             d = prepare_right_primer_dict(old_primer, apps, schema_editor)
-            primer = TargetedNoTailMinusPrimer.objects.using(db_alias).create(**d)
+            Primer = TargetedNoTailMinusPrimer
         else:
             raise IntegrityError("Bad primer without tail {}: sequence and "
                 "descriptive fields don't match, neither as left nor as "
                 "right.".format(old_primer.id))
-        old_primer.new_primer_id = primer.id
-        old_primer.new_primer_model = primer._meta.model_name
+        locations = get_physical_locations(old_primer, apps, schema_editor)
+        if locations:
+            primer = Primer.objects.using(db_alias).create(**d)
+            old_primer.new_primer_id = primer.id
+            old_primer.new_primer_model = primer._meta.model_name
+            alter_physical_locations(primer, locations, apps, schema_editor)
+        else:
+            # Primers here have no TEs
+            raise IntegrityError("Bad primer {} with no location and no "
+                "TE.".format(old_primer.id))
+        # We still owe this save to prepare_left_primer_dict.
         old_primer.save()
-        transfer_physical_locations(old_primer, primer, apps, schema_editor)
 
 def split_primers(qs, apps, schema_editor):
     db_alias = schema_editor.connection.alias
