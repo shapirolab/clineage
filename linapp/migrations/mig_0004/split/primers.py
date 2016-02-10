@@ -18,20 +18,20 @@ IRAC1_OVERLAP_END = 33 # FIXME
 IRAC2_OVERLAP_START = 12 # FIXME
 IRAC2_OVERLAP_END = 34 # FIXME
 
-def check_left_primer(old_primer, tail=""):
+def check_left_primer(old_primer):
     return old_primer.sequence.sequence == \
-        tail + \
+        (old_primer.tail.tail if old_primer.tail else "") + \
         getdna(old_primer.chromosome,old_primer.start_pos,old_primer.end_pos)
 
-def check_right_primer(old_primer, tail=""):
+def check_right_primer(old_primer):
     return old_primer.sequence.sequence == \
-        tail + \
+        (old_primer.tail.tail if old_primer.tail else "") + \
         rc(getdna(old_primer.chromosome,old_primer.start_pos,
             old_primer.end_pos))
 
-def get_left_primer_company_tag(old_primer, tail=""):
+def get_left_primer_company_tag(old_primer):
     m = re.match("^{}([ACTG]){}$".format(
-            tail,
+            old_primer.tail.tail if old_primer.tail else "",
             getdna(old_primer.chromosome,old_primer.start_pos,
                 old_primer.end_pos),
         ),
@@ -40,9 +40,9 @@ def get_left_primer_company_tag(old_primer, tail=""):
     if m:
         return m.groups()[0]
 
-def get_right_primer_company_tag(old_primer, tail=""):
+def get_right_primer_company_tag(old_primer):
     m = re.match("^{}([ACTG]){}$".format(
-            tail,
+            old_primer.tail.tail if old_primer.tail else "",
             rc(getdna(old_primer.chromosome,old_primer.start_pos,
                 old_primer.end_pos)),
         ),
@@ -118,11 +118,10 @@ def convert_left_primer_tail(qs, apps, schema_editor):
         old_primer = old_target.primer
         d = prepare_left_primer_dict(old_primer, apps, schema_editor)
         d["irac"] = irac
-        if check_left_primer(old_primer,tail=old_primer.tail.tail):
+        if check_left_primer(old_primer):
             primer = PCR1PlusPrimer.objects.using(db_alias).create(**d)
         else:
-            tag = get_left_primer_company_tag(
-                old_primer,tail=old_primer.tail.tail)
+            tag = get_left_primer_company_tag(old_primer)
             if tag:
                 d["tag"] = tag
                 primer = PCR1WithCompanyTagPlusPrimer.objects.using(db_alias) \
@@ -147,11 +146,10 @@ def convert_right_primer_tail(qs, apps, schema_editor):
         old_primer = old_target.primer
         d = prepare_right_primer_dict(old_primer, apps, schema_editor)
         d["irac"] = irac
-        if check_right_primer(old_primer,tail=old_primer.tail.tail):
+        if check_right_primer(old_primer):
             primer = PCR1MinusPrimer.objects.using(db_alias).create(**d)
         else:
-            tag = get_right_primer_company_tag(
-                old_primer,tail=old_primer.tail.tail)
+            tag = get_right_primer_company_tag(old_primer)
             if tag:
                 d["tag"] = tag
                 primer = PCR1WithCompanyTagMinusPrimer.objects.using(db_alias) \
