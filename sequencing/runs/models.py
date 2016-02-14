@@ -4,7 +4,8 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
 
-__author__ = 'ofirr'
+from merge import pear_with_defaults
+from demux import run_bcl2fastq
 
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
@@ -62,6 +63,10 @@ class Demultiplexing(models.Model):
     ngs_run = models.ForeignKey(NGSRun)
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
 
+    def run_demux(self):
+        for ss in get_sample_sheets(self):
+            run_bcl2fastq(ss)
+
 
 class DemultiplexedReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
@@ -79,6 +84,19 @@ class MergingScheme(models.Model):
 class MergedReads(models.Model):
     demux_read = models.ForeignKey(DemultiplexedReads)
     merge_scheme = models.ForeignKey(MergingScheme)
-    fastq = models.FilePathField(null=True)
+    # TODO: Add default path?
+    # TODO: Custom FASTQ field that caches #sequences
+    assembled_fastq = models.FilePathField(null=True)
+    discarded_fastq = models.FilePathField(null=True)
+    unassembled_forward_fastq = models.FilePathField(null=True)
+    unassembled_reverse_fastq = models.FilePathField(null=True)
 
-
+    def run_merge(self):
+        pear_with_defaults("--forward-fastq", self.demux_read.fastq1,
+                           "--reverse-fastq", self.demux_read.fastq2,
+                           "--output", self.id)
+        self.assembled_fastq = "{}.assembled.fastq.gz".format(self.id)
+        self.discarded_fastq = "{}.discarded.fastq.gz".format(self.id)
+        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq.gz".format(self.id)
+        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq.gz".format(self.id)
+        self.save()
