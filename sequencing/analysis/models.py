@@ -1,7 +1,7 @@
 from django.db import models
 
 from sequencing.runs.models import MergedReads
-from targeted_enrichment.unwrappers.models import Unwrapper
+from targeted_enrichment.unwrapping.models import Unwrapper
 
 
 ### -------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from lib_prep.workflows.models import Library
+from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
 

@@ -3,7 +3,7 @@ from django.db import models
 
 from genomes.models import DNASlice
 from misc.dna import DNA
-from targeted_enrichment.reagents import PCR1PrimerPairTER, \
+from targeted_enrichment.reagents.models import PCR1PrimerPairTER, \
     PCR1WithCompanyTagPrimerPairTER
 
 class Unwrapper(models.Model):
