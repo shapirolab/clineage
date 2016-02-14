@@ -11,7 +11,6 @@ from linapp.migrations.mig_0004.utils import get_physical_locations, \
 def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, force_loc=False):
     db_alias = schema_editor.connection.alias
     TargetEnrichment = apps.get_model("planning", "TargetEnrichment")
-    TargetEnrichmentReagent = apps.get_model("reagents", ter_model)
     old_left = old_te.left
     old_right = old_te.right
     te, c = TargetEnrichment.objects.using(db_alias).get_or_create(
@@ -28,6 +27,10 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, 
     ret = te
     locations = get_physical_locations(old_te, apps, schema_editor)
     if locations:
+        if ter_model is None:
+            raise IntegrityError("We have a TE with a physical_location, but"
+                "whose primers don't have. ex. {}".format(old_te.id))
+        TargetEnrichmentReagent = apps.get_model("reagents", ter_model)
         ter = TargetEnrichmentReagent.objects.using(db_alias).create(
             te=te,
             left_primer_id=old_left.new_primer_id,
@@ -79,6 +82,20 @@ def convert_no_tail_target_enrichments(qs, apps, schema_editor):
     print "Converting no-tail target enrichments:"
     for old_te in bar(qs):
         create_te_and_ter(old_te, "TargetedNoTailPrimerPairTER", 0, apps, schema_editor)
+
+@transaction.atomic
+def convert_theoretical_pcr1_target_enrichments(qs, apps, schema_editor):
+    print
+    print "Converting theoretical PCR1 target enrichments:"
+    for old_te in bar(qs):
+        create_te_and_ter(old_te, None, 1, apps, schema_editor)
+
+@transaction.atomic
+def convert_theoretical_no_tail_target_enrichments(qs, apps, schema_editor):
+    print
+    print "Converting theoretical no-tail target enrichments:"
+    for old_te in bar(qs):
+        create_te_and_ter(old_te, None, 0, apps, schema_editor)
 
 def split_target_enrichments(apps, schema_editor):
     db_alias = schema_editor.connection.alias
@@ -142,6 +159,26 @@ def split_target_enrichments(apps, schema_editor):
                 "type": get_tet("PCR"),
             },
             convert_no_tail_target_enrichments,
+        ),
+        (
+            {
+                "left__new_primer_id__isnull": True,
+                "right__new_primer_id__isnull": True,
+                "left__chromosome": F("chromosome"),
+                "right__chromosome": F("chromosome"),
+                "type": get_tet("PCR_with_tails"),
+            },
+            convert_theoretical_pcr1_target_enrichments,
+        ),
+        (
+            {
+                "left__new_primer_id__isnull": True,
+                "right__new_primer_id__isnull": True,
+                "left__chromosome": F("chromosome"),
+                "right__chromosome": F("chromosome"),
+                "type": get_tet("PCR"),
+            },
+            convert_theoretical_no_tail_target_enrichments,
         ),
     ]
     old_tes = OldTargetEnrichment.objects.using(db_alias).select_related(
