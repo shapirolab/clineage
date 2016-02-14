@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='targetenrichment',
             name='partner',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='targetenrichment',
@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='target',
             name='partner',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='target',

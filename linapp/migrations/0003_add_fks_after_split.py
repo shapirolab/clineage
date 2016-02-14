@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userreport',
             name='individual',
-            field=models.ManyToManyField(to='sampling.Individual', null=True),
+            field=models.ManyToManyField(to='sampling.Individual'),
         ),
     ]
 

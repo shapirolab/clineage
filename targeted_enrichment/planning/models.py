@@ -29,7 +29,7 @@ class UGSMinus(UGS,MinusStrandMixin):
 class Target(models.Model):
     name = models.CharField(max_length=50)
     slice = models.ForeignKey(DNASlice)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+    partner = models.ManyToManyField(User) # TODO: external table.
 
 class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
@@ -37,7 +37,7 @@ class TargetEnrichment(models.Model):
     right = models.ForeignKey(UGSMinus)
     # slice = models.ForeignKey(DNASlice)
     targets = models.ManyToManyField(Target)
-    partner = models.ManyToManyField(User, null=True) # TODO: external table.
+    partner = models.ManyToManyField(User) # TODO: external table.
     planning_version = models.IntegerField()
 
     def update_enriched_targets(self): # return queryset of targets between the two primers and updates the m2m targets field

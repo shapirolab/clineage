@@ -742,9 +742,9 @@ class Migration(migrations.Migration):
                 ('comment', models.CharField(max_length=50, null=True, blank=True)),
                 ('chromosome', models.ForeignKey(to='linapp.Chromosome')),
                 ('left', models.ForeignKey(related_name=b'left_primer', to='linapp.Primer')),
-                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True)),
+                ('partner', models.ManyToManyField(to=settings.AUTH_USER_MODEL)),
                 ('right', models.ForeignKey(related_name=b'right_primer', to='linapp.Primer')),
-                ('targets', models.ManyToManyField(related_name=b'primer_pair', null=True, to='linapp.Target', blank=True)),
+                ('targets', models.ManyToManyField(related_name=b'primer_pair', to='linapp.Target')),
             ],
             options={
             },
@@ -846,7 +846,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('creation_date', models.DateField(auto_now_add=True)),
                 ('cells', models.ManyToManyField(to='linapp.Cell')),
-                ('individual', models.ManyToManyField(to='linapp.Individual', null=True)),
+                ('individual', models.ManyToManyField(to='linapp.Individual')),
                 ('partner', models.ForeignKey(to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -880,7 +880,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='target',
             name='partner',
-            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ManyToManyField(to=settings.AUTH_USER_MODEL),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -1142,7 +1142,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cell',
             name='experiment',
-            field=models.ManyToManyField(related_name=b'cells', null=True, to='linapp.Experiment', blank=True),
+            field=models.ManyToManyField(related_name=b'cells', to='linapp.Experiment'),
             preserve_default=True,
         ),
         migrations.AddField(

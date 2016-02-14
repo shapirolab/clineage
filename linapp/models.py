@@ -74,7 +74,7 @@ def sampling_event_path(self, filename):
 class UserReport(models.Model):
     cells = models.ManyToManyField('sampling.Cell')
     partner = models.ForeignKey(User, null=True)
-    individual = models.ManyToManyField('sampling.Individual', null=True)
+    individual = models.ManyToManyField('sampling.Individual')
     creation_date = models.DateField(auto_now_add=True) #Automatically set the field to now when the object is first created.
 
     def __unicode__(self):
