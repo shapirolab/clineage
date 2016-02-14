@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from frogress import bar
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from django.db.models import Count
 
 from linapp.migrations.mig_0004.rejoin.common import unpack_slice, \
     get_or_create_sequence, target_types, FuncCacheDict
@@ -153,7 +154,35 @@ def revert_no_tail_primers(apps, schema_editor):
     for primer in bar(minus_qs):
         create_rev_primer(primer, apps, schema_editor)
 
+def validate_ugss_without_primers(apps, schema_editor):
+    """
+    Validate the UGSs which don't have an old_primer, asserting they have a TE.
+    This is required so that the TE will revert them to Primers later.
+    """
+    db_alias = schema_editor.connection.alias
+    UGSPlus = apps.get_model("planning","UGSPlus")
+    UGSMinus = apps.get_model("planning","UGSMinus")
+    plus_qs = UGSPlus.objects.using(db_alias) \
+        .filter(old_primer__isnull=True) \
+        .select_related("slice","slice__chromosome") \
+        .annotate(te_c=Count("targetenrichment")).filter(te_c=0)
+    minus_qs = UGSMinus.objects.using(db_alias) \
+        .filter(old_primer__isnull=True) \
+        .select_related("slice","slice__chromosome") \
+        .annotate(te_c=Count("targetenrichment")).filter(te_c=0)
+    print
+    print "Validating forward UGSs without primers."
+    if plus_qs:
+        raise IntegrityError("Bad UGS - no Primer, no TE. ex. {}".format(
+            plus_qs[0].id))
+    print
+    print "Validating reverse UGSs without primers."
+    if minus_qs:
+        raise IntegrityError("Bad UGS - no Primer, no TE. ex. {}".format(
+            minus_qs[0].id))
+
 def rejoin_primers(apps, schema_editor):
     revert_pcr1_primers(apps, schema_editor)
     revert_pcr1_with_company_tag_primers(apps, schema_editor)
     revert_no_tail_primers(apps, schema_editor)
+    validate_ugss_without_primers(apps, schema_editor)
