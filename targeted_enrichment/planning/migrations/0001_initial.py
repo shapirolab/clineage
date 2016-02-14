@@ -122,6 +122,16 @@ class Migration(migrations.Migration):
         ),
         # Temporary fields to assist with the data migration.
         migrations.AddField(
+            model_name='ugsplus',
+            name='old_primer',
+            field=models.ForeignKey(to='linapp.Primer', null=True),
+        ),
+        migrations.AddField(
+            model_name='ugsminus',
+            name='old_primer',
+            field=models.ForeignKey(to='linapp.Primer', null=True),
+        ),
+        migrations.AddField(
             model_name='target',
             name='old_target',
             field=models.ForeignKey(to='linapp.Target', null=True),

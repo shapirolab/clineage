@@ -13,6 +13,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RemoveField(
+            model_name='ugsplus',
+            name='old_primer',
+        ),
+        migrations.RemoveField(
+            model_name='ugsminus',
+            name='old_primer',
+        ),
+        migrations.RemoveField(
             model_name='target',
             name='old_target',
         ),

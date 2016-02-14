@@ -54,6 +54,10 @@ def create_fwd_primer(primer, apps, schema_editor, tail="", extra=""):
     old_primer = OldPrimer.objects.using(db_alias).create(**d)
     primer.old_primer = old_primer
     primer.save()
+    # To save select on old_primer.
+    if primer.ugs.old_primer_id is None:
+        primer.ugs.old_primer = old_primer
+        primer.ugs.save()
     transfer_physical_locations(primer, old_primer, apps, schema_editor)
 
 def create_rev_primer(primer, apps, schema_editor, tail="", extra=""):
@@ -73,6 +77,10 @@ def create_rev_primer(primer, apps, schema_editor, tail="", extra=""):
     old_primer = OldPrimer.objects.using(db_alias).create(**d)
     primer.old_primer = old_primer
     primer.save()
+    # To save select on old_primer.
+    if primer.ugs.old_primer_id is None:
+        primer.ugs.old_primer = old_primer
+        primer.ugs.save()
     transfer_physical_locations(primer, old_primer, apps, schema_editor)
 
 def get_fwd_irac_tail(primer):
