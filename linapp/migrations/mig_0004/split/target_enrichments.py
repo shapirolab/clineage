@@ -14,7 +14,7 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, 
     TargetEnrichmentReagent = apps.get_model("reagents", ter_model)
     old_left = old_te.left
     old_right = old_te.right
-    te = TargetEnrichment.objects.using(db_alias).create(
+    te, c = TargetEnrichment.objects.using(db_alias).get_or_create(
         chromosome_id=old_te.chromosome_id,
         left_id=old_left.new_ugs_id,
         right_id=old_right.new_ugs_id,
