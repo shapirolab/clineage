@@ -9,7 +9,7 @@ __author__ = 'ofirr'
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
-    read_length = models.IntegerField()
+    read_length = models.IntegerField(null=True)
 
     def __unicode__(self):
         return self.company + '_' + self.model
@@ -48,7 +48,7 @@ class NGSRun(models.Model):
     bcl_directory = models.FilePathField(allow_files=False, allow_folders=True, null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
-    kit = models.ForeignKey(NGSKit)
+    kit = models.ForeignKey(NGSKit, null=True)
     user = models.ForeignKey(User)
     date = models.DateField()
 
