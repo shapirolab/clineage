@@ -36,7 +36,7 @@ class TargetedUnwrapper(Unwrapper):
         abstract = True
 
 class PCR1WithCompanyTagUnwrapper(TargetedUnwrapper):
-    ter = models.OneToOne(PCR1WithCompanyTagPrimerPairTER)
+    ter = models.OneToOneField(PCR1WithCompanyTagPrimerPairTER)
 
     @property
     def left_margin(self):
