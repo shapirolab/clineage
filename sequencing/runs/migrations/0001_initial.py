@@ -46,43 +46,4 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=state_ops,
         ),
-        migrations.AddField(
-            model_name='ngsrun',
-            name='directory',
-            field=models.FilePathField(null=True),
-        ),
-        migrations.CreateModel(
-            name='DemultiplexingScheme',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=50)),
-                ('description', models.TextField()),
-            ],
-        ),
-        migrations.CreateModel(
-            name='DemultiplexedReads',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('directory', models.FilePathField(null=True)),
-                ('ngs_run', models.ForeignKey(to='runs.NGSRun')),
-                ('demux_scheme', models.ForeignKey(to='runs.DemultiplexingScheme')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='MergingScheme',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=50)),
-                ('description', models.TextField()),
-            ],
-        ),
-        migrations.CreateModel(
-            name='MergedReads',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('directory', models.FilePathField(null=True)),
-                ('demux_reads', models.ForeignKey(to='runs.DemultiplexedReads')),
-                ('merge_scheme', models.ForeignKey(to='runs.MergingScheme')),
-            ],
-        ),
     ]
