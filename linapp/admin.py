@@ -5,8 +5,8 @@ from wet_storage.models import StorageType, StorageBox, PlateContext, \
 PlatePlastica, PlateType, Plate, PlateStorage, SampleLocation
 from linapp.models import LineageRole, UserProfile, ProtocolType, Protocol, \
 UserReport
-from lib_prep.workflows.models import CellContentType, CellContentProtocol, \
-CellContent
+from lib_prep.workflows.models import BarcodedContent, CellContentProtocol, \
+AmplifiedContent
 from lib_prep.multiplexes.models import PCR1Multiplex, Panel
 from misc.models import Taxa
 from genomes.models import Assembly, Chromosome, DNASlice
@@ -45,9 +45,9 @@ admin.site.register(ProtocolType)
 admin.site.register(Protocol)
 admin.site.register(UserReport)
 
-admin.site.register(CellContentType)
+admin.site.register(BarcodedContent)
 admin.site.register(CellContentProtocol)
-admin.site.register(CellContent)
+admin.site.register(AmplifiedContent)
 
 admin.site.register(PCR1Multiplex)
 admin.site.register(Panel)
