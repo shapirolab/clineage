@@ -72,7 +72,8 @@ def convert_unknown_snps(qs, apps, schema_editor):
         snp = SNP.objects.using(db_alias).create(**d)
         fix_target(old_target, snp, apps, schema_editor)
 
-@transaction.atomic
+# This is too big to do atomically.
+# @transaction.atomic 
 def convert_restrictionsites(qs, apps, schema_editor):
     print
     print "Converting Restriction Sites:"

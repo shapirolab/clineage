@@ -5,7 +5,8 @@ from django.db import transaction
 
 from linapp.migrations.mig_0004.rejoin.common import unpack_slice, target_types
 
-@transaction.atomic
+# This is too big to do atomically.
+# @transaction.atomic
 def rejoin_restriction_sites(apps, schema_editor):
     print
     print "Reverting Restriction Sites:"
