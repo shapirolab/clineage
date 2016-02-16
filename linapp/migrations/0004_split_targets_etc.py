@@ -88,5 +88,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             code=split_targets_etc,
             reverse_code=rejoin_targets_etc,
+            atomic=False,
         ),
     ]
