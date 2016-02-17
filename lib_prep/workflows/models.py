@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-
 from django.db import models
 from django.contrib.contenttypes import fields
+
+from model_utils.managers import InheritanceManager
+
 from linapp.models import Protocol
 from wet_storage.models import SampleLocation
 from sampling.models import Cell
@@ -66,6 +68,8 @@ class Library(models.Model):
         match this cell.
         """
         raise NotImplementedError()
+
+    objects = InheritanceManager()
 
 class BarcodedContent(models.Model): # cell + barcode
     barcodes = models.ForeignKey(BarcodePair)

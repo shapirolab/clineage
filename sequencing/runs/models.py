@@ -102,7 +102,7 @@ class NGSRun(models.Model):
         """
         out = []
         def rows_iter():
-            for library in self.libraries.all():
+            for library in self.libraries.select_subclasses():
                 it = library.barcoded_contents
                 if isinstance(it,QuerySet):
                     it = it.select_related("barcodes","barcodes__left",
