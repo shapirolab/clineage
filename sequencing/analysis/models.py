@@ -3,6 +3,9 @@ from django.db import models
 from sequencing.runs.models import MergedReads
 from targeted_enrichment.unwrapping.models import Unwrapper
 
+from sequencing.analysis.merge import pear_with_defaults
+from sequencing.analysis.demux import run_bcl2fastq
+
 
 class DemultiplexingScheme(models.Model):
     name = models.CharField(max_length=50)

@@ -4,9 +4,6 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
 
-from merge import pear_with_defaults
-from demux import run_bcl2fastq
-
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
