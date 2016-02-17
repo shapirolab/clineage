@@ -9,6 +9,7 @@ from primers.parts.models import DNABarcode1, DNABarcode2, IlluminaReadingAdapto
 from lib_prep.workflows.models import BarcodePair, MagicalPCR1BarcodedContent, MagicalPCR1Library, AmplifiedContent
 from lib_prep.multiplexes.models import PCR1MultiplexCollection, Panel
 from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun
+from sequencing.analysis.models import DemultiplexingScheme
 
 @pytest.fixture()
 def ngsrun(db,django_user_model):
@@ -58,7 +59,6 @@ def ngsrun(db,django_user_model):
     mt = MachineType.objects.create(
         company="Illumina",
         model="NextSeq",
-        read_length=151,
     )
     m = Machine.objects.create(
         machineid="1",
@@ -73,6 +73,7 @@ def ngsrun(db,django_user_model):
     nk = NGSKit.objects.create(
         reading_adaptor1=ira1,
         reading_adaptor2=ira2,
+        read_length=151,
     )
     u = User.objects.create(
         username="Yossi",
@@ -90,6 +91,7 @@ def ngsrun(db,django_user_model):
 
 @pytest.mark.django_db
 def test_get_samplesheet(ngsrun):
-    assert ngsrun.get_samplesheet() == \
+    ds = DemultiplexingScheme.objects.create(name="TestScheme",description="1")
+    assert ngsrun.generate_sample_sheets(ds) == \
 """
 """
