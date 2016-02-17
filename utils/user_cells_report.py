@@ -7,7 +7,7 @@ from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 
 from linapp.models import UserReport
-from sampling.models import Cell, Individual
+from sampling.models import Cell, Individual, FACS
 
 
 def query_partner_individuals(partner_name, individual_name=None):
