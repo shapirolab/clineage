@@ -1,7 +1,8 @@
 from django.db import models
 
-from sequencing.runs.models import MergedReads
+from sequencing.runs.models import NGSRun
 from targeted_enrichment.unwrapping.models import Unwrapper
+from lib_prep.workflows.models import Library, BarcodedContent
 
 from sequencing.analysis.merge import pear_with_defaults
 from sequencing.analysis.demux import run_bcl2fastq
