@@ -1,14 +1,12 @@
-from plumbum import SshMachine
+from plumbum import local
 
 def run_bcl2fastq(bcl_folder, sample_sheet_path):
-    with SshMachine("mcluster01", user="dcsoft", keyfile="/home/dcsoft/id_rsa") as mc01:
-        with SshMachine("n71", user="dcsoft", keyfile="/home/dcsoft/id_rsa") as n71:
-            r_bcl2fastq = n71["bcl2fastq"]
-            r_bcl2fastq_with_defaults = r_bcl2fastq["--no-lane-splitting",
-                                                    "--processing-threads", 20]
-            r_bcl2fastq_with_defaults(
-                "--runfolder-dir", bcl_folder,
-                "--sample-sheet", sample_sheet_path)
+    bcl2fastq = local["bcl2fastq"]
+    bcl2fastq_with_defaults = bcl2fastq["--no-lane-splitting",
+                                            "--processing-threads", 20]
+    bcl2fastq_with_defaults(
+        "--runfolder-dir", bcl_folder,
+        "--sample-sheet", sample_sheet_path)
 
 
 # [dcsoft@n71 ~]$ bcl2fastq --help

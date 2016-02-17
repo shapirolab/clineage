@@ -64,8 +64,8 @@ class Demultiplexing(models.Model):
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
 
     def run_demux(self):
-        for ss in get_sample_sheets(self):
-            run_bcl2fastq(ss)
+        sample_sheet_path = self.ngs_run.generate_sample_sheets()
+        run_bcl2fastq(sample_sheet_path)
 
 
 class DemultiplexedReads(models.Model):
