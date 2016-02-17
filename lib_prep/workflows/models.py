@@ -53,7 +53,7 @@ class AmplifiedContent(models.Model):  # aka DNA
     #    return Experiment.objects.get(id = self.cell.experiment.values('id').annotate(experiment_count=Count('id')).order_by('-experiment_count')[0]['id'])
 
 class Library(models.Model):
-    pass
+    name = models.CharField(max_length=50)
 
     @property
     def barcoded_contents(self):
