@@ -72,14 +72,14 @@ class NGSKit(models.Model):
         """
         Return the value for the Adapter field in the SampleSheet.
         """
-        return reading_adaptor2.sequence[1:].rev_comp()
+        return self.reading_adaptor2.sequence[1:].rev_comp()
 
     @property
     def rev_read_adaptor(self):
         """
         Return the value for the AdapterRead2 field in the SampleSheet.
         """
-        return reading_adaptor1.sequence.rev_comp()
+        return self.reading_adaptor1.sequence.rev_comp()
 
 
 class NGSRun(models.Model):
@@ -122,12 +122,12 @@ class NGSRun(models.Model):
             bio.write(HEADER_FORMAT.format(
                 run_name=self.name,
                 run_date=self.date,
-                run_desc="_".join(lib.name for lib in ngsrun.libraries.all()),
+                run_desc="_".join(lib.name for lib in self.libraries.all()),
                 read_length=self.kit.read_length,
                 fwd_read_adaptor=self.kit.fwd_read_adaptor,
                 rev_read_adaptor=self.kit.rev_read_adaptor,
             ))
-            w = csv.DictWriter(bio,field_names=SAMPLESHEET_HEADERS)
+            w = csv.DictWriter(bio,fieldnames=SAMPLESHEET_HEADERS)
             w.writeheader()
             if max_samples is None:
                 for row in rows:
@@ -141,6 +141,5 @@ class NGSRun(models.Model):
                     w.writerow(row)
                 if row is None:
                     return out
-                else:
             out.append(bio.getvalue())
             bio.close()
