@@ -1,8 +1,6 @@
-
 import pytest
 import datetime
 
-from linapp.models import UserReport
 from misc.models import Taxa
 from sampling.models import Individual, SampleComposition, Cell
 from primers.parts.models import DNABarcode1, DNABarcode2, IlluminaReadingAdaptor1, IlluminaReadingAdaptor2
@@ -11,8 +9,88 @@ from lib_prep.multiplexes.models import PCR1MultiplexCollection, Panel
 from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun
 from sequencing.analysis.models import DemultiplexingScheme
 
+from accounts.test_user import user
+from misc.test_models import human_taxa
+from linapp.test_models import protocoltype
+from primers.parts.test_models import illuminareadingadaptor1, illuminareadingadaptor2, dnabarcode1, dnabarcode2
+from sampling.test_models import human_cell, human_individual, composition
+from lib_prep.workflows.test_models import magicalpcr1library, pcr1multiplexcollection, magicalpcr1barcodedcontent, barcodepair, amplifiedcontent, cellcontentprotocol
+from lib_prep.multiplexes.test_models import panel
+
 @pytest.fixture()
-def ngsrun(db,django_user_model):
+def machinetype(db):
+    mt = MachineType.objects.create(
+        company="Illumina",
+        model="NextSeq",
+    )
+    return mt
+
+
+@pytest.fixture()
+def machine(machinetype):
+    m = Machine.objects.create(
+        machineid="1",
+        type=machinetype,
+    )
+    return m
+
+@pytest.fixture()
+def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
+    nk = NGSKit.objects.create(
+        reading_adaptor1=illuminareadingadaptor1,
+        reading_adaptor2=illuminareadingadaptor2,
+        read_length=151,
+    )
+    return nk
+
+
+@pytest.fixture()
+def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent):
+    n = NGSRun.objects.create(
+        name="TestRun",
+        machine=machine,
+        kit=ngskit,
+        user=user,
+        date=datetime.date.today(),
+    )
+    n.libraries = [magicalpcr1library]
+    return n
+
+
+@pytest.mark.django_db
+def test_get_samplesheet(ngsrun):
+    ds = DemultiplexingScheme.objects.create(name="TestScheme", description="1")
+    # TODO: sort out adaptors
+    assert ngsrun.generate_sample_sheets(ds).replace('\r', '') == \
+"""[Header],,,,,,,,,
+IEMFileVersion,4,,,,,,,,
+Experiment Name,TestRun,,,,,,,,
+Date,{},,,,,,,,
+Workflow,GenerateFASTQ,,,,,,,,
+Application,FASTQ Only,,,,,,,,
+Assay,TruSeq HT,,,,,,,,
+Description,lib1,,,,,,,,
+Chemistry,Amplicon,,,,,,,,
+,,,,,,,,,
+[Reads],,,,,,,,,
+151,,,,,,,,,
+151,,,,,,,,,
+,,,,,,,,,
+[Settings],,,,,,,,,
+ReverseComplement,0,,,,,,,,
+Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,,,,,,,,
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,
+,,,,,,,,,
+[Data],,,,,,,,,
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description
+1,1,,,D710,TCCGCGAA,D508,GTCAGTAC,,
+""".format(datetime.date.today()).replace('\r', '')
+
+
+# ------------------------------------------------------------------------------------------------
+
+@pytest.fixture()
+def full_ngsrun(db, django_user_model):
     User = django_user_model
     t = Taxa.objects.create(
         name="test_abcde",
@@ -89,11 +167,12 @@ def ngsrun(db,django_user_model):
     n.libraries = [mpl1, mpl2]
     return n
 
+
 @pytest.mark.django_db
-def test_get_samplesheet(ngsrun):
+def test_get_samplesheet_full(full_ngsrun):
     ds = DemultiplexingScheme.objects.create(name="TestScheme", description="1")
     # TODO: sort out adaptors
-    assert ngsrun.generate_sample_sheets(ds).replace('\r', '') == \
+    assert full_ngsrun.generate_sample_sheets(ds).replace('\r', '') == \
 """[Header],,,,,,,,,
 IEMFileVersion,4,,,,,,,,
 Experiment Name,TestRun,,,,,,,,
