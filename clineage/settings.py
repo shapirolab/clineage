@@ -170,6 +170,7 @@ INSTALLED_APPS = (
     'sequencing.unwrapping',
     'targeted_enrichment.planning',
     'targeted_enrichment.reagents',
+    'targeted_enrichment.unwrapping',
     'wet_storage',
     'dojango',
     'datable',
