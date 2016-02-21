@@ -21,7 +21,7 @@ class AlterContentType(Operation):
     def _operate(self,from_app,to_app,from_model,to_model,schema_editor,from_state):
         ContentType = from_state.apps.get_model("contenttypes", "ContentType")
         db_alias = schema_editor.connection.alias
-        ct = ContentType.objects.using(db_alias).get(app_label=from_app,model=from_model)
+        ct, c = ContentType.objects.using(db_alias).get_or_create(app_label=from_app,model=from_model)
         # This is a hack because django ContentType populating is somewhat broken.
         try:
             to_ct = ContentType.objects.using(db_alias).get(app_label=to_app,model=to_model)
