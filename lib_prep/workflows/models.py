@@ -83,7 +83,8 @@ class BarcodedContent(models.Model): # cell + barcode
 
 class MagicalPCR1Library(Library):
     mpx_collection = models.ForeignKey(PCR1MultiplexCollection)
-    
+    # magicalpcr1barcodedcontent_set is a related field
+
     @property
     def barcoded_contents(self):
         return self.magicalpcr1barcodedcontent_set.all()
