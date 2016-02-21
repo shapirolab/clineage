@@ -1,5 +1,5 @@
 import pytest
-from models import DNABarcode1, DNABarcode2
+from models import DNABarcode1, DNABarcode2, IlluminaReadingAdaptor1, IlluminaReadingAdaptor2
 
 
 @pytest.fixture()
@@ -38,6 +38,24 @@ def dnabarcode2_a(db):
     return b4
 
 
+@pytest.fixture()
+def illuminareadingadaptor1(db):
+    ira1 = IlluminaReadingAdaptor1.objects.create(
+        name='Illumina Standard Reading Adaptor1',
+        _sequence='ACACTCTTTCCCTACACGACGCTCTTCCGATCT'
+    )
+    return ira1
+
+
+@pytest.fixture()
+def illuminareadingadaptor2(db):
+    ira2 = IlluminaReadingAdaptor2.objects.create(
+        name='Illumina Standard Reading Adaptor2',
+        _sequence='AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
+    )
+    return ira2
+
+
 @pytest.mark.django_db
 def test_dnabarcode1(dnabarcode1):
     assert dnabarcode1._sequence == "TCCGCGAA"
@@ -46,3 +64,13 @@ def test_dnabarcode1(dnabarcode1):
 @pytest.mark.django_db
 def test_dnabarcode2(dnabarcode2):
     assert dnabarcode2._sequence == "GTACTGAC"
+
+
+@pytest.mark.django_db
+def test_illuminareadingadaptor1(illuminareadingadaptor1):
+    assert illuminareadingadaptor1._sequence == "ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+
+
+@pytest.mark.django_db
+def test_illuminareadingadaptor1(illuminareadingadaptor2):
+    assert illuminareadingadaptor2._sequence == "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
