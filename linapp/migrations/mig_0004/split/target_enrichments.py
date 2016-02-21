@@ -118,7 +118,8 @@ def split_target_enrichments(apps, schema_editor):
     OldTargetEnrichment = apps.get_model("linapp", "TargetEnrichment")
     OldTargetEnrichmentType = apps.get_model("linapp", "TargetEnrichmentType")
     def get_tet(x):
-        return OldTargetEnrichmentType.objects.using(db_alias).get(name=x)
+        otet, c = OldTargetEnrichmentType.objects.using(db_alias).get_or_create(name=x)
+        return otet
     queries = [
         (
             {
