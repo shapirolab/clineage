@@ -260,8 +260,8 @@ def convert_unknown_primer_notail(qs, apps, schema_editor):
 def split_primers(qs, apps, schema_editor):
     db_alias = schema_editor.connection.alias
     OldPrimerTail = apps.get_model("linapp", "PrimerTail")
-    left_tail = OldPrimerTail.objects.using(db_alias).get(tail=LEFT_TAIL)
-    right_tail = OldPrimerTail.objects.using(db_alias).get(tail=RIGHT_TAIL)
+    left_tail, c = OldPrimerTail.objects.using(db_alias).get_or_create(tail=LEFT_TAIL)
+    right_tail, c = OldPrimerTail.objects.using(db_alias).get_or_create(tail=RIGHT_TAIL)
     queries = [
         (
             {
