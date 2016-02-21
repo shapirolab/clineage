@@ -12,9 +12,11 @@ from sequencing.analysis.models import DemultiplexingScheme
 from accounts.test_user import user
 from misc.test_models import human_taxa
 from linapp.test_models import protocoltype
-from primers.parts.test_models import illuminareadingadaptor1, illuminareadingadaptor2, dnabarcode1, dnabarcode2
+from primers.parts.test_models import illuminareadingadaptor1, illuminareadingadaptor2, dnabarcode1, dnabarcode2,\
+    dnabarcode1_a, dnabarcode2_a
 from sampling.test_models import human_cell, human_individual, composition
-from lib_prep.workflows.test_models import magicalpcr1library, pcr1multiplexcollection, magicalpcr1barcodedcontent, barcodepair, amplifiedcontent, cellcontentprotocol
+from lib_prep.workflows.test_models import magicalpcr1library, pcr1multiplexcollection, magicalpcr1barcodedcontent, \
+    barcodepair, barcodepair_a, magicalpcr1barcodedcontent_a,amplifiedcontent, cellcontentprotocol
 from lib_prep.multiplexes.test_models import panel
 
 @pytest.fixture()
@@ -45,7 +47,7 @@ def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
 
 
 @pytest.fixture()
-def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent):
+def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
     n = NGSRun.objects.create(
         name="TestRun",
         machine=machine,
@@ -84,6 +86,7 @@ AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,
 [Data],,,,,,,,,
 Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description
 1,1,,,D710,TCCGCGAA,D508,GTCAGTAC,,
+2,2,,,D718,TGGGAGCC,D502,GCCTCTAT,,
 """.format(datetime.date.today()).replace('\r', '')
 
 

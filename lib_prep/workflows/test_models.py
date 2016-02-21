@@ -2,6 +2,7 @@ import pytest
 from models import BarcodePair, CellContentProtocol, AmplifiedContent, MagicalPCR1Library, MagicalPCR1BarcodedContent
 from ..multiplexes.test_models import pcr1multiplexcollection
 from linapp.test_models import protocoltype
+
 from primers.parts.test_models import dnabarcode1, dnabarcode2
 from sampling.test_models import human_cell, human_individual, human_taxa, composition, human_samplingevent, human_extraction, human_extractionevent, organ, tissue
 from accounts.test_user import user
@@ -16,6 +17,13 @@ def barcodepair(dnabarcode1, dnabarcode2):
     )
     return bp
 
+@pytest.fixture()
+def barcodepair_a(dnabarcode1_a, dnabarcode2_a):
+    bp = BarcodePair.objects.create(
+        left=dnabarcode1_a,
+        right=dnabarcode2_a
+    )
+    return bp
 
 @pytest.fixture()
 def cellcontentprotocol(protocoltype):
@@ -53,6 +61,16 @@ def magicalpcr1library(pcr1multiplexcollection):
 def magicalpcr1barcodedcontent(barcodepair, amplifiedcontent, magicalpcr1library):
     mpbc = MagicalPCR1BarcodedContent.objects.create(
         barcodes=barcodepair,
+        content=amplifiedcontent,
+        library=magicalpcr1library,
+    )
+    return mpbc
+
+
+@pytest.fixture()
+def magicalpcr1barcodedcontent_a(barcodepair_a, amplifiedcontent, magicalpcr1library):
+    mpbc = MagicalPCR1BarcodedContent.objects.create(
+        barcodes=barcodepair_a,
         content=amplifiedcontent,
         library=magicalpcr1library,
     )
