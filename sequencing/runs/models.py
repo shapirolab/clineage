@@ -101,19 +101,23 @@ class NGSRun(models.Model):
         FIXME: Use demux_scheme.
         """
         out = []
+
         def rows_iter():
             for library in self.libraries.select_subclasses():
                 it = library.barcoded_contents
-                if isinstance(it,QuerySet):
-                    it = it.select_related("barcodes","barcodes__left",
-                        "barcodes__right")
+                if isinstance(it, QuerySet):
+                    it = it.select_related(
+                        "barcodes",
+                        "barcodes__left",
+                        "barcodes__right"
+                    )
                 for bc in library.barcoded_contents:
                     yield {
                         "Sample_ID": bc.id,
                         "Sample_Name": bc.id,
-                        "I7_Index_ID": bc.barcodes.left_id,
+                        "I7_Index_ID": bc.barcodes.left.name,
                         "index": bc.barcodes.left.sequence,
-                        "I5_Index_ID": bc.barcodes.right_id,
+                        "I5_Index_ID": bc.barcodes.right.name,
                         "index2": bc.barcodes.right.sequence,  # Or ref_seq?
                     }
         rows = rows_iter()
@@ -127,7 +131,7 @@ class NGSRun(models.Model):
                 fwd_read_adaptor=self.kit.fwd_read_adaptor,
                 rev_read_adaptor=self.kit.rev_read_adaptor,
             ))
-            w = csv.DictWriter(bio,fieldnames=SAMPLESHEET_HEADERS)
+            w = csv.DictWriter(bio, fieldnames=SAMPLESHEET_HEADERS)
             w.writeheader()
             if max_samples is None:
                 for row in rows:
@@ -137,7 +141,7 @@ class NGSRun(models.Model):
                 return b
             else:
                 row = None
-                for row in itertools.islice(rows,max_samples):
+                for row in itertools.islice(rows, max_samples):
                     w.writerow(row)
                 if row is None:
                     return out
