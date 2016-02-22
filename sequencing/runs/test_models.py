@@ -39,13 +39,13 @@ def ngsrun(db,django_user_model):
         composition=sc,
     )
     b1 = DNABarcode1.objects.create(name='D710', _sequence='TCCGCGAA')
-    b2 = DNABarcode2.objects.create(name='D508', _sequence='GTACTGAC')
+    b2 = DNABarcode2.objects.create(name='D508', _sequence='GTCAGTAC')
     bp12 = BarcodePair.objects.create(left=b1, right=b2)
     b3 = DNABarcode1.objects.create(name='D718', _sequence='TGGGAGCC')
-    b4 = DNABarcode2.objects.create(name='D502', _sequence='ATAGAGGC')
+    b4 = DNABarcode2.objects.create(name='D502', _sequence='GCCTCTAT')
     bp34 = BarcodePair.objects.create(left=b3, right=b4)
     b5 = DNABarcode1.objects.create(name='X720', _sequence='TGGCAGCC')
-    b6 = DNABarcode2.objects.create(name='X501', _sequence='ATCGAGGC')
+    b6 = DNABarcode2.objects.create(name='X501', _sequence='GCCTCGAT')
     bp56 = BarcodePair.objects.create(left=b5, right=b6)
     panel = Panel.objects.create(name='mock_panel')
     pmc = PCR1MultiplexCollection.objects.create(panel=panel)
@@ -65,10 +65,10 @@ def ngsrun(db,django_user_model):
         type=mt,
     )
     ira1 = IlluminaReadingAdaptor1.objects.create(
-        _sequence="AACC"
+        _sequence="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
     )
     ira2 = IlluminaReadingAdaptor2.objects.create(
-        _sequence="AATT"
+        _sequence="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
     )
     nk = NGSKit.objects.create(
         reading_adaptor1=ira1,
@@ -86,12 +86,36 @@ def ngsrun(db,django_user_model):
         date=datetime.date.today(),
         #bcl_directory=,
     )
-    n.libraries = [mpl1,mpl2]
+    n.libraries = [mpl1, mpl2]
     return n
 
 @pytest.mark.django_db
 def test_get_samplesheet(ngsrun):
-    ds = DemultiplexingScheme.objects.create(name="TestScheme",description="1")
-    assert ngsrun.generate_sample_sheets(ds) == \
-"""
-"""
+    ds = DemultiplexingScheme.objects.create(name="TestScheme", description="1")
+    # TODO: sort out adaptors
+    assert ngsrun.generate_sample_sheets(ds).replace('\r', '') == \
+"""[Header],,,,,,,,,
+IEMFileVersion,4,,,,,,,,
+Experiment Name,TestRun,,,,,,,,
+Date,{},,,,,,,,
+Workflow,GenerateFASTQ,,,,,,,,
+Application,FASTQ Only,,,,,,,,
+Assay,TruSeq HT,,,,,,,,
+Description,lib1_lib2,,,,,,,,
+Chemistry,Amplicon,,,,,,,,
+,,,,,,,,,
+[Reads],,,,,,,,,
+151,,,,,,,,,
+151,,,,,,,,,
+,,,,,,,,,
+[Settings],,,,,,,,,
+ReverseComplement,0,,,,,,,,
+Adapter,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTG,,,,,,,,
+AdapterRead2,TGACTGGAGTTCAGACGTGTGCTCTTCCGATCT,,,,,,,,
+,,,,,,,,,
+[Data],,,,,,,,,
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description
+1,1,,,D710,TCCGCGAA,D508,GTACTGAC,,
+2,2,,,D718,TGGGAGCC,D502,ATAGAGGC,,
+3,3,,,X720,TGGCAGCC,X501,ATCGAGGC,,
+""".format(datetime.date.today()).replace('\r', '')
