@@ -134,3 +134,24 @@ def test_readsindex_fwd_and_merged(readsindex_fwd_and_merged):
     assert os.path.isfile(readsindex_fwd_and_merged.merged_reads.unassembled_forward_fastq)
     readsindex_fwd_and_merged.create_final_merged_fastq()
     assert os.path.isfile(readsindex_fwd_and_merged.padded_reads_fasta)
+
+
+@pytest.mark.django_db
+def test_readsindex_bowtie2build(readsindex_merged_only):
+    readsindex_merged_only.merged_reads.run_merge()
+    assert os.path.isfile(readsindex_merged_only.merged_reads.assembled_fastq)
+    readsindex_merged_only.create_final_merged_fastq()
+    assert os.path.isfile(readsindex_merged_only.padded_reads_fasta)
+    readsindex_merged_only.index_reads()
+    expected_files = []
+    for i in xrange(1, 5):
+        f = "{}.{}.bt2".format(readsindex_merged_only.index_files_prefix, i)
+        assert os.path.isfile(f)
+        expected_files.append(f)
+    for i in xrange(1, 3):
+        f = "{}.rev.{}.bt2".format(readsindex_merged_only.index_files_prefix, i)
+        assert os.path.isfile(f)
+        expected_files.append(f)
+    for f in readsindex_merged_only.collect_bt_files():
+        if f not in expected_files:
+            assert False
