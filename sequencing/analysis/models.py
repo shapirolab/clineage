@@ -6,7 +6,9 @@ from lib_prep.workflows.models import Library, BarcodedContent
 
 from sequencing.analysis.merge import pear_with_defaults
 from sequencing.analysis.demux import run_bcl2fastq
+from sequencing.analysis.index_reads import bowtie2build
 
+import os
 from Bio import SeqIO
 from itertools import chain
 
@@ -67,6 +69,7 @@ class ReadsIndex(models.Model):
     """
     A collection of reads used for generating a bowtie2 index for primers to be searched against
     """
+    INDEX_DUMP_DIR = '.'
     INCLUDED_READS_OPTIONS = (('M', 'Only merged'), ('F', 'Merged and unassembled_forward'),)
     merged_reads = models.ForeignKey(MergedReads)
     included_reads = models.CharField(max_length=1, choices=INCLUDED_READS_OPTIONS)
@@ -76,6 +79,10 @@ class ReadsIndex(models.Model):
     @property
     def padded_reads_fasta_name(self):
         return "{}.padded.fa".format(self.merged_reads.pear_prefix)
+    
+    @property
+    def index_files_prefix(self):
+        return 'index_{}'.format(self.id)
 
     def pad_records(self, records):
         for record in records:
@@ -97,6 +104,16 @@ class ReadsIndex(models.Model):
         SeqIO.write(padded_reads, self.padded_reads_fasta_name, "fasta")
         self.padded_reads_fasta = self.padded_reads_fasta_name
         self.save()
+
+    def collect_bt_files(self):
+        for path in os.listdir(self.INDEX_DUMP_DIR):
+            if path[:len(self.index_files_prefix)] != self.index_files_prefix:
+                continue
+            yield path
+
+    def index_reads(self):
+        bowtie2build(self.padded_reads_fasta, self.index_files_prefix)
+
 
 
 class SequencingData(models.Model): # This contains the actual data.
