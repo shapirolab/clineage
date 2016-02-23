@@ -7,6 +7,9 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from sequencing.analysis.merge import pear_with_defaults
 from sequencing.analysis.demux import run_bcl2fastq
 
+from Bio import SeqIO
+from itertools import chain
+
 
 class DemultiplexingScheme(models.Model):
     name = models.CharField(max_length=50)
@@ -57,6 +60,42 @@ class MergedReads(models.Model):
         self.discarded_fastq = "{}.discarded.fastq".format(self.pear_prefix)
         self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(self.pear_prefix)
         self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(self.pear_prefix)
+        self.save()
+
+
+class ReadsIndex(models.Model):
+    """
+    A collection of reads used for generating a bowtie2 index for primers to be searched against
+    """
+    INCLUDED_READS_OPTIONS = (('M', 'Only merged'), ('F', 'Merged and unassembled_forward'),)
+    merged_reads = models.ForeignKey(MergedReads)
+    included_reads = models.CharField(max_length=1, choices=INCLUDED_READS_OPTIONS)
+    padded_reads_fasta = models.FilePathField(null=True)
+    padding = models.IntegerField(default=5)
+
+    @property
+    def padded_reads_fasta_name(self):
+        return "{}.padded.fa".format(self.merged_reads.pear_prefix)
+
+    def pad_records(self, records):
+        for record in records:
+            yield "N"*self.padding + record + "N"*self.padding
+
+    def included_reads_generator(self):
+        if self.included_reads == 'M':
+            return SeqIO.parse(self.merged_reads.assembled_fastq, "fastq")
+        if self.included_reads == 'F':
+            return chain(
+                SeqIO.parse(self.merged_reads.assembled_fastq, "fastq"),
+                SeqIO.parse(self.merged_reads.unassembled_forward_fastq, "fastq")
+            )
+        #IntegrityError
+        raise Exception()
+
+    def create_final_merged_fastq(self):
+        padded_reads = self.pad_records(self.included_reads_generator())
+        SeqIO.write(padded_reads, self.padded_reads_fasta_name, "fasta")
+        self.padded_reads_fasta = self.padded_reads_fasta_name
         self.save()
 
 
