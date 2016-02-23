@@ -45,14 +45,18 @@ class MergedReads(models.Model):
     unassembled_forward_fastq = models.FilePathField(null=True)
     unassembled_reverse_fastq = models.FilePathField(null=True)
 
+    @property
+    def pear_prefix(self):
+        return self.id
+
     def run_merge(self):
         pear_with_defaults("-f", self.demux_read.fastq1,
                            "-r", self.demux_read.fastq2,
-                           "-o", self.id)
-        self.assembled_fastq = "{}.assembled.fastq".format(self.id)
-        self.discarded_fastq = "{}.discarded.fastq".format(self.id)
-        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(self.id)
-        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(self.id)
+                           "-o", self.pear_prefix)
+        self.assembled_fastq = "{}.assembled.fastq".format(self.pear_prefix)
+        self.discarded_fastq = "{}.discarded.fastq".format(self.pear_prefix)
+        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(self.pear_prefix)
+        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(self.pear_prefix)
         self.save()
 
 
