@@ -2,8 +2,8 @@ from plumbum import local
 
 PEAR_PATH = "/net/mraid11/export/dcstor/Adam/Software/PEAR-master/src/pear"
 pear = local[PEAR_PATH]
-pear_with_defaults = pear["--min-overlap", "40",
-                          "--max-assembly-length", "300"]
+pear_with_defaults = pear["-v", "40",
+                          "-m", "300"]
 
 
 #~/data/home/Adam/Software/PEAR-master/src/pear
