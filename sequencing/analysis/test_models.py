@@ -1,6 +1,8 @@
 import pytest
 import os
-from models import DemultiplexingScheme, Demultiplexing, DemultiplexedReads, MergingScheme, MergedReads
+from models import DemultiplexingScheme, Demultiplexing, DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 from accounts.test_user import user
 from misc.test_models import human_taxa
@@ -74,6 +76,29 @@ def mergedreads(demultiplexedreads, mergingscheme):
     return mr
 
 
+@pytest.fixture()
+def readsindex_merged_only(mergedreads):
+    ri = ReadsIndex.objects.create(
+        merged_reads=mergedreads,
+        included_reads='M',  # Merged and unassembled_forward
+        padding=5,
+    )
+    return ri
+
+
+@pytest.fixture()
+def readsindex_fwd_and_merged(mergedreads):
+    ri = ReadsIndex.objects.create(
+        merged_reads=mergedreads,
+        included_reads='F',  # Merged and unassembled_forward
+        padding=5,
+    )
+    return ri
+
+
+
+
+
 @pytest.mark.django_db
 def test_demultiplexedreads(demultiplexedreads):
     assert demultiplexedreads.barcoded_content.content.name == 'human amplified content'
@@ -92,3 +117,20 @@ def test_runmerge(mergedreads):
     assert os.path.isfile(mergedreads.discarded_fastq)
     assert os.path.isfile(mergedreads.unassembled_forward_fastq)
     assert os.path.isfile(mergedreads.unassembled_reverse_fastq)
+
+
+@pytest.mark.django_db
+def test_readsindex_merged_only(readsindex_merged_only):
+    readsindex_merged_only.merged_reads.run_merge()
+    assert os.path.isfile(readsindex_merged_only.merged_reads.assembled_fastq)
+    readsindex_merged_only.create_final_merged_fastq()
+    assert os.path.isfile(readsindex_merged_only.padded_reads_fasta)
+
+
+@pytest.mark.django_db
+def test_readsindex_fwd_and_merged(readsindex_fwd_and_merged):
+    readsindex_fwd_and_merged.merged_reads.run_merge()
+    assert os.path.isfile(readsindex_fwd_and_merged.merged_reads.assembled_fastq)
+    assert os.path.isfile(readsindex_fwd_and_merged.merged_reads.unassembled_forward_fastq)
+    readsindex_fwd_and_merged.create_final_merged_fastq()
+    assert os.path.isfile(readsindex_fwd_and_merged.padded_reads_fasta)
