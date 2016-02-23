@@ -49,10 +49,10 @@ class MergedReads(models.Model):
         pear_with_defaults("-f", self.demux_read.fastq1,
                            "-r", self.demux_read.fastq2,
                            "-o", self.id)
-        self.assembled_fastq = "{}.assembled.fastq.gz".format(self.id)
-        self.discarded_fastq = "{}.discarded.fastq.gz".format(self.id)
-        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq.gz".format(self.id)
-        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq.gz".format(self.id)
+        self.assembled_fastq = "{}.assembled.fastq".format(self.id)
+        self.discarded_fastq = "{}.discarded.fastq".format(self.id)
+        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(self.id)
+        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(self.id)
         self.save()
 
 
