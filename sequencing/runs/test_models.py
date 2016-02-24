@@ -12,12 +12,23 @@ from sequencing.analysis.models import DemultiplexingScheme
 from accounts.test_user import user
 from misc.test_models import human_taxa
 from linapp.test_models import protocoltype
-from primers.parts.test_models import illuminareadingadaptor1, illuminareadingadaptor2, dnabarcode1, dnabarcode2,\
-    dnabarcode1_a, dnabarcode2_a
+from primers.parts.test_models import dnabarcode1, dnabarcode2, dnabarcode1_a, dnabarcode2_a, \
+    illuminareadingadaptor1cuts, illuminareadingadaptor2cuts
 from sampling.test_models import human_cell, human_individual, composition
-from lib_prep.workflows.test_models import magicalpcr1library, pcr1multiplexcollection, magicalpcr1barcodedcontent, \
-    barcodepair, barcodepair_a, magicalpcr1barcodedcontent_a,amplifiedcontent, cellcontentprotocol
-from lib_prep.multiplexes.test_models import panel
+from lib_prep.workflows.test_models import barcodepair, barcodepair_a, amplifiedcontent, cellcontentprotocol
+from lib_prep.multiplexes.test_models import panel, pcr1multiplex, pcr1multiplexcollection
+from genomes.test_models import hg19_assembly, hg19_chromosome, \
+    slice_28727_left, slice_28727_right, slice_28727_target_a, slice_28727_target_b,\
+    slice_28734_left, slice_28734_right, slice_28734_target_a
+from targeted_enrichment.planning.test_models import ugs_28727_left, ugs_28727_right, \
+    ugs_28734_left, ugs_28734_right, ms_28727_a, ms_28727_b, ms_28734_a
+from primers.synthesis.test_models import primer_28727_left, primer_28727_right, \
+    primer_28734_left, primer_28734_right
+from targeted_enrichment.planning.test_models import te_28727, te_28734
+from targeted_enrichment.reagents.test_models import ter_28727, ter_28734
+
+from primers.parts.test_models import illuminareadingadaptor1, illuminareadingadaptor2
+from lib_prep.workflows.test_models import magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a
 
 @pytest.fixture()
 def machinetype(db):
