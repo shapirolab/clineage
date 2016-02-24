@@ -1,8 +1,8 @@
 import pytest
 import os
-from models import DemultiplexingScheme, Demultiplexing, DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
+from Bio import SeqIO
+from models import DemultiplexingScheme, Demultiplexing, DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex, \
+    UGSAssignment
 
 from accounts.test_user import user
 from misc.test_models import human_taxa
@@ -17,15 +17,15 @@ from ..runs.test_models import machine, ngskit, machinetype
 from genomes.test_models import hg19_assembly, hg19_chromosome, \
     slice_28727_left, slice_28727_right, slice_28727_target_a, slice_28727_target_b,\
     slice_28734_left, slice_28734_right, slice_28734_target_a
-from targeted_enrichment.planning.test_models import ugs_28727_left, ugs_28727_right, \
-    ugs_28734_left, ugs_28734_right, ms_28727_a, ms_28727_b, ms_28734_a
+from targeted_enrichment.planning.test_models import ugs_28727_left, ugs_28727_right, ugs_28734_left, ugs_28734_right, \
+    te_28727, te_28734, ms_28727_a, ms_28727_b, ms_28734_a
 from primers.synthesis.test_models import primer_28727_left, primer_28727_right, \
     primer_28734_left, primer_28734_right
-from targeted_enrichment.planning.test_models import te_28727, te_28734
 from targeted_enrichment.reagents.test_models import ter_28727, ter_28734
 
 from ..runs.test_models import ngsrun
 from lib_prep.workflows.test_models import magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a
+from targeted_enrichment.unwrapping.test_models import pu_28727, pu_28734
 
 
 @pytest.fixture()
@@ -96,6 +96,13 @@ def readsindex_fwd_and_merged(mergedreads):
     return ri
 
 
+@pytest.fixture()
+def ugsassignment(readsindex_fwd_and_merged):
+    ugsa = UGSAssignment.objects.create(
+        reads_index=readsindex_fwd_and_merged,
+    )
+    return ugsa
+
 
 
 
@@ -155,3 +162,149 @@ def test_readsindex_bowtie2build(readsindex_merged_only):
     for f in readsindex_merged_only.collect_bt_files():
         if f not in expected_files:
             assert False
+
+
+def strip_fasta_records(fasta_records):
+    for rec in fasta_records:
+        yield rec.id, str(rec.seq)
+
+
+@pytest.mark.django_db
+def test_ugsassignment_create_panel_fasta(ugsassignment, pu_28727, pu_28734):
+    ugsassignment.create_panel_fasta()
+    assert os.path.isfile(ugsassignment.panel_fasta)
+    assert set(strip_fasta_records(SeqIO.parse(ugsassignment.panel_fasta, "fasta"))) == {
+        ("unwrapper_1_left", "TTTACTATGCCATGCTGCTGCT",),
+        ("unwrapper_1_right", "TGTGCAAACAAGAACAGATGCC",),
+        ("unwrapper_2_left", "AAGGCTTCTCCCCATTCCAAAG",),
+        ("unwrapper_2_right", "AGTCCAAGCACACACTACTTCC",),
+    }
+
+
+@pytest.mark.django_db
+def test_ugsassignment_align_primers_to_reads_basic(ugsassignment, pu_28727, pu_28734):
+    ugsassignment.create_panel_fasta()
+    assert os.path.isfile(ugsassignment.panel_fasta)
+    ugsassignment.align_primers_to_reads()
+    assert os.path.isfile(ugsassignment.primer_reads_alignment)
+
+
+@pytest.mark.django_db
+def test_ugsassignment_align_primers_to_reads_collection(ugsassignment, pu_28727, pu_28734):
+    ugsassignment.create_panel_fasta()
+    assert os.path.isfile(ugsassignment.panel_fasta)
+    ugsassignment.align_primers_to_reads()
+    assert os.path.isfile(ugsassignment.primer_reads_alignment)
+    assert ugsassignment.collect_mappings_from_sam() == {
+        'unwrapper_2_right': {
+            'M00393:167:000000000-ABF3N:1:2115:26810:9430',
+            'M00393:167:000000000-ABF3N:1:2101:12593:17954',
+            'M00393:167:000000000-ABF3N:1:1112:13016:19696',
+            'M00393:167:000000000-ABF3N:1:1101:7043:8470',
+            'M00393:167:000000000-ABF3N:1:1112:20425:16124',
+            'M00393:167:000000000-ABF3N:1:1101:20583:16769',
+            'M00393:167:000000000-ABF3N:1:2117:19711:1998',
+            'M00393:167:000000000-ABF3N:1:1102:6086:12380',
+            'M00393:167:000000000-ABF3N:1:1109:4497:5075',
+            'M00393:167:000000000-ABF3N:1:2109:21650:4662',
+            'M00393:167:000000000-ABF3N:1:1106:14231:8476',
+            'M00393:167:000000000-ABF3N:1:2104:19595:12515'
+        },
+        'unwrapper_2_left': {
+            'M00393:167:000000000-ABF3N:1:2117:19711:1998',
+            'M00393:167:000000000-ABF3N:1:1106:14231:8476',
+            'M00393:167:000000000-ABF3N:1:2115:26810:9430',
+            'M00393:167:000000000-ABF3N:1:2104:19595:12515',
+            'M00393:167:000000000-ABF3N:1:2109:21650:4662',
+            'M00393:167:000000000-ABF3N:1:1112:13016:19696',
+            'M00393:167:000000000-ABF3N:1:1109:4497:5075',
+            'M00393:167:000000000-ABF3N:1:2101:12593:17954',
+            'M00393:167:000000000-ABF3N:1:1102:6086:12380',
+            'M00393:167:000000000-ABF3N:1:1112:20425:16124',
+            'M00393:167:000000000-ABF3N:1:1101:7043:8470',
+            'M00393:167:000000000-ABF3N:1:1101:20583:16769'
+        }
+    }
+
+
+@pytest.mark.django_db
+def test_ugsassignment_read_ids_by_te(ugsassignment, pu_28727, pu_28734):
+    ugsassignment.create_panel_fasta()
+    ugsassignment.align_primers_to_reads()
+    assert os.path.isfile(ugsassignment.primer_reads_alignment)
+    assert list(ugsassignment.read_ids_by_unwrapper()) == [
+        (
+            pu_28727,
+            set()
+        ),
+        (
+            pu_28734,
+            {
+                'M00393:167:000000000-ABF3N:1:2115:26810:9430',
+                'M00393:167:000000000-ABF3N:1:2101:12593:17954',
+                'M00393:167:000000000-ABF3N:1:1112:13016:19696',
+                'M00393:167:000000000-ABF3N:1:1101:7043:8470',
+                'M00393:167:000000000-ABF3N:1:1112:20425:16124',
+                'M00393:167:000000000-ABF3N:1:1101:20583:16769',
+                'M00393:167:000000000-ABF3N:1:2117:19711:1998',
+                'M00393:167:000000000-ABF3N:1:1102:6086:12380',
+                'M00393:167:000000000-ABF3N:1:1109:4497:5075',
+                'M00393:167:000000000-ABF3N:1:2109:21650:4662',
+                'M00393:167:000000000-ABF3N:1:1106:14231:8476',
+                'M00393:167:000000000-ABF3N:1:2104:19595:12515'
+            }
+        )
+    ]
+
+
+@pytest.mark.django_db
+def test_ugsassignment_reads_by_te(ugsassignment, pu_28727, pu_28734):
+    ugsassignment.reads_index.merged_reads.run_merge()
+    ugsassignment.create_panel_fasta()
+    ugsassignment.align_primers_to_reads()
+    assert os.path.isfile(ugsassignment.primer_reads_alignment)
+    uws_and_reads = list(ugsassignment.reads_by_unwrapper())
+    uw, reads_list = uws_and_reads[0]
+    assert uw == pu_28727
+    assert set(strip_fasta_records(reads_list)) == set()
+    uw, reads_list = uws_and_reads[1]
+    assert uw == pu_28734
+    assert set(strip_fasta_records(reads_list)) == {
+        (
+            'M00393:167:000000000-ABF3N:1:1101:20583:16769',
+            'AAAGGCTTCTCCCCACTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1101:7043:8470',
+            'AAAGGCTTCTCCCCACTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1102:6086:12380',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1106:14231:8476',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1109:4497:5075',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1112:13016:19696',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:1112:20425:16124',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:2101:12593:17954',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:2104:19595:12515',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:2109:21650:4662',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:2115:26810:9430',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ), (
+            'M00393:167:000000000-ABF3N:1:2117:19711:1998',
+            'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        ),
+    }
