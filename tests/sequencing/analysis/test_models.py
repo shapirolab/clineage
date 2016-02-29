@@ -15,12 +15,13 @@ def test_mergedreads(mergedreads):
 
 
 @pytest.mark.django_db
-def test_runmerge(mergedreads):
-    mergedreads.run_merge()
-    assert os.path.isfile(mergedreads.assembled_fastq)
-    assert os.path.isfile(mergedreads.discarded_fastq)
-    assert os.path.isfile(mergedreads.unassembled_forward_fastq)
-    assert os.path.isfile(mergedreads.unassembled_reverse_fastq)
+def test_runmerge(demultiplexedreads, mergingscheme):
+    mr = demultiplexedreads.run_merge(mergingscheme)
+    assert mr.demux_reads is demultiplexedreads
+    assert os.path.isfile(mr.assembled_fastq)
+    assert os.path.isfile(mr.discarded_fastq)
+    assert os.path.isfile(mr.unassembled_forward_fastq)
+    assert os.path.isfile(mr.unassembled_reverse_fastq)
 
 
 @pytest.mark.django_db

@@ -26,6 +26,22 @@ class DemultiplexedReads(models.Model):
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
 
+    def run_merge(self, merging_scheme):
+        prefix = os.path.join(settings.DATA_STORE,"{}".format(uuid.uuid4()))
+        # TODO: check by merging scheme.
+        pear_with_defaults("-f", self.fastq1,
+                           "-r", self.fastq2,
+                           "-o", prefix)
+        mr = MergedReads.objects.create(
+                demux_reads=self,
+                merging_scheme=merging_scheme,
+                assembled_fastq="{}.assembled.fastq".format(prefix),
+                discarded_fastq="{}.discarded.fastq".format(prefix),
+                unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
+                unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
+        )
+        return mr
+
 
 class MergingScheme(models.Model):
     name = models.CharField(max_length=50)
@@ -37,21 +53,10 @@ class MergedReads(models.Model):
     merging_scheme = models.ForeignKey(MergingScheme)
     # TODO: Add default path?
     # TODO: Custom FASTQ field that caches #sequences
-    assembled_fastq = models.FilePathField(null=True)
-    discarded_fastq = models.FilePathField(null=True)
-    unassembled_forward_fastq = models.FilePathField(null=True)
-    unassembled_reverse_fastq = models.FilePathField(null=True)
-
-    def run_merge(self):
-        prefix = os.path.join(settings.DATA_STORE,"{}".format(uuid.uuid4()))
-        pear_with_defaults("-f", self.demux_reads.fastq1,
-                           "-r", self.demux_reads.fastq2,
-                           "-o", prefix)
-        self.assembled_fastq = "{}.assembled.fastq".format(prefix)
-        self.discarded_fastq = "{}.discarded.fastq".format(prefix)
-        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(prefix)
-        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(prefix)
-        self.save()
+    assembled_fastq = models.FilePathField()
+    discarded_fastq = models.FilePathField()
+    unassembled_forward_fastq = models.FilePathField()
+    unassembled_reverse_fastq = models.FilePathField()
 
 
 class ReadsIndex(models.Model):
