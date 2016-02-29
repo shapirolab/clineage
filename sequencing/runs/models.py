@@ -95,6 +95,11 @@ class NGSRun(models.Model):
             max_samples=max_samples
         )
 
+    def run_demux(self):
+        sample_sheet = self.get_sample_sheets()
+        # FIXME
+        #run_bcl2fastq(folder, sample_sheet)
+
 
 class DemultiplexingScheme(models.Model):
     name = models.CharField(max_length=50)
@@ -104,7 +109,3 @@ class DemultiplexingScheme(models.Model):
 class Demultiplexing(models.Model):
     ngs_run = models.ForeignKey(NGSRun)
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
-
-    def run_demux(self):
-        sample_sheet_path = self.ngs_run.get_sample_sheets()
-        run_bcl2fastq(sample_sheet_path)

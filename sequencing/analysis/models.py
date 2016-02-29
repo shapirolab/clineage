@@ -21,8 +21,8 @@ class DemultiplexedReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
     library = models.ForeignKey(Library)
-    fastq1 = models.FilePathField(null=True)
-    fastq2 = models.FilePathField(null=True)
+    fastq1 = models.FilePathField()
+    fastq2 = models.FilePathField()
 
 
 class MergingScheme(models.Model):
