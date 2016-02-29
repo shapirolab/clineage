@@ -93,8 +93,8 @@ class MagicalPCR1Library(Library):
     def unwrappers(self):
         #TODO: make nice and queryful.
         for mpx in self.mpx_collection.mpxs.all():
-            for primer in mpx.primers.all():
-                yield primer.pcr1unwrapper
+            for ter in mpx.ters.select_subclasses():
+                yield ter.pcr1unwrapper
 
 class MagicalPCR1BarcodedContent(BarcodedContent):
     content = models.ForeignKey(AmplifiedContent)
