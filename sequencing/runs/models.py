@@ -10,6 +10,9 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
 
+from sequencing.runs.demux import run_bcl2fastq
+
+
 SAMPLESHEET_HEADERS = [
 "Sample_ID",
 "Sample_Name",
@@ -147,3 +150,17 @@ class NGSRun(models.Model):
                     return out
             out.append(bio.getvalue())
             bio.close()
+
+
+class DemultiplexingScheme(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+
+class Demultiplexing(models.Model):
+    ngs_run = models.ForeignKey(NGSRun)
+    demux_scheme = models.ForeignKey(DemultiplexingScheme)
+
+    def run_demux(self):
+        sample_sheet_path = self.ngs_run.generate_sample_sheets()
+        run_bcl2fastq(sample_sheet_path)

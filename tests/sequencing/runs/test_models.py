@@ -2,9 +2,6 @@ import pytest
 import datetime
 
 
-from tests.sequencing.analysis.conftest import demultiplexingscheme
-
-
 @pytest.mark.django_db
 def test_get_samplesheet(ngsrun,demultiplexingscheme):
     # TODO: sort out adaptors

@@ -1,7 +1,7 @@
 import pytest
 import datetime
 
-from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun
+from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun, DemultiplexingScheme, Demultiplexing
 
 from tests.primers.parts.conftest import *
 from tests.lib_prep.workflows.conftest import *
@@ -46,3 +46,19 @@ def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent
     return n
 
 
+@pytest.fixture()
+def demultiplexingscheme(db):
+    ds = DemultiplexingScheme.objects.create(
+        name='test demux scheme',
+        description='wrovhnwpovnwecpqkewmc',
+    )
+    return ds
+
+
+@pytest.fixture()
+def demultiplexing(demultiplexingscheme, ngsrun):
+    dm = Demultiplexing.objects.create(
+        ngs_run=ngsrun,
+        demux_scheme=demultiplexingscheme
+    )
+    return dm

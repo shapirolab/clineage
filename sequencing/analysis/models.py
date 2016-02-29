@@ -1,13 +1,12 @@
 from django.db import models
 
-from sequencing.runs.models import NGSRun
+from sequencing.runs.models import Demultiplexing
 from targeted_enrichment.planning.models import UGS
 from targeted_enrichment.unwrapping.models import Unwrapper
 from lib_prep.workflows.models import Library, BarcodedContent
 from lib_prep.multiplexes.models import Panel
 
 from sequencing.analysis.merge import pear_with_defaults
-from sequencing.analysis.demux import run_bcl2fastq
 from sequencing.analysis.index_reads import bowtie2build, bowtie2_with_defaults
 
 import os
@@ -16,20 +15,6 @@ import pysam
 from itertools import chain
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-
-
-class DemultiplexingScheme(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.TextField()
-
-
-class Demultiplexing(models.Model):
-    ngs_run = models.ForeignKey(NGSRun)
-    demux_scheme = models.ForeignKey(DemultiplexingScheme)
-
-    def run_demux(self):
-        sample_sheet_path = self.ngs_run.generate_sample_sheets()
-        run_bcl2fastq(sample_sheet_path)
 
 
 class DemultiplexedReads(models.Model):

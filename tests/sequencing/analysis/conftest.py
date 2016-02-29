@@ -1,29 +1,11 @@
 import pytest
 
-from sequencing.analysis.models import DemultiplexingScheme, Demultiplexing, DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex, \
+from sequencing.analysis.models import DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex, \
     UGSAssignment
 
 from tests.sequencing.runs.conftest import *
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.unwrapping.conftest import *
-
-
-@pytest.fixture()
-def demultiplexingscheme(db):
-    ds = DemultiplexingScheme.objects.create(
-        name='test demux scheme',
-        description='wrovhnwpovnwecpqkewmc',
-    )
-    return ds
-
-
-@pytest.fixture()
-def demultiplexing(demultiplexingscheme, ngsrun):
-    dm = Demultiplexing.objects.create(
-        ngs_run=ngsrun,
-        demux_scheme=demultiplexingscheme
-    )
-    return dm
 
 
 @pytest.fixture()
