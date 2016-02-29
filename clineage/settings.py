@@ -15,6 +15,8 @@ PRIMER3_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Prime
 
 BOWTIE2_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2'
 
+DATA_STORE = os.path.join(PROJECT_PATH,"storage")
+
 DOJANGO_DOJO_VERSION = "1.7.2"
 
 MANAGERS = ADMINS

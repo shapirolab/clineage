@@ -31,9 +31,14 @@ def mergingscheme(db):
 
 @pytest.fixture()
 def mergedreads(demultiplexedreads, mergingscheme):
+    prefix = '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/1'
     mr = MergedReads.objects.create(
-        demux_read=demultiplexedreads,
-        merge_scheme=mergingscheme,
+        demux_reads=demultiplexedreads,
+        merging_scheme=mergingscheme,
+        assembled_fastq="{}.assembled.fastq".format(prefix),
+        discarded_fastq="{}.discarded.fastq".format(prefix),
+        unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
+        unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
     )
     return mr
 
@@ -42,7 +47,8 @@ def mergedreads(demultiplexedreads, mergingscheme):
 def readsindex_merged_only(mergedreads):
     ri = ReadsIndex.objects.create(
         merged_reads=mergedreads,
-        included_reads='M',  # Merged and unassembled_forward
+        included_reads='M',  # Only merged
+        index_dump_dir='/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M',
         padding=5,
     )
     return ri
@@ -53,6 +59,7 @@ def readsindex_fwd_and_merged(mergedreads):
     ri = ReadsIndex.objects.create(
         merged_reads=mergedreads,
         included_reads='F',  # Merged and unassembled_forward
+        index_dump_dir='/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1F',
         padding=5,
     )
     return ri

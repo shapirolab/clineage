@@ -1,4 +1,13 @@
+import os
+from Bio import SeqIO
+import pysam
+from itertools import chain
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+import uuid
+
 from django.db import models
+from django.conf import settings
 
 from sequencing.runs.models import Demultiplexing
 from targeted_enrichment.planning.models import UGS
@@ -8,13 +17,6 @@ from lib_prep.multiplexes.models import Panel
 
 from sequencing.analysis.merge import pear_with_defaults
 from sequencing.analysis.index_reads import bowtie2build, bowtie2_with_defaults
-
-import os
-from Bio import SeqIO
-import pysam
-from itertools import chain
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
 
 
 class DemultiplexedReads(models.Model):
@@ -31,8 +33,8 @@ class MergingScheme(models.Model):
 
 
 class MergedReads(models.Model):
-    demux_read = models.ForeignKey(DemultiplexedReads)
-    merge_scheme = models.ForeignKey(MergingScheme)
+    demux_reads = models.ForeignKey(DemultiplexedReads)
+    merging_scheme = models.ForeignKey(MergingScheme)
     # TODO: Add default path?
     # TODO: Custom FASTQ field that caches #sequences
     assembled_fastq = models.FilePathField(null=True)
@@ -40,18 +42,15 @@ class MergedReads(models.Model):
     unassembled_forward_fastq = models.FilePathField(null=True)
     unassembled_reverse_fastq = models.FilePathField(null=True)
 
-    @property
-    def pear_prefix(self):
-        return self.id
-
     def run_merge(self):
-        pear_with_defaults("-f", self.demux_read.fastq1,
-                           "-r", self.demux_read.fastq2,
-                           "-o", self.pear_prefix)
-        self.assembled_fastq = "{}.assembled.fastq".format(self.pear_prefix)
-        self.discarded_fastq = "{}.discarded.fastq".format(self.pear_prefix)
-        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(self.pear_prefix)
-        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(self.pear_prefix)
+        prefix = os.path.join(settings.DATA_STORE,"{}".format(uuid.uuid4()))
+        pear_with_defaults("-f", self.demux_reads.fastq1,
+                           "-r", self.demux_reads.fastq2,
+                           "-o", prefix)
+        self.assembled_fastq = "{}.assembled.fastq".format(prefix)
+        self.discarded_fastq = "{}.discarded.fastq".format(prefix)
+        self.unassembled_forward_fastq = "{}.unassembled.forward.fastq".format(prefix)
+        self.unassembled_reverse_fastq = "{}.unassembled.reverse.fastq".format(prefix)
         self.save()
 
 
@@ -59,20 +58,19 @@ class ReadsIndex(models.Model):
     """
     A collection of reads used for generating a bowtie2 index for primers to be searched against
     """
-    INDEX_DUMP_DIR = '.'
     INCLUDED_READS_OPTIONS = (('M', 'Only merged'), ('F', 'Merged and unassembled_forward'),)
     merged_reads = models.ForeignKey(MergedReads)
     included_reads = models.CharField(max_length=1, choices=INCLUDED_READS_OPTIONS)
-    padded_reads_fasta = models.FilePathField(null=True)
+    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True, null=True)
     padding = models.IntegerField(default=5)
 
     @property
-    def padded_reads_fasta_name(self):
-        return "{}.padded.fa".format(self.merged_reads.pear_prefix)
+    def padded_reads_fasta(self):
+        return os.path.join(self.index_dump_dir,"reads.fasta")
     
     @property
     def index_files_prefix(self):
-        return 'index_{}'.format(self.id)
+        return os.path.join(self.index_dump_dir,"index")
 
     def pad_records(self, records):
         for record in records:
@@ -90,13 +88,15 @@ class ReadsIndex(models.Model):
         raise Exception()
 
     def create_final_merged_fastq(self):
+        file_path = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
+        os.mkdir(file_path)
         padded_reads = self.pad_records(self.included_reads_generator())
-        SeqIO.write(padded_reads, self.padded_reads_fasta_name, "fasta")
-        self.padded_reads_fasta = self.padded_reads_fasta_name
+        self.index_dump_dir = file_path
+        SeqIO.write(padded_reads, self.padded_reads_fasta, "fasta")
         self.save()
 
     def collect_bt_files(self):
-        for path in os.listdir(self.INDEX_DUMP_DIR):
+        for path in os.listdir(self.index_dump_dir):
             if path[:len(self.index_files_prefix)] != self.index_files_prefix:
                 continue
             yield path
@@ -111,16 +111,12 @@ class UGSAssignment(models.Model):
     primer_reads_alignment = models.FilePathField(null=True)
 
     @property
-    def panel_fasta_name(self):
-        return 'panel_fasta_{}.fa'.format(self.id)
-
-    @property
     def primer_reads_alignment_name(self):
         return 'primer_reads_alignment_{}.sam'.format(self.id)
 
     @property
     def unwrappers(self):
-        return self.reads_index.merged_reads.demux_read.library.unwrappers
+        return self.reads_index.merged_reads.demux_reads.library.unwrappers
 
     @staticmethod
     def left_unwrapper_name(unwrapper):
@@ -147,15 +143,17 @@ class UGSAssignment(models.Model):
             # breaks the downstream bowtie2 alignment.
 
     def create_panel_fasta(self):
-        SeqIO.write(self.trim_one_base_from_left(self.primers_seqrecords_generator()), self.panel_fasta_name, "fasta")
-        self.panel_fasta = self.panel_fasta_name
+        panel_fasta_name = os.path.join(settings.DATA_STORE, "{}.fasta".format(format(uuid.uuid4())))
+        SeqIO.write(self.trim_one_base_from_left(self.primers_seqrecords_generator()), panel_fasta_name, "fasta")
+        self.panel_fasta = panel_fasta_name
         self.save()
 
     def align_primers_to_reads(self):
+        primer_reads_alignment_name = os.path.join(settings.DATA_STORE, "{}.sam".format(format(uuid.uuid4())))
         bowtie2_with_defaults('-x', self.reads_index.index_files_prefix,
                               '-f', self.panel_fasta,
-                              '-S', self.primer_reads_alignment_name)
-        self.primer_reads_alignment = self.primer_reads_alignment_name
+                              '-S', primer_reads_alignment_name)
+        self.primer_reads_alignment = primer_reads_alignment_name
         self.save()
 
     def read_sam(self):

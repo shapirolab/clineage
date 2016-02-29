@@ -10,8 +10,8 @@ def test_demultiplexedreads(demultiplexedreads):
 
 @pytest.mark.django_db
 def test_mergedreads(mergedreads):
-    assert os.path.isfile(mergedreads.demux_read.fastq1)
-    assert os.path.isfile(mergedreads.demux_read.fastq2)
+    assert os.path.isfile(mergedreads.demux_reads.fastq1)
+    assert os.path.isfile(mergedreads.demux_reads.fastq2)
 
 
 @pytest.mark.django_db
@@ -25,7 +25,6 @@ def test_runmerge(mergedreads):
 
 @pytest.mark.django_db
 def test_readsindex_merged_only(readsindex_merged_only):
-    readsindex_merged_only.merged_reads.run_merge()
     assert os.path.isfile(readsindex_merged_only.merged_reads.assembled_fastq)
     readsindex_merged_only.create_final_merged_fastq()
     assert os.path.isfile(readsindex_merged_only.padded_reads_fasta)
@@ -33,7 +32,6 @@ def test_readsindex_merged_only(readsindex_merged_only):
 
 @pytest.mark.django_db
 def test_readsindex_fwd_and_merged(readsindex_fwd_and_merged):
-    readsindex_fwd_and_merged.merged_reads.run_merge()
     assert os.path.isfile(readsindex_fwd_and_merged.merged_reads.assembled_fastq)
     assert os.path.isfile(readsindex_fwd_and_merged.merged_reads.unassembled_forward_fastq)
     readsindex_fwd_and_merged.create_final_merged_fastq()
@@ -42,7 +40,6 @@ def test_readsindex_fwd_and_merged(readsindex_fwd_and_merged):
 
 @pytest.mark.django_db
 def test_readsindex_bowtie2build(readsindex_merged_only):
-    readsindex_merged_only.merged_reads.run_merge()
     assert os.path.isfile(readsindex_merged_only.merged_reads.assembled_fastq)
     readsindex_merged_only.create_final_merged_fastq()
     assert os.path.isfile(readsindex_merged_only.padded_reads_fasta)
@@ -156,7 +153,6 @@ def test_ugsassignment_read_ids_by_te(ugsassignment, pu_28727, pu_28734):
 
 @pytest.mark.django_db
 def test_ugsassignment_reads_by_te(ugsassignment, pu_28727, pu_28734):
-    ugsassignment.reads_index.merged_reads.run_merge()
     ugsassignment.create_panel_fasta()
     ugsassignment.align_primers_to_reads()
     assert os.path.isfile(ugsassignment.primer_reads_alignment)
