@@ -1,8 +1,4 @@
 
-import itertools
-import csv
-import io
-
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.query import QuerySet
@@ -10,44 +6,9 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
 
-from sequencing.runs.demux import run_bcl2fastq
+from sequencing.runs.demux import run_bcl2fastq, generate_sample_sheets
 
 
-SAMPLESHEET_HEADERS = [
-"Sample_ID",
-"Sample_Name",
-"Sample_Plate",
-"Sample_Well",
-"I7_Index_ID",
-"index",
-"I5_Index_ID",
-"index2",
-"Sample_Project",
-"Description",
-]
-
-HEADER_FORMAT = \
-"""[Header],,,,,,,,,
-IEMFileVersion,4,,,,,,,,
-Experiment Name,{run_name},,,,,,,,
-Date,{run_date},,,,,,,,
-Workflow,GenerateFASTQ,,,,,,,,
-Application,FASTQ Only,,,,,,,,
-Assay,TruSeq HT,,,,,,,,
-Description,{run_desc},,,,,,,,
-Chemistry,Amplicon,,,,,,,,
-,,,,,,,,,
-[Reads],,,,,,,,,
-{read_length},,,,,,,,,
-{read_length},,,,,,,,,
-,,,,,,,,,
-[Settings],,,,,,,,,
-ReverseComplement,0,,,,,,,,
-Adapter,{fwd_read_adaptor},,,,,,,,
-AdapterRead2,{rev_read_adaptor},,,,,,,,
-,,,,,,,,,
-[Data],,,,,,,,,
-"""
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
@@ -94,7 +55,20 @@ class NGSRun(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
 
-    def generate_sample_sheets(self, demux_scheme, max_samples=None):
+    @property
+    def barcoded_contents(self):
+        for library in self.libraries.select_subclasses():
+            it = library.barcoded_contents
+            if isinstance(it, QuerySet):
+                it = it.select_related(
+                    "barcodes",
+                    "barcodes__left",
+                    "barcodes__right"
+                )
+            for bc in it:
+                yield bc
+
+    def get_sample_sheets(self, demux_scheme, max_samples=None):
         """
         Create samplesheet(s) for this given run for demultiplexing with given
         demux_scheme. If max_samples is specified, creates multiple
@@ -103,53 +77,23 @@ class NGSRun(models.Model):
         Currently, demux_scheme doesn't change anything.
         FIXME: Use demux_scheme.
         """
-        out = []
-
-        def rows_iter():
-            for library in self.libraries.select_subclasses():
-                it = library.barcoded_contents
-                if isinstance(it, QuerySet):
-                    it = it.select_related(
-                        "barcodes",
-                        "barcodes__left",
-                        "barcodes__right"
-                    )
-                for bc in library.barcoded_contents:
-                    yield {
-                        "Sample_ID": bc.id,
-                        "Sample_Name": bc.id,
-                        "I7_Index_ID": bc.barcodes.left.name,
-                        "index": bc.barcodes.left.sequence,
-                        "I5_Index_ID": bc.barcodes.right.name,
-                        "index2": bc.barcodes.right.sequence,  # Or ref_seq?
-                    }
-        rows = rows_iter()
-        while True:
-            bio = io.BytesIO()
-            bio.write(HEADER_FORMAT.format(
-                run_name=self.name,
-                run_date=self.date,
-                run_desc="_".join(lib.name for lib in self.libraries.all()),
-                read_length=self.kit.read_length,
-                fwd_read_adaptor=self.kit.fwd_read_adaptor,
-                rev_read_adaptor=self.kit.rev_read_adaptor,
-            ))
-            w = csv.DictWriter(bio, fieldnames=SAMPLESHEET_HEADERS)
-            w.writeheader()
-            if max_samples is None:
-                for row in rows:
-                    w.writerow(row)
-                b = bio.getvalue()
-                bio.close()
-                return b
-            else:
-                row = None
-                for row in itertools.islice(rows, max_samples):
-                    w.writerow(row)
-                if row is None:
-                    return out
-            out.append(bio.getvalue())
-            bio.close()
+        name = self.name
+        date = self.date
+        description = "_".join(lib.name for lib in self.libraries.all())
+        read_length = self.kit.read_length
+        fwd_read_adaptor = self.kit.fwd_read_adaptor
+        rev_read_adaptor = self.kit.rev_read_adaptor
+        return generate_sample_sheets(
+            barcodes=self.barcoded_contents,
+            name=name,
+            date=date,
+            description=description,
+            read_length=read_length,
+            fwd_read_adaptor=fwd_read_adaptor,
+            rev_read_adaptor=rev_read_adaptor,
+            demux_scheme=demux_scheme,
+            max_samples=max_samples
+        )
 
 
 class DemultiplexingScheme(models.Model):
@@ -162,5 +106,5 @@ class Demultiplexing(models.Model):
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
 
     def run_demux(self):
-        sample_sheet_path = self.ngs_run.generate_sample_sheets()
+        sample_sheet_path = self.ngs_run.get_sample_sheets()
         run_bcl2fastq(sample_sheet_path)

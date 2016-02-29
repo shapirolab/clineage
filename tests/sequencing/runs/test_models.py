@@ -5,7 +5,7 @@ import datetime
 @pytest.mark.django_db
 def test_get_samplesheet(ngsrun,demultiplexingscheme):
     # TODO: sort out adaptors
-    assert ngsrun.generate_sample_sheets(demultiplexingscheme).replace('\r', '') == \
+    assert ngsrun.get_sample_sheets(demultiplexingscheme).replace('\r', '') == \
 """[Header],,,,,,,,,
 IEMFileVersion,4,,,,,,,,
 Experiment Name,TestRun,,,,,,,,
