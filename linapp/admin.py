@@ -28,8 +28,6 @@ from primers.synthesis.models import TargetedNoTailPlusPrimer, \
     PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
     PCR2PlusPrimer, PCR2MinusPrimer
 from sequencing.runs.models import MachineType, Machine, NGSRun
-from sequencing.analysis.models import DemultiplexingScheme, MergingScheme, \
-    DemultiplexedReads, MergedReads
 
 admin.site.register(StorageType)
 admin.site.register(StorageBox)
@@ -112,7 +110,3 @@ admin.site.register(PCR2MinusPrimer)
 admin.site.register(MachineType)
 admin.site.register(Machine)
 admin.site.register(NGSRun)
-admin.site.register(DemultiplexingScheme)
-admin.site.register(MergingScheme)
-admin.site.register(DemultiplexedReads)
-admin.site.register(MergedReads)
