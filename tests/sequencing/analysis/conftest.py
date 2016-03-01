@@ -48,7 +48,7 @@ def readsindex_merged_only(mergedreads):
     ri = ReadsIndex.objects.create(
         merged_reads=mergedreads,
         included_reads='M',  # Only merged
-        index_dump_dir='/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M',
+        index_dump_dir='/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M2',
         padding=5,
     )
     return ri

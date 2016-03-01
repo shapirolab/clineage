@@ -1,7 +1,8 @@
+
 import os
 from Bio import SeqIO
 import pysam
-from itertools import chain
+import itertools
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import uuid
@@ -16,7 +17,7 @@ from lib_prep.workflows.models import Library, BarcodedContent
 from lib_prep.multiplexes.models import Panel
 
 from sequencing.analysis.merge import pear_with_defaults
-from sequencing.analysis.index_reads import bowtie2build, bowtie2_with_defaults
+from sequencing.analysis.index_reads import bowtie2build, bowtie2_with_defaults, create_padded_fasta
 
 
 class DemultiplexedReads(models.Model):
@@ -58,56 +59,61 @@ class MergedReads(models.Model):
     unassembled_forward_fastq = models.FilePathField()
     unassembled_reverse_fastq = models.FilePathField()
 
+    def _included_reads_generator(self, included_reads):
+        if included_reads == 'M':
+            return SeqIO.parse(self.assembled_fastq, "fastq")
+        elif included_reads == 'F':
+            return itertools.chain(
+                SeqIO.parse(self.assembled_fastq, "fastq"),
+                SeqIO.parse(self.unassembled_forward_fastq, "fastq")
+            )
+        else:
+            raise ValueError("included_reads should be one of {}".format(ReadsIndex.INCLUDED_READS_OPTIONS))
+
+    def create_reads_index(self, included_reads, padding):
+        """
+        Create an index from some of these reads. included_reads should be one
+        of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
+        padding controls how much to pad on each side of the reads.
+        """
+        index_dir = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
+        reads = self._included_reads_generator(included_reads)
+        fasta = create_padded_fasta(reads, padding)
+        # TODO: clean this double code.
+        os.mkdir(index_dir)
+        bowtie2build(fasta, os.path.join(index_dir, ReadsIndex.INDEX_PREFIX))
+        ri = ReadsIndex.objects.create(
+                merged_reads=self,
+                included_reads=included_reads,
+                index_dump_dir=index_dir,
+                padding=padding,
+            )
+        return ri
+
 
 class ReadsIndex(models.Model):
     """
     A collection of reads used for generating a bowtie2 index for primers to be searched against
     """
     INCLUDED_READS_OPTIONS = (('M', 'Only merged'), ('F', 'Merged and unassembled_forward'),)
+    INDEX_PREFIX = "index"
     merged_reads = models.ForeignKey(MergedReads)
     included_reads = models.CharField(max_length=1, choices=INCLUDED_READS_OPTIONS)
-    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True, null=True)
+    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True)
     padding = models.IntegerField(default=5)
 
-    @property
-    def padded_reads_fasta(self):
-        return os.path.join(self.index_dump_dir,"reads.fasta")
-    
+    def included_reads_generator(self):
+        return self.merged_reads._included_reads_generator(self.included_reads)
+
     @property
     def index_files_prefix(self):
-        return os.path.join(self.index_dump_dir,"index")
-
-    def pad_records(self, records):
-        for record in records:
-            yield "N"*self.padding + record + "N"*self.padding
-
-    def included_reads_generator(self):
-        if self.included_reads == 'M':
-            return SeqIO.parse(self.merged_reads.assembled_fastq, "fastq")
-        if self.included_reads == 'F':
-            return chain(
-                SeqIO.parse(self.merged_reads.assembled_fastq, "fastq"),
-                SeqIO.parse(self.merged_reads.unassembled_forward_fastq, "fastq")
-            )
-        #IntegrityError
-        raise Exception()
-
-    def create_final_merged_fastq(self):
-        file_path = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
-        os.mkdir(file_path)
-        padded_reads = self.pad_records(self.included_reads_generator())
-        self.index_dump_dir = file_path
-        SeqIO.write(padded_reads, self.padded_reads_fasta, "fasta")
-        self.save()
+        return os.path.join(self.index_dump_dir,self.INDEX_PREFIX)
 
     def collect_bt_files(self):
         for path in os.listdir(self.index_dump_dir):
-            if path[:len(self.index_files_prefix)] != self.index_files_prefix:
+            if path[:len(self.INDEX_PREFIX)] != self.INDEX_PREFIX:
                 continue
-            yield path
-
-    def index_reads(self):
-        bowtie2build(self.padded_reads_fasta, self.index_files_prefix)
+            yield os.path.join(self.index_dump_dir, path)
 
 
 class UGSAssignment(models.Model):
@@ -184,6 +190,7 @@ class UGSAssignment(models.Model):
 
     def reads_by_unwrapper(self):
         fq_dict = SeqIO.to_dict(self.reads_index.included_reads_generator())
+
         for uw, read_ids in self.read_ids_by_unwrapper():
             reads = [fq_dict[read_id] for read_id in read_ids]
             yield uw, reads
