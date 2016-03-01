@@ -17,7 +17,7 @@ def test_demultiplexedreads(demultiplexedreads):
 def test_mergedreads(mergedreads):
     assert os.path.isfile(mergedreads.demux_reads.fastq1)
     assert os.path.isfile(mergedreads.demux_reads.fastq2)
-    assert set(strip_fasta_records(mergedreads._included_reads_generator('M'))) == {
+    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == {
         (
             'M00393:167:000000000-ABF3N:1:1101:20583:16769',
             'AAAGGCTTCTCCCCACTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
@@ -56,7 +56,7 @@ def test_mergedreads(mergedreads):
             'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
         ),
     }
-    assert set(strip_fasta_records(mergedreads._included_reads_generator('M'))) == set(strip_fasta_records(mergedreads._included_reads_generator('F')))
+    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == set(strip_fasta_records(mergedreads.included_reads_generator('F')))
 
 
 @pytest.mark.django_db

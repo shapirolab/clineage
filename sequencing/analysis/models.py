@@ -28,18 +28,18 @@ class DemultiplexedReads(models.Model):
     fastq2 = models.FilePathField()
 
     def run_merge(self, merging_scheme):
-        prefix = os.path.join(settings.DATA_STORE,"{}".format(uuid.uuid4()))
+        prefix = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
         # TODO: check by merging scheme.
         pear_with_defaults("-f", self.fastq1,
                            "-r", self.fastq2,
                            "-o", prefix)
         mr = MergedReads.objects.create(
-                demux_reads=self,
-                merging_scheme=merging_scheme,
-                assembled_fastq="{}.assembled.fastq".format(prefix),
-                discarded_fastq="{}.discarded.fastq".format(prefix),
-                unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
-                unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
+            demux_reads=self,
+            merging_scheme=merging_scheme,
+            assembled_fastq="{}.assembled.fastq".format(prefix),
+            discarded_fastq="{}.discarded.fastq".format(prefix),
+            unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
+            unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
         )
         return mr
 
@@ -59,7 +59,7 @@ class MergedReads(models.Model):
     unassembled_forward_fastq = models.FilePathField()
     unassembled_reverse_fastq = models.FilePathField()
 
-    def _included_reads_generator(self, included_reads):
+    def included_reads_generator(self, included_reads):
         if included_reads == 'M':
             return SeqIO.parse(self.assembled_fastq, "fastq")
         elif included_reads == 'F':
@@ -77,17 +77,17 @@ class MergedReads(models.Model):
         padding controls how much to pad on each side of the reads.
         """
         index_dir = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
-        reads = self._included_reads_generator(included_reads)
+        reads = self.included_reads_generator(included_reads)
         fasta = create_padded_fasta(reads, padding)
         # TODO: clean this double code.
         os.mkdir(index_dir)
         bowtie2build(fasta, os.path.join(index_dir, ReadsIndex.INDEX_PREFIX))
         ri = ReadsIndex.objects.create(
-                merged_reads=self,
-                included_reads=included_reads,
-                index_dump_dir=index_dir,
-                padding=padding,
-            )
+            merged_reads=self,
+            included_reads=included_reads,
+            index_dump_dir=index_dir,
+            padding=padding,
+        )
         return ri
 
 
@@ -103,11 +103,11 @@ class ReadsIndex(models.Model):
     padding = models.IntegerField(default=5)
 
     def included_reads_generator(self):
-        return self.merged_reads._included_reads_generator(self.included_reads)
+        return self.merged_reads.included_reads_generator(self.included_reads)
 
     @property
     def index_files_prefix(self):
-        return os.path.join(self.index_dump_dir,self.INDEX_PREFIX)
+        return os.path.join(self.index_dump_dir, self.INDEX_PREFIX)
 
     def collect_bt_files(self):
         for path in os.listdir(self.index_dump_dir):
@@ -196,7 +196,7 @@ class UGSAssignment(models.Model):
             yield uw, reads
 
 
-class SequencingData(models.Model): # This contains the actual data.
+class SequencingData(models.Model):  # This contains the actual data.
     merged_reads = models.ForeignKey(MergedReads)
     unwrapper = models.ForeignKey(Unwrapper)
     target_offset = models.IntegerField(null=True)
