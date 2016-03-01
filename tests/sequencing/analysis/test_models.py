@@ -67,6 +67,11 @@ def test_runmerge(demultiplexedreads, mergingscheme):
     assert os.path.isfile(mr.discarded_fastq)
     assert os.path.isfile(mr.unassembled_forward_fastq)
     assert os.path.isfile(mr.unassembled_reverse_fastq)
+    mr.delete()
+    assert not os.path.exists(mr.assembled_fastq)
+    assert not os.path.exists(mr.discarded_fastq)
+    assert not os.path.exists(mr.unassembled_forward_fastq)
+    assert not os.path.exists(mr.unassembled_reverse_fastq)
 
 
 # @pytest.mark.django_db
@@ -88,16 +93,9 @@ def test_runmerge(demultiplexedreads, mergingscheme):
 def test_readsindex_bowtie2build_merged_only(mergedreads):
     assert os.path.isfile(mergedreads.assembled_fastq)
     ri = mergedreads.create_reads_index(included_reads='M',padding=5)
-    expected_files = set()
-    for i in xrange(1, 5):
-        f = "{}.{}.bt2".format(ri.index_files_prefix, i)
-        assert os.path.isfile(f)
-        expected_files.add(f)
-    for i in xrange(1, 3):
-        f = "{}.rev.{}.bt2".format(ri.index_files_prefix, i)
-        assert os.path.isfile(f)
-        expected_files.add(f)
-    assert expected_files == set(ri.collect_bt_files())
+    assert set(os.path.join(ri.index_dump_dir, x) for x in os.listdir(ri.index_dump_dir)) == set(ri.files)
+    ri.delete()
+    assert not os.path.exists(ri.index_dump_dir)
 
 
 @pytest.mark.django_db

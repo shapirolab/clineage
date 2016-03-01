@@ -7,6 +7,8 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch.dispatcher import receiver
 
 from misc.utils import get_unique_path
 
@@ -20,12 +22,31 @@ from sequencing.analysis.merge import pear_with_defaults
 from sequencing.analysis.index_reads import bowtie2build, bowtie2_with_defaults, create_padded_fasta
 
 
+def delete_files(sender, instance, **kwargs):
+    # Pass false so FileField doesn't save the model.
+    for filename in getattr(instance, "files", []):
+        try:
+            os.unlink(filename)
+        except OSError:
+            raise
+    for dirname in getattr(instance, "dirs", []):
+        try:
+            os.rmdir(dirname)
+        except OSError:
+            raise
+
+
 class DemultiplexedReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
     library = models.ForeignKey(Library)
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
+
+    @property
+    def files(self):
+        yield self.fastq1
+        yield self.fastq2
 
     def run_merge(self, merging_scheme):
         prefix = get_unique_path()
@@ -43,6 +64,8 @@ class DemultiplexedReads(models.Model):
         )
         return mr
 
+post_delete.connect(delete_files, DemultiplexedReads)
+
 
 class MergingScheme(models.Model):
     name = models.CharField(max_length=50)
@@ -58,6 +81,13 @@ class MergedReads(models.Model):
     discarded_fastq = models.FilePathField()
     unassembled_forward_fastq = models.FilePathField()
     unassembled_reverse_fastq = models.FilePathField()
+
+    @property
+    def files(self):
+        yield self.assembled_fastq
+        yield self.discarded_fastq
+        yield self.unassembled_forward_fastq
+        yield self.unassembled_reverse_fastq
 
     def included_reads_generator(self, included_reads):
         if included_reads == 'M':
@@ -90,6 +120,8 @@ class MergedReads(models.Model):
         )
         return ri
 
+post_delete.connect(delete_files, MergedReads)
+
 
 class ReadsIndex(models.Model):
     """
@@ -109,11 +141,18 @@ class ReadsIndex(models.Model):
     def index_files_prefix(self):
         return os.path.join(self.index_dump_dir, self.INDEX_PREFIX)
 
-    def collect_bt_files(self):
-        for path in os.listdir(self.index_dump_dir):
-            if path[:len(self.INDEX_PREFIX)] != self.INDEX_PREFIX:
-                continue
-            yield os.path.join(self.index_dump_dir, path)
+    @property
+    def files(self):
+        for i in xrange(1, 5):
+            yield "{}.{}.bt2".format(self.index_files_prefix, i)
+        for i in xrange(1, 3):
+            yield "{}.rev.{}.bt2".format(self.index_files_prefix, i)
+
+    @property
+    def dirs(self):
+        yield self.index_dump_dir
+
+post_delete.connect(delete_files, ReadsIndex)
 
 
 class UGSAssignment(models.Model):
