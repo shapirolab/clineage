@@ -5,6 +5,7 @@ import uuid
 from Bio import SeqIO
 
 from django.conf import settings
+from misc.utils import get_unique_path
 
 BOWTIE2BUILD_PATH = "/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2-build"
 bowtie2build = local[BOWTIE2BUILD_PATH]
@@ -41,7 +42,7 @@ def _pad_records(records, padding):
         yield "N"*padding + record + "N"*padding
 
 def create_padded_fasta(reads_iter, padding):
-    file_path = os.path.join(settings.DATA_STORE, "{}.fasta".format(uuid.uuid4()))
+    file_path = get_unique_path("fasta")
     padded_reads = _pad_records(reads_iter, padding)
     SeqIO.write(padded_reads, file_path, "fasta")
     return file_path

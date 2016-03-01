@@ -5,10 +5,10 @@ import pysam
 import itertools
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-import uuid
 
 from django.db import models
-from django.conf import settings
+
+from misc.utils import get_unique_path
 
 from sequencing.runs.models import Demultiplexing
 from targeted_enrichment.planning.models import UGS
@@ -28,7 +28,7 @@ class DemultiplexedReads(models.Model):
     fastq2 = models.FilePathField()
 
     def run_merge(self, merging_scheme):
-        prefix = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
+        prefix = get_unique_path()
         # TODO: check by merging scheme.
         pear_with_defaults("-f", self.fastq1,
                            "-r", self.fastq2,
@@ -76,7 +76,7 @@ class MergedReads(models.Model):
         of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
         padding controls how much to pad on each side of the reads.
         """
-        index_dir = os.path.join(settings.DATA_STORE, "{}".format(uuid.uuid4()))
+        index_dir = get_unique_path()
         reads = self.included_reads_generator(included_reads)
         fasta = create_padded_fasta(reads, padding)
         # TODO: clean this double code.
@@ -154,13 +154,13 @@ class UGSAssignment(models.Model):
             # breaks the downstream bowtie2 alignment.
 
     def create_panel_fasta(self):
-        panel_fasta_name = os.path.join(settings.DATA_STORE, "{}.fasta".format(format(uuid.uuid4())))
+        panel_fasta_name = get_unique_path("fasta")
         SeqIO.write(self.trim_one_base_from_left(self.primers_seqrecords_generator()), panel_fasta_name, "fasta")
         self.panel_fasta = panel_fasta_name
         self.save()
 
     def align_primers_to_reads(self):
-        primer_reads_alignment_name = os.path.join(settings.DATA_STORE, "{}.sam".format(format(uuid.uuid4())))
+        primer_reads_alignment_name = get_unique_path("sam")
         bowtie2_with_defaults('-x', self.reads_index.index_files_prefix,
                               '-f', self.panel_fasta,
                               '-S', primer_reads_alignment_name)
