@@ -9,8 +9,8 @@ def strip_fasta_records(fasta_records):
 
 
 @pytest.mark.django_db
-def test_demultiplexedreads(demultiplexedreads):
-    assert demultiplexedreads.barcoded_content.content.name == 'human amplified content'
+def test_samplereads(samplereads):
+    assert samplereads.barcoded_content.content.name == 'human amplified content'
 
 
 @pytest.mark.django_db
@@ -60,9 +60,9 @@ def test_mergedreads(mergedreads):
 
 
 @pytest.mark.django_db
-def test_runmerge(demultiplexedreads, mergingscheme):
-    mr = demultiplexedreads.run_merge(mergingscheme)
-    assert mr.demux_reads is demultiplexedreads
+def test_runmerge(samplereads, mergingscheme):
+    mr = samplereads.run_merge(mergingscheme)
+    assert mr.demux_reads is samplereads
     assert os.path.isfile(mr.assembled_fastq)
     assert os.path.isfile(mr.discarded_fastq)
     assert os.path.isfile(mr.unassembled_forward_fastq)

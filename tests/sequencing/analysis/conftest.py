@@ -3,7 +3,7 @@ import os
 import uuid
 from django.conf import settings
 
-from sequencing.analysis.models import DemultiplexedReads, MergingScheme, MergedReads, ReadsIndex, \
+from sequencing.analysis.models import SampleReads, MergingScheme, MergedReads, ReadsIndex, \
     UGSAssignment
 
 from misc.utils import get_unique_path
@@ -14,7 +14,7 @@ from tests.targeted_enrichment.unwrapping.conftest import *
 
 
 @pytest.fixture()
-def demultiplexedreads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
+def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
     fastq_r1 = get_unique_path("fastq")
     fastq_r2 = get_unique_path("fastq")
     os.symlink(
@@ -25,14 +25,14 @@ def demultiplexedreads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1li
         '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R2.fastq',
         fastq_r2
     )
-    dr = DemultiplexedReads.objects.create(
+    sr = SampleReads.objects.create(
         demux=demultiplexing,
         barcoded_content=magicalpcr1barcodedcontent,
         library=magicalpcr1library,
         fastq1=fastq_r1,
         fastq2=fastq_r2,
     )
-    return dr
+    return sr
 
 
 @pytest.fixture()
@@ -45,7 +45,7 @@ def mergingscheme(db):
 
 
 @pytest.fixture()
-def mergedreads(demultiplexedreads, mergingscheme):
+def mergedreads(samplereads, mergingscheme):
     src_prefix = '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/1'
     dst_prefix = get_unique_path()
     os.symlink(
@@ -65,7 +65,7 @@ def mergedreads(demultiplexedreads, mergingscheme):
         "{}.unassembled.reverse.fastq".format(dst_prefix)
     )
     mr = MergedReads.objects.create(
-        demux_reads=demultiplexedreads,
+        demux_reads=samplereads,
         merging_scheme=mergingscheme,
         assembled_fastq="{}.assembled.fastq".format(dst_prefix),
         discarded_fastq="{}.discarded.fastq".format(dst_prefix),

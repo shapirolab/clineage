@@ -36,7 +36,7 @@ def delete_files(sender, instance, **kwargs):
             raise
 
 
-class DemultiplexedReads(models.Model):
+class SampleReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
     library = models.ForeignKey(Library)
@@ -64,7 +64,7 @@ class DemultiplexedReads(models.Model):
         )
         return mr
 
-post_delete.connect(delete_files, DemultiplexedReads)
+post_delete.connect(delete_files, SampleReads)
 
 
 class MergingScheme(models.Model):
@@ -73,7 +73,7 @@ class MergingScheme(models.Model):
 
 
 class MergedReads(models.Model):
-    demux_reads = models.ForeignKey(DemultiplexedReads)
+    demux_reads = models.ForeignKey(SampleReads)
     merging_scheme = models.ForeignKey(MergingScheme)
     # TODO: Add default path?
     # TODO: Custom FASTQ field that caches #sequences
