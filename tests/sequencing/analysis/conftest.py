@@ -12,17 +12,18 @@ from tests.sequencing.runs.conftest import *
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.unwrapping.conftest import *
 
+file_fixtures_path = os.path.join(*(os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1] + ("ngs_fixtures",)))
 
 @pytest.fixture()
 def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
     fastq_r1 = get_unique_path("fastq")
     fastq_r2 = get_unique_path("fastq")
     os.symlink(
-        '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R1.fastq',
+        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R1.fastq'),
         fastq_r1
     )
     os.symlink(
-        '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R2.fastq',
+        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R2.fastq'),
         fastq_r2
     )
     sr = SampleReads.objects.create(
@@ -46,7 +47,7 @@ def mergingscheme(db):
 
 @pytest.fixture()
 def mergedreads(samplereads, mergingscheme):
-    src_prefix = '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/1'
+    src_prefix = os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/1')
     dst_prefix = get_unique_path()
     os.symlink(
         "{}.assembled.fastq".format(src_prefix),
@@ -86,7 +87,7 @@ def link_index_files(src_dir, dst_dir):
 
 @pytest.fixture()
 def readsindex_merged_only(mergedreads):
-    src_dir = '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M2'
+    src_dir = os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M2')
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     ri = ReadsIndex.objects.create(
@@ -100,7 +101,7 @@ def readsindex_merged_only(mergedreads):
 
 @pytest.fixture()
 def readsindex_fwd_and_merged(mergedreads):
-    src_dir = '/net/mraid11/export/dcstor/Ofir/ngs_fixtures/1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1F'
+    src_dir = os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1F')
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     ri = ReadsIndex.objects.create(
