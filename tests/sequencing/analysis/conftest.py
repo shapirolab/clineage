@@ -120,6 +120,3 @@ def ugsassignment(readsindex_fwd_and_merged):
     )
     return ugsa
 
-
-
-
