@@ -7,8 +7,7 @@ from Bio import SeqIO
 from django.conf import settings
 from misc.utils import get_unique_path
 
-BOWTIE2BUILD_PATH = "/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2-build"
-bowtie2build = local[BOWTIE2BUILD_PATH]
+bowtie2build = local["bowtie2-build"]
 
 # bowtie2-build \
 #     ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged.fa \
@@ -16,8 +15,7 @@ bowtie2build = local[BOWTIE2BUILD_PATH]
 
 
 
-BOWTIE2_PATH = "/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2"
-bowtie2 = local[BOWTIE2_PATH]
+bowtie2 = local["bowtie2"]
 bowtie2_with_defaults = bowtie2["-p", "24",
                                 "-a",
                                 "--very-sensitive",]

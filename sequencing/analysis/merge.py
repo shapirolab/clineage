@@ -1,7 +1,6 @@
 from plumbum import local
 
-PEAR_PATH = "/net/mraid11/export/dcstor/Adam/Software/PEAR-master/src/pear"
-pear = local[PEAR_PATH]
+pear = local["pear"]
 pear_with_defaults = pear["-v", "40",
                           "-m", "300"]
 
