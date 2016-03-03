@@ -5,6 +5,8 @@ import pysam
 import itertools
 import re
 
+from model_utils.managers import InheritanceManager
+
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch.dispatcher import receiver
@@ -151,3 +153,33 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
             ("margin_assignment", "unwrapper"),
         )
 
+
+class HistogramEntryReads(models.Model):
+    sample_reads = models.ForeignKey(SampleReads)
+
+    objects = InheritanceManager()
+    
+
+class AdamHistogramEntryReads(HistogramEntryReads):
+    amplicon_reads = models.ForeignKey(AdamAmpliconReads)
+
+
+class MicrosatelliteHistogramGenotype(models.Model):
+    microsatellite = models.ForeignKey(Microsatellite)
+    repeat_number = models.PositiveIntegerField()
+
+
+class SNPHistogramGenotype(models.Model):
+    snp = models.ForeignKey(SNP)
+    base = models.CharField(max_length=1)
+
+
+class HistogramEntry(models.Model):
+    reads_analysis = models.ForeignKey(HistogramEntryReads)
+    unwrapper = models.ForeignKey(Unwrapper)
+    microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
+    snp_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
+    num_reads = models.PositiveIntegerField()
+    fastq1 = models.FilePathField()
+    fastq2 = models.FilePathField()
+    fastqm = models.FilePathField(null=True)
