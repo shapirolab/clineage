@@ -1,6 +1,8 @@
 
 from django.db import models
 
+from model_utils.managers import InheritanceManager
+
 from genomes.models import DNASlice
 from misc.dna import DNA
 from targeted_enrichment.reagents.models import PCR1PrimerPairTER, \
@@ -8,6 +10,8 @@ from targeted_enrichment.reagents.models import PCR1PrimerPairTER, \
 
 class Unwrapper(models.Model):
     slice = models.ForeignKey(DNASlice)
+
+    objects = InheritanceManager()
 
     @property
     def left_margin(self):
