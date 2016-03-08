@@ -1,13 +1,16 @@
 import pytest
 import os
 from Bio import SeqIO
+import filecmp
 
 from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
-    seperate_reads_by_amplicons, get_adam_ms_variations
-from sequencing.analysis.models import AdamMSVariations
+    seperate_reads_by_amplicons, _build_ms_variations, get_adam_ms_variations
+from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin
 
+index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
+    ["1","2","3","4","1.rev","2.rev"]]
 
 def strip_fasta_records(fasta_records):
     for rec in fasta_records:
@@ -116,18 +119,20 @@ def test_seperate_reads_by_amplicons(adammarginassignment, adamampliconreads):
     )
     assert aar_reads == ref_reads
 
+def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations):
+    fasta = _build_ms_variations(pu_28727, 50)
+    variations = set(strip_fasta_records(SeqIO.parse(fasta, "fasta")))
+    assert variations == pu_28727_adam_ms_variations
+
 @pytest.mark.django_db
-def test_get_adam_ms_variations(pu_28727, pu_28727_adam_ms_variations):
+def test_get_adam_ms_variations(pu_28727):
     assert AdamMSVariations.objects.count() == 0
     amsv = get_adam_ms_variations(pu_28727, 50)
     assert AdamMSVariations.objects.count() == 1
     amsv2 = get_adam_ms_variations(pu_28727, 50)
     assert AdamMSVariations.objects.count() == 1
     assert amsv2.id == amsv.id
-    variations = set(strip_fasta_records(
-        SeqIO.parse(amsv.fasta, "fasta"))
-    )
-    assert variations == pu_28727_adam_ms_variations
+    # TODO: test that we get a good index.
     amsv.delete()
-    assert not os.path.exists(amsv.fasta)
+    assert not os.path.exists(amsv.index_dump_dir)
 

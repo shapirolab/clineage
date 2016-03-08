@@ -161,14 +161,9 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
         )
 
 
-class AdamMSVariations(models.Model):
+class AdamMSVariations(BowtieIndexMixin):
     unwrapper = models.ForeignKey(Unwrapper)
-    fasta = models.FilePathField()
     padding = models.PositiveIntegerField()
-
-    @property
-    def files(self):
-        yield self.fasta
 
     class Meta:
         index_together=[

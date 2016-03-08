@@ -6,6 +6,7 @@ import uuid
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+import shutil
 
 from django.conf import settings
 from django.db import IntegrityError
@@ -273,12 +274,21 @@ def get_adam_ms_variations(unwrapper, padding):
             padding=padding,
         )
     except AdamMSVariations.DoesNotExist:
+        index_dir = get_unique_path()
         fasta = _build_ms_variations(unwrapper, padding)
-        amsv, c = AdamMSVariations.objects.get_or_create(
+        os.mkdir(index_dir)
+        mock_msv = AdamMSVariations(
             unwrapper=unwrapper,
             padding=padding,
-            defaults={"fasta": fasta}
+            index_dump_dir=index_dir,
+        )
+        bowtie2build(fasta, mock_msv.index_files_prefix)
+        os.unlink(fasta)
+        msv, c = AdamMSVariations.objects.get_or_create(
+            unwrapper=unwrapper,
+            padding=padding,
+            defaults={"index_dump_dir": index_dir}
         )
         if not c:
-            os.unlink(fasta)
-        return amsv
+            delete_files(mock_msv)
+        return msv
