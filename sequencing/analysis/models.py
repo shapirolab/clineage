@@ -32,6 +32,29 @@ def delete_files(sender, instance, **kwargs):
             raise
 
 
+class BowtieIndexMixin(models.Model):
+    INDEX_PREFIX = "index"
+    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True)
+
+    class Meta:
+        abstract=True
+
+    @property
+    def index_files_prefix(self):
+        return os.path.join(self.index_dump_dir, self.INDEX_PREFIX)
+
+    @property
+    def files(self):
+        for i in xrange(1, 5):
+            yield "{}.{}.bt2".format(self.index_files_prefix, i)
+        for i in xrange(1, 3):
+            yield "{}.rev.{}.bt2".format(self.index_files_prefix, i)
+
+    @property
+    def dirs(self):
+        yield self.index_dump_dir
+
+
 class SampleReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
@@ -77,34 +100,17 @@ class AdamMergedReads(models.Model):
 post_delete.connect(delete_files, AdamMergedReads)
 
 
-class AdamReadsIndex(models.Model):
+class AdamReadsIndex(BowtieIndexMixin):
     """
     A collection of reads used for generating a bowtie2 index for primers to be searched against
     """
     INCLUDED_READS_OPTIONS = (('M', 'Only merged'), ('F', 'Merged and unassembled_forward'),)
-    INDEX_PREFIX = "index"
     merged_reads = models.ForeignKey(AdamMergedReads)
     included_reads = models.CharField(max_length=1, choices=INCLUDED_READS_OPTIONS)
-    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True)
     padding = models.IntegerField(default=5)
 
     def included_reads_generator(self):
         return self.merged_reads.included_reads_generator(self.included_reads)
-
-    @property
-    def index_files_prefix(self):
-        return os.path.join(self.index_dump_dir, self.INDEX_PREFIX)
-
-    @property
-    def files(self):
-        for i in xrange(1, 5):
-            yield "{}.{}.bt2".format(self.index_files_prefix, i)
-        for i in xrange(1, 3):
-            yield "{}.rev.{}.bt2".format(self.index_files_prefix, i)
-
-    @property
-    def dirs(self):
-        yield self.index_dump_dir
 
 post_delete.connect(delete_files, AdamReadsIndex)
 
