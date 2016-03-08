@@ -7,10 +7,11 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from django.conf import settings
-from misc.utils import get_unique_path
 
-from models import AdamMergedReads, AdamReadsIndex, AdamMarginAssignment, \
-    AdamAmpliconReads, unwrapper_margin_to_name, LEFT, RIGHT
+from misc.utils import get_unique_path
+from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
+    AdamMarginAssignment,  AdamAmpliconReads, unwrapper_margin_to_name, \
+    LEFT, RIGHT
 
 pear = local["pear"]
 pear_with_defaults = pear["-v", "40",
@@ -143,18 +144,17 @@ def _validate_unwrapper_mapping(reads_matches):
     # For example, make sure left primer is mapped to the left of the amplicon
     # and the right primer to the right of the amplicon using ".pos" property
     # of pysam.calignmentfile.AlignedSegment objects
-    for read_id in reads_matches:
-        if len(reads_matches[read_id]) != 2:
+    for read_id, matches in reads_matches.iteritems():
+        if len(matches) != 2:
             # place proper bin
             continue
-        unwrappers, directions = zip(*reads_matches[read_id])
+        unwrappers, directions = zip(*matches)
         u1, u2 = unwrappers
         if u1 != u2:
             # place proper bin
             continue
         if set(directions) != {LEFT, RIGHT}:
-            # place proper bin
-            continue
+            raise RuntimeError("What else is here? {}".format(directions))
         yield read_id, u1
 
 
@@ -165,23 +165,20 @@ def _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers):
     return reads_by_unwrapper
 
 
-def seperate_reads_by_amplicons(adammarginassignment):
-    reads_matches = _collect_mappings_from_sam(adammarginassignment)
+def seperate_reads_by_amplicons(margin_assignment):
+    reads_matches = _collect_mappings_from_sam(margin_assignment)
     validated_reads_unwrappers = _validate_unwrapper_mapping(reads_matches)
     reads_by_unwrapper = _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers)
-    reads = adammarginassignment.reads_index.included_reads_generator()
+    reads = margin_assignment.reads_index.included_reads_generator()
     fq_dict = SeqIO.to_dict(reads)
-    for unwrapper in reads_by_unwrapper:
-        unwrapper_reads_fasta_name = get_unique_path("fastq")
-        unwrapper_reads = [fq_dict[read_id] for read_id in reads_by_unwrapper[unwrapper]]
-        SeqIO.write(unwrapper_reads,
-                    unwrapper_reads_fasta_name, "fastq")
+    for unwrapper, read_ids in reads_by_unwrapper.iteritems():
+        unwrapper_reads_fastq_name = get_unique_path("fastq")
+        unwrapper_reads = (fq_dict[read_id] for read_id in read_ids)
+        SeqIO.write(unwrapper_reads, unwrapper_reads_fastq_name, "fastq")
         aar = AdamAmpliconReads.objects.create(
-            margin_assignment=adammarginassignment,
+            margin_assignment=margin_assignment,
             unwrapper=unwrapper,
-            fastq=unwrapper_reads_fasta_name,
+            fastq=unwrapper_reads_fastq_name,
         )
         yield aar
 
-# def _reads_by_unwrapper(reads_matches):
-#     for unwrapper, read_name in _validate_unwrapper_mapping(reads_matches)
