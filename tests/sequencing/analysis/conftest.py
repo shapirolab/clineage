@@ -4,7 +4,7 @@ import uuid
 from django.conf import settings
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, AdamMSVariations
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
 
@@ -265,3 +265,34 @@ def adamampliconreads(adammarginassignment, pu_28734):
 @pytest.fixture()
 def pu_28727_adam_ms_variations():
     return VARS_28727
+
+
+@pytest.fixture()
+def amsv_28727(pu_28727):
+    src_dir = os.path.join(file_fixtures_path, 'amsv_28727')
+    dst_dir = get_unique_path()
+    link_index_files(src_dir, dst_dir)
+    amsv = AdamMSVariations.objects.create(
+        unwrapper=pu_28727,
+        index_dump_dir=dst_dir,
+        padding=50,
+    )
+    return amsv
+    
+
+@pytest.fixture()
+def amsv_28734(pu_28734):
+    src_dir = os.path.join(file_fixtures_path, 'amsv_28734')
+    dst_dir = get_unique_path()
+    link_index_files(src_dir, dst_dir)
+    amsv = AdamMSVariations.objects.create(
+        unwrapper=pu_28734,
+        index_dump_dir=dst_dir,
+        padding=50,
+    )
+    return amsv
+    
+
+@pytest.fixture()
+def require_adammsvariations(amsv_28727, amsv_28734):
+    pass
