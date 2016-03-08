@@ -1,4 +1,5 @@
 
+import itertools
 from plumbum import local
 import os
 import uuid
@@ -7,11 +8,13 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from django.conf import settings
+from django.db import IntegrityError
 
 from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
-    AdamMarginAssignment,  AdamAmpliconReads, unwrapper_margin_to_name, \
-    LEFT, RIGHT
+    AdamMarginAssignment, AdamAmpliconReads, unwrapper_margin_to_name, \
+    LEFT, RIGHT, AdamMSVariations
+from targeted_enrichment.planning.models import Microsatellite
 
 pear = local["pear"]
 pear_with_defaults = pear["-v", "40",
@@ -182,3 +185,100 @@ def seperate_reads_by_amplicons(margin_assignment):
         )
         yield aar
 
+
+def _get_ms_length_range(ms):
+    #if (Rep>3)
+            #Xcomb{ti} = 3:(Rep*2-3);
+    #else
+            #Xcomb{ti} = 1:5;
+    #end
+    # TODO: put better boundries
+    n = ms.repeat_number
+    if n > 3:
+        return xrange(3,2*n-2)
+    else:
+        return xrange(1,6)
+
+
+def _get_ms_variations(ms):
+    # FIXME: kill this +-1 when we move to 0-based.
+    ru = ms.slice.chromosome.getdna(ms.slice.start_pos,
+        ms.slice.start_pos+ms.repeat_unit_len-1)
+    for i in _get_ms_length_range(ms):
+        yield (i, ru*i)
+
+
+def _get_mss_variations_seqrecords(mss, seq_fmt, prefix):
+    name_fmt = ":".join([prefix]+["{}={{}}".format(ms.name) for ms in mss])
+    for mult in itertools.product(*[_get_ms_variations(ms) for ms in mss]):
+        nums, seqs = zip(*mult)
+        # name='', description='' are workarounds for the '<unknown
+        # description>' that is being outputted otherwise
+        yield SeqRecord(
+            Seq(seq_fmt.format(*seqs)),
+            id=name_fmt.format(*nums),
+            name='',
+            description=''
+        )
+
+
+def _build_ms_variations(unwrapper, padding):
+    # FIXME: What's the right API for this?
+    targets = list(unwrapper.ter.te.targets.select_related(
+        "microsatellite",
+        "slice",
+    ))
+    mss = []
+    for t in targets:
+        try:
+            m = t.microsatellite
+        except Microsatellite.DoesNotExist:
+            pass
+        else:
+            mss.append(m)
+    # This is so they are ordered properly for the format string.
+    mss = sorted(mss,key=lambda ms: ms.slice.start_pos)
+    # FIXME: kill this +-1 when we move to 0-based.
+    points = [unwrapper.slice.start_pos-1]
+    for ms in mss:
+        # FIXME: kill this +-1 when we move to 0-based.
+        points.append(ms.slice.start_pos-1)
+        points.append(ms.slice.end_pos)
+    points.append(unwrapper.slice.end_pos)
+    if points != sorted(points):
+        raise IntegrityError("Unwrapper {} has interlocking MSs or MSs " \
+            "outside its boundaries".format(unwrapper.id))
+    # FIXME: kill this +-1 when we move to 0-based.
+    segments = [(points[2*i]+1, points[2*i+1]) \
+        for i in xrange(len(points)//2) if points[2*i] < points[2*i+1]]
+    # FIXME: maybe store these slices?
+    fmt = "{}".join([unwrapper.slice.chromosome.getdna(*a) for a in segments])
+    full_fmt = "{pad}{left}{slice}{right}{pad}".format(
+        pad="N"*padding,
+        left=unwrapper.left_margin,
+        slice=fmt,
+        right=unwrapper.right_margin
+    )
+    fasta = get_unique_path("fa")
+    prefix = "{}".format(unwrapper.id)
+    SeqIO.write(_get_mss_variations_seqrecords(mss, full_fmt, prefix),
+        fasta, "fasta")
+    return fasta
+
+
+def get_adam_ms_variations(unwrapper, padding):
+    try:
+        return AdamMSVariations.objects.get(
+            unwrapper=unwrapper,
+            padding=padding,
+        )
+    except AdamMSVariations.DoesNotExist:
+        fasta = _build_ms_variations(unwrapper, padding)
+        amsv, c = AdamMSVariations.objects.get_or_create(
+            unwrapper=unwrapper,
+            padding=padding,
+            defaults={"fasta": fasta}
+        )
+        if not c:
+            os.unlink(fasta)
+        return amsv

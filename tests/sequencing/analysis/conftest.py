@@ -9,6 +9,7 @@ from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
 
 from tests.sequencing.runs.conftest import *
+from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.unwrapping.conftest import *
 
@@ -259,3 +260,8 @@ def adamampliconreads(adammarginassignment, pu_28734):
         fastq=fastq_path
     )
     return aar
+
+
+@pytest.fixture()
+def pu_28727_adam_ms_variations():
+    return VARS_28727

@@ -128,6 +128,7 @@ class AdamMarginAssignment(models.Model):
 
 post_delete.connect(delete_files, AdamMarginAssignment)
 
+
 LEFT, RIGHT = "left", "right"
 
 def unwrapper_margin_to_name(unwrapper, side):
@@ -152,6 +153,23 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
         index_together = (
             ("margin_assignment", "unwrapper"),
         )
+
+
+class AdamMSVariations(models.Model):
+    unwrapper = models.ForeignKey(Unwrapper)
+    fasta = models.FilePathField()
+    padding = models.PositiveIntegerField()
+
+    @property
+    def files(self):
+        yield self.fasta
+
+    class Meta:
+        index_together=[
+            ("unwrapper","padding")
+        ]
+
+post_delete.connect(delete_files, AdamMSVariations)
 
 
 class HistogramEntryReads(models.Model):

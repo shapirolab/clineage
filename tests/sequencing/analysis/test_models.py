@@ -1,10 +1,12 @@
 import pytest
 import os
 from Bio import SeqIO
+
 from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
-    seperate_reads_by_amplicons
+    seperate_reads_by_amplicons, get_adam_ms_variations
+from sequencing.analysis.models import AdamMSVariations
 
 
 def strip_fasta_records(fasta_records):
@@ -113,3 +115,19 @@ def test_seperate_reads_by_amplicons(adammarginassignment, adamampliconreads):
         SeqIO.parse(adamampliconreads.fastq, "fastq"))
     )
     assert aar_reads == ref_reads
+
+@pytest.mark.django_db
+def test_get_adam_ms_variations(pu_28727, pu_28727_adam_ms_variations):
+    assert AdamMSVariations.objects.count() == 0
+    amsv = get_adam_ms_variations(pu_28727, 50)
+    assert AdamMSVariations.objects.count() == 1
+    amsv2 = get_adam_ms_variations(pu_28727, 50)
+    assert AdamMSVariations.objects.count() == 1
+    assert amsv2.id == amsv.id
+    variations = set(strip_fasta_records(
+        SeqIO.parse(amsv.fasta, "fasta"))
+    )
+    assert variations == pu_28727_adam_ms_variations
+    amsv.delete()
+    assert not os.path.exists(amsv.fasta)
+
