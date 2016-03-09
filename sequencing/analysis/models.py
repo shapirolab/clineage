@@ -173,13 +173,13 @@ class AdamMSVariations(BowtieIndexMixin):
 post_delete.connect(delete_files, AdamMSVariations)
 
 
-class HistogramEntryReads(models.Model):
+class Histogram(models.Model):
     sample_reads = models.ForeignKey(SampleReads)
 
     objects = InheritanceManager()
 
 
-class AdamHistogramEntryReads(HistogramEntryReads):
+class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
 
 
@@ -236,8 +236,8 @@ class SNPHistogramGenotype(models.Model):
     base = models.CharField(max_length=1)
 
 
-class HistogramEntry(models.Model):
-    reads_analysis = models.ForeignKey(HistogramEntryReads)
+class HistogramEntryReads(models.Model):
+    histogram = models.ForeignKey(Histogram)
     unwrapper = models.ForeignKey(Unwrapper)
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
     snp_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
