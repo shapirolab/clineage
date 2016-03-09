@@ -125,6 +125,7 @@ class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
+    repeat_unit_ref_seq = models.CharField(max_length=50) #string of acutal unit in genome.
 
     def __unicode__(self):
         return u"{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,

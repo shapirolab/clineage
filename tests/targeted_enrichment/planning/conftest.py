@@ -29,6 +29,7 @@ def ms_28727_a(slice_28727_target_a):
         repeat_unit_len=3,
         repeat_unit_type='AAG',
         repeat_number=23,
+        repeat_unit_ref_seq='TCT',
     )
     return ms
 
@@ -41,6 +42,7 @@ def ms_28727_b(slice_28727_target_b):
         repeat_unit_len=3,
         repeat_unit_type='AGC',
         repeat_number=12,
+        repeat_unit_ref_seq='CTG',
     )
     return ms
 
@@ -81,6 +83,7 @@ def ms_28734_a(slice_28734_target_a):
         repeat_unit_len=3,
         repeat_unit_type='AAG',
         repeat_number=6,
+        repeat_unit_ref_seq='AGA',
     )
     return ms
 
