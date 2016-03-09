@@ -24,6 +24,7 @@ def ugs_28727_right(slice_28727_right):
 @pytest.fixture()
 def ms_28727_a(slice_28727_target_a):
     ms = Microsatellite.objects.create(
+        id=1,
         name='X_81316131_81316199',
         slice=slice_28727_target_a,
         repeat_unit_len=3,
@@ -37,6 +38,7 @@ def ms_28727_a(slice_28727_target_a):
 @pytest.fixture()
 def ms_28727_b(slice_28727_target_b):
     ms = Microsatellite.objects.create(
+        id=2,
         name='X_81316201_81316236',
         slice=slice_28727_target_b,
         repeat_unit_len=3,
@@ -78,6 +80,7 @@ def ugs_28734_right(slice_28734_right):
 @pytest.fixture()
 def ms_28734_a(slice_28734_target_a):
     ms = Microsatellite.objects.create(
+        id=3,
         name='X_54384788_54384805',
         slice=slice_28734_target_a,
         repeat_unit_len=3,

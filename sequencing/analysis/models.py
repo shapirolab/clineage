@@ -188,8 +188,7 @@ class MicrosatelliteHistogramGenotype(models.Model):
     repeat_number = models.PositiveIntegerField()
 
     def __unicode__(self):
-        #return "{}={}".format(self.microsatellite.id, self.repeat_number)
-        return "{}={}".format(self.microsatellite.name, self.repeat_number)
+        return "{}={}".format(self.microsatellite.id, self.repeat_number)
 
     @classmethod
     def get_for_string(cls, s):
