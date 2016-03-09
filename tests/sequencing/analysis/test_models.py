@@ -8,7 +8,7 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
     seperate_reads_by_amplicons, _build_ms_variations, get_adam_ms_variations
 from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
-    MicrosatelliteHistogramGenotype
+    MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
 
 index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
     ["1","2","3","4","1.rev","2.rev"]]
@@ -156,3 +156,19 @@ def test_ms_histogram_genotype(ms_28727_a, ms_28727_b):
     assert mhg3.sequence == "CTG"*20
     mhg1.delete()
     mhg3.delete()
+
+
+@pytest.mark.django_db
+def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
+    mhg1 = MicrosatelliteHistogramGenotype.get_for_genotype(ms_28727_a, 5)
+    mhg2 = MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 8)
+    assert ms_genotypes_to_name([mhg1,mhg2],prefix="abc") == "abc:1=5:3=8"
+    mhgs, prefix = name_to_ms_genotypes("xyz:3=7:1=11")
+    assert prefix == "xyz"
+    mhg3, mhg4 = mhgs
+    assert mhg3.microsatellite == ms_28734_a
+    assert mhg3.repeat_number == 7
+    assert mhg4.microsatellite == ms_28727_a
+    assert mhg4.repeat_number == 11
+    for mhg in [mhg1,mhg2,mhg3,mhg4]:
+        mhg.delete()
