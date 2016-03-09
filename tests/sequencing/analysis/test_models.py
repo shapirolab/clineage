@@ -119,6 +119,20 @@ def test_seperate_reads_by_amplicons(adammarginassignment, adamampliconreads):
         SeqIO.parse(adamampliconreads.fastq, "fastq"))
     )
     assert aar_reads == ref_reads
+    aar_reads1 = set(strip_fasta_records(
+        SeqIO.parse(aar.fastq1, "fastq"))
+    )
+    ref_reads1 = set(strip_fasta_records(
+        SeqIO.parse(adamampliconreads.fastq1, "fastq"))
+    )
+    assert aar_reads1 == ref_reads1
+    aar_reads2 = set(strip_fasta_records(
+        SeqIO.parse(aar.fastq2, "fastq"))
+    )
+    ref_reads2 = set(strip_fasta_records(
+        SeqIO.parse(adamampliconreads.fastq2, "fastq"))
+    )
+    assert aar_reads2 == ref_reads2
 
 def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations):
     fasta = _build_ms_variations(pu_28727, 50)

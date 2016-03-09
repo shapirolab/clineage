@@ -153,6 +153,8 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
     margin_assignment = models.ForeignKey(AdamMarginAssignment)
     unwrapper = models.ForeignKey(Unwrapper)
     target_offset = models.IntegerField(null=True)
+    fastq1 = models.FilePathField()
+    fastq2 = models.FilePathField()
     fastq = models.FilePathField()
 
     class Meta:

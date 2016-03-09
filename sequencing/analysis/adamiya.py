@@ -174,16 +174,28 @@ def seperate_reads_by_amplicons(margin_assignment):
     reads_matches = _collect_mappings_from_sam(margin_assignment)
     validated_reads_unwrappers = _validate_unwrapper_mapping(reads_matches)
     reads_by_unwrapper = _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers)
-    reads = margin_assignment.reads_index.included_reads_generator()
-    fq_dict = SeqIO.to_dict(reads)
+    reads_gen = margin_assignment.reads_index.included_reads_generator()
+    reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
+        .demux_reads.fastq1, "fastq")
+    reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
+        .demux_reads.fastq2, "fastq")
+    reads = SeqIO.to_dict(reads_gen)
     for unwrapper, read_ids in reads_by_unwrapper.iteritems():
         unwrapper_reads_fastq_name = get_unique_path("fastq")
-        unwrapper_reads = (fq_dict[read_id] for read_id in read_ids)
+        unwrapper_reads = (reads[read_id] for read_id in read_ids)
         SeqIO.write(unwrapper_reads, unwrapper_reads_fastq_name, "fastq")
+        unwrapper_reads1_fastq_name = get_unique_path("fastq")
+        unwrapper_reads1 = (reads1[read_id] for read_id in read_ids)
+        SeqIO.write(unwrapper_reads1, unwrapper_reads1_fastq_name, "fastq")
+        unwrapper_reads2_fastq_name = get_unique_path("fastq")
+        unwrapper_reads2 = (reads2[read_id] for read_id in read_ids)
+        SeqIO.write(unwrapper_reads2, unwrapper_reads2_fastq_name, "fastq")
         aar = AdamAmpliconReads.objects.create(
             margin_assignment=margin_assignment,
             unwrapper=unwrapper,
             fastq=unwrapper_reads_fastq_name,
+            fastq1=unwrapper_reads1_fastq_name,
+            fastq2=unwrapper_reads2_fastq_name,
         )
         yield aar
 

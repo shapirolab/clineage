@@ -254,10 +254,24 @@ def adamampliconreads(adammarginassignment, pu_28734):
                      '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.fastq'),
         fastq_path
     )
+    fastq1_path = get_unique_path("fastq")
+    os.symlink(
+        os.path.join(file_fixtures_path,
+                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R1.fastq'),
+        fastq1_path
+    )
+    fastq2_path = get_unique_path("fastq")
+    os.symlink(
+        os.path.join(file_fixtures_path,
+                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R2.fastq'),
+        fastq2_path
+    )
     aar = AdamAmpliconReads.objects.create(
         margin_assignment=adammarginassignment,
         unwrapper=pu_28734,
-        fastq=fastq_path
+        fastq=fastq_path,
+        fastq1=fastq1_path,
+        fastq2=fastq2_path,
     )
     return aar
 
