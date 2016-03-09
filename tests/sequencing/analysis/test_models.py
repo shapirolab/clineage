@@ -7,7 +7,8 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
     seperate_reads_by_amplicons, _build_ms_variations, get_adam_ms_variations
-from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin
+from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
+    MicrosatelliteHistogramGenotype
 
 index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
     ["1","2","3","4","1.rev","2.rev"]]
@@ -136,3 +137,22 @@ def test_get_adam_ms_variations(pu_28727):
     amsv.delete()
     assert not os.path.exists(amsv.index_dump_dir)
 
+@pytest.mark.django_db
+def test_ms_histogram_genotype(ms_28727_a, ms_28727_b):
+    assert MicrosatelliteHistogramGenotype.objects.count() == 0
+    mhg1 = MicrosatelliteHistogramGenotype.get_for_genotype(ms_28727_a, 10)
+    assert "{}".format(mhg1) == "1=10"
+    assert MicrosatelliteHistogramGenotype.objects.count() == 1
+    mhg2 = MicrosatelliteHistogramGenotype.get_for_string("1=10")
+    assert MicrosatelliteHistogramGenotype.objects.count() == 1
+    assert mhg1.id == mhg2.id
+    assert mhg1.microsatellite == ms_28727_a
+    assert mhg1.repeat_number == 10
+    mhg3 = MicrosatelliteHistogramGenotype.get_for_string("2=20")
+    assert MicrosatelliteHistogramGenotype.objects.count() == 2
+    assert mhg3.microsatellite == ms_28727_b
+    assert mhg3.repeat_number == 20
+    assert mhg1.sequence == "TCT"*10
+    assert mhg3.sequence == "CTG"*20
+    mhg1.delete()
+    mhg3.delete()

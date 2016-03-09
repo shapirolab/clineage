@@ -205,13 +205,14 @@ class MicrosatelliteHistogramGenotype(models.Model):
 
     @classmethod
     def get_for_string(cls, s):
-        m = re.fullmatch("([1-9][0-9]*)=([1-9][0-9]*)", s)
+        # py3: m = re.fullmatch("([1-9][0-9]*)=([1-9][0-9]*)", s)
+        m = re.match("([1-9][0-9]*)=([1-9][0-9]*)$", s)
         if not m:
             raise ValueError("Bad ms genotype string: {}".format(s))
         msid, rn = m.groups()
         # NOTE: we save a query by not getting the actual MS.
         # This is OK as long as we use a db with FK enforcement.
-        obj, c = cls.get_or_create(
+        obj, c = cls.objects.get_or_create(
             microsatellite_id=int(msid),
             repeat_number=int(rn),
         )
