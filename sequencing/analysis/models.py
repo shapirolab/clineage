@@ -177,10 +177,23 @@ class HistogramEntryReads(models.Model):
     sample_reads = models.ForeignKey(SampleReads)
 
     objects = InheritanceManager()
-    
+
 
 class AdamHistogramEntryReads(HistogramEntryReads):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
+
+
+def ms_genotypes_to_name(ms_genotypes, prefix):
+    names = ["{}".format(mhg) for mhg in ms_genotypes]
+    return ":".join([prefix] + names)
+
+
+def name_to_ms_genotypes(ms_genotypes_name):
+    genotypes_plus = ms_genotypes_name.split(":")
+    prefix = genotypes_plus[0]
+    ms_genotypes = [MicrosatelliteHistogramGenotype.get_for_string(s) \
+        for s in genotypes_plus[1:]]
+    return ms_genotypes, prefix
 
 
 class MicrosatelliteHistogramGenotype(models.Model):
