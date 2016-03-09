@@ -14,7 +14,7 @@ from django.db import IntegrityError
 from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, unwrapper_margin_to_name, \
-    LEFT, RIGHT, AdamMSVariations
+    LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype
 from targeted_enrichment.planning.models import Microsatellite
 
 pear = local["pear"]
@@ -202,22 +202,19 @@ def _get_ms_length_range(ms):
 
 
 def _get_ms_variations(ms):
-    # FIXME: kill this +-1 when we move to 0-based.
-    ru = ms.slice.chromosome.getdna(ms.slice.start_pos,
-        ms.slice.start_pos+ms.repeat_unit_len-1)
     for i in _get_ms_length_range(ms):
-        yield (i, ru*i)
+        yield MicrosatelliteHistogramGenotype.get_for_genotype(ms,i)
 
 
 def _get_mss_variations_seqrecords(mss, seq_fmt, prefix):
-    name_fmt = ":".join([prefix]+["{}={{}}".format(ms.name) for ms in mss])
     for mult in itertools.product(*[_get_ms_variations(ms) for ms in mss]):
-        nums, seqs = zip(*mult)
+        seqs = [mhg.sequence for mhg in mult]
+        names = ["{}".format(mhg) for mhg in mult]
         # name='', description='' are workarounds for the '<unknown
         # description>' that is being outputted otherwise
         yield SeqRecord(
             Seq(seq_fmt.format(*seqs)),
-            id=name_fmt.format(*nums),
+            id=":".join([prefix] + names),
             name='',
             description=''
         )

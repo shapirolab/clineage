@@ -187,6 +187,36 @@ class MicrosatelliteHistogramGenotype(models.Model):
     microsatellite = models.ForeignKey(Microsatellite)
     repeat_number = models.PositiveIntegerField()
 
+    def __unicode__(self):
+        #return "{}={}".format(self.microsatellite.id, self.repeat_number)
+        return "{}={}".format(self.microsatellite.name, self.repeat_number)
+
+    @classmethod
+    def get_for_string(cls, s):
+        m = re.fullmatch("([1-9][0-9]*)=([1-9][0-9]*)", s)
+        if not m:
+            raise ValueError("Bad ms genotype string: {}".format(s))
+        msid, rn = m.groups()
+        # NOTE: we save a query by not getting the actual MS.
+        # This is OK as long as we use a db with FK enforcement.
+        obj, c = cls.get_or_create(
+            microsatellite_id=int(msid),
+            repeat_number=int(rn),
+        )
+        return obj
+
+    @classmethod
+    def get_for_genotype(cls, ms, rn):
+        mhg, c = cls.objects.get_or_create(
+            microsatellite=ms,
+            repeat_number=rn,
+        )
+        return mhg
+
+    @property
+    def sequence(self):
+        return self.microsatellite.repeat_unit_ref_seq * self.repeat_number
+
 
 class SNPHistogramGenotype(models.Model):
     snp = models.ForeignKey(SNP)
