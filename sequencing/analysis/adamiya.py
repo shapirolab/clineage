@@ -15,7 +15,7 @@ from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, unwrapper_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
-    ms_genotypes_to_name
+    ms_genotypes_to_name, AdamHistogram
 from targeted_enrichment.planning.models import Microsatellite
 
 pear = local["pear"]
@@ -33,6 +33,8 @@ bowtie2 = local["bowtie2"]
 bowtie2_with_defaults = bowtie2["-p", "24",
                                 "-a",
                                 "--very-sensitive",]
+bowtie2_with_defaults2 = bowtie2["-p", "24",
+                                 "-a"]
 
 # bowtie2 \
 #     -p 24 \
@@ -301,3 +303,18 @@ def get_adam_ms_variations(unwrapper, padding):
         if not c:
             delete_files(mock_msv)
         return msv
+
+
+def align_reads_to_ms_variations(amplicon_reads, padding):
+    assignment_sam = get_unique_path("sam")
+    msv = get_adam_ms_variations(amplicon_reads.unwrapper, padding)
+    bowtie2_with_defaults2('-x', msv.index_files_prefix,
+                          '-U', amplicon_reads.fastq,
+                          '-S', assignment_sam)
+    ah = AdamHistogram.objects.create(
+        sample_reads_id=amplicon_reads.margin_assignment.reads_index \
+            .merged_reads.demux_reads_id,
+        amplicon_reads=amplicon_reads,
+        assignment_sam=assignment_sam,
+    )
+    return ah

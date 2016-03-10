@@ -6,7 +6,8 @@ import filecmp
 from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
-    seperate_reads_by_amplicons, _build_ms_variations, get_adam_ms_variations
+    seperate_reads_by_amplicons, _build_ms_variations, \
+    get_adam_ms_variations, align_reads_to_ms_variations
 from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
 
@@ -186,3 +187,9 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
     assert mhg4.repeat_number == 11
     for mhg in [mhg1,mhg2,mhg3,mhg4]:
         mhg.delete()
+
+@pytest.mark.django_db
+def test_align_reads_to_ms_variations(adamampliconreads):
+    ah = align_reads_to_ms_variations(adamampliconreads, 50)
+    assert os.path.isfile(ah.assignment_sam)
+    #assert filecmp.cmp(ah.assignment_sam, 

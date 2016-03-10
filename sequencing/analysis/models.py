@@ -183,6 +183,24 @@ class Histogram(models.Model):
 
 class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
+    assignment_sam = models.FilePathField()
+
+    def read_sam(self):
+        with pysam.AlignmentFile(self.assignment_sam, "rb") as samfile:
+            for r in samfile:
+                if r.is_unmapped:
+                    continue  # unmapped TODO: dump in appropriate bin
+                ms_genotypes_name = samfile.getrname(r.reference_id)
+                read_id = r.query_name
+                ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
+                assert int(prefix) == self.amplicon_reads.unwrapper_id
+                yield read_id, ms_genotypes
+    
+    @property
+    def files(self):
+        yield self.assignment_sam
+
+post_delete.connect(delete_files, AdamHistogram)
 
 
 def ms_genotypes_to_name(ms_genotypes, prefix):
@@ -193,8 +211,8 @@ def ms_genotypes_to_name(ms_genotypes, prefix):
 def name_to_ms_genotypes(ms_genotypes_name):
     genotypes_plus = ms_genotypes_name.split(":")
     prefix = genotypes_plus[0]
-    ms_genotypes = [MicrosatelliteHistogramGenotype.get_for_string(s) \
-        for s in genotypes_plus[1:]]
+    ms_genotypes = tuple([MicrosatelliteHistogramGenotype.get_for_string(s) \
+        for s in genotypes_plus[1:]])
     return ms_genotypes, prefix
 
 
