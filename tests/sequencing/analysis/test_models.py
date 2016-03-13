@@ -7,7 +7,8 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
     _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
     seperate_reads_by_amplicons, _build_ms_variations, \
-    get_adam_ms_variations, align_reads_to_ms_variations
+    get_adam_ms_variations, align_reads_to_ms_variations, \
+    separate_reads_by_genotypes
 from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
 
@@ -193,3 +194,18 @@ def test_align_reads_to_ms_variations(adamampliconreads):
     ah = align_reads_to_ms_variations(adamampliconreads, 50)
     assert os.path.isfile(ah.assignment_sam)
     #assert filecmp.cmp(ah.assignment_sam, 
+
+@pytest.mark.django_db
+def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
+    l = list(separate_reads_by_genotypes(adamhistogram))
+    assert len(l) == 1
+    her = l[0]
+    assert her.histogram == adamhistogram
+    assert her.unwrapper == pu_28734
+    assert set(her.microsatellite_genotypes.all()) == \
+        {MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 7)}
+    assert set(her.snp_genotypes.all()) == set()
+    assert her.num_reads == 12
+    #fastq1 = models.FilePathField()
+    #fastq2 = models.FilePathField()
+    #fastqm = models.FilePathField(null=True)

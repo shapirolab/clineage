@@ -15,7 +15,7 @@ from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, unwrapper_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
-    ms_genotypes_to_name, AdamHistogram
+    ms_genotypes_to_name, AdamHistogram, HistogramEntryReads
 from targeted_enrichment.planning.models import Microsatellite
 
 pear = local["pear"]
@@ -318,3 +318,48 @@ def align_reads_to_ms_variations(amplicon_reads, padding):
         assignment_sam=assignment_sam,
     )
     return ah
+
+
+def _collect_genotypes_from_sam(histogram):
+    genotypes_reads = set()
+    for read_id, ms_genotypes in histogram.read_sam():
+        if read_id not in genotypes_reads:
+            # We assume that the SAM is ordered by quality of match.
+            genotypes_reads.add(read_id)
+            yield ms_genotypes, read_id
+
+
+def _aggregate_read_ids_by_genotypes(genotype_read_iterator):
+    genotypes_reads = {}
+    for ms_genotypes, read_id in genotype_read_iterator:
+        genotypes_reads.setdefault(ms_genotypes, set()).add(read_id)
+    return genotypes_reads
+
+
+def separate_reads_by_genotypes(histogram):
+    genotype_read_iterator = _collect_genotypes_from_sam(histogram)
+    genotypes_reads = _aggregate_read_ids_by_genotypes(genotype_read_iterator)
+    reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
+    reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
+    reads = SeqIO.index(histogram.amplicon_reads.fastq, "fastq")
+    for genotypes, read_ids in genotypes_reads.iteritems():
+        genotypes_reads_fastq_name = get_unique_path("fastq")
+        genotypes_reads = (reads[read_id] for read_id in read_ids)
+        SeqIO.write(genotypes_reads, genotypes_reads_fastq_name, "fastq")
+        genotypes_reads1_fastq_name = get_unique_path("fastq")
+        genotypes_reads1 = (reads1[read_id] for read_id in read_ids)
+        SeqIO.write(genotypes_reads1, genotypes_reads1_fastq_name, "fastq")
+        genotypes_reads2_fastq_name = get_unique_path("fastq")
+        genotypes_reads2 = (reads2[read_id] for read_id in read_ids)
+        SeqIO.write(genotypes_reads2, genotypes_reads2_fastq_name, "fastq")
+        her = HistogramEntryReads.objects.create(
+            histogram=histogram,
+            unwrapper=histogram.amplicon_reads.unwrapper,
+            num_reads = len(read_ids),
+            fastq1=genotypes_reads1_fastq_name,
+            fastq2=genotypes_reads2_fastq_name,
+            fastqm=genotypes_reads_fastq_name,
+        )
+        her.microsatellite_genotypes.add(*genotypes)
+        yield her
+

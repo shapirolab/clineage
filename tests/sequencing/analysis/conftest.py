@@ -4,7 +4,8 @@ import uuid
 from django.conf import settings
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, AdamMSVariations
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
+    AdamMSVariations, AdamHistogram
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
 
@@ -310,3 +311,20 @@ def amsv_28734(pu_28734):
 @pytest.fixture()
 def require_adammsvariations(amsv_28727, amsv_28734):
     pass
+
+
+@pytest.fixture()
+def adamhistogram(adamampliconreads):
+    alignment_file_name = get_unique_path("sam")
+    os.symlink(
+        os.path.join(file_fixtures_path,
+                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.sam'),
+        alignment_file_name
+    )
+    ama = AdamHistogram.objects.create(
+        sample_reads=adamampliconreads.margin_assignment.reads_index \
+            .merged_reads.demux_reads,
+        amplicon_reads=adamampliconreads,
+        assignment_sam=alignment_file_name,
+    )
+    return ama
