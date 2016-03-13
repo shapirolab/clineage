@@ -1,13 +1,13 @@
 import pytest
 
-from targeted_enrichment.unwrapping.models import PCR1Unwrapper
+from targeted_enrichment.amplicons.models import PCR1Amplicon
 
 from tests.targeted_enrichment.reagents.conftest import *
 
 
 @pytest.fixture()
 def pu_28727(ter_28727):
-    pu = PCR1Unwrapper(
+    pu = PCR1Amplicon(
         id=1,
         ter=ter_28727,
     )
@@ -18,7 +18,7 @@ def pu_28727(ter_28727):
 
 @pytest.fixture()
 def pu_28734(ter_28734):
-    pu = PCR1Unwrapper(
+    pu = PCR1Amplicon(
         id=2,
         ter=ter_28734,
     )
@@ -27,5 +27,5 @@ def pu_28734(ter_28734):
     return pu
 
 @pytest.fixture()
-def require_unwrappers(pu_28727, pu_28734):
+def require_amplicons(pu_28727, pu_28734):
     pass

@@ -13,7 +13,7 @@ from django.db import IntegrityError
 
 from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
-    AdamMarginAssignment, AdamAmpliconReads, unwrapper_margin_to_name, \
+    AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     ms_genotypes_to_name, AdamHistogram, HistogramEntryReads
 from targeted_enrichment.planning.models import Microsatellite
@@ -108,26 +108,26 @@ def create_reads_index(merged_reads, included_reads, padding):
     return ri
 
 
-def _primers_seqrecords_generator(unwrappers):
-    for uw in unwrappers:
+def _primers_seqrecords_generator(amplicons):
+    for uw in amplicons:
         # NOTE: [1:] is workaround adam bug ?
-        yield SeqRecord(Seq(uw.left_margin.seq), id=unwrapper_margin_to_name(uw, LEFT), name='', description='')[1:]
-        yield SeqRecord(Seq(uw.right_margin.seq), id=unwrapper_margin_to_name(uw, RIGHT), name='', description='')[1:]
+        yield SeqRecord(Seq(uw.left_margin.seq), id=amplicon_margin_to_name(uw, LEFT), name='', description='')[1:]
+        yield SeqRecord(Seq(uw.right_margin.seq), id=amplicon_margin_to_name(uw, RIGHT), name='', description='')[1:]
         # name='', description='' are workarounds for the '<unknown description>' that is being outputted and
         # breaks the downstream bowtie2 alignment.
 
 
-def _create_panel_fasta(unwrappers):
+def _create_panel_fasta(amplicons):
     panel_fasta_name = get_unique_path("fasta")
-    SeqIO.write(_primers_seqrecords_generator(unwrappers),
+    SeqIO.write(_primers_seqrecords_generator(amplicons),
         panel_fasta_name, "fasta")
     return panel_fasta_name
 
 
 def align_primers_to_reads(reads_index):
     assignment_sam = get_unique_path("sam")
-    unwrappers = reads_index.merged_reads.sample_reads.library.unwrappers
-    panel_fasta = _create_panel_fasta(unwrappers)
+    amplicons = reads_index.merged_reads.sample_reads.library.amplicons
+    panel_fasta = _create_panel_fasta(amplicons)
     bowtie2_with_defaults('-x', reads_index.index_files_prefix,
                           '-f', panel_fasta,
                           '-S', assignment_sam)
@@ -141,12 +141,12 @@ def align_primers_to_reads(reads_index):
 
 def _collect_mappings_from_sam(margin_assignment):
     reads_matches = {}
-    for read_id, unwrapper_margin in margin_assignment.read_sam():
-        reads_matches.setdefault(read_id, set()).add(unwrapper_margin)
+    for read_id, amplicon_margin in margin_assignment.read_sam():
+        reads_matches.setdefault(read_id, set()).add(amplicon_margin)
     return reads_matches
 
 
-def _validate_unwrapper_mapping(reads_matches):
+def _validate_amplicon_mapping(reads_matches):
     # TODO: consider maintaining pysqm alignment objects for stronger tests here.
     # For example, make sure left primer is mapped to the left of the amplicon
     # and the right primer to the right of the amplicon using ".pos" property
@@ -155,8 +155,8 @@ def _validate_unwrapper_mapping(reads_matches):
         if len(matches) != 2:
             # place proper bin
             continue
-        unwrappers, directions = zip(*matches)
-        u1, u2 = unwrappers
+        amplicons, directions = zip(*matches)
+        u1, u2 = amplicons
         if u1 != u2:
             # place proper bin
             continue
@@ -165,39 +165,39 @@ def _validate_unwrapper_mapping(reads_matches):
         yield read_id, u1
 
 
-def _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers):
-    reads_by_unwrapper = {}
-    for read_id, unwrapper in validated_reads_unwrappers:
-        reads_by_unwrapper.setdefault(unwrapper, set()).add(read_id)
-    return reads_by_unwrapper
+def _aggregate_read_ids_by_amplicon(validated_reads_amplicons):
+    reads_by_amplicon = {}
+    for read_id, amplicon in validated_reads_amplicons:
+        reads_by_amplicon.setdefault(amplicon, set()).add(read_id)
+    return reads_by_amplicon
 
 
 def seperate_reads_by_amplicons(margin_assignment):
     reads_matches = _collect_mappings_from_sam(margin_assignment)
-    validated_reads_unwrappers = _validate_unwrapper_mapping(reads_matches)
-    reads_by_unwrapper = _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers)
+    validated_reads_amplicons = _validate_amplicon_mapping(reads_matches)
+    reads_by_amplicon = _aggregate_read_ids_by_amplicon(validated_reads_amplicons)
     reads_gen = margin_assignment.reads_index.included_reads_generator()
     reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
         .sample_reads.fastq1, "fastq")
     reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
-    for unwrapper, read_ids in reads_by_unwrapper.iteritems():
-        unwrapper_reads_fastq_name = get_unique_path("fastq")
-        unwrapper_reads = (reads[read_id] for read_id in read_ids)
-        SeqIO.write(unwrapper_reads, unwrapper_reads_fastq_name, "fastq")
-        unwrapper_reads1_fastq_name = get_unique_path("fastq")
-        unwrapper_reads1 = (reads1[read_id] for read_id in read_ids)
-        SeqIO.write(unwrapper_reads1, unwrapper_reads1_fastq_name, "fastq")
-        unwrapper_reads2_fastq_name = get_unique_path("fastq")
-        unwrapper_reads2 = (reads2[read_id] for read_id in read_ids)
-        SeqIO.write(unwrapper_reads2, unwrapper_reads2_fastq_name, "fastq")
+    for amplicon, read_ids in reads_by_amplicon.iteritems():
+        amplicon_reads_fastq_name = get_unique_path("fastq")
+        amplicon_reads = (reads[read_id] for read_id in read_ids)
+        SeqIO.write(amplicon_reads, amplicon_reads_fastq_name, "fastq")
+        amplicon_reads1_fastq_name = get_unique_path("fastq")
+        amplicon_reads1 = (reads1[read_id] for read_id in read_ids)
+        SeqIO.write(amplicon_reads1, amplicon_reads1_fastq_name, "fastq")
+        amplicon_reads2_fastq_name = get_unique_path("fastq")
+        amplicon_reads2 = (reads2[read_id] for read_id in read_ids)
+        SeqIO.write(amplicon_reads2, amplicon_reads2_fastq_name, "fastq")
         aar = AdamAmpliconReads.objects.create(
             margin_assignment=margin_assignment,
-            unwrapper=unwrapper,
-            fastq=unwrapper_reads_fastq_name,
-            fastq1=unwrapper_reads1_fastq_name,
-            fastq2=unwrapper_reads2_fastq_name,
+            amplicon=amplicon,
+            fastq=amplicon_reads_fastq_name,
+            fastq1=amplicon_reads1_fastq_name,
+            fastq2=amplicon_reads2_fastq_name,
         )
         yield aar
 
@@ -234,9 +234,9 @@ def _get_mss_variations_seqrecords(mss, seq_fmt, prefix):
         )
 
 
-def _build_ms_variations(unwrapper, padding):
+def _build_ms_variations(amplicon, padding):
     # FIXME: What's the right API for this?
-    targets = list(unwrapper.ter.te.targets.select_related(
+    targets = list(amplicon.ter.te.targets.select_related(
         "microsatellite",
         "slice",
     ))
@@ -251,52 +251,52 @@ def _build_ms_variations(unwrapper, padding):
     # This is so they are ordered properly for the format string.
     mss = sorted(mss,key=lambda ms: ms.slice.start_pos)
     # FIXME: kill this +-1 when we move to 0-based.
-    points = [unwrapper.slice.start_pos-1]
+    points = [amplicon.slice.start_pos-1]
     for ms in mss:
         # FIXME: kill this +-1 when we move to 0-based.
         points.append(ms.slice.start_pos-1)
         points.append(ms.slice.end_pos)
-    points.append(unwrapper.slice.end_pos)
+    points.append(amplicon.slice.end_pos)
     if points != sorted(points):
-        raise IntegrityError("Unwrapper {} has interlocking MSs or MSs " \
-            "outside its boundaries".format(unwrapper.id))
+        raise IntegrityError("Amplicon {} has interlocking MSs or MSs " \
+            "outside its boundaries".format(amplicon.id))
     # FIXME: kill this +-1 when we move to 0-based.
     segments = [(points[2*i]+1, points[2*i+1]) \
         for i in xrange(len(points)//2) if points[2*i] < points[2*i+1]]
     # FIXME: maybe store these slices?
-    fmt = "{}".join([unwrapper.slice.chromosome.getdna(*a) for a in segments])
+    fmt = "{}".join([amplicon.slice.chromosome.getdna(*a) for a in segments])
     full_fmt = "{pad}{left}{slice}{right}{pad}".format(
         pad="N"*padding,
-        left=unwrapper.left_margin,
+        left=amplicon.left_margin,
         slice=fmt,
-        right=unwrapper.right_margin
+        right=amplicon.right_margin
     )
     fasta = get_unique_path("fa")
-    prefix = "{}".format(unwrapper.id)
+    prefix = "{}".format(amplicon.id)
     SeqIO.write(_get_mss_variations_seqrecords(mss, full_fmt, prefix),
         fasta, "fasta")
     return fasta
 
 
-def get_adam_ms_variations(unwrapper, padding):
+def get_adam_ms_variations(amplicon, padding):
     try:
         return AdamMSVariations.objects.get(
-            unwrapper=unwrapper,
+            amplicon=amplicon,
             padding=padding,
         )
     except AdamMSVariations.DoesNotExist:
         index_dir = get_unique_path()
-        fasta = _build_ms_variations(unwrapper, padding)
+        fasta = _build_ms_variations(amplicon, padding)
         os.mkdir(index_dir)
         mock_msv = AdamMSVariations(
-            unwrapper=unwrapper,
+            amplicon=amplicon,
             padding=padding,
             index_dump_dir=index_dir,
         )
         bowtie2build(fasta, mock_msv.index_files_prefix)
         os.unlink(fasta)
         msv, c = AdamMSVariations.objects.get_or_create(
-            unwrapper=unwrapper,
+            amplicon=amplicon,
             padding=padding,
             defaults={"index_dump_dir": index_dir}
         )
@@ -307,7 +307,7 @@ def get_adam_ms_variations(unwrapper, padding):
 
 def align_reads_to_ms_variations(amplicon_reads, padding):
     assignment_sam = get_unique_path("sam")
-    msv = get_adam_ms_variations(amplicon_reads.unwrapper, padding)
+    msv = get_adam_ms_variations(amplicon_reads.amplicon, padding)
     bowtie2_with_defaults2('-x', msv.index_files_prefix,
                           '-U', amplicon_reads.fastq,
                           '-S', assignment_sam)
@@ -354,7 +354,7 @@ def separate_reads_by_genotypes(histogram):
         SeqIO.write(genotypes_reads2, genotypes_reads2_fastq_name, "fastq")
         her = HistogramEntryReads.objects.create(
             histogram=histogram,
-            unwrapper=histogram.amplicon_reads.unwrapper,
+            amplicon=histogram.amplicon_reads.amplicon,
             num_reads = len(read_ids),
             fastq1=genotypes_reads1_fastq_name,
             fastq2=genotypes_reads2_fastq_name,

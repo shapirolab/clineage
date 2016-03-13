@@ -8,7 +8,7 @@ from misc.dna import DNA
 from targeted_enrichment.reagents.models import PCR1PrimerPairTER, \
     PCR1WithCompanyTagPrimerPairTER
 
-class Unwrapper(models.Model):
+class Amplicon(models.Model):
     slice = models.ForeignKey(DNASlice)
 
     objects = InheritanceManager()
@@ -21,7 +21,7 @@ class Unwrapper(models.Model):
     def right_margin(self):
         raise NotImplementedError()
 
-class RawUnwrapper(Unwrapper):
+class RawAmplicon(Amplicon):
 
     @property
     def left_margin(self):
@@ -31,7 +31,7 @@ class RawUnwrapper(Unwrapper):
     def right_margin(self):
         return DNA()
 
-class TargetedUnwrapper(Unwrapper):
+class TargetedAmplicon(Amplicon):
 
     def infer_slice(self):
         raise NotImplementedError()
@@ -39,7 +39,7 @@ class TargetedUnwrapper(Unwrapper):
     class Meta:
         abstract = True
 
-class PCR1WithCompanyTagUnwrapper(TargetedUnwrapper):
+class PCR1WithCompanyTagAmplicon(TargetedAmplicon):
     ter = models.OneToOneField(PCR1WithCompanyTagPrimerPairTER)
 
     @property
@@ -63,7 +63,7 @@ class PCR1WithCompanyTagUnwrapper(TargetedUnwrapper):
         self.slice = s
         #self.save()
 
-class PCR1Unwrapper(TargetedUnwrapper):
+class PCR1Amplicon(TargetedAmplicon):
     ter = models.OneToOneField(PCR1PrimerPairTER)
 
     @property

@@ -171,7 +171,7 @@ INSTALLED_APPS = (
     'sequencing.runs',
     'targeted_enrichment.planning',
     'targeted_enrichment.reagents',
-    'targeted_enrichment.unwrapping',
+    'targeted_enrichment.amplicons',
     'wet_storage',
     'dojango',
     'datable',

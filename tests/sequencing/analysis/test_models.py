@@ -5,7 +5,7 @@ import filecmp
 
 from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
-    _validate_unwrapper_mapping, _aggregate_read_ids_by_unwrapper, \
+    _validate_amplicon_mapping, _aggregate_read_ids_by_amplicon, \
     seperate_reads_by_amplicons, _build_ms_variations, \
     get_adam_ms_variations, align_reads_to_ms_variations, \
     separate_reads_by_genotypes
@@ -63,29 +63,29 @@ def test_create_panel_fasta(pu_28727, pu_28734):
     assert set(strip_fasta_records(
         SeqIO.parse(panel_fasta_name, "fasta")
     )) == {
-        ("unwrapper_1_left", "TTTACTATGCCATGCTGCTGCT",),
-        ("unwrapper_1_right", "TGTGCAAACAAGAACAGATGCC",),
-        ("unwrapper_2_left", "AAGGCTTCTCCCCATTCCAAAG",),
-        ("unwrapper_2_right", "AGTCCAAGCACACACTACTTCC",),
+        ("amplicon_1_left", "TTTACTATGCCATGCTGCTGCT",),
+        ("amplicon_1_right", "TGTGCAAACAAGAACAGATGCC",),
+        ("amplicon_2_left", "AAGGCTTCTCCCCATTCCAAAG",),
+        ("amplicon_2_right", "AGTCCAAGCACACACTACTTCC",),
     }
 
 
-def test_readsindex_unwrappers(readsindex_merged_only, pu_28727, pu_28734):
+def test_readsindex_amplicons(readsindex_merged_only, pu_28727, pu_28734):
     assert list(
-        readsindex_merged_only.merged_reads.sample_reads.library.unwrappers
+        readsindex_merged_only.merged_reads.sample_reads.library.amplicons
     ) == [pu_28727, pu_28734]
 
 
 @pytest.mark.django_db
 def test_align_primers_to_reads_basic(readsindex_merged_only,
-                                      require_unwrappers):
+                                      require_amplicons):
     ma = align_primers_to_reads(readsindex_merged_only)
     assert os.path.isfile(ma.assignment_sam)
 
 
 @pytest.mark.django_db
 def test_collect_mappings_from_sam(adammarginassignment,
-                                   require_unwrappers,
+                                   require_amplicons,
                                    reads_matches):
     assert _collect_mappings_from_sam(adammarginassignment) == reads_matches
 
@@ -100,13 +100,13 @@ def test_align_primers_to_read_ids_with_mapping(readsindex_merged_only,
 
 
 @pytest.mark.django_db
-def test_validate_unwrapper_mapping(reads_matches, reads_unwrappers):
-    assert set(_validate_unwrapper_mapping(reads_matches)) == reads_unwrappers
+def test_validate_amplicon_mapping(reads_matches, reads_amplicons):
+    assert set(_validate_amplicon_mapping(reads_matches)) == reads_amplicons
 
 
 @pytest.mark.django_db
-def test_aggregate_read_ids_by_unwrapper(reads_unwrappers, reads_by_unwrappers):
-    assert _aggregate_read_ids_by_unwrapper(reads_unwrappers) == reads_by_unwrappers
+def test_aggregate_read_ids_by_amplicon(reads_amplicons, reads_by_amplicons):
+    assert _aggregate_read_ids_by_amplicon(reads_amplicons) == reads_by_amplicons
 
 
 @pytest.mark.django_db
@@ -201,7 +201,7 @@ def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
     assert len(l) == 1
     her = l[0]
     assert her.histogram == adamhistogram
-    assert her.unwrapper == pu_28734
+    assert her.amplicon == pu_28734
     assert set(her.microsatellite_genotypes.all()) == \
         {MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 7)}
     assert set(her.snp_genotypes.all()) == set()

@@ -62,9 +62,9 @@ class Library(models.Model):
         raise NotImplementedError()
 
     @property
-    def unwrappers(self):
+    def amplicons(self):
         """
-        Return an iterator (favorably, a QuerySet) for unwrappers which might
+        Return an iterator (favorably, a QuerySet) for amplicons which might
         match this cell.
         """
         raise NotImplementedError()
@@ -90,11 +90,11 @@ class MagicalPCR1Library(Library):
         return self.magicalpcr1barcodedcontent_set.all()
 
     @property
-    def unwrappers(self):
+    def amplicons(self):
         #TODO: make nice and queryful.
         for mpx in self.mpx_collection.mpxs.all():
             for ter in mpx.ters.select_subclasses():
-                yield ter.pcr1unwrapper
+                yield ter.pcr1amplicon
 
 class MagicalPCR1BarcodedContent(BarcodedContent):
     content = models.ForeignKey(AmplifiedContent)

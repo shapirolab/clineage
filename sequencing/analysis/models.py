@@ -13,7 +13,7 @@ from django.dispatch.dispatcher import receiver
 
 from sequencing.runs.models import Demultiplexing
 from targeted_enrichment.planning.models import Microsatellite, SNP
-from targeted_enrichment.unwrapping.models import Unwrapper
+from targeted_enrichment.amplicons.models import Amplicon
 from lib_prep.workflows.models import Library, BarcodedContent
 from lib_prep.multiplexes.models import Panel
 
@@ -126,7 +126,7 @@ class AdamMarginAssignment(models.Model):
                     continue  # unmapped TODO: dump in appropriate bin
                 read_id = samfile.getrname(r.reference_id)
                 margin_name = r.query_name
-                yield read_id, name_to_unwrapper_margin(margin_name)
+                yield read_id, name_to_amplicon_margin(margin_name)
     
     @property
     def files(self):
@@ -137,21 +137,21 @@ post_delete.connect(delete_files, AdamMarginAssignment)
 
 LEFT, RIGHT = "left", "right"
 
-def unwrapper_margin_to_name(unwrapper, side):
+def amplicon_margin_to_name(amplicon, side):
     if side not in [LEFT, RIGHT]:
         raise ValueError("Side should be one of adamiya.LEFT, adamiya.RIGHT")
-    return 'unwrapper_{}_{}'.format(unwrapper.id, side)
+    return 'amplicon_{}_{}'.format(amplicon.id, side)
 
-def name_to_unwrapper_margin(name):
-    m = re.match("unwrapper_([1-9][0-9]*)_({}|{})".format(LEFT, RIGHT), name)
+def name_to_amplicon_margin(name):
+    m = re.match("amplicon_([1-9][0-9]*)_({}|{})".format(LEFT, RIGHT), name)
     if not m:
         return None, None
-    return Unwrapper.objects.select_subclasses().get(id=int(m.groups()[0])), m.groups()[1]
+    return Amplicon.objects.select_subclasses().get(id=int(m.groups()[0])), m.groups()[1]
 
 
 class AdamAmpliconReads(models.Model):  # This contains the actual data.
     margin_assignment = models.ForeignKey(AdamMarginAssignment)
-    unwrapper = models.ForeignKey(Unwrapper)
+    amplicon = models.ForeignKey(Amplicon)
     target_offset = models.IntegerField(null=True)
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
@@ -159,17 +159,17 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
 
     class Meta:
         index_together = (
-            ("margin_assignment", "unwrapper"),
+            ("margin_assignment", "amplicon"),
         )
 
 
 class AdamMSVariations(BowtieIndexMixin):
-    unwrapper = models.ForeignKey(Unwrapper)
+    amplicon = models.ForeignKey(Amplicon)
     padding = models.PositiveIntegerField()
 
     class Meta:
         index_together=[
-            ("unwrapper","padding")
+            ("amplicon","padding")
         ]
 
 post_delete.connect(delete_files, AdamMSVariations)
@@ -193,7 +193,7 @@ class AdamHistogram(Histogram):
                 ms_genotypes_name = samfile.getrname(r.reference_id)
                 read_id = r.query_name
                 ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
-                assert int(prefix) == self.amplicon_reads.unwrapper_id
+                assert int(prefix) == self.amplicon_reads.amplicon_id
                 yield read_id, ms_genotypes
     
     @property
@@ -258,7 +258,7 @@ class SNPHistogramGenotype(models.Model):
 
 class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
-    unwrapper = models.ForeignKey(Unwrapper)
+    amplicon = models.ForeignKey(Amplicon)
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
     snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
     num_reads = models.PositiveIntegerField()

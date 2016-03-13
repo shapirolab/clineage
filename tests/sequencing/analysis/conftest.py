@@ -12,7 +12,7 @@ from misc.utils import get_unique_path
 from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
-from tests.targeted_enrichment.unwrapping.conftest import *
+from tests.targeted_enrichment.amplicons.conftest import *
 
 file_fixtures_path = os.path.join(*(os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1] + ("ngs_fixtures",)))
 
@@ -153,7 +153,7 @@ def readsindex_fwd_and_merged(mergedreads):
 
 
 @pytest.fixture()
-def adammarginassignment(readsindex_fwd_and_merged, require_unwrappers):
+def adammarginassignment(readsindex_fwd_and_merged, require_amplicons):
     alignment_file_name = get_unique_path("sam")
     os.symlink(
         os.path.join(file_fixtures_path,
@@ -198,7 +198,7 @@ def reads_matches(pu_28734):
 
 
 @pytest.fixture()
-def reads_unwrappers(pu_28734):
+def reads_amplicons(pu_28734):
     return {
         ('M00393:167:000000000-ABF3N:1:1101:20583:16769',
             pu_28734),
@@ -228,7 +228,7 @@ def reads_unwrappers(pu_28734):
 
 
 @pytest.fixture()
-def reads_by_unwrappers(pu_28734):
+def reads_by_amplicons(pu_28734):
     return {
         pu_28734: {
             'M00393:167:000000000-ABF3N:1:1101:20583:16769',
@@ -269,7 +269,7 @@ def adamampliconreads(adammarginassignment, pu_28734):
     )
     aar = AdamAmpliconReads.objects.create(
         margin_assignment=adammarginassignment,
-        unwrapper=pu_28734,
+        amplicon=pu_28734,
         fastq=fastq_path,
         fastq1=fastq1_path,
         fastq2=fastq2_path,
@@ -288,7 +288,7 @@ def amsv_28727(pu_28727):
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     amsv = AdamMSVariations.objects.create(
-        unwrapper=pu_28727,
+        amplicon=pu_28727,
         index_dump_dir=dst_dir,
         padding=50,
     )
@@ -301,7 +301,7 @@ def amsv_28734(pu_28734):
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     amsv = AdamMSVariations.objects.create(
-        unwrapper=pu_28734,
+        amplicon=pu_28734,
         index_dump_dir=dst_dir,
         padding=50,
     )
