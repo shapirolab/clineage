@@ -36,6 +36,13 @@ def convert_microsatellites(qs, apps, schema_editor):
     Microsatellite = apps.get_model("planning", "Microsatellite")
     for old_target in bar(qs.select_related("microsatellite")):
         old_ms = old_target.microsatellite
+        if old_ms.repeat_unit_len != len(old_ms.repeat_unit_type):
+            raise integrityerror("bad ms (repeat_unit_len): {}".format(
+                old_ms.id))
+        if old_ms.repeat_unit_len * old_ms.repeat_number != \
+            old_ms.end_pos - old_ms.start_pos + 1:
+            raise integrityerror("bad ms (repeat_unit_number): {}".format(
+                old_ms.id))
         d = prepare_target_dict(old_target, apps, schema_editor) 
         d.update({k: old_ms.__dict__[k] for k in [
             "repeat_unit_len",
