@@ -71,7 +71,7 @@ post_delete.connect(delete_files, SampleReads)
 
 
 class AdamMergedReads(models.Model):
-    demux_reads = models.ForeignKey(SampleReads)
+    sample_reads = models.ForeignKey(SampleReads)
     # TODO: Add default path?
     # TODO: Custom FASTQ field that caches #sequences
     assembled_fastq = models.FilePathField()

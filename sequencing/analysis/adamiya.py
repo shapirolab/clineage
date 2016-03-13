@@ -67,7 +67,7 @@ def merge(sample_reads):
                        "-r", sample_reads.fastq2,
                        "-o", prefix)
     mr = AdamMergedReads.objects.create(
-        demux_reads=sample_reads,
+        sample_reads=sample_reads,
         assembled_fastq="{}.assembled.fastq".format(prefix),
         discarded_fastq="{}.discarded.fastq".format(prefix),
         unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
@@ -126,7 +126,7 @@ def _create_panel_fasta(unwrappers):
 
 def align_primers_to_reads(reads_index):
     assignment_sam = get_unique_path("sam")
-    unwrappers = reads_index.merged_reads.demux_reads.library.unwrappers
+    unwrappers = reads_index.merged_reads.sample_reads.library.unwrappers
     panel_fasta = _create_panel_fasta(unwrappers)
     bowtie2_with_defaults('-x', reads_index.index_files_prefix,
                           '-f', panel_fasta,
@@ -178,9 +178,9 @@ def seperate_reads_by_amplicons(margin_assignment):
     reads_by_unwrapper = _aggregate_read_ids_by_unwrapper(validated_reads_unwrappers)
     reads_gen = margin_assignment.reads_index.included_reads_generator()
     reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
-        .demux_reads.fastq1, "fastq")
+        .sample_reads.fastq1, "fastq")
     reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
-        .demux_reads.fastq2, "fastq")
+        .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for unwrapper, read_ids in reads_by_unwrapper.iteritems():
         unwrapper_reads_fastq_name = get_unique_path("fastq")
@@ -313,7 +313,7 @@ def align_reads_to_ms_variations(amplicon_reads, padding):
                           '-S', assignment_sam)
     ah = AdamHistogram.objects.create(
         sample_reads_id=amplicon_reads.margin_assignment.reads_index \
-            .merged_reads.demux_reads_id,
+            .merged_reads.sample_reads_id,
         amplicon_reads=amplicon_reads,
         assignment_sam=assignment_sam,
     )

@@ -104,7 +104,7 @@ def mergedreads(samplereads):
         "{}.unassembled.reverse.fastq".format(dst_prefix)
     )
     mr = AdamMergedReads.objects.create(
-        demux_reads=samplereads,
+        sample_reads=samplereads,
         assembled_fastq="{}.assembled.fastq".format(dst_prefix),
         discarded_fastq="{}.discarded.fastq".format(dst_prefix),
         unassembled_forward_fastq="{}.unassembled.forward.fastq".format(dst_prefix),
@@ -323,7 +323,7 @@ def adamhistogram(adamampliconreads):
     )
     ama = AdamHistogram.objects.create(
         sample_reads=adamampliconreads.margin_assignment.reads_index \
-            .merged_reads.demux_reads,
+            .merged_reads.sample_reads,
         amplicon_reads=adamampliconreads,
         assignment_sam=alignment_file_name,
     )

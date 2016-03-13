@@ -27,8 +27,8 @@ def test_samplereads(samplereads):
 
 @pytest.mark.django_db
 def test_mergedreads(mergedreads, merged_reads_stripped_fasta):
-    assert os.path.isfile(mergedreads.demux_reads.fastq1)
-    assert os.path.isfile(mergedreads.demux_reads.fastq2)
+    assert os.path.isfile(mergedreads.sample_reads.fastq1)
+    assert os.path.isfile(mergedreads.sample_reads.fastq2)
     assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == merged_reads_stripped_fasta
     assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == set(strip_fasta_records(mergedreads.included_reads_generator('F')))
 
@@ -36,7 +36,7 @@ def test_mergedreads(mergedreads, merged_reads_stripped_fasta):
 @pytest.mark.django_db
 def test_runmerge(samplereads):
     mr = merge(samplereads)
-    assert mr.demux_reads is samplereads
+    assert mr.sample_reads is samplereads
     assert os.path.isfile(mr.assembled_fastq)
     assert os.path.isfile(mr.discarded_fastq)
     assert os.path.isfile(mr.unassembled_forward_fastq)
@@ -72,7 +72,7 @@ def test_create_panel_fasta(pu_28727, pu_28734):
 
 def test_readsindex_unwrappers(readsindex_merged_only, pu_28727, pu_28734):
     assert list(
-        readsindex_merged_only.merged_reads.demux_reads.library.unwrappers
+        readsindex_merged_only.merged_reads.sample_reads.library.unwrappers
     ) == [pu_28727, pu_28734]
 
 
