@@ -260,7 +260,7 @@ class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
     unwrapper = models.ForeignKey(Unwrapper)
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
-    snp_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
+    snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
     num_reads = models.PositiveIntegerField()
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
