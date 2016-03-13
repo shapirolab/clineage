@@ -8,7 +8,8 @@ from tests.targeted_enrichment.reagents.conftest import *
 @pytest.fixture()
 def pu_28727(ter_28727):
     pu = PCR1Unwrapper(
-        ter=ter_28727
+        id=1,
+        ter=ter_28727,
     )
     pu.infer_slice()
     pu.save()
@@ -18,7 +19,8 @@ def pu_28727(ter_28727):
 @pytest.fixture()
 def pu_28734(ter_28734):
     pu = PCR1Unwrapper(
-        ter=ter_28734
+        id=2,
+        ter=ter_28734,
     )
     pu.infer_slice()
     pu.save()
