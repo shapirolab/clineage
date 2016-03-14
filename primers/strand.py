@@ -9,7 +9,12 @@ class BaseStrandMixin(object):
     def sequence(self):
         raise NotImplementedError()
 
+    @property
+    def strand(self):
+        raise NotImplementedError()
+
 class PlusStrandMixin(BaseStrandMixin):
+
     @property
     def ref_sequence(self):
         return self.sequence
@@ -17,6 +22,10 @@ class PlusStrandMixin(BaseStrandMixin):
     @property
     def sequence(self):
         return self.ref_sequence
+
+    @property
+    def strand(self):
+        return u"+"
 
 class MinusStrandMixin(BaseStrandMixin):
     @property
@@ -26,3 +35,7 @@ class MinusStrandMixin(BaseStrandMixin):
     @property
     def sequence(self):
         return self.ref_sequence.rev_comp()
+
+    @property
+    def strand(self):
+        return u"-"

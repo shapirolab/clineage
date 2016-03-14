@@ -3,8 +3,9 @@ __author__ = 'ofirr'
 import re
 
 from django.db import models
-
 from django.contrib.auth.models import User
+
+from model_utils.managers import InheritanceManager
 
 from genomes.models import DNASlice, Chromosome
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
@@ -20,6 +21,9 @@ class UGS(models.Model,BaseStrandMixin):
     def ref_sequence(self):
         return self.slice.sequence
 
+    def __unicode__(self):
+        return u"{}({})".format(self.slice, self.strand)
+
 class UGSPlus(UGS,PlusStrandMixin):
     pass
 
@@ -30,6 +34,11 @@ class Target(models.Model):
     name = models.CharField(max_length=50)
     slice = models.ForeignKey(DNASlice)
     partner = models.ManyToManyField(User) # TODO: external table.
+    
+    objects = InheritanceManager
+
+    def __unicode__(self):
+        return u"{}@{}".format(self.name, self.slice)
 
 class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
@@ -76,9 +85,8 @@ class TargetEnrichment(models.Model):
             return max(lttaas), min(rttaas)
         return None
 
-
     def __unicode__(self):
-        return 'TE: left=%s, right=%s' % (self.left.name, self.right.name)
+        return u"{},{}".format(self.left, self.right)
 
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
@@ -102,14 +110,25 @@ class RestrictionSite(models.Model):
     def sequence(self):
         return self.enzyme.sequence
 
+    def __unicode__(self):
+        return u"{}@{}".format(self.enzyme.name, self.slice)
+
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
 
+    def __unicode__(self):
+        return u"{}x{}@{}".format(self.repeat_number, self.repeat_unit_type,
+            self.slice)
+
 
 class SNP(Target):
     mutation = models.CharField(max_length=10, null=True) #X>Y
     modified = models.CharField(max_length=10, null=True) #Y
+
+    def __unicode__(self):
+        return u"{}:{}@{}".format(self.name, self.mutation, self.slice)
+
 
 # TODO: add indel

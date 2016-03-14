@@ -42,7 +42,7 @@ class Chromosome(models.Model):
     cyclic = models.BooleanField()
 
     def __unicode__(self):
-        return self.name
+        return u"{}:{}".format(self.assembly, self.name)
 
     def get_path(self, ext="txt"):
         return os.path.join(self.assembly.get_path(), 'chr{}.{}'.format(self.name, ext))
@@ -151,3 +151,27 @@ class DNASlice(models.Model):
         right = self.get_right_surrounding_restriction(restriction_type)
         return left, right
 
+    def __unicode__(self):
+        return "{}:{}-{}".format(self.chromosome.name, self.start_pos,
+            self.end_pos)
+
+    def pretty(self, width=2):
+        """
+        Return a pretty representaion of this slice, with indices and aligned
+        prints.
+        Width is the length of each line, in blocks of 10.
+        """
+        ret = u""
+        full_width = width*10
+        seq = ((u" "*((self.start_pos-1)%full_width)) + u"{}" \
+            + (u" "*((width-1)-((self.end_pos-1)%full_width)))).format(
+                self.sequence)
+        sa = (self.start_pos-1)//full_width
+        ea = (self.end_pos-1)//full_width
+        ret += (u"{pos:<12}: "+u" ".join([u"{ind}"]*width)+u"\n").format(
+            pos=self.chromosome, ind=u"1234567890")
+        for i in xrange(ea-sa+1):
+            ret += (u"{pos:<12}: "+u" ".join([u"{}"]*width)+u"\n").format(
+                *[seq[i*full_width+j*10:i*full_width+(j+1)*10] for \
+                    j in xrange(width)],
+                pos=(sa+i)*full_width)
