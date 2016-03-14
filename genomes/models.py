@@ -175,3 +175,4 @@ class DNASlice(models.Model):
                 *[seq[i*full_width+j*10:i*full_width+(j+1)*10] for \
                     j in xrange(width)],
                 pos=(sa+i)*full_width)
+        return ret
