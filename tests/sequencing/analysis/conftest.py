@@ -3,9 +3,7 @@ import os
 import uuid
 from django.conf import settings
 
-from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
-    AdamMSVariations, AdamHistogram
+from sequencing.analysis.models import AdamMSVariations, AdamHistogram
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
 
@@ -13,30 +11,22 @@ from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
+from tests.sequencing.analysis.fixture_generators import \
+    generate_samplereads, generate_mergedreads, generate_readsindex, \
+    generate_adammarginassignment, generate_adamampliconreads, generate_amsv, \
+    generate_adamhistogram
+from tests.utils import to_fixture
 
-file_fixtures_path = os.path.join(*(os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1] + ("ngs_fixtures",)))
 
-
-@pytest.fixture()
-def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
-    fastq_r1 = get_unique_path("fastq")
-    fastq_r2 = get_unique_path("fastq")
-    os.symlink(
-        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R1.fastq'),
-        fastq_r1
-    )
-    os.symlink(
-        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R2.fastq'),
-        fastq_r2
-    )
-    sr = SampleReads.objects.create(
-        demux=demultiplexing,
-        barcoded_content=magicalpcr1barcodedcontent,
-        library=magicalpcr1library,
-        fastq1=fastq_r1,
-        fastq2=fastq_r2,
-    )
-    return sr
+samplereads_bc1 = to_fixture(generate_samplereads, "bc1")
+mergedreads_bc1 = to_fixture(generate_mergedreads, "bc1")
+readsindex_bc1_M = to_fixture(generate_readsindex, "bc1", "M")
+readsindex_bc1_F = to_fixture(generate_readsindex, "bc1", "F")
+adammarginassignment_bc1_F = to_fixture(generate_adammarginassignment, "bc1", "F")
+adamampliconreads_bc1_F_28734 = to_fixture(generate_adamampliconreads, "bc1", "F", "28734")
+amsv_28727 = to_fixture(generate_amsv, "28727")
+amsv_28734 = to_fixture(generate_amsv, "28734")
+adamhistogram = to_fixture(generate_adamhistogram, "bc1", "F", "28734")
 
 
 @pytest.fixture()
@@ -80,91 +70,6 @@ def merged_reads_stripped_fasta():
             'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
         ),
     }
-
-
-@pytest.fixture()
-def mergedreads(samplereads):
-    src_prefix = os.path.join(file_fixtures_path,
-                              '1448-Viktor-AAR20-BC81_S321_L001_R1_001/1')
-    dst_prefix = get_unique_path()
-    os.symlink(
-        "{}.assembled.fastq".format(src_prefix),
-        "{}.assembled.fastq".format(dst_prefix)
-    )
-    os.symlink(
-        "{}.discarded.fastq".format(src_prefix),
-        "{}.discarded.fastq".format(dst_prefix)
-    )
-    os.symlink(
-        "{}.unassembled.forward.fastq".format(src_prefix),
-        "{}.unassembled.forward.fastq".format(dst_prefix)
-    )
-    os.symlink(
-        "{}.unassembled.reverse.fastq".format(src_prefix),
-        "{}.unassembled.reverse.fastq".format(dst_prefix)
-    )
-    mr = AdamMergedReads.objects.create(
-        sample_reads=samplereads,
-        assembled_fastq="{}.assembled.fastq".format(dst_prefix),
-        discarded_fastq="{}.discarded.fastq".format(dst_prefix),
-        unassembled_forward_fastq="{}.unassembled.forward.fastq".format(dst_prefix),
-        unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(dst_prefix),
-    )
-    return mr
-
-
-def link_index_files(src_dir, dst_dir):
-    os.mkdir(dst_dir)
-    for index_file in os.listdir(src_dir):
-        os.symlink(
-            os.path.join(src_dir, index_file),
-            os.path.join(dst_dir, index_file),
-        )
-
-
-@pytest.fixture()
-def readsindex_merged_only(mergedreads):
-    src_dir = os.path.join(file_fixtures_path,
-                           '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M2')
-    dst_dir = get_unique_path()
-    link_index_files(src_dir, dst_dir)
-    ri = AdamReadsIndex.objects.create(
-        merged_reads=mergedreads,
-        included_reads='M',  # Only merged
-        index_dump_dir=dst_dir,
-        padding=5,
-    )
-    return ri
-
-
-@pytest.fixture()
-def readsindex_fwd_and_merged(mergedreads):
-    src_dir = os.path.join(file_fixtures_path,
-                           '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1F')
-    dst_dir = get_unique_path()
-    link_index_files(src_dir, dst_dir)
-    ri = AdamReadsIndex.objects.create(
-        merged_reads=mergedreads,
-        included_reads='F',  # Merged and unassembled_forward
-        index_dump_dir=dst_dir,
-        padding=5,
-    )
-    return ri
-
-
-@pytest.fixture()
-def adammarginassignment(readsindex_fwd_and_merged, require_amplicons):
-    alignment_file_name = get_unique_path("sam")
-    os.symlink(
-        os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/margine_assignemnt.sam'),
-        alignment_file_name
-    )
-    ama = AdamMarginAssignment.objects.create(
-        reads_index=readsindex_fwd_and_merged,
-        assignment_sam=alignment_file_name,
-    )
-    return ama
 
 
 @pytest.fixture()
@@ -248,83 +153,10 @@ def reads_by_amplicons(pu_28734):
 
 
 @pytest.fixture()
-def adamampliconreads(adammarginassignment, pu_28734):
-    fastq_path = get_unique_path("fastq")
-    os.symlink(
-        os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.fastq'),
-        fastq_path
-    )
-    fastq1_path = get_unique_path("fastq")
-    os.symlink(
-        os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R1.fastq'),
-        fastq1_path
-    )
-    fastq2_path = get_unique_path("fastq")
-    os.symlink(
-        os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R2.fastq'),
-        fastq2_path
-    )
-    aar = AdamAmpliconReads.objects.create(
-        margin_assignment=adammarginassignment,
-        amplicon=pu_28734,
-        fastq=fastq_path,
-        fastq1=fastq1_path,
-        fastq2=fastq2_path,
-    )
-    return aar
-
-
-@pytest.fixture()
 def pu_28727_adam_ms_variations():
     return VARS_28727
 
 
 @pytest.fixture()
-def amsv_28727(pu_28727):
-    src_dir = os.path.join(file_fixtures_path, 'amsv_28727')
-    dst_dir = get_unique_path()
-    link_index_files(src_dir, dst_dir)
-    amsv = AdamMSVariations.objects.create(
-        amplicon=pu_28727,
-        index_dump_dir=dst_dir,
-        padding=50,
-    )
-    return amsv
-    
-
-@pytest.fixture()
-def amsv_28734(pu_28734):
-    src_dir = os.path.join(file_fixtures_path, 'amsv_28734')
-    dst_dir = get_unique_path()
-    link_index_files(src_dir, dst_dir)
-    amsv = AdamMSVariations.objects.create(
-        amplicon=pu_28734,
-        index_dump_dir=dst_dir,
-        padding=50,
-    )
-    return amsv
-    
-
-@pytest.fixture()
 def require_adammsvariations(amsv_28727, amsv_28734):
     pass
-
-
-@pytest.fixture()
-def adamhistogram(adamampliconreads):
-    alignment_file_name = get_unique_path("sam")
-    os.symlink(
-        os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.sam'),
-        alignment_file_name
-    )
-    ama = AdamHistogram.objects.create(
-        sample_reads=adamampliconreads.margin_assignment.reads_index \
-            .merged_reads.sample_reads,
-        amplicon_reads=adamampliconreads,
-        assignment_sam=alignment_file_name,
-    )
-    return ama

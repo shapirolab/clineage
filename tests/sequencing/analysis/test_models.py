@@ -21,22 +21,22 @@ def strip_fasta_records(fasta_records):
 
 
 @pytest.mark.django_db
-def test_samplereads(samplereads):
-    assert samplereads.barcoded_content.content.name == 'human amplified content'
+def test_samplereads(samplereads_bc1):
+    assert samplereads_bc1.barcoded_content.content.name == 'human amplified content'
 
 
 @pytest.mark.django_db
-def test_mergedreads(mergedreads, merged_reads_stripped_fasta):
-    assert os.path.isfile(mergedreads.sample_reads.fastq1)
-    assert os.path.isfile(mergedreads.sample_reads.fastq2)
-    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == merged_reads_stripped_fasta
-    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == set(strip_fasta_records(mergedreads.included_reads_generator('F')))
+def test_mergedreads(mergedreads_bc1, merged_reads_stripped_fasta):
+    assert os.path.isfile(mergedreads_bc1.sample_reads.fastq1)
+    assert os.path.isfile(mergedreads_bc1.sample_reads.fastq2)
+    assert set(strip_fasta_records(mergedreads_bc1.included_reads_generator('M'))) == merged_reads_stripped_fasta
+    assert set(strip_fasta_records(mergedreads_bc1.included_reads_generator('M'))) == set(strip_fasta_records(mergedreads_bc1.included_reads_generator('F')))
 
 
 @pytest.mark.django_db
-def test_runmerge(samplereads):
-    mr = merge(samplereads)
-    assert mr.sample_reads is samplereads
+def test_runmerge(samplereads_bc1):
+    mr = merge(samplereads_bc1)
+    assert mr.sample_reads is samplereads_bc1
     assert os.path.isfile(mr.assembled_fastq)
     assert os.path.isfile(mr.discarded_fastq)
     assert os.path.isfile(mr.unassembled_forward_fastq)
@@ -49,9 +49,9 @@ def test_runmerge(samplereads):
 
 
 @pytest.mark.django_db
-def test_readsindex_bowtie2build(mergedreads):
-    assert os.path.isfile(mergedreads.assembled_fastq)
-    ri = create_reads_index(mergedreads, included_reads='M', padding=5)
+def test_readsindex_bowtie2build(mergedreads_bc1):
+    assert os.path.isfile(mergedreads_bc1.assembled_fastq)
+    ri = create_reads_index(mergedreads_bc1, included_reads='M', padding=5)
     assert set(os.path.join(ri.index_dump_dir, x) for x in os.listdir(ri.index_dump_dir)) == set(ri.files)
     ri.delete()
     assert not os.path.exists(ri.index_dump_dir)
@@ -70,33 +70,33 @@ def test_create_panel_fasta(pu_28727, pu_28734):
     }
 
 
-def test_readsindex_amplicons(readsindex_merged_only, pu_28727, pu_28734):
+def test_readsindex_amplicons(readsindex_bc1_M, pu_28727, pu_28734):
     assert list(
-        readsindex_merged_only.merged_reads.sample_reads.library.amplicons
+        readsindex_bc1_M.merged_reads.sample_reads.library.amplicons
     ) == [pu_28727, pu_28734]
 
 
 @pytest.mark.django_db
-def test_align_primers_to_reads_basic(readsindex_merged_only,
+def test_align_primers_to_reads_basic(readsindex_bc1_M,
                                       require_amplicons):
-    ma = align_primers_to_reads(readsindex_merged_only)
+    ma = align_primers_to_reads(readsindex_bc1_M)
     assert os.path.isfile(ma.assignment_sam)
 
 
 @pytest.mark.django_db
-def test_collect_mappings_from_sam(adammarginassignment,
+def test_collect_mappings_from_sam(adammarginassignment_bc1_F,
                                    require_amplicons,
                                    reads_matches):
-    assert _collect_mappings_from_sam(adammarginassignment) == reads_matches
+    assert _collect_mappings_from_sam(adammarginassignment_bc1_F) == reads_matches
 
 
 @pytest.mark.django_db
-def test_align_primers_to_read_ids_with_mapping(readsindex_merged_only,
-                                             adammarginassignment):
+def test_align_primers_to_read_ids_with_mapping(readsindex_bc1_M,
+                                             adammarginassignment_bc1_F):
     assert \
         _collect_mappings_from_sam(
-            align_primers_to_reads(readsindex_merged_only)
-        ) == _collect_mappings_from_sam(adammarginassignment)
+            align_primers_to_reads(readsindex_bc1_M)
+        ) == _collect_mappings_from_sam(adammarginassignment_bc1_F)
 
 
 @pytest.mark.django_db
@@ -110,29 +110,29 @@ def test_aggregate_read_ids_by_amplicon(reads_amplicons, reads_by_amplicons):
 
 
 @pytest.mark.django_db
-def test_seperate_reads_by_amplicons(adammarginassignment, adamampliconreads):
-    aars = list(seperate_reads_by_amplicons(adammarginassignment))
+def test_seperate_reads_by_amplicons(adammarginassignment_bc1_F, adamampliconreads_bc1_F_28734):
+    aars = list(seperate_reads_by_amplicons(adammarginassignment_bc1_F))
     assert len(aars) == 1
     aar = aars[0]
     aar_reads = set(strip_fasta_records(
         SeqIO.parse(aar.fastq, "fastq"))
     )
     ref_reads = set(strip_fasta_records(
-        SeqIO.parse(adamampliconreads.fastq, "fastq"))
+        SeqIO.parse(adamampliconreads_bc1_F_28734.fastq, "fastq"))
     )
     assert aar_reads == ref_reads
     aar_reads1 = set(strip_fasta_records(
         SeqIO.parse(aar.fastq1, "fastq"))
     )
     ref_reads1 = set(strip_fasta_records(
-        SeqIO.parse(adamampliconreads.fastq1, "fastq"))
+        SeqIO.parse(adamampliconreads_bc1_F_28734.fastq1, "fastq"))
     )
     assert aar_reads1 == ref_reads1
     aar_reads2 = set(strip_fasta_records(
         SeqIO.parse(aar.fastq2, "fastq"))
     )
     ref_reads2 = set(strip_fasta_records(
-        SeqIO.parse(adamampliconreads.fastq2, "fastq"))
+        SeqIO.parse(adamampliconreads_bc1_F_28734.fastq2, "fastq"))
     )
     assert aar_reads2 == ref_reads2
 
@@ -190,8 +190,8 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
         mhg.delete()
 
 @pytest.mark.django_db
-def test_align_reads_to_ms_variations(adamampliconreads):
-    ah = align_reads_to_ms_variations(adamampliconreads, 50)
+def test_align_reads_to_ms_variations(adamampliconreads_bc1_F_28734):
+    ah = align_reads_to_ms_variations(adamampliconreads_bc1_F_28734, 50)
     assert os.path.isfile(ah.assignment_sam)
     #assert filecmp.cmp(ah.assignment_sam, 
 
