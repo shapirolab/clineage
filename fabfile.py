@@ -47,7 +47,8 @@ def freeze():
 
 @task
 def reload_app():
-    run("kill -HUP `cat %s`" % env.pidfile)
+    pass
+    # run("kill -HUP `cat %s`" % env.pidfile)
 
 
 @task
