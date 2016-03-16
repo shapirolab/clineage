@@ -49,6 +49,31 @@ def test_runmerge(samplereads_bc1):
 
 
 @pytest.mark.django_db
+def test_runmerge_custom_read(samplereads_bc2):
+    mr = merge(samplereads_bc2)
+    reads = list(strip_fasta_records(mr.included_reads_generator('M')))
+    assert len(reads) == 1
+    read = reads[0]
+    assert read == (
+            'M00393:167:000000000-ABF3N:1:1101:20583:16769',
+            'AAAGGCTTCTCCCCACTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
+        )
+    mr.delete()
+
+@pytest.mark.django_db
+def test_adamhistogram_plus3(adamhistogram_plus3, pu_28734, ms_28734_a):
+    l = list(separate_reads_by_genotypes(adamhistogram_plus3))
+    assert len(l) == 1
+    her = l[0]
+    assert her.histogram == adamhistogram_plus3
+    assert her.amplicon == pu_28734
+    assert set(her.microsatellite_genotypes.all()) == \
+        {MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 9)}
+    assert set(her.snp_genotypes.all()) == set()
+    assert her.num_reads == 1
+
+
+@pytest.mark.django_db
 def test_readsindex_bowtie2build(mergedreads_bc1):
     assert os.path.isfile(mergedreads_bc1.assembled_fastq)
     ri = create_reads_index(mergedreads_bc1, included_reads='M', padding=5)

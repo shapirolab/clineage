@@ -28,6 +28,11 @@ amsv_28727 = to_fixture(generate_amsv, "28727")
 amsv_28734 = to_fixture(generate_amsv, "28734")
 adamhistogram = to_fixture(generate_adamhistogram, "bc1", "F", "28734")
 
+samplereads_bc2 = to_fixture(generate_samplereads, "bc2")
+readsindex_bc2_M = to_fixture(generate_readsindex, "bc2", "M")
+adammarginassignment_bc2_M = to_fixture(generate_adammarginassignment, "bc2", "M")
+adamampliconreads_bc2_M_28734 = to_fixture(generate_adamampliconreads, "bc2", "M", "28734")
+adamhistogram_plus3 = to_fixture(generate_adamhistogram, "bc2", "M", "28734")
 
 @pytest.fixture()
 def merged_reads_stripped_fasta():

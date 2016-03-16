@@ -1,0 +1,5 @@
+Sample: 1448-Viktor-AAR20-BC81_S321_L001_R1_001
+Amplicons: 28734
+Reads:
+    @@M00393:167:000000000-ABF3N:1:1101:7043:8470
+        Added three repeat units
