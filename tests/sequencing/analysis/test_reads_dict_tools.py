@@ -1,4 +1,4 @@
-from reads_dict import flatten_nested_list_dict, ReadIdGen
+from reads_dict_tools import flatten_nested_list_dict, ReadIdGen
 
 
 def test_flatten_nested_list_dict():
