@@ -94,7 +94,7 @@ def flatten_nested_list_dict(nested_dict):
         for i in xrange(1,len(nk)+1):
             a = flat.setdefault(nk[:i],[])
             a += nv
-        # Special case
-        a = flat.setdefault(nk[0],[])
-        a += nv
+    for k in nested_dict.iterkeys():
+        if (k,) in flat:
+            flat[k] = flat[k,]
     return flat
