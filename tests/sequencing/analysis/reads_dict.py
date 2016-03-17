@@ -1,6 +1,6 @@
 
 from tests.sequencing.analysis.reads_dict_tools import \
-    get_fastq_record_triplet, ReadIdGen, flatten_nested_list_dict
+    get_fastq_record_triplet, ReadIdGen
 
 
 ID = ReadIdGen()
@@ -17,7 +17,7 @@ def bc1(sr1, sr2, srm):
     )
 
 
-_READS_DICT = {
+READS_DICT1 = {
 "bc1": {
     "M": {
         "28734": {
@@ -44,4 +44,3 @@ _READS_DICT = {
 }
 
 
-READS_DICT = flatten_nested_list_dict(_READS_DICT)
