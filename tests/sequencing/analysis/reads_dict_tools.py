@@ -2,16 +2,14 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 
-class TripleSeqRec(object):
-    def __init__(self, rec1, rec2, recm):
-        self.rec1 = rec1
-        self.rec2 = rec2
-        self.recm = recm
-
-
 _DESC_FMT = "{} {}:N:0:{}+{}"
 _FWD_FMT = _DESC_FMT.format("{}", "1", "{}", "{}")
 _REV_FMT = _DESC_FMT.format("{}", "2", "{}", "{}")
+
+
+R1 = "R1"
+R2 = "R2"
+RM = "RM"
 
 
 def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
@@ -41,7 +39,7 @@ def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
         description=fwd_desc,
         letter_annotations={"phred_quality": [40] * len(seq_rm)},
     )
-    return TripleSeqRec(rec1=rec1, rec2=rec2, recm=recm)
+    return {R1: rec1, R2: rec2, RM: recm}
 
 
 _CUSTOM_READ_ID_FMT = "M00321:123:000000000-ABCDE:1:1111:22222:{:05}"
