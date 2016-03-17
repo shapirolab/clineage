@@ -98,3 +98,30 @@ def flatten_nested_list_dict(nested_dict):
         if (k,) in flat:
             flat[k] = flat[k,]
     return flat
+
+
+def _deinterlace(interlaced):
+    d = {}
+    for frame in interlaced:
+        for k, v in frame.iteritems():
+            d.setdefault(k,[]).append(v)
+    return d
+
+
+def _update_deinterlaced_dict(d, e):
+    for k, v in e.iteritems():
+        a = d.setdefault(k,[])
+        a += v
+
+
+def flatten_and_deinterlace_nested_list_dict(nested_dict):
+    flat = {}
+    for nk, nv in _iterate_nested_items(nested_dict):
+        denv = _deinterlace(nv)
+        for i in xrange(1,len(nk)+1):
+            a = flat.setdefault(nk[:i],{})
+            _update_deinterlaced_dict(a, denv)
+    for k in nested_dict.iterkeys():
+        if (k,) in flat:
+            flat[k] = flat[k,]
+    return flat

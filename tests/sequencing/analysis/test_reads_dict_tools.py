@@ -1,4 +1,5 @@
-from reads_dict_tools import flatten_nested_list_dict, ReadIdGen
+from reads_dict_tools import flatten_nested_list_dict, ReadIdGen, \
+    flatten_and_deinterlace_nested_list_dict
 
 
 def test_flatten_nested_list_dict():
@@ -25,6 +26,43 @@ def test_flatten_nested_list_dict():
          (1, 5): ['c'],
          (6,): ['d'],
          (7,): []}
+
+
+def test_flatten_and_deinterlace_nested_list_dict():
+    assert flatten_and_deinterlace_nested_list_dict({
+        1: {
+            2: {
+                3: [
+                    {'+':'a1','-':'a2'},
+                    {'+':'b1'},
+                    {'-':'c2'},
+                ],
+                4: [
+                    {'-':'d2'},
+                ],
+            },
+            5: [
+                {'+':'e1','-':'e2'},
+            ],
+        },
+        6: [
+            {'+':'f1'},
+        ],
+        7: [
+        ],
+        8: {
+        }
+    }) == \
+        {1: {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
+         6: {'+': ['f1']},
+         7: {},
+         (1,): {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
+         (1, 2): {'+': ['a1', 'b1'], '-': ['a2', 'c2', 'd2']},
+         (1, 2, 3): {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
+         (1, 2, 4): {'-': ['d2']},
+         (1, 5): {'+': ['e1'], '-': ['e2']},
+         (6,): {'+': ['f1']},
+         (7,): {}}
 
 
 def test_ReadIdGen():
