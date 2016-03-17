@@ -17,12 +17,12 @@ from tests.sequencing.analysis.fixture_generators import \
     generate_adamhistogram
 from tests.utils import to_fixture
 from tests.sequencing.analysis.reads_dict_tools import flatten_nested_list_dict
-from tests.sequencing.analysis.reads_dict import READS_DICT1
+from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM
 
 
 @pytest.fixture(scope="session")
-def reads_dict1():
-    return flatten_nested_list_dict(READS_DICT1)
+def reads_dict_adam():
+    return flatten_nested_list_dict(READS_DICT_ADAM)
 
 
 samplereads_bc1 = to_fixture(generate_samplereads, "bc1")

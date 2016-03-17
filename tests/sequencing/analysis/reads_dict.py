@@ -17,7 +17,7 @@ def bc1(sr1, sr2, srm):
     )
 
 
-READS_DICT1 = {
+READS_DICT_ADAM = {
 "bc1": {
     "M": {
         "28734": {
