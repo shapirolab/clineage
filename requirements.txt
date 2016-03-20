@@ -6,7 +6,7 @@ django-extensions==1.5.9
 django-mptt==0.8.3
 # dojango==0.5.7
 -e git+https://github.com/ofirr/dojango.git@375e62bb73e2ee60a64e4b1551dd25aa531c734c#egg=dojango-master
--e git+https://github.com/ofirr/dojango-datable.git@04dce2169ed638175e2cfa4967e3ae9f996aeca5#egg=dojango_datable-master
+-e git+https://github.com/ofirr/dojango-datable.git@ac274e4daf4d581b953351809578d7a0929bb054#egg=dojango_datable-master
 ipython==3.1.0
 iso8601==0.1.10
 ludibrio==3.1.0
