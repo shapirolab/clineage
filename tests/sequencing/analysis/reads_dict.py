@@ -12,8 +12,8 @@ def bc1(sr1, sr2, srm):
         sr1=sr1,
         sr2=sr2,
         srm=srm,
-        barcode1="ACACAC",  # FIXME: match the barcode to BC1.
-        barcode2="AGAGAG",  # FIXME: match the barcode to BC1.
+        barcode1="TCCGCGAA",
+        barcode2="GTACTGAC",
     )
 
 
