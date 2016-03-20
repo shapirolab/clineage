@@ -28,7 +28,6 @@ from misc.models import Taxa
 from genomes.models import Assembly
 from targeted_enrichment.planning.models import Microsatellite, TargetEnrichment
 from utils.plate_string_description import *
-from linapp.DBUtils import DBUtils
 
 @wraps(loader.render_to_string)
 def render_to_response(*args,**kwargs):
