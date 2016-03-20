@@ -28,9 +28,8 @@ class HelloWorldService(ServiceBase):
 
 hello_world_service = csrf_exempt(DjangoApplication(Application([HelloWorldService],
     'spyne.examples.django',
-    in_protocol=Soap11(),
+    in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11(),
-    interface=Wsdl11(),
 )))
 
 class CLineageWebServices(ServiceBase):
@@ -247,9 +246,8 @@ class CLineageWebServices(ServiceBase):
 
 niki_service = csrf_exempt(DjangoApplication(Application([CLineageWebServices],
     'spyne.examples.django',
-    in_protocol=Soap11(),
+    in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11(),
-    interface=Wsdl11(),
 )))
 
     #

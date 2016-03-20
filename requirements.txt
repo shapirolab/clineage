@@ -14,7 +14,7 @@ paramiko==1.15.1
 pyreadline==2.0
 pytz==2013.9
 six==1.5.2
-spyne==2.10.10
+spyne==2.12.11
 sqlparse==0.1.11
 virtualenv==1.11.6
 wsgiref==0.1.2
