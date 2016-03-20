@@ -23,6 +23,9 @@ class KitSynthetic(models.Model,BaseStrandMixin):
     def ref_sequence(self):
         return DNA(self._sequence)
 
+    def __unicode__(self):
+        return u"{}({})".format(self.name, self.strand)
+
 class ReadingAdaptorCuts(models.Model):
     overlap_start = models.IntegerField()
     overlap_end = models.IntegerField()
@@ -41,6 +44,10 @@ class ReadingAdaptorCuts(models.Model):
 
     class Meta:
         abstract = True
+
+    def __unicode__(self):
+        return u"{}[:{}:{}:]".format(self.ira, self.overlap_start,
+            self.overlap_end)
 
 class IlluminaReadingAdaptor1(KitSynthetic,PlusStrandMixin):
     pass

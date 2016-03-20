@@ -40,7 +40,11 @@ class TargetedEnrichmentReagent(models.Model):
         abstract = True
 
 
-class PCR1PrimerPairTERBase(TargetedEnrichmentReagent):
+class TwoPrimersUnicodeMixin(object):
+    def __unicode__(self):
+        return u"{}, {}".format(self.left_primer, self.right_primer)
+
+class PCR1PrimerPairTERBase(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
     pass
 
 
@@ -59,6 +63,6 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
-class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent):
+class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)

@@ -110,9 +110,10 @@ def split_targets(apps, schema_editor):
     OldTarget = apps.get_model("linapp", "Target")
     OldTargetType = apps.get_model("linapp", "TargetType")
     def get_tt(x):
-        return OldTargetType.objects.using(db_alias).get(name=x)
+        ott, c = OldTargetType.objects.using(db_alias).get_or_create(name=x)
+        return ott
     def get_tts(xs):
-        return [OldTargetType.objects.using(db_alias).get(name=x) for x in xs]
+        return [OldTargetType.objects.using(db_alias).get_or_create(name=x)[0] for x in xs]
     queries = [
         (
             {
