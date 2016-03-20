@@ -115,18 +115,21 @@ class AdamReadsIndex(BowtieIndexMixin):
 post_delete.connect(delete_files, AdamReadsIndex)
 
 
+def _read_sam(sam_path):
+    with pysam.AlignmentFile(sam_path, "rb") as samfile:
+        for r in samfile:
+            if r.is_unmapped:
+                continue  # unmapped TODO: dump in appropriate bin
+            yield samfile.getrname(r.reference_id), r.query_name
+
+
 class AdamMarginAssignment(models.Model):
     reads_index = models.ForeignKey(AdamReadsIndex)
     assignment_sam = models.FilePathField()
 
     def read_sam(self):
-        with pysam.AlignmentFile(self.assignment_sam, "rb") as samfile:
-            for r in samfile:
-                if r.is_unmapped:
-                    continue  # unmapped TODO: dump in appropriate bin
-                read_id = samfile.getrname(r.reference_id)
-                margin_name = r.query_name
-                yield read_id, name_to_amplicon_margin(margin_name)
+        for read_id, margin_name in _read_sam(self.assignment_sam):
+            yield read_id, name_to_amplicon_margin(margin_name)
     
     @property
     def files(self):
@@ -186,15 +189,10 @@ class AdamHistogram(Histogram):
     assignment_sam = models.FilePathField()
 
     def read_sam(self):
-        with pysam.AlignmentFile(self.assignment_sam, "rb") as samfile:
-            for r in samfile:
-                if r.is_unmapped:
-                    continue  # unmapped TODO: dump in appropriate bin
-                ms_genotypes_name = samfile.getrname(r.reference_id)
-                read_id = r.query_name
-                ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
-                assert int(prefix) == self.amplicon_reads.amplicon_id
-                yield read_id, ms_genotypes
+        for ms_genotypes_name, read_id in _read_sam(self.assignment_sam):
+            ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
+            assert int(prefix) == self.amplicon_reads.amplicon_id
+            yield read_id, ms_genotypes
     
     @property
     def files(self):
