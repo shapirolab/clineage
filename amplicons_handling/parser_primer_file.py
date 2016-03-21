@@ -1,7 +1,7 @@
 __author__ = 'veronika'
 import re
 import hashlib
-from primers_insertion import get_or_create_sequence, PrimerLocationError
+from .primers_insertion import get_or_create_sequence, PrimerLocationError
 from django.contrib.auth.models import User
 from genomes.models import TargetType, Assembly, Chromosome, Microsatellite, SNP
 from targeted_enrichment.planning.models import Target, Microsatellite, SNP
@@ -34,7 +34,7 @@ def get_case_from_columns(columns):
     col_tup = tuple(columns)
     if columns_case_dict[col_tup]:
         return columns_case_dict[col_tup]
-    print 'unsupported columns structure' #add helpful example
+    print('unsupported columns structure') #add helpful example
     raise
 
 
@@ -45,7 +45,7 @@ def clean_chromosome_name(raw_chr_name):
         return raw_chr_name[3:]
     if re.match('^[XYMxym]$', raw_chr_name):
         return raw_chr_name.upper()
-    print 'unsupport chromosome name format'
+    print('unsupport chromosome name format')
     raise
 
 
@@ -91,7 +91,7 @@ def locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins):
                                   sequence.sequence,
                                   padding=margins)
         if ms_s != start_pos or ms_e != end_pos:
-            print 'WARN: input indexes are off and were corrected'
+            print('WARN: input indexes are off and were corrected')
     except ValueError:
         try:
             ms_s, ms_e = chrom.locate(start_pos,
@@ -99,9 +99,9 @@ def locate_sequence_on_strand(chrom, start_pos, end_pos, sequence, margins):
                                       complement(sequence.sequence)[::-1],
                                       padding=margins)
             if ms_s != start_pos or ms_e != end_pos:
-                print 'WARN: input indexes are off and were corrected'
+                print('WARN: input indexes are off and were corrected')
         except ValueError:
-            print chrom.name, chrom.assembly, start_pos, end_pos, sequence.sequence
+            print(chrom.name, chrom.assembly, start_pos, end_pos, sequence.sequence)
             raise PrimerLocationError
     return ms_s, ms_e
 
@@ -131,7 +131,7 @@ def microsatellite_object(row_dict, sequence, start_pos, end_pos, name, tgtype, 
                   'repeat_number': repeat_len}
     )
     if overlapping and created:
-        print 'WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom
+        print('WARN: overlapping MS for ', start_pos, end_pos, name, tgtype, chrom)
     if not partner or partner in obj.partner.all():
         return obj, created
     obj.partner.add(partner)

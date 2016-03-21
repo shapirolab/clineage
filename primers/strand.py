@@ -25,7 +25,7 @@ class PlusStrandMixin(BaseStrandMixin):
 
     @property
     def strand(self):
-        return u"+"
+        return "+"
 
 class MinusStrandMixin(BaseStrandMixin):
     @property
@@ -38,4 +38,4 @@ class MinusStrandMixin(BaseStrandMixin):
 
     @property
     def strand(self):
-        return u"-"
+        return "-"

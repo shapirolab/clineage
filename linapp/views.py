@@ -5,9 +5,9 @@ import csv
 import time
 
 from dojango.decorators import json_response, expect_post_request
-from datables import *
-from tabselection import *
-from dataminers import *
+from .datables import *
+from .tabselection import *
+from .dataminers import *
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
@@ -220,7 +220,7 @@ def multiple_cells_create(request):
     if request.method == 'POST':
         cells_form = MultipleCellForm(request.POST, prefix='multicell')
         if cells_form.is_valid():
-            print cells_form.cleaned_data
+            print(cells_form.cleaned_data)
             individual = cells_form.cleaned_data['individual']
             sampling_event = cells_form.cleaned_data['sampling']
             cell_composition = cells_form.cleaned_data['composition']
@@ -364,7 +364,7 @@ def plate_input_with_names(request):
                 )
                 plate = new_plate
             else:
-                print 'invalid choice in plate form'
+                print('invalid choice in plate form')
                 raise
             wells = plate_parser(plate_form.cleaned_data['samples_in_wells'])
             for index, cell_value in wells:
@@ -491,7 +491,7 @@ def existing_primer_pairs_tdv(request, taxa, assem):
 def plate_well_selection(request, plate_plastica_id):
     plate_plastica = get_object_or_404(PlatePlastica, pk=plate_plastica_id)
     rows = [num2abc(row) for row in range(1, plate_plastica.rows+1)]
-    columns = range(1, plate_plastica.columns+1)
+    columns = list(range(1, plate_plastica.columns+1))
     return render_to_response('forms/plate_boolean_form.html', context={'rows': rows, 'columns': columns},request=request)
 
 

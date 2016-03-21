@@ -14,7 +14,7 @@ class StorageType(models.Model):
     name = models.CharField(max_length=100, blank=True)
     temperature = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=1)
     def __unicode__(self):
-        return u"%s (temp:%s\xB0c)" % (self.name, str(self.temperature))
+        return "%s (temp:%s\xB0c)" % (self.name, str(self.temperature))
 ### -------------------------------------------------------------------------------------
 class StorageBox(models.Model):
     code = models.AutoField(primary_key=True)
@@ -22,12 +22,12 @@ class StorageBox(models.Model):
     name = models.CharField(max_length=100, blank=True)
     barcode = models.CharField(max_length=20, blank=True)
     def __unicode__(self):
-        return u"%s (type:%s)" % (self.name, self.storage_type.name)
+        return "%s (type:%s)" % (self.name, self.storage_type.name)
 ### -------------------------------------------------------------------------------------
 class PlateContext(models.Model): #The plate's context in use. e.g. pcr
     description = models.CharField(max_length=30, blank=True)
     def __unicode__(self):
-        return u"%s" %self.description
+        return "%s" %self.description
 ### -------------------------------------------------------------------------------------
 class PlatePlastica(models.Model): #The plate's physical form. e.g. deepwell square
     code = models.AutoField(primary_key=True)
@@ -40,7 +40,7 @@ class PlatePlastica(models.Model): #The plate's physical form. e.g. deepwell squ
         return self.rows*self.columns
 
     def __unicode__(self):
-        return u"%s" %self.description
+        return "%s" %self.description
 ### -------------------------------------------------------------------------------------
 class PlateType(models.Model):  # TODO: kill and modify as follows:
     code = models.AutoField(primary_key=True)
@@ -48,7 +48,7 @@ class PlateType(models.Model):  # TODO: kill and modify as follows:
     context = models.ForeignKey(PlateContext, null=True)  # TODO: kill and modify to plate inheritance
     plastic = models.ForeignKey(PlatePlastica, null=True)  # TODO: relocate as field of Plate
     def __unicode__(self):
-        return u"%s" % self.friendly
+        return "%s" % self.friendly
 ### -------------------------------------------------------------------------------------
 class PlateFullException(Exception):
     """
@@ -75,7 +75,7 @@ class Plate(models.Model):
             self.lastusedwell = index2str(first_free_well_index + 8 - (first_free_well_index-1) % 8)
 
     def place_reagent(self, reagent, reagent_volume=-1, reagent_concentration=-1):
-        print str2index(self.lastusedwell), self.type.plastic.wells
+        print(str2index(self.lastusedwell), self.type.plastic.wells)
         if str2index(self.lastusedwell) > self.type.plastic.wells:
             raise PlateFullException
         location = SampleLocation.objects.create(plate=self,

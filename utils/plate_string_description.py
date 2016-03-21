@@ -1,6 +1,6 @@
 
 import csv
-from StringIO import StringIO
+from io import StringIO
 from utils.wells import xy_index_2_index, index2str
 import re
 from sampling.models import SampleComposition
@@ -69,7 +69,7 @@ def well_value_to_composition(well_value):
 def test():
     # TODO: write some tests
 
-    print 'Test passed successfully'
+    print('Test passed successfully')
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ from frogress import bar
 
 def get_or_create_sequence(seq):
     if not re.match('^[ACTGactg]+$', seq.strip()):
-        print 'unsupported characters in input sequence {}'.format(seq)
+        print('unsupported characters in input sequence {}'.format(seq))
         raise
     try:
         sequence = Sequence.objects.get(hash=hashlib.md5(seq).hexdigest())
@@ -64,12 +64,12 @@ def check_primers(target, primer_left_sequence, primer_right_sequence, target_en
     if colliding_te:
         for co in colliding_te:
             if co.physical_locations.all():
-                print 'The Targets {} collides with location {}'.format(colliding_te, co.physical_locations.all())
+                print('The Targets {} collides with location {}'.format(colliding_te, co.physical_locations.all()))
                 raise AmpliconCollisionError
     target_e = target.primer_pair.all()
     for te in target_e:
         if te.targets.filter(name__contains='TTAA'):
-            print 'The Targets {} colaides with  TTAA site {}'.format(target.pk, te.targets.all())
+            print('The Targets {} colaides with  TTAA site {}'.format(target.pk, te.targets.all()))
             # raise AmpliconCollisionError
     return (pf_s, pf_e), (pr_s, pr_e)
 
@@ -111,10 +111,10 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         try:
             primers_indexes_tuple = check_primers(target, primer_left_sequence, primer_right_sequence, target_enrichment_type, margins=margins)
         except PrimerLocationError:
-            print 'Unresolved primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence)
+            print('Unresolved primers for target {}, pf:{}, pr:{}'.format(target.id, primer_left_sequence, primer_right_sequence))
             continue
         except AmpliconCollisionError:
-            print 'Colliding primers for target {}, pf:{}, pr:{}, type:{}'.format(target.id, primer_left_sequence, primer_right_sequence, target.type)
+            print('Colliding primers for target {}, pf:{}, pr:{}, type:{}'.format(target.id, primer_left_sequence, primer_right_sequence, target.type))
             colliding_amplicons.append(target)
             continue
         left_primer_indexes, right_primer_indexes = primers_indexes_tuple
@@ -132,7 +132,7 @@ def create_primers_in_db(chosen_target_primers, target_enrichment_type, in_silic
         # print "Primer fw {} INFO: {}".format(primer_fwd, created_fw)
         primer_rev, created_rv = create_one_primer(pr_s, pr_e, pr_tail, target, primer_type, pr_refseq, pr_seq, '_rev')
         # print "Primer rev {} INFO: {}".format(primer_rev, created_rv)
-        print 'Assert: ', primer_rev.end_pos - primer_fwd.start_pos
+        print('Assert: ', primer_rev.end_pos - primer_fwd.start_pos)
         assert primer_rev.end_pos - primer_fwd.start_pos <= margins
         te_made, created = TargetEnrichment.objects.get_or_create(
                     chromosome=target.chromosome,

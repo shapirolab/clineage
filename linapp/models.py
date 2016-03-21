@@ -87,7 +87,7 @@ class UserReport(models.Model):
             if set(ur.cells.all()) == set(cells):
                 user_report = ur
         if user_report:
-            print user_report
+            print(user_report)
             if not user_report.partner and partner:
                 user_report.partner = partner
                 user_report.save()

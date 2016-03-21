@@ -7,7 +7,7 @@ class DNA(object):
 
     def __init__(self,seq):
         # FIXME: this should change when we fix the db to give us bytearray.
-        if isinstance(seq,(str,unicode)):
+        if isinstance(seq,str):
             s = seq.upper()
             for i in s:
                 if i not in "ACGT":

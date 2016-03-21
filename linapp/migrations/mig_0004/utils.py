@@ -70,8 +70,8 @@ def check_partition(related_manager, queries):
             raise TypeError("Bad query type.")
     if not_covering:
         raise NotCovering(not_covering)
-    for i in xrange(len(querysets)):
-        for j in xrange(i):
+    for i in range(len(querysets)):
+        for j in range(i):
             if isinstance(queries[j],dict):
                 mutex = querysets[i].filter(**queries[j])
             else: # We already checked types above.

@@ -26,8 +26,8 @@ def unpack_target(target, apps, schema_editor):
 
 @transaction.atomic
 def revert_microsatellites(qs, apps, schema_editor):
-    print
-    print "Reverting Microsatellites:"
+    print()
+    print("Reverting Microsatellites:")
     db_alias = schema_editor.connection.alias
     OldMicrosatellite = apps.get_model("linapp", "Microsatellite")
     type = target_types["Microsatellite",apps,schema_editor]
@@ -45,8 +45,8 @@ def revert_microsatellites(qs, apps, schema_editor):
 
 @transaction.atomic
 def revert_known_snps(qs, apps, schema_editor):
-    print
-    print "Reverting known SNPs:"
+    print()
+    print("Reverting known SNPs:")
     db_alias = schema_editor.connection.alias
     OldSNP = apps.get_model("linapp", "SNP")
     type = target_types["SNP",apps,schema_editor]
@@ -72,15 +72,15 @@ def revert_targets_inner(qs, type, apps, schema_editor):
 
 @transaction.atomic
 def revert_unknown_snps(qs, apps, schema_editor):
-    print
-    print "Reverting unknown SNPs:"
+    print()
+    print("Reverting unknown SNPs:")
     type = target_types["SNP",apps,schema_editor]
     revert_targets_inner(qs, type, apps, schema_editor)
 
 @transaction.atomic
 def revert_other_targets(qs, apps, schema_editor):
-    print
-    print "Reverting other targets:"
+    print()
+    print("Reverting other targets:")
     # This generates the last type, which we don't use but still want to
     # create.
     target_types["Flank",apps,schema_editor]

@@ -7,8 +7,8 @@ from linapp.migrations.mig_0004.utils import transfer_physical_locations
 
 @transaction.atomic
 def rejoin_multiplexes(apps, schema_editor):
-    print
-    print "Reverting PCR1 multiplexes:"
+    print()
+    print("Reverting PCR1 multiplexes:")
     db_alias = schema_editor.connection.alias
     PCR1Multiplex = apps.get_model("multiplexes","PCR1Multiplex")
     OldPrimersMultiplex = apps.get_model("linapp","PrimersMultiplex")
@@ -23,8 +23,8 @@ def rejoin_multiplexes(apps, schema_editor):
 
 @transaction.atomic
 def rejoin_panels(apps, schema_editor):
-    print
-    print "Reverting panels:"
+    print()
+    print("Reverting panels:")
     db_alias = schema_editor.connection.alias
     Panel = apps.get_model("multiplexes","Panel")
     OldPanel = apps.get_model("linapp","Panel")

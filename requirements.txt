@@ -8,5 +8,5 @@ django-extensions==1.6.1
 django-model-utils==2.4
 frogress==0.9.1
 lxml==3.6.0
--e git+https://github.com/ofirr/dojango.git@375e62bb73e2ee60a64e4b1551dd25aa531c734c#egg=dojango-master
--e git+https://github.com/ofirr/dojango-datable.git@ac274e4daf4d581b953351809578d7a0929bb054#egg=dojango_datable-master
+-e git+https://github.com/ofirr/dojango.git@2b0aecb07e6b68d4793aaaabc65adb10b3d90a8a#egg=dojango
+-e git+https://github.com/ofirr/dojango-datable.git@c4d27c23d66c023062270a31f05e21d0982e0b43#egg=dojango_datable

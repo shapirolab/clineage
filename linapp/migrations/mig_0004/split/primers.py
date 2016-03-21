@@ -109,8 +109,8 @@ def get_or_create_right_irac(apps, schema_editor):
 
 @transaction.atomic
 def convert_left_primer_tail(qs, apps, schema_editor):
-    print
-    print "Converting left primers with tails:"
+    print()
+    print("Converting left primers with tails:")
     db_alias = schema_editor.connection.alias
     PCR1PlusPrimer = apps.get_model("synthesis","PCR1PlusPrimer")
     PCR1WithCompanyTagPlusPrimer = apps.get_model("synthesis","PCR1WithCompanyTagPlusPrimer")
@@ -144,8 +144,8 @@ def convert_left_primer_tail(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_right_primer_tail(qs, apps, schema_editor):
-    print
-    print "Converting right primers with tails:"
+    print()
+    print("Converting right primers with tails:")
     db_alias = schema_editor.connection.alias
     PCR1MinusPrimer = apps.get_model("synthesis","PCR1MinusPrimer")
     PCR1WithCompanyTagMinusPrimer = apps.get_model("synthesis","PCR1WithCompanyTagMinusPrimer")
@@ -179,8 +179,8 @@ def convert_right_primer_tail(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_left_primer_notail(qs, apps, schema_editor):
-    print
-    print "Converting left primers without tails:"
+    print()
+    print("Converting left primers without tails:")
     db_alias = schema_editor.connection.alias
     TargetedNoTailPlusPrimer = apps.get_model("synthesis","TargetedNoTailPlusPrimer")
     for old_target in bar(qs):
@@ -203,8 +203,8 @@ def convert_left_primer_notail(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_right_primer_notail(qs, apps, schema_editor):
-    print
-    print "Converting right primers without tails:"
+    print()
+    print("Converting right primers without tails:")
     db_alias = schema_editor.connection.alias
     TargetedNoTailMinusPrimer = apps.get_model("synthesis","TargetedNoTailMinusPrimer")
     for old_target in bar(qs):
@@ -227,8 +227,8 @@ def convert_right_primer_notail(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_unknown_primer_notail(qs, apps, schema_editor):
-    print
-    print "Converting unknown primers with tails:"
+    print()
+    print("Converting unknown primers with tails:")
     db_alias = schema_editor.connection.alias
     TargetedNoTailPlusPrimer = apps.get_model("synthesis","TargetedNoTailPlusPrimer")
     TargetedNoTailMinusPrimer = apps.get_model("synthesis","TargetedNoTailMinusPrimer")

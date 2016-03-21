@@ -52,7 +52,7 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
                 script += ';'
     script += ' '+'TE_LIST  AUT_AIR  TIPTYPE:200\n'
     script += '\nENDSCRIPT\n'
-    print script
+    print(script)
     for i in range(0, len(inputPlates)/len(allowedPlates) + 1):
         if i <= len(inputPlates)/len(allowedPlates):
             last_index = len(allowedPlates)
@@ -92,7 +92,7 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
                 script+=';'
         script+=' '+str(MULTIPLEX_VOLUME)+' BOT_BOT_LIQUID  TIPTYPE:20'
         script+='\nENDSCRIPT\n'
-        print script
+        print(script)
 
 
 def getPosFromPlate(plateName, srcPlates_srcPlatesOnTable):

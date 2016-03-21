@@ -7,8 +7,8 @@ from linapp.migrations.mig_0004.utils import transfer_physical_locations
 
 @transaction.atomic
 def split_multiplexes(apps, schema_editor):
-    print
-    print "Converting PCR1 multiplexes:"
+    print()
+    print("Converting PCR1 multiplexes:")
     db_alias = schema_editor.connection.alias
     OldPrimersMultiplex = apps.get_model("linapp","PrimersMultiplex")
     PCR1Multiplex = apps.get_model("multiplexes","PCR1Multiplex")
@@ -34,8 +34,8 @@ def split_multiplexes(apps, schema_editor):
 
 @transaction.atomic
 def split_panels(apps, schema_editor):
-    print
-    print "Converting panels:"
+    print()
+    print("Converting panels:")
     db_alias = schema_editor.connection.alias
     OldPanel = apps.get_model("linapp","Panel")
     Panel = apps.get_model("multiplexes","Panel")

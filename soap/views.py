@@ -23,7 +23,7 @@ from linapp.queries import get_targets_by_panel, get_targets_by_aar
 class HelloWorldService(ServiceBase):
     @rpc(String, Integer, _returns=Iterable(String))
     def say_hello(ctx, name, times):
-        for i in xrange(times):
+        for i in range(times):
             yield 'Hello, %s' % name
 
 hello_world_service = csrf_exempt(DjangoApplication(Application([HelloWorldService],
