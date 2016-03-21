@@ -114,13 +114,20 @@ def _update_deinterlaced_dict(d, e):
 
 class FlatDict(object):
     
-    def __init__(self, nested_dict):
+    def __init__(self, nested_dict, deinterlaced_keys=None):
         self._d = {}
         self._keys_tree = {}
+        if deinterlaced_keys is not None:
+            self._deinterlaced_keys = deinterlaced_keys
+            self._has_default = True
+        else:
+            self._deinterlaced_keys = []
+            self._has_default = False
         for nk, nv in _iterate_nested_items(nested_dict):
             denv = _deinterlace(nv)
             for i in xrange(1,len(nk)+1):
-                a = self._d.setdefault(nk[:i],{})
+                a = self._d.setdefault(nk[:i],
+                    {k: [] for k in self._deinterlaced_keys})
                 _update_deinterlaced_dict(a, denv)
             for i in xrange(0,len(nk)):
                 a = self._keys_tree.setdefault(nk[:i],set())
@@ -139,4 +146,7 @@ class FlatDict(object):
             yield k, self[nk + (k,)]
 
     def __getitem__(self, nk):
-        return self._d[nk]
+        if self._has_default:
+            return self._d.get(nk, {k: [] for k in self._deinterlaced_keys})
+        else:
+            return self._d[nk]
