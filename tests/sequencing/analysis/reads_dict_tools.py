@@ -112,14 +112,27 @@ def _update_deinterlaced_dict(d, e):
         a += v
 
 
-def flatten_and_deinterlace_nested_list_dict(nested_dict):
-    flat = {}
-    for nk, nv in _iterate_nested_items(nested_dict):
-        denv = _deinterlace(nv)
-        for i in xrange(1,len(nk)+1):
-            a = flat.setdefault(nk[:i],{})
-            _update_deinterlaced_dict(a, denv)
-    for k in nested_dict.iterkeys():
-        if (k,) in flat:
-            flat[k] = flat[k,]
-    return flat
+class FlatDict(object):
+    
+    def __init__(self, nested_dict):
+        self._d = {}
+        self._keys_tree = {}
+        for nk, nv in _iterate_nested_items(nested_dict):
+            denv = _deinterlace(nv)
+            for i in xrange(1,len(nk)+1):
+                a = self._d.setdefault(nk[:i],{})
+                _update_deinterlaced_dict(a, denv)
+            for i in xrange(1,len(nk)):
+                a = self._keys_tree.setdefault(nk[:i],set())
+                a.add(nk[i])
+        for k in nested_dict.iterkeys():
+            if (k,) in self._d:
+                self._d[k] = self._d[k,]
+            if (k,) in self._keys_tree:
+                self._keys_tree[k] = self._keys_tree[k,]
+
+    def get_children(self, nk):
+        return self._keys_tree[nk]
+
+    def __getitem__(self, nk):
+        return self._d[nk]

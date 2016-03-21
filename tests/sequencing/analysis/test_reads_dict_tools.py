@@ -1,5 +1,4 @@
-from reads_dict_tools import flatten_nested_list_dict, ReadIdGen, \
-    flatten_and_deinterlace_nested_list_dict
+from reads_dict_tools import flatten_nested_list_dict, ReadIdGen, FlatDict
 
 
 def test_flatten_nested_list_dict():
@@ -28,8 +27,8 @@ def test_flatten_nested_list_dict():
          (7,): []}
 
 
-def test_flatten_and_deinterlace_nested_list_dict():
-    assert flatten_and_deinterlace_nested_list_dict({
+def test_flat_dict():
+    fd = FlatDict({
         1: {
             2: {
                 3: [
@@ -37,9 +36,11 @@ def test_flatten_and_deinterlace_nested_list_dict():
                     {'+':'b1'},
                     {'-':'c2'},
                 ],
-                4: [
-                    {'-':'d2'},
-                ],
+                4: {
+                    9: [
+                        {'-':'d2'},
+                    ],
+                },
             },
             5: [
                 {'+':'e1','-':'e2'},
@@ -52,17 +53,22 @@ def test_flatten_and_deinterlace_nested_list_dict():
         ],
         8: {
         }
-    }) == \
-        {1: {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
-         6: {'+': ['f1']},
-         7: {},
-         (1,): {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
-         (1, 2): {'+': ['a1', 'b1'], '-': ['a2', 'c2', 'd2']},
-         (1, 2, 3): {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
-         (1, 2, 4): {'-': ['d2']},
-         (1, 5): {'+': ['e1'], '-': ['e2']},
-         (6,): {'+': ['f1']},
-         (7,): {}}
+    })
+    assert fd._d == { \
+        1: {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
+        6: {'+': ['f1']},
+        7: {},
+        (1,): {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
+        (1, 2): {'+': ['a1', 'b1'], '-': ['a2', 'c2', 'd2']},
+        (1, 2, 3): {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
+        (1, 2, 4): {'-': ['d2']},
+        (1, 2, 4, 9): {'-': ['d2']},
+        (1, 5): {'+': ['e1'], '-': ['e2']},
+        (6,): {'+': ['f1']},
+        (7,): {},
+    }  # FIXME
+    assert fd[(1, 2, 3)] == {'+': ['a1', 'b1'], '-': ['a2', 'c2']}
+    assert fd.get_children((1, 2)) == {3, 4}
 
 
 def test_ReadIdGen():
