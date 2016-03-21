@@ -54,7 +54,7 @@ def test_flat_dict():
         8: {
         }
     })
-    assert fd._d == { \
+    assert fd._d == {
         1: {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
         6: {'+': ['f1']},
         7: {},
@@ -67,8 +67,25 @@ def test_flat_dict():
         (6,): {'+': ['f1']},
         (7,): {},
     }  # FIXME
+    assert fd._keys_tree == {
+        1: {2, 5},
+        (1,): {2, 5},
+        (1, 2): {3, 4},
+        (1, 2, 4): {9},
+        (): {1, 6, 7}
+    }  # FIXME
     assert fd[(1, 2, 3)] == {'+': ['a1', 'b1'], '-': ['a2', 'c2']}
-    assert fd.get_children((1, 2)) == {3, 4}
+    assert set(fd.keys((1, 2))) == {3, 4}
+    assert set(fd.keys()) == {1, 6, 7}
+    assert dict(fd.items((1, 2))) == {
+        3: {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
+        4: {'-': ['d2']},
+    }
+    assert dict(fd.items()) == {
+        1: {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
+        6: {'+': ['f1']},
+        7: {},
+    }
 
 
 def test_ReadIdGen():

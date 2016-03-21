@@ -122,7 +122,7 @@ class FlatDict(object):
             for i in xrange(1,len(nk)+1):
                 a = self._d.setdefault(nk[:i],{})
                 _update_deinterlaced_dict(a, denv)
-            for i in xrange(1,len(nk)):
+            for i in xrange(0,len(nk)):
                 a = self._keys_tree.setdefault(nk[:i],set())
                 a.add(nk[i])
         for k in nested_dict.iterkeys():
@@ -131,8 +131,12 @@ class FlatDict(object):
             if (k,) in self._keys_tree:
                 self._keys_tree[k] = self._keys_tree[k,]
 
-    def get_children(self, nk):
-        return self._keys_tree[nk]
+    def keys(self, nk=()):
+        return iter(self._keys_tree[nk])
+
+    def items(self, nk=()):
+        for k in self.keys(nk):
+            yield k, self[nk + (k,)]
 
     def __getitem__(self, nk):
         return self._d[nk]
