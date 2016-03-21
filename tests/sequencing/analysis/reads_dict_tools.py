@@ -1,4 +1,4 @@
-from Bio.Seq import Seq
+from Bio.Seq import Seq, Alphabet
 from Bio.SeqRecord import SeqRecord
 
 
@@ -12,10 +12,23 @@ R2 = "R2"
 RM = "RM"
 
 
+def sr_to_tup(sr):
+    return (tuple(sr.seq),) + tuple(getattr(sr, k) for k in [
+        "id",
+        "name",
+        "description",
+    ]) + (tuple(sr.letter_annotations["phred_quality"]),)
+
+
+def srs_to_tups(srs):
+    for sr in srs:
+        yield sr_to_tup(sr)
+
+
 def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
-    seq_r1 = Seq(sr1)
-    seq_r2 = Seq(sr2)
-    seq_rm = Seq(srm)
+    seq_r1 = Seq(sr1, Alphabet.SingleLetterAlphabet())
+    seq_r2 = Seq(sr2, Alphabet.SingleLetterAlphabet())
+    seq_rm = Seq(srm, Alphabet.SingleLetterAlphabet())
     fwd_desc = _FWD_FMT.format(read_id, barcode1, barcode2)
     rev_desc = _REV_FMT.format(read_id, barcode1, barcode2)
     rec1 = SeqRecord(
