@@ -43,7 +43,7 @@ def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
         id=read_id,
         name=read_id,
         description=rev_desc,
-        letter_annotations={"phred_quality": [40] * len(seq_r2)},
+        letter_annotations={"phred_quality": [30] * len(seq_r2)},
     )
     recm = SeqRecord(
         seq_rm,
