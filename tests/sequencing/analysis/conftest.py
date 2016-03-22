@@ -2,6 +2,7 @@ import pytest
 import os
 import uuid
 from django.conf import settings
+from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
     AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
@@ -13,7 +14,7 @@ from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
-from tests.sequencing.analysis.reads_dict_tools import FlatDict
+from tests.sequencing.analysis.reads_dict_tools import FlatDict, R1, R2, RM
 from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM
 
 
@@ -21,30 +22,46 @@ file_fixtures_path = os.path.join(*(os.path.split(os.path.dirname(os.path.realpa
 
 
 @pytest.fixture(scope="session")
-def reads_dict_adam():
-    return FlatDict(READS_DICT_ADAM)
+def adam_reads_fd():
+    return FlatDict(READS_DICT_ADAM, [R1, R2, RM])
 
 
-@pytest.fixture()
-def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
-    fastq_r1 = get_unique_path("fastq")
-    fastq_r2 = get_unique_path("fastq")
-    os.symlink(
-        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R1.fastq'),
-        fastq_r1
-    )
-    os.symlink(
-        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R2.fastq'),
-        fastq_r2
-    )
-    sr = SampleReads.objects.create(
-        demux=demultiplexing,
-        barcoded_content=magicalpcr1barcodedcontent,
-        library=magicalpcr1library,
-        fastq1=fastq_r1,
-        fastq2=fastq_r2,
-    )
-    return sr
+@pytest.yield_fixture(scope="session")
+def sample_reads_files_d(adam_reads_fd):
+    d = {}
+    for k, r_d in adam_reads_fd.items():
+        fastq_r1 = get_unique_path("fastq")
+        fastq_r2 = get_unique_path("fastq")
+        SeqIO.write(r_d[R1], fastq_r1, "fastq")
+        SeqIO.write(r_d[R2], fastq_r2, "fastq")
+        d[k] = {R1: fastq_r1, R2: fastq_r2}
+    yield d
+    for f_d in d.itervalues():
+        os.unlink(f_d[R1])
+        os.unlink(f_d[R2])
+
+
+@pytest.yield_fixture()
+def sample_reads_d(sample_reads_files_d, demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
+    d = {}
+    for k, f_d in sample_reads_files_d.iteritems():
+        fastq_r1 = get_unique_path("fastq")
+        fastq_r2 = get_unique_path("fastq")
+        os.symlink(f_d[R1], fastq_r1)
+        os.symlink(f_d[R2], fastq_r2)
+        sr = SampleReads.objects.create(
+            demux=demultiplexing,
+            barcoded_content=magicalpcr1barcodedcontent,
+            library=magicalpcr1library,
+            fastq1=fastq_r1,
+            fastq2=fastq_r2,
+        )
+        d[k] = sr
+    yield d
+    for sr in d.itervalues():
+        # sr.delete()
+        os.unlink(sr.fastq1)
+        os.unlink(sr.fastq2)
 
 
 @pytest.fixture()
@@ -88,6 +105,28 @@ def merged_reads_stripped_fasta():
             'AAAGGCTTCTCCCCATTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC',
         ),
     }
+
+
+@pytest.fixture()
+def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
+    fastq_r1 = get_unique_path("fastq")
+    fastq_r2 = get_unique_path("fastq")
+    os.symlink(
+        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R1.fastq'),
+        fastq_r1
+    )
+    os.symlink(
+        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R2.fastq'),
+        fastq_r2
+    )
+    sr = SampleReads.objects.create(
+        demux=demultiplexing,
+        barcoded_content=magicalpcr1barcodedcontent,
+        library=magicalpcr1library,
+        fastq1=fastq_r1,
+        fastq2=fastq_r2,
+    )
+    return sr
 
 
 @pytest.fixture()
