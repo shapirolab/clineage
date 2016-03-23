@@ -30,11 +30,11 @@ def samplereads(demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
     fastq_r1 = get_unique_path("fastq")
     fastq_r2 = get_unique_path("fastq")
     os.symlink(
-        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R1.fastq'),
+        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R1.fastq'),
         fastq_r1
     )
     os.symlink(
-        os.path.join(file_fixtures_path, '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28727_and_28734_R2.fastq'),
+        os.path.join(file_fixtures_path, 'adam/bcs/bc1/bc1_R2.fastq'),
         fastq_r2
     )
     sr = SampleReads.objects.create(
@@ -93,7 +93,7 @@ def merged_reads_stripped_fasta():
 @pytest.fixture()
 def mergedreads(samplereads):
     src_prefix = os.path.join(file_fixtures_path,
-                              '1448-Viktor-AAR20-BC81_S321_L001_R1_001/1')
+                              'adam/bcs/bc1/bc1')
     dst_prefix = get_unique_path()
     os.symlink(
         "{}.assembled.fastq".format(src_prefix),
@@ -133,7 +133,7 @@ def link_index_files(src_dir, dst_dir):
 @pytest.fixture()
 def readsindex_merged_only(mergedreads):
     src_dir = os.path.join(file_fixtures_path,
-                           '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1M2')
+                           'adam/bcs/bc1/M/')
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     ri = AdamReadsIndex.objects.create(
@@ -148,7 +148,7 @@ def readsindex_merged_only(mergedreads):
 @pytest.fixture()
 def readsindex_fwd_and_merged(mergedreads):
     src_dir = os.path.join(file_fixtures_path,
-                           '1448-Viktor-AAR20-BC81_S321_L001_R1_001/ind1F')
+                           'adam/bcs/bc1/F/')
     dst_dir = get_unique_path()
     link_index_files(src_dir, dst_dir)
     ri = AdamReadsIndex.objects.create(
@@ -165,7 +165,7 @@ def adammarginassignment(readsindex_fwd_and_merged, require_amplicons):
     alignment_file_name = get_unique_path("sam")
     os.symlink(
         os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/margine_assignemnt.sam'),
+                     'adam/bcs/bc1/F/margins.sam'),
         alignment_file_name
     )
     ama = AdamMarginAssignment.objects.create(
@@ -260,19 +260,19 @@ def adamampliconreads(adammarginassignment, pu_28734):
     fastq_path = get_unique_path("fastq")
     os.symlink(
         os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.fastq'),
+                     'adam/bcs/bc1/F/28734/28734.fastq'),
         fastq_path
     )
     fastq1_path = get_unique_path("fastq")
     os.symlink(
         os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R1.fastq'),
+                     'adam/bcs/bc1/F/28734/28734_R1.fastq'),
         fastq1_path
     )
     fastq2_path = get_unique_path("fastq")
     os.symlink(
         os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734_R2.fastq'),
+                     'adam/bcs/bc1/F/28734/28734_R2.fastq'),
         fastq2_path
     )
     aar = AdamAmpliconReads.objects.create(
@@ -326,7 +326,7 @@ def adamhistogram(adamampliconreads):
     alignment_file_name = get_unique_path("sam")
     os.symlink(
         os.path.join(file_fixtures_path,
-                     '1448-Viktor-AAR20-BC81_S321_L001_R1_001/28734.sam'),
+                     'adam/bcs/bc1/F/28734/28734.sam'),
         alignment_file_name
     )
     ama = AdamHistogram.objects.create(
