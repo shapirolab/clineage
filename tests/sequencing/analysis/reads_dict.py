@@ -6,6 +6,10 @@ from tests.sequencing.analysis.reads_dict_tools import \
 ID = ReadIdGen()
 
 
+ASSEMBLED = "ASSEMBLED"
+UNASSEMBLED = "UNASSEMBLED"
+
+
 def bc1(sr1, sr2, srm):
     return get_fastq_record_triplet(
         read_id=str(ID),
@@ -19,7 +23,7 @@ def bc1(sr1, sr2, srm):
 
 READS_DICT_ADAM = {
 "bc1": {
-    "M": {
+    ASSEMBLED: {
         "28734": {
             ((3,7),): [
                 bc1(
@@ -34,7 +38,16 @@ READS_DICT_ADAM = {
             ],
         },
     },
-    "F": {
+    UNASSEMBLED: {
+        "28734": {
+            ((3,7),): [
+                bc1(
+                    sr1="AAAGGCTTCTCCCCACTCCAAAGAGAAAATCTCTTAGAGGAAGCACGCGCGACATCTCCTGTGTGTTCCGAAGCGCTCTCGCTCTCTCTCAGCTGCTCTACCCTCTCCCCTCAGAGAAGAAGAAGAAGAAGAAGAAAAGTCCAAGCACACACTACTTCC",
+                    sr2="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                    srm="",  #FIXME
+                ),
+            ],
+        },
     },
 },
 }
