@@ -14,7 +14,8 @@ from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
-from tests.sequencing.analysis.reads_dict_tools import FlatDict, R1, R2, RM
+from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM
+from tests.flat_dict import FlatDict
 from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM
 
 
