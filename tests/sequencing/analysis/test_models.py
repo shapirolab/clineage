@@ -12,7 +12,9 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
 from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
 
-from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, srs_to_tups
+from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
+    srs_to_tups, rc_srs_to_tups
+from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
 
 index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
     ["1","2","3","4","1.rev","2.rev"]]
@@ -34,10 +36,15 @@ def test_runmerge(sample_reads_d, adam_reads_fd):
         mr = merge(sr)
         assert mr.sample_reads is sr
         assert os.path.isfile(mr.assembled_fastq)
-        assert set(srs_to_tups(SeqIO.parse(mr.assembled_fastq, "fastq"))) == set(srs_to_tups(adam_reads_fd[k,"M"][RM]))
+        assert set(srs_to_tups(SeqIO.parse(mr.assembled_fastq, "fastq"))) == \
+            set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM]))
         assert os.path.isfile(mr.discarded_fastq)
-        assert set(srs_to_tups(SeqIO.parse(mr.unassembled_forward_fastq, "fastq"))) == set(srs_to_tups(adam_reads_fd[k,"F"][RM]))
+        assert set(srs_to_tups(SeqIO.parse(mr.discarded_fastq, "fastq"))) == set()
+        assert set(srs_to_tups(SeqIO.parse(mr.unassembled_forward_fastq, "fastq"))) == \
+            set(srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R1]))
         assert os.path.isfile(mr.unassembled_reverse_fastq)
+        assert set(srs_to_tups(SeqIO.parse(mr.unassembled_reverse_fastq, "fastq"))) == \
+            set(rc_srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R2]))
         mr.delete()
         assert not os.path.exists(mr.assembled_fastq)
         assert not os.path.exists(mr.discarded_fastq)
@@ -46,11 +53,13 @@ def test_runmerge(sample_reads_d, adam_reads_fd):
 
 
 @pytest.mark.django_db
-def test_mergedreads(mergedreads, merged_reads_stripped_fasta):
-    assert os.path.isfile(mergedreads.sample_reads.fastq1)
-    assert os.path.isfile(mergedreads.sample_reads.fastq2)
-    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == merged_reads_stripped_fasta
-    assert set(strip_fasta_records(mergedreads.included_reads_generator('M'))) == set(strip_fasta_records(mergedreads.included_reads_generator('F')))
+def test_merged_reads(adam_merged_reads_d, adam_reads_fd):
+    for k, mr in adam_merged_reads_d.iteritems():
+        assert set(srs_to_tups(mr.included_reads_generator('M'))) == \
+             set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM]))
+        assert set(srs_to_tups(mr.included_reads_generator('F'))) == \
+             set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM])) | \
+             set(srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R1]))
 
 
 #@pytest.mark.django_db
