@@ -31,7 +31,7 @@ def adam_reads_fd():
 @pytest.yield_fixture(scope="session")
 def sample_reads_files_d(adam_reads_fd):
     d = {}
-    for k, r_d in adam_reads_fd.items():
+    for k, r_d in adam_reads_fd.reads():
         fastq_r1 = get_unique_path("fastq")
         fastq_r2 = get_unique_path("fastq")
         SeqIO.write(r_d[R1], fastq_r1, "fastq")
@@ -69,14 +69,14 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, magicalpcr1barcodedcont
 @pytest.yield_fixture(scope="session")
 def adam_merged_reads_files_d(adam_reads_fd):
     d = {}
-    for k in adam_reads_fd.keys():
+    for k, s_d in adam_reads_fd.items():
         assembled_fastq = get_unique_path("fastq")
         unassembled_forward_fastq = get_unique_path("fastq")
         unassembled_reverse_fastq = get_unique_path("fastq")
         discarded_fastq = get_unique_path("fastq")
-        SeqIO.write(adam_reads_fd[k, ASSEMBLED][RM], assembled_fastq, "fastq")
-        SeqIO.write(adam_reads_fd[k, UNASSEMBLED][R1], unassembled_forward_fastq, "fastq")
-        SeqIO.write(adam_reads_fd[k, UNASSEMBLED][R2], unassembled_reverse_fastq, "fastq")
+        SeqIO.write(s_d[ASSEMBLED][RM], assembled_fastq, "fastq")
+        SeqIO.write(s_d[UNASSEMBLED][R1], unassembled_forward_fastq, "fastq")
+        SeqIO.write(s_d[UNASSEMBLED][R2], unassembled_reverse_fastq, "fastq")
         SeqIO.write((), discarded_fastq, "fastq")
         d[k] = {
             ASSEMBLED: assembled_fastq,
