@@ -13,7 +13,15 @@ RM = "RM"
 
 
 def sr_to_tup(sr):
-    return (tuple(sr.seq),) + tuple(getattr(sr, k) for k in [
+    return (str(sr.seq),) + tuple(getattr(sr, k) for k in [
+        "id",
+        "name",
+        "description",
+    ]) + (tuple(sr.letter_annotations["phred_quality"]),)
+
+
+def rc_sr_to_tup(sr):
+    return (str(sr.seq.reverse_complement()),) + tuple(getattr(sr, k) for k in [
         "id",
         "name",
         "description",
@@ -23,6 +31,11 @@ def sr_to_tup(sr):
 def srs_to_tups(srs):
     for sr in srs:
         yield sr_to_tup(sr)
+
+
+def rc_srs_to_tups(srs):
+    for sr in srs:
+        yield rc_sr_to_tup(sr)
 
 
 def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
