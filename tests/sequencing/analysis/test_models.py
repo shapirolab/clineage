@@ -87,14 +87,14 @@ def test_merged_reads(adam_merged_reads_d, adam_reads_fd):
     #assert her.num_reads == 1
 
 
-
 @pytest.mark.django_db
-def test_readsindex_bowtie2build(mergedreads):
-    assert os.path.isfile(mergedreads.assembled_fastq)
-    ri = create_reads_index(mergedreads, included_reads='M', padding=5)
-    assert set(os.path.join(ri.index_dump_dir, x) for x in os.listdir(ri.index_dump_dir)) == set(ri.files)
-    ri.delete()
-    assert not os.path.exists(ri.index_dump_dir)
+def test_readsindex_bowtie2build(adam_merged_reads_d):
+    for k, mr in adam_merged_reads_d.iteritems():
+        assert os.path.isfile(mr.assembled_fastq)
+        ri = create_reads_index(mr, included_reads='M', padding=5)
+        assert set(os.path.join(ri.index_dump_dir, x) for x in os.listdir(ri.index_dump_dir)) == set(ri.files)
+        ri.delete()
+        assert not os.path.exists(ri.index_dump_dir)
 
 
 def test_create_panel_fasta(pu_28727, pu_28734):
