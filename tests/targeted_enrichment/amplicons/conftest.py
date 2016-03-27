@@ -26,6 +26,10 @@ def pu_28734(ter_28734):
     pu.save()
     return pu
 
+
 @pytest.fixture()
-def require_amplicons(pu_28727, pu_28734):
-    pass
+def amplicon_d(pu_28727, pu_28734):
+    return {
+        "28727": pu_28727,
+        "28734": pu_28734,
+    }

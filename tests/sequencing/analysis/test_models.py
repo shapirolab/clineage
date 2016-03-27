@@ -118,14 +118,14 @@ def test_readsindex_amplicons(readsindex_merged_only, pu_28727, pu_28734):
 
 @pytest.mark.django_db
 def test_align_primers_to_reads_basic(readsindex_merged_only,
-                                      require_amplicons):
+                                      amplicon_d):
     ma = align_primers_to_reads(readsindex_merged_only)
     assert os.path.isfile(ma.assignment_sam)
 
 
 @pytest.mark.django_db
 def test_collect_mappings_from_sam(adammarginassignment,
-                                   require_amplicons,
+                                   amplicon_d,
                                    reads_matches):
     assert _collect_mappings_from_sam(adammarginassignment) == reads_matches
 

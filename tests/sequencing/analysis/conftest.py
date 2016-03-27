@@ -223,7 +223,7 @@ def readsindex_fwd_and_merged(mergedreads):
 
 
 @pytest.fixture()
-def adammarginassignment(readsindex_fwd_and_merged, require_amplicons):
+def adammarginassignment(readsindex_fwd_and_merged, amplicon_d):
     alignment_file_name = get_unique_path("sam")
     os.symlink(
         os.path.join(file_fixtures_path,
