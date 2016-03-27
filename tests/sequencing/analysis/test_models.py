@@ -229,11 +229,14 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
     for mhg in [mhg1,mhg2,mhg3,mhg4]:
         mhg.delete()
 
+
 @pytest.mark.django_db
-def test_align_reads_to_ms_variations(adamampliconreads):
-    ah = align_reads_to_ms_variations(adamampliconreads, 50)
-    assert os.path.isfile(ah.assignment_sam)
-    #assert filecmp.cmp(ah.assignment_sam, 
+def test_align_reads_to_ms_variations(adam_amplicon_reads_d):
+    for k, amr in adam_amplicon_reads_d.iteritems():
+        ah = align_reads_to_ms_variations(amr, 50)
+        assert os.path.isfile(ah.assignment_sam)
+        #assert filecmp.cmp(ah.assignment_sam,
+
 
 @pytest.mark.django_db
 def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):

@@ -2,6 +2,7 @@ import pytest
 import os
 import uuid
 from django.conf import settings
+import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
@@ -128,6 +129,110 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
         os.unlink(mr.discarded_fastq)
         os.unlink(mr.unassembled_forward_fastq)
         os.unlink(mr.unassembled_reverse_fastq)
+
+
+@pytest.yield_fixture()
+def adam_amplicon_reads_files_d(adam_reads_fd):
+    d = {}
+    for bc, s_d in adam_reads_fd.items():
+        # M
+        d[bc, "M"] = {}
+        for amp, r_d in s_d.sub(ASSEMBLED).reads():
+            f_d = {
+                RM: get_unique_path("fastq"),
+                R1: get_unique_path("fastq"),
+                R2: get_unique_path("fastq"),
+            }
+            for r in [R1, R2, RM]:
+                SeqIO.write(r_d[r], f_d[r], "fastq")
+            d[bc, "M"][amp] = f_d
+        # F
+        d[bc, "F"] = {}
+        all_amps = set(s_d.sub(ASSEMBLED).keys()) | set(s_d.sub(UNASSEMBLED).keys())
+        for amp in all_amps:
+            # Assuming there are no amplicons only present in UNASSEMBLED
+            f_d = {
+                RM: get_unique_path("fastq"),
+                R1: get_unique_path("fastq"),
+                R2: get_unique_path("fastq"),
+            }
+            for r in [R1, R2]:
+                SeqIO.write(itertools.chain(
+                    s_d[ASSEMBLED, amp][r],
+                    s_d[UNASSEMBLED, amp][r],
+                    ), f_d[r], "fastq")
+            SeqIO.write(itertools.chain(
+                s_d[ASSEMBLED, amp][RM],
+                s_d[UNASSEMBLED, amp][R1],
+                ), f_d[RM], "fastq")
+            d[bc, "F"][amp] = f_d
+    yield d
+    for f_d_d in d.itervalues():
+        for f_d in f_d_d.itervalues():
+            os.unlink(f_d[RM])
+            os.unlink(f_d[R1])
+            os.unlink(f_d[R2])
+
+
+@pytest.yield_fixture()
+def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
+    d = {}
+    for (bc, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+        dst_dir = get_unique_path()
+        os.mkdir(dst_dir)
+        ari = AdamReadsIndex.objects.create(
+            merged_reads=adam_merged_reads_d[bc],
+            included_reads=inc,  # Merged and unassembled_forward
+            index_dump_dir=dst_dir,
+            padding=5,
+        )
+        fake_sam = get_unique_path("sam")
+        with open(fake_sam, "wb") as f:
+            pass
+        ama = AdamMarginAssignment.objects.create(
+            reads_index=ari,
+            assignment_sam=fake_sam,
+        )
+        d[bc, inc] = ari, ama
+    yield d
+    for ari, ama in d.itervalues():
+        os.rmdir(ari.index_dump_dir)
+        os.unlink(ama.assignment_sam)
+
+
+@pytest.yield_fixture()
+def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, amplicon_d):
+    d = {}
+    extra_dirs = []
+    extra_files = []
+    for (bc, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+        ari, ama = _chain[bc, inc]
+        for amp, f_d in f_d_d.iteritems():
+            f_d2 = {}
+            for r in [R1, R2, RM]:
+                f_d2[r] = get_unique_path("fastq")
+                os.symlink(f_d[r], f_d2[r])
+            aar = AdamAmpliconReads.objects.create(
+                margin_assignment=ama,
+                amplicon=amplicon_d[amp],  # FIXME
+                fastq=f_d2[RM],
+                fastq1=f_d2[R1],
+                fastq2=f_d2[R2],
+            )
+            d[bc, inc, amp] = aar
+    yield d
+    for aar in d.itervalues():
+        # aar.margin_assignment.reads_index.delete()
+        # aar.margin_assignment.delete()
+        # aar.delete()
+        os.unlink(aar.fastq)
+        os.unlink(aar.fastq1)
+        os.unlink(aar.fastq2)
+
+
+
+
+
 
 
 @pytest.fixture()
