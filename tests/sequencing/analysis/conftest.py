@@ -30,7 +30,7 @@ def adam_reads_fd():
 
 
 @pytest.yield_fixture(scope="session")
-def sample_reads_files_d(adam_reads_fd):
+def sample_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
     for k, r_d in adam_reads_fd.reads():
         fastq_r1 = get_unique_path("fastq")
@@ -68,7 +68,7 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, magicalpcr1barcodedcont
 
 
 @pytest.yield_fixture(scope="session")
-def adam_merged_reads_files_d(adam_reads_fd):
+def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
     for k, s_d in adam_reads_fd.items():
         assembled_fastq = get_unique_path("fastq")
@@ -132,7 +132,7 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
 
 
 @pytest.yield_fixture()
-def adam_amplicon_reads_files_d(adam_reads_fd):
+def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
     for bc, s_d in adam_reads_fd.items():
         # M
