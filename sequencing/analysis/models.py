@@ -165,6 +165,13 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
             ("margin_assignment", "amplicon"),
         )
 
+    @property
+    def files(self):
+        yield self.fastq1
+        yield self.fastq2
+        yield self.fastq
+
+post_delete.connect(delete_files, AdamAmpliconReads)
 
 class AdamMSVariations(BowtieIndexMixin):
     amplicon = models.ForeignKey(Amplicon)

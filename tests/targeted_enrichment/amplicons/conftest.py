@@ -33,3 +33,8 @@ def amplicon_d(pu_28727, pu_28734):
         "28727": pu_28727,
         "28734": pu_28734,
     }
+
+
+@pytest.fixture()
+def amplicon_d_r(amplicon_d):
+    return {v: k for k, v in amplicon_d.iteritems()}
