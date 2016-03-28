@@ -1,7 +1,7 @@
 
 import pytest
 import tempfile
-import shutil
+import os
 
 from django.conf import settings
 
@@ -10,4 +10,4 @@ def temp_storage():
     t = tempfile.mkdtemp()
     settings.DATA_STORE = t
     yield
-    shutil.rmtree(t)
+    os.rmdir(t)
