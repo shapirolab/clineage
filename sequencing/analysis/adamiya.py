@@ -190,13 +190,13 @@ def seperate_reads_by_amplicons(margin_assignment):
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.iteritems():
-        amplicon_reads_fastq_name = _extract_amplicon_reads(reads, read_ids)
+        amplicon_readsm_fastq_name = _extract_amplicon_reads(reads, read_ids)
         amplicon_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
         amplicon_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)
         aar = AdamAmpliconReads.objects.create(
             margin_assignment=margin_assignment,
             amplicon=amplicon,
-            fastq=amplicon_reads_fastq_name,
+            fastqm=amplicon_readsm_fastq_name,
             fastq1=amplicon_reads1_fastq_name,
             fastq2=amplicon_reads2_fastq_name,
         )
@@ -310,7 +310,7 @@ def align_reads_to_ms_variations(amplicon_reads, padding):
     assignment_sam = get_unique_path("sam")
     msv = get_adam_ms_variations(amplicon_reads.amplicon, padding)
     bowtie2_with_defaults2('-x', msv.index_files_prefix,
-                          '-U', amplicon_reads.fastq,
+                          '-U', amplicon_reads.fastqm,
                           '-S', assignment_sam)
     ah = AdamHistogram.objects.create(
         sample_reads_id=amplicon_reads.margin_assignment.reads_index \
@@ -342,9 +342,9 @@ def separate_reads_by_genotypes(histogram):
     genotypes_reads = _aggregate_read_ids_by_genotypes(genotype_read_iterator)
     reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
-    reads = SeqIO.index(histogram.amplicon_reads.fastq, "fastq")
+    readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
     for genotypes, read_ids in genotypes_reads.iteritems():
-        genotypes_reads_fastq_name = _extract_amplicon_reads(reads, read_ids)
+        genotypes_readsm_fastq_name = _extract_amplicon_reads(readsm, read_ids)
         genotypes_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
         genotypes_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)
         her = HistogramEntryReads.objects.create(
@@ -353,7 +353,7 @@ def separate_reads_by_genotypes(histogram):
             num_reads=len(read_ids),
             fastq1=genotypes_reads1_fastq_name,
             fastq2=genotypes_reads2_fastq_name,
-            fastqm=genotypes_reads_fastq_name,
+            fastqm=genotypes_readsm_fastq_name,
         )
         her.microsatellite_genotypes.add(*genotypes)
         yield her

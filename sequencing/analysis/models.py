@@ -158,7 +158,7 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
     target_offset = models.IntegerField(null=True)
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
-    fastq = models.FilePathField()
+    fastqm = models.FilePathField()
 
     class Meta:
         index_together = (
@@ -169,7 +169,7 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
     def files(self):
         yield self.fastq1
         yield self.fastq2
-        yield self.fastq
+        yield self.fastqm
 
 post_delete.connect(delete_files, AdamAmpliconReads)
 

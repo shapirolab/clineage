@@ -215,7 +215,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, amplicon_d):
             aar = AdamAmpliconReads.objects.create(
                 margin_assignment=ama,
                 amplicon=amplicon_d[amp],  # FIXME
-                fastq=f_d2[RM],
+                fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
             )
@@ -225,7 +225,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, amplicon_d):
         # aar.margin_assignment.reads_index.delete()
         # aar.margin_assignment.delete()
         # aar.delete()
-        os.unlink(aar.fastq)
+        os.unlink(aar.fastqm)
         os.unlink(aar.fastq1)
         os.unlink(aar.fastq2)
 

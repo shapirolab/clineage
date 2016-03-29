@@ -118,13 +118,13 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
         for aar in seperate_reads_by_amplicons(ama):
             amp = amplicon_d_r[aar.amplicon]
             amps.add(amp)
-            aar_reads = set(strip_fasta_records(
-                SeqIO.parse(aar.fastq, "fastq"))
+            aar_readsm = set(strip_fasta_records(
+                SeqIO.parse(aar.fastqm, "fastq"))
             )
-            ref_reads = set(strip_fasta_records(
+            ref_readsm = set(strip_fasta_records(
                 adam_reads_fd[bc, ASSEMBLED, amp][RM])
             )
-            assert aar_reads == ref_reads
+            assert aar_readsm == ref_readsm
             aar_reads1 = set(strip_fasta_records(
                 SeqIO.parse(aar.fastq1, "fastq"))
             )
@@ -142,7 +142,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
             aar.delete()
             assert not os.path.exists(aar.fastq1)
             assert not os.path.exists(aar.fastq2)
-            assert not os.path.exists(aar.fastq)
+            assert not os.path.exists(aar.fastqm)
         assert amps == set(adam_reads_fd.sub((bc, ASSEMBLED)).keys())
         ama.delete()
         assert not os.path.exists(ama.assignment_sam)
