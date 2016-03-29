@@ -41,7 +41,8 @@ def rc_srs_to_tups(srs):
 def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
     seq_r1 = Seq(sr1, Alphabet.SingleLetterAlphabet())
     seq_r2 = Seq(sr2, Alphabet.SingleLetterAlphabet())
-    seq_rm = Seq(srm, Alphabet.SingleLetterAlphabet())
+    if srm is not None:
+        seq_rm = Seq(srm, Alphabet.SingleLetterAlphabet())
     fwd_desc = _FWD_FMT.format(read_id, barcode1, barcode2)
     rev_desc = _REV_FMT.format(read_id, barcode1, barcode2)
     rec1 = SeqRecord(
@@ -58,14 +59,18 @@ def get_fastq_record_triplet(read_id, sr1, sr2, srm, barcode1, barcode2):
         description=rev_desc,
         letter_annotations={"phred_quality": [30] * len(seq_r2)},
     )
-    recm = SeqRecord(
-        seq_rm,
-        id=read_id,
-        name=read_id,
-        description=fwd_desc,
-        letter_annotations={"phred_quality": [40] * len(seq_rm)},
-    )
-    return {R1: rec1, R2: rec2, RM: recm}
+    if srm is not None:
+        recm = SeqRecord(
+            seq_rm,
+            id=read_id,
+            name=read_id,
+            description=fwd_desc,
+            letter_annotations={"phred_quality": [40] * len(seq_rm)},
+        )
+    if srm is not None:
+        return {R1: rec1, R2: rec2, RM: recm}
+    else:
+        return {R1: rec1, R2: rec2}
 
 
 _CUSTOM_READ_ID_FMT = "M00321:123:000000000-ABCDE:1:1111:22222:{:05}"
