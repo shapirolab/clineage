@@ -12,6 +12,11 @@ R2 = "R2"
 RM = "RM"
 
 
+def strip_fasta_records(fasta_records):
+    for rec in fasta_records:
+        yield rec.id, str(rec.seq)
+
+
 def sr_to_tup(sr):
     return (str(sr.seq),) + tuple(getattr(sr, k) for k in [
         "id",
