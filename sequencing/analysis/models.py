@@ -270,3 +270,11 @@ class HistogramEntryReads(models.Model):
     fastq1 = models.FilePathField()
     fastq2 = models.FilePathField()
     fastqm = models.FilePathField(null=True)
+
+    @property
+    def files(self):
+        yield self.fastq1
+        yield self.fastq2
+        yield self.fastqm
+
+post_delete.connect(delete_files, HistogramEntryReads)

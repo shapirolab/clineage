@@ -150,6 +150,74 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
         assert not os.path.exists(ri.index_dump_dir)
 
 
+def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
+    for (bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
+        # FIXME
+        if inc != "M":
+            continue
+        # test_align_reads_to_ms_variations
+        ah = align_reads_to_ms_variations(amr, 50)
+        assert ah.amplicon_reads == amr
+        assert os.path.isfile(ah.assignment_sam)
+        gens = set()
+        # test_separate_reads_by_genotypes
+        for her in separate_reads_by_genotypes(ah):
+            assert her.histogram_id == ah.id
+            assert amplicon_d_r[her.amplicon] == amp
+            assert set(her.snp_genotypes.all()) == set()
+            gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
+                msg in her.microsatellite_genotypes.all())
+            gens.add(gen)
+            her_readsm = set(strip_fasta_records(
+                SeqIO.parse(her.fastqm, "fastq"))
+            )
+            ref_readsm = set(strip_fasta_records(
+                adam_reads_fd[bc, ASSEMBLED, amp, gen][RM])
+            )
+            assert her_readsm == ref_readsm
+            her_reads1 = set(strip_fasta_records(
+                SeqIO.parse(her.fastq1, "fastq"))
+            )
+            ref_reads1 = set(strip_fasta_records(
+                adam_reads_fd[bc, ASSEMBLED, amp, gen][R1])
+            )
+            assert her_reads1 == ref_reads1
+            her_reads2 = set(strip_fasta_records(
+                SeqIO.parse(her.fastq2, "fastq"))
+            )
+            ref_reads2 = set(strip_fasta_records(
+                adam_reads_fd[bc, ASSEMBLED, amp, gen][R2])
+            )
+            assert her_reads2 == ref_reads2
+            assert her.num_reads == \
+                len(adam_reads_fd[bc, ASSEMBLED, amp, gen][RM])
+            her.delete()
+            assert not os.path.exists(her.fastq1)
+            assert not os.path.exists(her.fastq2)
+            assert not os.path.exists(her.fastqm)
+        ah.delete()
+        assert not os.path.exists(ah.assignment_sam)
+        #assert filecmp.cmp(ah.assignment_sam,
+    # FIXME: get these from outside.
+    AdamMSVariations.objects.all().delete()
+    
+
+#@pytest.mark.django_db
+#def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
+    #l = list(
+    #assert len(l) == 1
+    #her = l[0]
+    #assert her.histogram == adamhistogram
+    #assert her.amplicon == pu_28734
+    #assert set(her.microsatellite_genotypes.all()) == \
+        #{MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 7)}
+    #assert set(her.snp_genotypes.all()) == set()
+    #assert her.num_reads == 12
+    ##fastq1 = models.FilePathField()
+    ##fastq2 = models.FilePathField()
+    ##fastqm = models.FilePathField(null=True)
+
+
 #def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations):
     #fasta = _build_ms_variations(pu_28727, 50)
     #variations = set(strip_fasta_records(SeqIO.parse(fasta, "fasta")))
@@ -204,31 +272,3 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
     assert mhg4.repeat_number == 11
     for mhg in [mhg1,mhg2,mhg3,mhg4]:
         mhg.delete()
-
-
-@pytest.mark.django_db
-def test_align_reads_to_ms_variations(adam_amplicon_reads_d):
-    for k, amr in adam_amplicon_reads_d.iteritems():
-        ah = align_reads_to_ms_variations(amr, 50)
-        assert os.path.isfile(ah.assignment_sam)
-        ah.delete()
-        assert not os.path.exists(ah.assignment_sam)
-        #assert filecmp.cmp(ah.assignment_sam,
-    # FIXME: get these from outside.
-    AdamMSVariations.objects.all().delete()
-
-
-#@pytest.mark.django_db
-#def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
-    #l = list(separate_reads_by_genotypes(adamhistogram))
-    #assert len(l) == 1
-    #her = l[0]
-    #assert her.histogram == adamhistogram
-    #assert her.amplicon == pu_28734
-    #assert set(her.microsatellite_genotypes.all()) == \
-        #{MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 7)}
-    #assert set(her.snp_genotypes.all()) == set()
-    #assert her.num_reads == 12
-    ##fastq1 = models.FilePathField()
-    ##fastq2 = models.FilePathField()
-    ##fastqm = models.FilePathField(null=True)
