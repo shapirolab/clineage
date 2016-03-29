@@ -93,14 +93,14 @@ def test_create_panel_fasta(pu_28727, pu_28734):
     assert set(strip_fasta_records(
         SeqIO.parse(panel_fasta_name, "fasta")
     )) == {
-        ("amplicon_1_left", "TTTACTATGCCATGCTGCTGCT",),
-        ("amplicon_1_right", "TGTGCAAACAAGAACAGATGCC",),
-        ("amplicon_2_left", "AAGGCTTCTCCCCATTCCAAAG",),
-        ("amplicon_2_right", "AGTCCAAGCACACACTACTTCC",),
+        ("amplicon_28727_left", "TTTACTATGCCATGCTGCTGCT",),
+        ("amplicon_28727_right", "TGTGCAAACAAGAACAGATGCC",),
+        ("amplicon_28734_left", "AAGGCTTCTCCCCATTCCAAAG",),
+        ("amplicon_28734_right", "AGTCCAAGCACACACTACTTCC",),
     }
     os.unlink(panel_fasta_name)
 
-def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
+def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicons):
     for bc, mr in adam_merged_reads_d.iteritems():
         for inc in ["M", "F"]:
             # test_readsindex_bowtie2build
@@ -117,7 +117,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
             #test_seperate_reads_by_amplicons
             amps = set()
             for aar in seperate_reads_by_amplicons(ama):
-                amp = amplicon_d_r[aar.amplicon]
+                amp = aar.amplicon_id
                 amps.add(amp)
                 aar_fnames_d = {
                     R1: aar.fastq1,
@@ -153,7 +153,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
             assert not os.path.exists(ri.index_dump_dir)
 
 
-def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
+def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons):
     for (bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
         # FIXME
         # test_align_reads_to_ms_variations
@@ -164,7 +164,7 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
         # test_separate_reads_by_genotypes
         for her in separate_reads_by_genotypes(ah):
             assert her.histogram_id == ah.id
-            assert amplicon_d_r[her.amplicon] == amp
+            assert her.amplicon_id == amp
             assert set(her.snp_genotypes.all()) == set()
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
                 msg in her.microsatellite_genotypes.all())

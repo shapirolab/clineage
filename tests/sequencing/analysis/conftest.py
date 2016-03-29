@@ -8,6 +8,7 @@ from Bio import SeqIO
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
     AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
     AdamMSVariations, AdamHistogram
+from targeted_enrichment.amplicons.models import Amplicon
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
 
@@ -201,7 +202,7 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
 
 
 @pytest.yield_fixture()
-def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, amplicon_d):
+def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicons):
     d = {}
     extra_dirs = []
     extra_files = []
@@ -214,7 +215,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, amplicon_d):
                 os.symlink(f_d[r], f_d2[r])
             aar = AdamAmpliconReads.objects.create(
                 margin_assignment=ama,
-                amplicon=amplicon_d[amp],  # FIXME
+                amplicon=Amplicon.objects.select_subclasses().get(id=amp),
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
