@@ -206,6 +206,48 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
     AdamMSVariations.objects.all().delete()
     
 
+def test_get_adam_ms_variations(pu_28727, pu_28734):
+    assert AdamMSVariations.objects.count() == 0
+    amsv1 = get_adam_ms_variations(pu_28727, 50)
+    assert amsv1.padding == 50
+    assert amsv1.amplicon == pu_28727
+    assert os.path.isdir(amsv1.index_dump_dir)
+    assert AdamMSVariations.objects.count() == 1
+    amsv2 = get_adam_ms_variations(pu_28727, 30)
+    assert amsv2.padding == 30
+    assert amsv2.amplicon == pu_28727
+    assert os.path.isdir(amsv2.index_dump_dir)
+    assert AdamMSVariations.objects.count() == 2
+    amsv3 = get_adam_ms_variations(pu_28727, 50)
+    assert amsv3.padding == 50
+    assert amsv3.amplicon == pu_28727
+    assert os.path.isdir(amsv3.index_dump_dir)
+    assert AdamMSVariations.objects.count() == 2
+    amsv4 = get_adam_ms_variations(pu_28734, 50)
+    assert amsv4.padding == 50
+    assert amsv4.amplicon == pu_28734
+    assert os.path.isdir(amsv4.index_dump_dir)
+    assert AdamMSVariations.objects.count() == 3
+    assert amsv1.id != amsv2.id
+    assert amsv1.id != amsv4.id
+    assert amsv2.id != amsv4.id
+    assert amsv1.id == amsv3.id
+    amsv3.delete()
+    assert not os.path.exists(amsv3.index_dump_dir)
+    assert AdamMSVariations.objects.count() == 2
+    amsv5 = get_adam_ms_variations(pu_28727, 50)
+    assert AdamMSVariations.objects.count() == 3
+    assert amsv5.padding == 50
+    assert amsv5.amplicon == pu_28727
+    assert os.path.isdir(amsv5.index_dump_dir)
+    amsv2.delete()
+    assert not os.path.exists(amsv2.index_dump_dir)
+    amsv4.delete()
+    assert not os.path.exists(amsv4.index_dump_dir)
+    amsv5.delete()
+    assert not os.path.exists(amsv5.index_dump_dir)
+
+
 #@pytest.mark.django_db
 #def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
     #l = list(
