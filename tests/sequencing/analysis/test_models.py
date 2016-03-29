@@ -102,59 +102,60 @@ def test_create_panel_fasta(pu_28727, pu_28734):
 
 def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, amplicon_d_r):
     for bc, mr in adam_merged_reads_d.iteritems():
-        inc = 'M'
-        # test_readsindex_bowtie2build
-        assert os.path.isfile(mr.assembled_fastq)
-        ri = create_reads_index(mr, included_reads=inc, padding=5)
-        assert ri.merged_reads == mr
-        assert set(os.path.join(ri.index_dump_dir, x) for x in os.listdir(ri.index_dump_dir)) == set(ri.files)
+        for inc in ["M", "F"]:
+            # test_readsindex_bowtie2build
+            assert os.path.isfile(mr.assembled_fastq)
+            ri = create_reads_index(mr, included_reads=inc, padding=5)
+            assert ri.merged_reads == mr
+            assert set(os.path.join(ri.index_dump_dir, x) for x in \
+                os.listdir(ri.index_dump_dir)) == set(ri.files)
 
-        #test_align_primers_to_reads_basic
-        ama = align_primers_to_reads(ri)
-        assert os.path.isfile(ama.assignment_sam)
+            #test_align_primers_to_reads_basic
+            ama = align_primers_to_reads(ri)
+            assert os.path.isfile(ama.assignment_sam)
 
-        #test_seperate_reads_by_amplicons
-        amps = set()
-        for aar in seperate_reads_by_amplicons(ama):
-            amp = amplicon_d_r[aar.amplicon]
-            amps.add(amp)
-            aar_readsm = set(strip_fasta_records(
-                SeqIO.parse(aar.fastqm, "fastq"))
-            )
-            ref_readsm = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp][RM])
-            )
-            assert aar_readsm == ref_readsm
-            aar_reads1 = set(strip_fasta_records(
-                SeqIO.parse(aar.fastq1, "fastq"))
-            )
-            ref_reads1 = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp][R1])
-            )
-            assert aar_reads1 == ref_reads1
-            aar_reads2 = set(strip_fasta_records(
-                SeqIO.parse(aar.fastq2, "fastq"))
-            )
-            ref_reads2 = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp][R2])
-            )
-            assert aar_reads2 == ref_reads2
-            aar.delete()
-            assert not os.path.exists(aar.fastq1)
-            assert not os.path.exists(aar.fastq2)
-            assert not os.path.exists(aar.fastqm)
-        assert amps == set(adam_reads_fd.sub((bc, ASSEMBLED)).keys())
-        ama.delete()
-        assert not os.path.exists(ama.assignment_sam)
-        ri.delete()
-        assert not os.path.exists(ri.index_dump_dir)
+            #test_seperate_reads_by_amplicons
+            amps = set()
+            for aar in seperate_reads_by_amplicons(ama):
+                amp = amplicon_d_r[aar.amplicon]
+                amps.add(amp)
+                aar_fnames_d = {
+                    R1: aar.fastq1,
+                    R2: aar.fastq2,
+                    RM: aar.fastqm,
+                }
+                if inc == "M":
+                    ref_reads_d = adam_reads_fd[bc, ASSEMBLED, amp]
+                else:  # inc == "F"
+                    ref_reads_d = {
+                        R1: adam_reads_fd[bc, ASSEMBLED, amp][R1] + \
+                            adam_reads_fd[bc, UNASSEMBLED, amp][R1],
+                        R2: adam_reads_fd[bc, ASSEMBLED, amp][R2] + \
+                            adam_reads_fd[bc, UNASSEMBLED, amp][R2],
+                        RM: adam_reads_fd[bc, ASSEMBLED, amp][RM] + \
+                            adam_reads_fd[bc, UNASSEMBLED, amp][R1],
+                    }
+                for r in [R1, R2, RM]:
+                    assert set(strip_fasta_records(
+                        SeqIO.parse(aar_fnames_d[r], "fastq"))
+                    ) == \
+                    set(strip_fasta_records(
+                        ref_reads_d[r]
+                    ))
+                aar.delete()
+                assert not os.path.exists(aar.fastq1)
+                assert not os.path.exists(aar.fastq2)
+                assert not os.path.exists(aar.fastqm)
+            assert amps == set(adam_reads_fd.sub((bc, ASSEMBLED)).keys())
+            ama.delete()
+            assert not os.path.exists(ama.assignment_sam)
+            ri.delete()
+            assert not os.path.exists(ri.index_dump_dir)
 
 
 def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
     for (bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
         # FIXME
-        if inc != "M":
-            continue
         # test_align_reads_to_ms_variations
         ah = align_reads_to_ms_variations(amr, 50)
         assert ah.amplicon_reads == amr
@@ -168,29 +169,32 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
                 msg in her.microsatellite_genotypes.all())
             gens.add(gen)
-            her_readsm = set(strip_fasta_records(
-                SeqIO.parse(her.fastqm, "fastq"))
-            )
-            ref_readsm = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp, gen][RM])
-            )
-            assert her_readsm == ref_readsm
-            her_reads1 = set(strip_fasta_records(
-                SeqIO.parse(her.fastq1, "fastq"))
-            )
-            ref_reads1 = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp, gen][R1])
-            )
-            assert her_reads1 == ref_reads1
-            her_reads2 = set(strip_fasta_records(
-                SeqIO.parse(her.fastq2, "fastq"))
-            )
-            ref_reads2 = set(strip_fasta_records(
-                adam_reads_fd[bc, ASSEMBLED, amp, gen][R2])
-            )
-            assert her_reads2 == ref_reads2
+
+            her_fnames_d = {
+                R1: her.fastq1,
+                R2: her.fastq2,
+                RM: her.fastqm,
+            }
+            if inc == "M":
+                ref_reads_d = adam_reads_fd[bc, ASSEMBLED, amp, gen]
+            else:  # inc == "F"
+                ref_reads_d = {
+                    R1: adam_reads_fd[bc, ASSEMBLED, amp, gen][R1] + \
+                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R1],
+                    R2: adam_reads_fd[bc, ASSEMBLED, amp, gen][R2] + \
+                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R2],
+                    RM: adam_reads_fd[bc, ASSEMBLED, amp, gen][RM] + \
+                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R1],
+                }
+            for r in [R1, R2, RM]:
+                assert set(strip_fasta_records(
+                    SeqIO.parse(her_fnames_d[r], "fastq"))
+                ) == \
+                set(strip_fasta_records(
+                    ref_reads_d[r]
+                ))
             assert her.num_reads == \
-                len(adam_reads_fd[bc, ASSEMBLED, amp, gen][RM])
+                len(ref_reads_d[RM])
             her.delete()
             assert not os.path.exists(her.fastq1)
             assert not os.path.exists(her.fastq2)
