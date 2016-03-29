@@ -204,7 +204,7 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, amplicon_d_r):
         #assert filecmp.cmp(ah.assignment_sam,
     # FIXME: get these from outside.
     AdamMSVariations.objects.all().delete()
-    
+
 
 def test_get_adam_ms_variations(pu_28727, pu_28734):
     assert AdamMSVariations.objects.count() == 0
@@ -246,28 +246,6 @@ def test_get_adam_ms_variations(pu_28727, pu_28734):
     assert not os.path.exists(amsv4.index_dump_dir)
     amsv5.delete()
     assert not os.path.exists(amsv5.index_dump_dir)
-
-
-#@pytest.mark.django_db
-#def test_separate_reads_by_genotypes(adamhistogram, pu_28734, ms_28734_a):
-    #l = list(
-    #assert len(l) == 1
-    #her = l[0]
-    #assert her.histogram == adamhistogram
-    #assert her.amplicon == pu_28734
-    #assert set(her.microsatellite_genotypes.all()) == \
-        #{MicrosatelliteHistogramGenotype.get_for_genotype(ms_28734_a, 7)}
-    #assert set(her.snp_genotypes.all()) == set()
-    #assert her.num_reads == 12
-    ##fastq1 = models.FilePathField()
-    ##fastq2 = models.FilePathField()
-    ##fastqm = models.FilePathField(null=True)
-
-
-#def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations):
-    #fasta = _build_ms_variations(pu_28727, 50)
-    #variations = set(strip_fasta_records(SeqIO.parse(fasta, "fasta")))
-    #assert variations == pu_28727_adam_ms_variations
 
 
 @pytest.mark.django_db
