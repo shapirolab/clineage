@@ -2,6 +2,7 @@
 import pytest
 import tempfile
 import os
+import shutil
 
 from django.conf import settings
 
@@ -10,4 +11,9 @@ def temp_storage():
     t = tempfile.mkdtemp()
     settings.DATA_STORE = t
     yield
-    os.rmdir(t)
+    files = os.listdir(t)
+    if files:
+        shutil.rmtree(t)
+        raise Exception("Extra files: {}".format(files))
+    else:
+        os.rmdir(t)
