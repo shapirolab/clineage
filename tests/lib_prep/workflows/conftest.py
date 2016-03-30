@@ -52,6 +52,7 @@ def amplifiedcontent(human_cell_with_se, cellcontentprotocol):
 @pytest.fixture()
 def magicalpcr1library(pcr1multiplexcollection):
     mpl = MagicalPCR1Library.objects.create(
+        id=1,
         name="lib1",
         mpx_collection=pcr1multiplexcollection,
     )
@@ -61,6 +62,7 @@ def magicalpcr1library(pcr1multiplexcollection):
 @pytest.fixture()
 def magicalpcr1barcodedcontent(barcodepair, amplifiedcontent, magicalpcr1library):
     mpbc = MagicalPCR1BarcodedContent.objects.create(
+        id=1,
         barcodes=barcodepair,
         content=amplifiedcontent,
         library=magicalpcr1library,
@@ -71,10 +73,15 @@ def magicalpcr1barcodedcontent(barcodepair, amplifiedcontent, magicalpcr1library
 @pytest.fixture()
 def magicalpcr1barcodedcontent_a(barcodepair_a, amplifiedcontent, magicalpcr1library):
     mpbc = MagicalPCR1BarcodedContent.objects.create(
+        id=2,
         barcodes=barcodepair_a,
         content=amplifiedcontent,
         library=magicalpcr1library,
     )
     return mpbc
 
+
+@pytest.fixture()
+def require_magicals(magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
+    pass
 
