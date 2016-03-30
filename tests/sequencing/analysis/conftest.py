@@ -33,12 +33,13 @@ def adam_reads_fd():
 @pytest.yield_fixture(scope="session")
 def sample_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
-    for k, r_d in adam_reads_fd.reads():
-        fastq_r1 = get_unique_path("fastq")
-        fastq_r2 = get_unique_path("fastq")
-        SeqIO.write(r_d[R1], fastq_r1, "fastq")
-        SeqIO.write(r_d[R2], fastq_r2, "fastq")
-        d[k] = {R1: fastq_r1, R2: fastq_r2}
+    for l_id, l_d in adam_reads_fd.items():
+        for bc_id, r_d in l_d.reads():
+            fastq_r1 = get_unique_path("fastq")
+            fastq_r2 = get_unique_path("fastq")
+            SeqIO.write(r_d[R1], fastq_r1, "fastq")
+            SeqIO.write(r_d[R2], fastq_r2, "fastq")
+            d[l_id, bc_id] = {R1: fastq_r1, R2: fastq_r2}
     yield d
     for f_d in d.itervalues():
         os.unlink(f_d[R1])
@@ -46,21 +47,21 @@ def sample_reads_files_d(adam_reads_fd, temp_storage):
 
 
 @pytest.yield_fixture()
-def sample_reads_d(sample_reads_files_d, demultiplexing, magicalpcr1barcodedcontent, magicalpcr1library):
+def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
     d = {}
-    for k, f_d in sample_reads_files_d.iteritems():
+    for (l_id, bc_id), f_d in sample_reads_files_d.iteritems():
         fastq_r1 = get_unique_path("fastq")
         fastq_r2 = get_unique_path("fastq")
         os.symlink(f_d[R1], fastq_r1)
         os.symlink(f_d[R2], fastq_r2)
         sr = SampleReads.objects.create(
             demux=demultiplexing,
-            barcoded_content=magicalpcr1barcodedcontent,
-            library=magicalpcr1library,
+            barcoded_content=MagicalPCR1BarcodedContent.objects.get(id=bc_id),
+            library=MagicalPCR1Library.objects.get(id=l_id),
             fastq1=fastq_r1,
             fastq2=fastq_r2,
         )
-        d[k] = sr
+        d[l_id, bc_id] = sr
     yield d
     for sr in d.itervalues():
         # sr.delete()
@@ -71,21 +72,22 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, magicalpcr1barcodedcont
 @pytest.yield_fixture(scope="session")
 def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
-    for k, s_d in adam_reads_fd.items():
-        assembled_fastq = get_unique_path("fastq")
-        unassembled_forward_fastq = get_unique_path("fastq")
-        unassembled_reverse_fastq = get_unique_path("fastq")
-        discarded_fastq = get_unique_path("fastq")
-        SeqIO.write(s_d[ASSEMBLED][RM], assembled_fastq, "fastq")
-        SeqIO.write(s_d[UNASSEMBLED][R1], unassembled_forward_fastq, "fastq")
-        SeqIO.write(s_d[UNASSEMBLED][R2], unassembled_reverse_fastq, "fastq")
-        SeqIO.write((), discarded_fastq, "fastq")
-        d[k] = {
-            ASSEMBLED: assembled_fastq,
-            (UNASSEMBLED, R1): unassembled_forward_fastq,
-            (UNASSEMBLED, R2): unassembled_reverse_fastq,
-            None: discarded_fastq
-        }
+    for l_id, l_d in adam_reads_fd.items():
+        for bc_id, s_d in l_d.items():
+            assembled_fastq = get_unique_path("fastq")
+            unassembled_forward_fastq = get_unique_path("fastq")
+            unassembled_reverse_fastq = get_unique_path("fastq")
+            discarded_fastq = get_unique_path("fastq")
+            SeqIO.write(s_d[ASSEMBLED][RM], assembled_fastq, "fastq")
+            SeqIO.write(s_d[UNASSEMBLED][R1], unassembled_forward_fastq, "fastq")
+            SeqIO.write(s_d[UNASSEMBLED][R2], unassembled_reverse_fastq, "fastq")
+            SeqIO.write((), discarded_fastq, "fastq")
+            d[l_id, bc_id] = {
+                ASSEMBLED: assembled_fastq,
+                (UNASSEMBLED, R1): unassembled_forward_fastq,
+                (UNASSEMBLED, R2): unassembled_reverse_fastq,
+                None: discarded_fastq
+            }
     yield d
     for f_d in d.itervalues():
         os.unlink(f_d[ASSEMBLED])
@@ -97,7 +99,7 @@ def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
 @pytest.yield_fixture()
 def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
     d = {}
-    for k, f_d in adam_merged_reads_files_d.iteritems():
+    for (l_id, bc_id), f_d in adam_merged_reads_files_d.iteritems():
         dst_prefix = get_unique_path()
         os.symlink(
             f_d[ASSEMBLED],
@@ -116,13 +118,13 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
             "{}.unassembled.reverse.fastq".format(dst_prefix)
         )
         mr = AdamMergedReads.objects.create(
-            sample_reads=sample_reads_d[k],
+            sample_reads=sample_reads_d[l_id, bc_id],
             assembled_fastq="{}.assembled.fastq".format(dst_prefix),
             discarded_fastq="{}.discarded.fastq".format(dst_prefix),
             unassembled_forward_fastq="{}.unassembled.forward.fastq".format(dst_prefix),
             unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(dst_prefix),
         )
-        d[k] = mr
+        d[l_id, bc_id] = mr
     yield d
     for mr in d.itervalues():
         # mr.delete()
@@ -135,38 +137,39 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
 @pytest.yield_fixture()
 def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
-    for bc, s_d in adam_reads_fd.items():
-        # M
-        d[bc, "M"] = {}
-        for amp, r_d in s_d.sub(ASSEMBLED).reads():
-            f_d = {
-                RM: get_unique_path("fastq"),
-                R1: get_unique_path("fastq"),
-                R2: get_unique_path("fastq"),
-            }
-            for r in [R1, R2, RM]:
-                SeqIO.write(r_d[r], f_d[r], "fastq")
-            d[bc, "M"][amp] = f_d
-        # F
-        d[bc, "F"] = {}
-        all_amps = set(s_d.sub(ASSEMBLED).keys()) | set(s_d.sub(UNASSEMBLED).keys())
-        for amp in all_amps:
-            # Assuming there are no amplicons only present in UNASSEMBLED
-            f_d = {
-                RM: get_unique_path("fastq"),
-                R1: get_unique_path("fastq"),
-                R2: get_unique_path("fastq"),
-            }
-            for r in [R1, R2]:
+    for l_id, l_d in adam_reads_fd.items():
+        for bc_id, s_d in l_d.items():
+            # M
+            d[l_id, bc_id, "M"] = {}
+            for amp, r_d in s_d.sub(ASSEMBLED).reads():
+                f_d = {
+                    RM: get_unique_path("fastq"),
+                    R1: get_unique_path("fastq"),
+                    R2: get_unique_path("fastq"),
+                }
+                for r in [R1, R2, RM]:
+                    SeqIO.write(r_d[r], f_d[r], "fastq")
+                d[l_id, bc_id, "M"][amp] = f_d
+            # F
+            d[l_id, bc_id, "F"] = {}
+            all_amps = set(s_d.sub(ASSEMBLED).keys()) | set(s_d.sub(UNASSEMBLED).keys())
+            for amp in all_amps:
+                # Assuming there are no amplicons only present in UNASSEMBLED
+                f_d = {
+                    RM: get_unique_path("fastq"),
+                    R1: get_unique_path("fastq"),
+                    R2: get_unique_path("fastq"),
+                }
+                for r in [R1, R2]:
+                    SeqIO.write(itertools.chain(
+                        s_d[ASSEMBLED, amp][r],
+                        s_d[UNASSEMBLED, amp][r],
+                        ), f_d[r], "fastq")
                 SeqIO.write(itertools.chain(
-                    s_d[ASSEMBLED, amp][r],
-                    s_d[UNASSEMBLED, amp][r],
-                    ), f_d[r], "fastq")
-            SeqIO.write(itertools.chain(
-                s_d[ASSEMBLED, amp][RM],
-                s_d[UNASSEMBLED, amp][R1],
-                ), f_d[RM], "fastq")
-            d[bc, "F"][amp] = f_d
+                    s_d[ASSEMBLED, amp][RM],
+                    s_d[UNASSEMBLED, amp][R1],
+                    ), f_d[RM], "fastq")
+                d[l_id, bc_id, "F"][amp] = f_d
     yield d
     for f_d_d in d.itervalues():
         for f_d in f_d_d.itervalues():
@@ -178,11 +181,11 @@ def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
 @pytest.yield_fixture()
 def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
     d = {}
-    for (bc, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
         dst_dir = get_unique_path()
         os.mkdir(dst_dir)
         ari = AdamReadsIndex.objects.create(
-            merged_reads=adam_merged_reads_d[bc],
+            merged_reads=adam_merged_reads_d[l_id, bc_id],
             included_reads=inc,  # Merged and unassembled_forward
             index_dump_dir=dst_dir,
             padding=5,
@@ -194,7 +197,7 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
             reads_index=ari,
             assignment_sam=fake_sam,
         )
-        d[bc, inc] = ari, ama
+        d[l_id, bc_id, inc] = ari, ama
     yield d
     for ari, ama in d.itervalues():
         os.rmdir(ari.index_dump_dir)
@@ -206,8 +209,8 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
     d = {}
     extra_dirs = []
     extra_files = []
-    for (bc, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
-        ari, ama = _chain[bc, inc]
+    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+        ari, ama = _chain[l_id, bc_id, inc]
         for amp, f_d in f_d_d.iteritems():
             f_d2 = {}
             for r in [R1, R2, RM]:
@@ -220,7 +223,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
             )
-            d[bc, inc, amp] = aar
+            d[l_id, bc_id, inc, amp] = aar
     yield d
     for aar in d.itervalues():
         # aar.margin_assignment.reads_index.delete()

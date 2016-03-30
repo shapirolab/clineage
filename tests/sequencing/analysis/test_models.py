@@ -28,19 +28,19 @@ def test_samplereads(sample_reads_d):
 
 @pytest.mark.django_db
 def test_runmerge(sample_reads_d, adam_reads_fd):
-    for k, sr in sample_reads_d.iteritems():
+    for (l_id, bc_id), sr in sample_reads_d.iteritems():
         mr = merge(sr)
         assert mr.sample_reads is sr
         assert os.path.isfile(mr.assembled_fastq)
         assert set(srs_to_tups(SeqIO.parse(mr.assembled_fastq, "fastq"))) == \
-            set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM]))
+            set(srs_to_tups(adam_reads_fd[l_id, bc_id, ASSEMBLED][RM]))
         assert os.path.isfile(mr.discarded_fastq)
         assert set(srs_to_tups(SeqIO.parse(mr.discarded_fastq, "fastq"))) == set()
         assert set(srs_to_tups(SeqIO.parse(mr.unassembled_forward_fastq, "fastq"))) == \
-            set(srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R1]))
+            set(srs_to_tups(adam_reads_fd[l_id, bc_id, UNASSEMBLED][R1]))
         assert os.path.isfile(mr.unassembled_reverse_fastq)
         assert set(srs_to_tups(SeqIO.parse(mr.unassembled_reverse_fastq, "fastq"))) == \
-            set(rc_srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R2]))
+            set(rc_srs_to_tups(adam_reads_fd[l_id, bc_id, UNASSEMBLED][R2]))
         mr.delete()
         assert not os.path.exists(mr.assembled_fastq)
         assert not os.path.exists(mr.discarded_fastq)
@@ -50,12 +50,12 @@ def test_runmerge(sample_reads_d, adam_reads_fd):
 
 @pytest.mark.django_db
 def test_merged_reads(adam_merged_reads_d, adam_reads_fd):
-    for k, mr in adam_merged_reads_d.iteritems():
+    for (l_id, bc_id), mr in adam_merged_reads_d.iteritems():
         assert set(srs_to_tups(mr.included_reads_generator('M'))) == \
-             set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM]))
+             set(srs_to_tups(adam_reads_fd[l_id, bc_id, ASSEMBLED][RM]))
         assert set(srs_to_tups(mr.included_reads_generator('F'))) == \
-             set(srs_to_tups(adam_reads_fd[k,ASSEMBLED][RM])) | \
-             set(srs_to_tups(adam_reads_fd[k,UNASSEMBLED][R1]))
+             set(srs_to_tups(adam_reads_fd[l_id, bc_id, ASSEMBLED][RM])) | \
+             set(srs_to_tups(adam_reads_fd[l_id, bc_id, UNASSEMBLED][R1]))
 
 
 def test_create_panel_fasta(pu_28727, pu_28734):
@@ -71,8 +71,9 @@ def test_create_panel_fasta(pu_28727, pu_28734):
     }
     os.unlink(panel_fasta_name)
 
+
 def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicons):
-    for bc, mr in adam_merged_reads_d.iteritems():
+    for (l_id, bc_id), mr in adam_merged_reads_d.iteritems():
         for inc in ["M", "F"]:
             # test_readsindex_bowtie2build
             assert os.path.isfile(mr.assembled_fastq)
@@ -96,15 +97,15 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
                     RM: aar.fastqm,
                 }
                 if inc == "M":
-                    ref_reads_d = adam_reads_fd[bc, ASSEMBLED, amp]
+                    ref_reads_d = adam_reads_fd[l_id, bc_id, ASSEMBLED, amp]
                 else:  # inc == "F"
                     ref_reads_d = {
-                        R1: adam_reads_fd[bc, ASSEMBLED, amp][R1] + \
-                            adam_reads_fd[bc, UNASSEMBLED, amp][R1],
-                        R2: adam_reads_fd[bc, ASSEMBLED, amp][R2] + \
-                            adam_reads_fd[bc, UNASSEMBLED, amp][R2],
-                        RM: adam_reads_fd[bc, ASSEMBLED, amp][RM] + \
-                            adam_reads_fd[bc, UNASSEMBLED, amp][R1],
+                        R1: adam_reads_fd[l_id, bc_id, ASSEMBLED, amp][R1] + \
+                            adam_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R1],
+                        R2: adam_reads_fd[l_id, bc_id, ASSEMBLED, amp][R2] + \
+                            adam_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R2],
+                        RM: adam_reads_fd[l_id, bc_id, ASSEMBLED, amp][RM] + \
+                            adam_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R1],
                     }
                 for r in [R1, R2, RM]:
                     assert set(srs_to_tups(
@@ -117,8 +118,8 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
                 assert not os.path.exists(aar.fastq1)
                 assert not os.path.exists(aar.fastq2)
                 assert not os.path.exists(aar.fastqm)
-            assert amps == set(adam_reads_fd.sub((bc, ASSEMBLED)).keys()) | \
-                (set(adam_reads_fd.sub((bc, UNASSEMBLED)).keys()) if \
+            assert amps == set(adam_reads_fd.sub((l_id, bc_id, ASSEMBLED)).keys()) | \
+                (set(adam_reads_fd.sub((l_id, bc_id, UNASSEMBLED)).keys()) if \
                     inc == "F" else set())
             ama.delete()
             assert not os.path.exists(ama.assignment_sam)
@@ -127,7 +128,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
 
 
 def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons):
-    for (bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
+    for (l_id, bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
         # FIXME
         # test_align_reads_to_ms_variations
         ah = align_reads_to_ms_variations(amr, 50)
@@ -149,15 +150,15 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
                 RM: her.fastqm,
             }
             if inc == "M":
-                ref_reads_d = adam_reads_fd[bc, ASSEMBLED, amp, gen]
+                ref_reads_d = adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen]
             else:  # inc == "F"
                 ref_reads_d = {
-                    R1: adam_reads_fd[bc, ASSEMBLED, amp, gen][R1] + \
-                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R1],
-                    R2: adam_reads_fd[bc, ASSEMBLED, amp, gen][R2] + \
-                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R2],
-                    RM: adam_reads_fd[bc, ASSEMBLED, amp, gen][RM] + \
-                        adam_reads_fd[bc, UNASSEMBLED, amp, gen][R1],
+                    R1: adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R1] + \
+                        adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                    R2: adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R2] + \
+                        adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R2],
+                    RM: adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
+                        adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
             for r in [R1, R2, RM]:
                 assert set(srs_to_tups(
@@ -172,8 +173,8 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
             assert not os.path.exists(her.fastq1)
             assert not os.path.exists(her.fastq2)
             assert not os.path.exists(her.fastqm)
-        assert gens == set(adam_reads_fd.sub((bc, ASSEMBLED, amp)).keys()) | \
-            (set(adam_reads_fd.sub((bc, UNASSEMBLED, amp)).keys()) if \
+        assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys()) | \
+            (set(adam_reads_fd.sub((l_id, bc, UNASSEMBLED, amp)).keys()) if \
                 inc == "F" else set())
         ah.delete()
         assert not os.path.exists(ah.assignment_sam)
