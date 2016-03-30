@@ -173,9 +173,11 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
             assert not os.path.exists(her.fastq1)
             assert not os.path.exists(her.fastq2)
             assert not os.path.exists(her.fastqm)
-        assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys()) | \
-            (set(adam_reads_fd.sub((l_id, bc, UNASSEMBLED, amp)).keys()) if \
-                inc == "F" else set())
+        if inc == "F":
+            assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys()) \
+                | set(adam_reads_fd.sub((l_id, bc, UNASSEMBLED, amp)).keys())
+        else:
+            assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys())
         ah.delete()
         assert not os.path.exists(ah.assignment_sam)
         #assert filecmp.cmp(ah.assignment_sam,
