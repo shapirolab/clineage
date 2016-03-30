@@ -1,6 +1,10 @@
 import pytest
 
 from tests.flat_dict import FlatDict
+from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM
+from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM
+from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
+    UNASSEMBLED
 
 BIG_D = {
     1: {
@@ -123,3 +127,11 @@ def test_sub_flat_dict():
             3: {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
             4: {'-': ['d2']},
         }
+
+
+def test_flat_dict__in():
+    d = FlatDict(READS_DICT_ADAM, [R1, R2, RM])
+    assert 1 in d
+    assert (1, 1) in d
+    assert (1, 1, UNASSEMBLED) in d
+    assert (1, 1, UNASSEMBLED, 28727) not in d
