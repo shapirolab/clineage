@@ -10,3 +10,6 @@ frogress==0.9.1
 lxml==3.6.0
 -e git+https://github.com/ofirr/dojango.git@375e62bb73e2ee60a64e4b1551dd25aa531c734c#egg=dojango-master
 -e git+https://github.com/ofirr/dojango-datable.git@ac274e4daf4d581b953351809578d7a0929bb054#egg=dojango_datable-master
+Cython==0.23.5
+pysam==0.9.0
+plumbum==1.6.1.post0
