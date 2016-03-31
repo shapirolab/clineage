@@ -1,12 +1,9 @@
 import pytest
 import os
 from Bio import SeqIO
-import filecmp
 
 from sequencing.analysis.adamiya import merge, create_reads_index, \
-    align_primers_to_reads, _create_panel_fasta, _collect_mappings_from_sam, \
-    _validate_amplicon_mapping, _aggregate_read_ids_by_amplicon, \
-    seperate_reads_by_amplicons, _build_ms_variations, \
+    align_primers_to_reads, _create_panel_fasta, seperate_reads_by_amplicons, \
     get_adam_ms_variations, align_reads_to_ms_variations, \
     separate_reads_by_genotypes
 from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
@@ -161,7 +158,7 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
                         adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
             for r in [R1, R2, RM]:
-                assert set(srs_to_tups(
+                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
                     SeqIO.parse(her_fnames_d[r], "fastq"))
                 ) == \
                 set(srs_to_tups(
