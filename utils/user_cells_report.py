@@ -123,7 +123,7 @@ def get_cells_filenames_in_folder(cells, cell_folder):
 def get_cells(partner_name, individual_name=None, cell_groups=None):
     if not cell_groups:
         cell_groups = get_cells_grouping(partner_name, individual_name=individual_name)
-    return cell_groups.keys()
+    return list(cell_groups.keys())
 
 
 def sorted_cells(individual):

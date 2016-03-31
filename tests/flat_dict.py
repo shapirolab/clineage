@@ -1,7 +1,7 @@
 
 def _iterate_nested_items(nested_dict):
     if isinstance(nested_dict, dict):
-        for k, inner_d in nested_dict.iteritems():
+        for k, inner_d in nested_dict.items():
             for inner_k, v in _iterate_nested_items(inner_d):
                 yield ((k,) + inner_k), v
     else:
@@ -11,13 +11,13 @@ def _iterate_nested_items(nested_dict):
 def _deinterlace(interlaced):
     d = {}
     for frame in interlaced:
-        for k, v in frame.iteritems():
+        for k, v in frame.items():
             d.setdefault(k,[]).append(v)
     return d
 
 
 def _update_deinterlaced_dict(d, e):
-    for k, v in e.iteritems():
+    for k, v in e.items():
         a = d.setdefault(k,[])
         a += v
 
@@ -40,11 +40,11 @@ class _FlatDict(object):
             self._has_default = False
         for nk, nv in _iterate_nested_items(nested_dict):
             denv = _deinterlace(nv)
-            for i in xrange(1,len(nk)+1):
+            for i in range(1,len(nk)+1):
                 a = self._d.setdefault(nk[:i],
                     {k: [] for k in self._deinterlaced_keys})
                 _update_deinterlaced_dict(a, denv)
-            for i in xrange(0,len(nk)):
+            for i in range(0,len(nk)):
                 a = self._keys_tree.setdefault(nk[:i],set())
                 a.add(nk[i])
             self._keys_tree[nk] = set()

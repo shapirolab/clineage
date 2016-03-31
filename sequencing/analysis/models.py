@@ -45,9 +45,9 @@ class BowtieIndexMixin(models.Model):
 
     @property
     def files(self):
-        for i in xrange(1, 5):
+        for i in range(1, 5):
             yield "{}.{}.bt2".format(self.index_files_prefix, i)
-        for i in xrange(1, 3):
+        for i in range(1, 3):
             yield "{}.rev.{}.bt2".format(self.index_files_prefix, i)
 
     @property
@@ -225,7 +225,7 @@ class MicrosatelliteHistogramGenotype(models.Model):
     microsatellite = models.ForeignKey(Microsatellite)
     repeat_number = models.PositiveIntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}={}".format(self.microsatellite.id, self.repeat_number)
 
     @classmethod

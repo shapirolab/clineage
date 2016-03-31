@@ -65,8 +65,8 @@ def generate_sample_sheets(barcodes, name, date, description, read_length, fwd_r
         out = []
         rows = _rows_iter(barcodes)
         while True:
-            bio = io.BytesIO()
-            bio.write(HEADER_FORMAT.format(
+            sio = io.StringIO()
+            sio.write(HEADER_FORMAT.format(
                 run_name=name,
                 run_date=date,
                 run_desc=description,
@@ -74,13 +74,13 @@ def generate_sample_sheets(barcodes, name, date, description, read_length, fwd_r
                 fwd_read_adaptor=fwd_read_adaptor,
                 rev_read_adaptor=rev_read_adaptor,
             ))
-            w = csv.DictWriter(bio, fieldnames=SAMPLESHEET_HEADERS)
+            w = csv.DictWriter(sio, fieldnames=SAMPLESHEET_HEADERS)
             w.writeheader()
             if max_samples is None:
                 for row in rows:
                     w.writerow(row)
-                b = bio.getvalue()
-                bio.close()
+                b = sio.getvalue()
+                sio.close()
                 return b
             else:
                 row = None
@@ -88,8 +88,8 @@ def generate_sample_sheets(barcodes, name, date, description, read_length, fwd_r
                     w.writerow(row)
                 if row is None:
                     return out
-            out.append(bio.getvalue())
-            bio.close()
+            out.append(sio.getvalue())
+            sio.close()
 
 
 

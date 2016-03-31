@@ -7,7 +7,7 @@ basecomp = {'A': 'T',
 def _rc(seq):
     n = len(seq)
     l = [None]*n
-    for i in xrange(n):
+    for i in range(n):
         l[n-i-1] = basecomp[seq[i]]
     return ''.join(l)
 
@@ -15,7 +15,7 @@ class DNA(object):
 
     def __init__(self,seq):
         # FIXME: this should change when we fix the db to give us bytearray.
-        if isinstance(seq,(str,unicode)):
+        if isinstance(seq,str):
             s = seq.upper()
             for i in s:
                 if i not in "ACGT":

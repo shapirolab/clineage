@@ -41,7 +41,7 @@ def sample_reads_files_d(adam_reads_fd, temp_storage):
             SeqIO.write(r_d[R2], fastq_r2, "fastq")
             d[l_id, bc_id] = {R1: fastq_r1, R2: fastq_r2}
     yield d
-    for f_d in d.itervalues():
+    for f_d in d.values():
         os.unlink(f_d[R1])
         os.unlink(f_d[R2])
 
@@ -49,7 +49,7 @@ def sample_reads_files_d(adam_reads_fd, temp_storage):
 @pytest.yield_fixture()
 def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
     d = {}
-    for (l_id, bc_id), f_d in sample_reads_files_d.iteritems():
+    for (l_id, bc_id), f_d in sample_reads_files_d.items():
         fastq_r1 = get_unique_path("fastq")
         fastq_r2 = get_unique_path("fastq")
         os.symlink(f_d[R1], fastq_r1)
@@ -63,7 +63,7 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
         )
         d[l_id, bc_id] = sr
     yield d
-    for sr in d.itervalues():
+    for sr in d.values():
         # sr.delete()
         os.unlink(sr.fastq1)
         os.unlink(sr.fastq2)
@@ -89,7 +89,7 @@ def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
                 None: discarded_fastq
             }
     yield d
-    for f_d in d.itervalues():
+    for f_d in d.values():
         os.unlink(f_d[ASSEMBLED])
         os.unlink(f_d[UNASSEMBLED, R1])
         os.unlink(f_d[UNASSEMBLED, R2])
@@ -99,7 +99,7 @@ def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
 @pytest.yield_fixture()
 def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
     d = {}
-    for (l_id, bc_id), f_d in adam_merged_reads_files_d.iteritems():
+    for (l_id, bc_id), f_d in adam_merged_reads_files_d.items():
         dst_prefix = get_unique_path()
         os.symlink(
             f_d[ASSEMBLED],
@@ -126,7 +126,7 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
         )
         d[l_id, bc_id] = mr
     yield d
-    for mr in d.itervalues():
+    for mr in d.values():
         # mr.delete()
         os.unlink(mr.assembled_fastq)
         os.unlink(mr.discarded_fastq)
@@ -171,8 +171,8 @@ def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
                     ), f_d[RM], "fastq")
                 d[l_id, bc_id, "F"][amp] = f_d
     yield d
-    for f_d_d in d.itervalues():
-        for f_d in f_d_d.itervalues():
+    for f_d_d in d.values():
+        for f_d in f_d_d.values():
             os.unlink(f_d[RM])
             os.unlink(f_d[R1])
             os.unlink(f_d[R2])
@@ -181,7 +181,7 @@ def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
 @pytest.yield_fixture()
 def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
     d = {}
-    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.items():
         dst_dir = get_unique_path()
         os.mkdir(dst_dir)
         ari = AdamReadsIndex.objects.create(
@@ -199,7 +199,7 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
         )
         d[l_id, bc_id, inc] = ari, ama
     yield d
-    for ari, ama in d.itervalues():
+    for ari, ama in d.values():
         os.rmdir(ari.index_dump_dir)
         os.unlink(ama.assignment_sam)
 
@@ -209,9 +209,9 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
     d = {}
     extra_dirs = []
     extra_files = []
-    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.iteritems():
+    for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.items():
         ari, ama = _chain[l_id, bc_id, inc]
-        for amp, f_d in f_d_d.iteritems():
+        for amp, f_d in f_d_d.items():
             f_d2 = {}
             for r in [R1, R2, RM]:
                 f_d2[r] = get_unique_path("fastq")
@@ -225,7 +225,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
             )
             d[l_id, bc_id, inc, amp] = aar
     yield d
-    for aar in d.itervalues():
+    for aar in d.values():
         # aar.margin_assignment.reads_index.delete()
         # aar.margin_assignment.delete()
         # aar.delete()

@@ -50,7 +50,7 @@ class Histogram(object):
     
     # Cleaning
     def clean_zero_entries(self):
-        for key in self.keys():
+        for key in list(self.keys()):
             if self[key] == 0:
                 del self._hist[key]
             
@@ -61,14 +61,14 @@ class Histogram(object):
         
     def truncate(self, p=.050):
         "Cleans noise below p"
-        for k in self.keys():
+        for k in list(self.keys()):
             if self[k]<p:
                 self.nsamples -= self[k]*self.nsamples
                 self[k] = 0
                 
     def cut_peak(self, n=1):
         "Cleans anything with n zen zeros between it and the maximum"
-        keys = self.keys()
+        keys = list(self.keys())
         max_key = max([(self[k],k) for k in keys])[1]
         max_ind = keys.index(max_key)
         zeros_left = n
@@ -97,7 +97,7 @@ class Histogram(object):
         return sorted(self._hist.keys())
 
     def values(self):
-         return [self._hist[k] for k in self.keys()]
+         return [self._hist[k] for k in list(self.keys())]
 
     def __getitem__(self, item):
         return self._hist[item]
@@ -107,11 +107,11 @@ class Histogram(object):
 
     @property
     def sample(self):
-        return [k for k in self.keys()
-                for i in xrange(int(self.nsamples*self[k]))]
+        return [k for k in list(self.keys())
+                for i in range(int(self.nsamples*self[k]))]
 
     def random_sample(self, k):
-        return Histogram(Counter(np.random.choice(self._hist.keys(), k, p=self._hist.values())))
+        return Histogram(Counter(np.random.choice(list(self._hist.keys()), k, p=list(self._hist.values()))))
 
     # Operators
     def normalize(self):
@@ -119,19 +119,19 @@ class Histogram(object):
         s = float(sum(self.values()))
         if not s:
             return
-        for k in self.keys():
+        for k in list(self.keys()):
             self._hist[k] /= s
     
     def sq_normalize(self, axis=-1, order=2):
-        tuples_list = self._hist.items()
+        tuples_list = list(self._hist.items())
         keys = [t[0] for t in tuples_list]
         values = [t[1] for t in tuples_list]
         nvalues = vnormalized(values)[0]
         self._hist = Counter({k: v for k, v in zip(keys, nvalues)})
     
     def __add__(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i+other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i+other:self[i] for i in list(self.keys())}, nsamples=self.nsamples)
         if isinstance(other, Histogram):
             self.normalize()
             other.normalize()
@@ -147,8 +147,8 @@ class Histogram(object):
         return self.__add__(other)
 
     def __sub__(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i-other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i-other:self[i] for i in list(self.keys())}, nsamples=self.nsamples)
         if isinstance(other, Histogram):
             self.normalize()
             other.normalize()
@@ -157,38 +157,38 @@ class Histogram(object):
         raise TypeError()
 
     def __mul__(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i*other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i*other:self[i] for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     def __div__(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i/other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i/other:self[i] for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     def __pow__(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i**other:self[i] for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i**other:self[i] for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     def ymul(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i:self[i]*other for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i:self[i]*other for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     def ydiv(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i:self[i]/other for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i:self[i]/other for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     def ypow(self, other):
-        if isinstance(other, (int, long, float)):
-            return Histogram({i:self[i]**other for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, (int, float)):
+            return Histogram({i:self[i]**other for i in list(self.keys())}, nsamples=self.nsamples)
         raise TypeError()
 
     # Statistical operators
     def mu(self):
-        return sum(k*self[k] for k in self.keys())
+        return sum(k*self[k] for k in list(self.keys()))
     
     def sig(self):
         return math.sqrt(mu((self-mu(self))**2))
@@ -205,9 +205,9 @@ class Histogram(object):
     def __repr__(self):
         N = sum(self.values())
         if N<.1:
-            return "<Empty on [%s]>"%(', '.join('%.2f'%k for k in self.keys()))
+            return "<Empty on [%s]>"%(', '.join('%.2f'%k for k in list(self.keys())))
         return '\n'.join(('%.2f: %.2f'%(x,self[x])).ljust(20)[:20] + '|'
-        + '#'*int(50*self[x]/N+.5) for x in self.keys() if self[x])
+        + '#'*int(50*self[x]/N+.5) for x in list(self.keys()) if self[x])
 
 def mu(x):
     return x.mu()

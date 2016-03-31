@@ -102,7 +102,7 @@ class ExtractionEvent(models.Model):
     user_documented = models.ForeignKey(User, related_name='+')
 
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.individual), self.name)
+        return '{}>{}'.format(str(self.individual), self.name)
 
     def get_absolute_url(self):
         return reverse('extraction_event_detail', kwargs={'pk': self.pk})
@@ -118,7 +118,7 @@ class Extraction(models.Model):
                                content_type_field='content_type',
                                object_id_field='object_id')
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.extraction_event), self.name)
+        return '{}>{}'.format(str(self.extraction_event), self.name)
 
     def get_absolute_url(self):
         return reverse('extraction_detail', kwargs={'pk': self.pk})
@@ -134,7 +134,7 @@ class SamplingEvent(models.Model):
     comment = models.TextField(null=True, blank=True)
     attachment = models.FileField(upload_to=sampling_event_path, null=True, blank=True)
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.extraction), self.name)
+        return '{}>{}'.format(str(self.extraction), self.name)
 
     def get_absolute_url(self):
         return reverse('samplingevent_detail', kwargs={'pk': self.pk})
@@ -167,7 +167,7 @@ class Cell(models.Model):
     comment = models.TextField(null=True, blank=True)
     classification = models.CharField(max_length=50, null=True, blank=True)
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.sampling), self.name)
+        return '{}>{}'.format(str(self.sampling), self.name)
 
     def get_absolute_url(self):
         return reverse('cell_detail', kwargs={'pk': self.pk})

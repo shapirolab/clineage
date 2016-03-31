@@ -8,9 +8,9 @@ from django.conf import settings
 from collections import defaultdict
 from collections import Counter
 from frogress import bar
-from primers_insertion import create_primers_in_db
-from positioning import insertion_plates_to_db, create_primer_order_file_xls
-from primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
+from .primers_insertion import create_primers_in_db
+from .positioning import insertion_plates_to_db, create_primer_order_file_xls
+from .primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
 from genomes.models import TargetEnrichmentType, PrimerTail
 from targeted_enrichment.planning.models import Target
 
@@ -72,16 +72,16 @@ def parse_primer3_output(output_name):
 def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
     target_primers = parse_primer3_output(output_name)
     out_string = ''
-    for seq_id in target_primers.keys():
-        for primer_number in target_primers[seq_id]['LEFT'].keys():
+    for seq_id in list(target_primers.keys()):
+        for primer_number in list(target_primers[seq_id]['LEFT'].keys()):
             out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['LEFT'][primer_number])
             out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['RIGHT'][primer_number])
     primer_data_check = '{}.fa'.format(str(input_fasta_file))
-    print 'writing primers fasta file {}'.format(primer_data_check)
+    print('writing primers fasta file {}'.format(primer_data_check))
     with open(primer_data_check, 'w+') as primers_output:
         primers_output.write(out_string)
     sam_file = '{}.sam'.format(str(output_file))
-    print 'running bowtie sam file output:{}'.format(sam_file)
+    print('running bowtie sam file output:{}'.format(sam_file))
     s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
     os.system(s)
     return sam_file, primer_data_check, target_primers
@@ -103,7 +103,7 @@ def sort_unique_primers(sam_file, target_primers, margins=300):
     name_count, primers_names = primer_count_from_sam_file(sam_file)
     chosen_target_primers = defaultdict(lambda: defaultdict(str))
     discarded_targets = []
-    for target_id in bar(target_primers.keys()):
+    for target_id in bar(list(target_primers.keys())):
         left_primer = None
         for primer_number_fr in sorted(target_primers[target_id]['LEFT'].keys()):
             bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number_fr, target_id)

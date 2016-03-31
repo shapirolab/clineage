@@ -137,8 +137,8 @@ def revert_ters(qs, type_name, apps, schema_editor):
         create_target_enrichment_from_ter(ter, type_name, apps, schema_editor)
 
 def revert_pcr1_primer_pair_ter(apps, schema_editor):
-    print
-    print "Reverting PCR1 Primer Pair TERs:"
+    print()
+    print("Reverting PCR1 Primer Pair TERs:")
     db_alias = schema_editor.connection.alias
     PCR1PrimerPairTER = apps.get_model("reagents", "PCR1PrimerPairTER")
     # Here we divide into cases, but there are none.
@@ -146,8 +146,8 @@ def revert_pcr1_primer_pair_ter(apps, schema_editor):
     revert_ters(qs, "PCR_with_tails", apps, schema_editor)
 
 def revert_pcr1_with_company_tag_primer_pair_ter(apps, schema_editor):
-    print
-    print "Reverting PCR1 With Company Tag Primer Pair TERs:"
+    print()
+    print("Reverting PCR1 With Company Tag Primer Pair TERs:")
     db_alias = schema_editor.connection.alias
     PCR1WithCompanyTagPrimerPairTER = apps.get_model("reagents", "PCR1WithCompanyTagPrimerPairTER")
     # Here we divide into cases, but there are none.
@@ -155,8 +155,8 @@ def revert_pcr1_with_company_tag_primer_pair_ter(apps, schema_editor):
     revert_ters(qs, "PCR_with_tails", apps, schema_editor)
 
 def revert_pcr1_primer_pair_ter_deprecated(apps, schema_editor):
-    print
-    print "Reverting Deprecated PCR1 Primer Pair TERs:"
+    print()
+    print("Reverting Deprecated PCR1 Primer Pair TERs:")
     db_alias = schema_editor.connection.alias
     PCR1PrimerPairTERDeprecated = apps.get_model("reagents", "PCR1PrimerPairTERDeprecated")
     # Here we divide into cases, but there are none.
@@ -164,8 +164,8 @@ def revert_pcr1_primer_pair_ter_deprecated(apps, schema_editor):
     revert_ters(qs, "depricated", apps, schema_editor)  # sic.
 
 def revert_no_tail_ter(apps, schema_editor):
-    print
-    print "Reverting No-Tails Primer Pair TERs:"
+    print()
+    print("Reverting No-Tails Primer Pair TERs:")
     db_alias = schema_editor.connection.alias
     TargetedNoTailPrimerPairTER = apps.get_model("reagents", "TargetedNoTailPrimerPairTER")
     # Here we divide into cases, but there are none.
@@ -177,8 +177,8 @@ def revert_tes_without_ter(apps, schema_editor):
     """
     Revert all TEs which don't have a TER (so they weren't reverted before).
     """
-    print
-    print "Reverting TEs without TERs:"
+    print()
+    print("Reverting TEs without TERs:")
     db_alias = schema_editor.connection.alias
     TargetEnrichment = apps.get_model("planning", "TargetEnrichment")
     # We only take those that weren't assigned an old_te, meaning they

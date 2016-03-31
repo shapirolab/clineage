@@ -40,7 +40,7 @@ class AmplifiedContent(models.Model):  # aka DNA
                                object_id_field='object_id')
 
     def __unicode__(self):
-        return u'{}>{}'.format(unicode(self.cell), self.name)
+        return '{}>{}'.format(str(self.cell), self.name)
 
     def get_absolute_url(self):
         return reverse('cell_content_detail', kwargs={'pk': self.pk})

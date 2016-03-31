@@ -105,13 +105,13 @@ def revert_pcr1_primers(apps, schema_editor):
         *SELECT_RELATED_TAIL)
     minus_qs = PCR1MinusPrimer.objects.using(db_alias).select_related(
         *SELECT_RELATED_TAIL)
-    print
-    print "Reverting forward PCR1 primers:"
+    print()
+    print("Reverting forward PCR1 primers:")
     for primer in bar(plus_qs):
         tail = get_fwd_irac_tail(primer)
         create_fwd_primer(primer, apps, schema_editor, tail)
-    print
-    print "Reverting reverse PCR1 primers:"
+    print()
+    print("Reverting reverse PCR1 primers:")
     for primer in bar(minus_qs):
         tail = get_rev_irac_tail(primer)
         create_rev_primer(primer, apps, schema_editor, tail)
@@ -125,13 +125,13 @@ def revert_pcr1_with_company_tag_primers(apps, schema_editor):
         .select_related(*SELECT_RELATED_TAIL)
     minus_qs = PCR1WithCompanyTagMinusPrimer.objects.using(db_alias) \
         .select_related(*SELECT_RELATED_TAIL)
-    print
-    print "Reverting forward PCR1 primers with company tags:"
+    print()
+    print("Reverting forward PCR1 primers with company tags:")
     for primer in bar(plus_qs):
         tail = get_fwd_irac_tail(primer)
         create_fwd_primer(primer, apps, schema_editor, tail, extra=primer.tag)
-    print
-    print "Reverting reverse PCR1 primers with company tags:"
+    print()
+    print("Reverting reverse PCR1 primers with company tags:")
     for primer in bar(minus_qs):
         tail = get_rev_irac_tail(primer)
         create_rev_primer(primer, apps, schema_editor, tail, extra=primer.tag)
@@ -145,12 +145,12 @@ def revert_no_tail_primers(apps, schema_editor):
         .select_related(*SELECT_RELATED_NOTAIL)
     minus_qs = TargetedNoTailMinusPrimer.objects.using(db_alias) \
         .select_related(*SELECT_RELATED_NOTAIL)
-    print
-    print "Reverting forward PCR1 primers:"
+    print()
+    print("Reverting forward PCR1 primers:")
     for primer in bar(plus_qs):
         create_fwd_primer(primer, apps, schema_editor)
-    print
-    print "Reverting reverse PCR1 primers:"
+    print()
+    print("Reverting reverse PCR1 primers:")
     for primer in bar(minus_qs):
         create_rev_primer(primer, apps, schema_editor)
 
@@ -170,13 +170,13 @@ def validate_ugss_without_primers(apps, schema_editor):
         .filter(old_primer__isnull=True) \
         .select_related("slice","slice__chromosome") \
         .annotate(te_c=Count("targetenrichment")).filter(te_c=0)
-    print
-    print "Validating forward UGSs without primers."
+    print()
+    print("Validating forward UGSs without primers.")
     if plus_qs:
         raise IntegrityError("Bad UGS - no Primer, no TE. ex. {}".format(
             plus_qs[0].id))
-    print
-    print "Validating reverse UGSs without primers."
+    print()
+    print("Validating reverse UGSs without primers.")
     if minus_qs:
         raise IntegrityError("Bad UGS - no Primer, no TE. ex. {}".format(
             minus_qs[0].id))

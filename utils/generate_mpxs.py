@@ -1,6 +1,7 @@
 __author__ = 'ofirr'
 
 from target_enrichments.planning.models import TargetEnrichment
+from functools import reduce
 
 def other_target_enrichment_withing_margins(target_enrichment, existing_target_enrichments, margins=10000):
     """Check if the new amplicon collides with one of the existing amplicons within given margins"""
@@ -27,14 +28,14 @@ def populate_conditioned_mpxs_map(target_enrichment_queryset, conditioned_mpxs, 
     misfits = []
     for target_enrichment in target_enrichment_queryset:
         added = False
-        for conditioned_mpx in conditioned_mpxs.keys():
+        for conditioned_mpx in list(conditioned_mpxs.keys()):
             added, conditioned_mpxs[conditioned_mpx] = populate_conditioned_mpx(conditioned_mpxs[conditioned_mpx], target_enrichment, margins=margins)
             if added:
                 break
         if not added:
             misfits.append(target_enrichment)
-        temp_sum = reduce(lambda x,y:x+y, [len(conditioned_mpxs[group]['target_enrichments']) for group in conditioned_mpxs.keys()])
-        expected_sum = reduce(lambda x,y:x+y, [conditioned_mpxs[group]['size'] for group in conditioned_mpxs.keys()])
+        temp_sum = reduce(lambda x,y:x+y, [len(conditioned_mpxs[group]['target_enrichments']) for group in list(conditioned_mpxs.keys())])
+        expected_sum = reduce(lambda x,y:x+y, [conditioned_mpxs[group]['size'] for group in list(conditioned_mpxs.keys())])
         if temp_sum == expected_sum:
             return misfits, conditioned_mpxs
         if temp_sum > expected_sum:

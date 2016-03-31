@@ -200,7 +200,7 @@ def test():
     assert str2index('H1') == 8
     assert str2index('A2') == 9
     assert str2index('H12') == 96
-    print 'Test passed successfully'
+    print('Test passed successfully')
 
 
 if __name__ == '__main__':

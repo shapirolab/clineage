@@ -44,7 +44,7 @@ class TargetedEnrichmentReagent(models.Model):
 
 class TwoPrimersUnicodeMixin(object):
     def __unicode__(self):
-        return u"{}, {}".format(self.left_primer, self.right_primer)
+        return "{}, {}".format(self.left_primer, self.right_primer)
 
 class PCR1PrimerPairTERBase(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
     pass

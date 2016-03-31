@@ -19,13 +19,13 @@ index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
 
 @pytest.mark.django_db
 def test_samplereads(sample_reads_d):
-    for sr in sample_reads_d.itervalues():
+    for sr in sample_reads_d.values():
         assert sr.barcoded_content.content.name == 'human amplified content'
 
 
 @pytest.mark.django_db
 def test_runmerge(sample_reads_d, adam_reads_fd):
-    for (l_id, bc_id), sr in sample_reads_d.iteritems():
+    for (l_id, bc_id), sr in sample_reads_d.items():
         mr = merge(sr)
         assert mr.sample_reads is sr
         assert os.path.isfile(mr.assembled_fastq)
@@ -47,7 +47,7 @@ def test_runmerge(sample_reads_d, adam_reads_fd):
 
 @pytest.mark.django_db
 def test_merged_reads(adam_merged_reads_d, adam_reads_fd):
-    for (l_id, bc_id), mr in adam_merged_reads_d.iteritems():
+    for (l_id, bc_id), mr in adam_merged_reads_d.items():
         assert set(srs_to_tups(mr.included_reads_generator('M'))) == \
              set(srs_to_tups(adam_reads_fd[l_id, bc_id, ASSEMBLED][RM]))
         assert set(srs_to_tups(mr.included_reads_generator('F'))) == \
@@ -70,7 +70,7 @@ def test_create_panel_fasta(pu_28727, pu_28734):
 
 
 def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicons):
-    for (l_id, bc_id), mr in adam_merged_reads_d.iteritems():
+    for (l_id, bc_id), mr in adam_merged_reads_d.items():
         for inc in ["M", "F"]:
             # test_readsindex_bowtie2build
             assert os.path.isfile(mr.assembled_fastq)
@@ -125,7 +125,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
 
 
 def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons):
-    for (l_id, bc, inc, amp), amr in adam_amplicon_reads_d.iteritems():
+    for (l_id, bc, inc, amp), amr in adam_amplicon_reads_d.items():
         # FIXME
         # test_align_reads_to_ms_variations
         ah = align_reads_to_ms_variations(amr, 50)

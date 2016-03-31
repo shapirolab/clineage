@@ -24,11 +24,11 @@ def test_multiplex():
             try:
                 sources.append(t.physical_locations.all()[0])
             except Exception as e:
-                print 'Error: exception in target %s:\r\n\t%s' % (str(t), str(e))
+                print('Error: exception in target %s:\r\n\t%s' % (str(t), str(e)))
         for source in sources:
             tup = ((source.plate.name, source.well), (target.plate.name, target.well))
             res.append(tup)
-    print res
+    print(res)
     distribute_multiplex(res)
 
 
@@ -68,7 +68,7 @@ MPX_LINE_LENGTH = 15
 def get_mpxs_map(tabDelimitedValues):
     mpxs_map = defaultdict(list)
     for row in tabDelimitedValues[1:]:
-        print 'proccessing row: %s' % row[MpxRow.name]
+        print('proccessing row: %s' % row[MpxRow.name])
         if len(row) == MPX_LINE_LENGTH:
             assert re.match('^[0-9]+$', row[MpxRow.start_index])
             assert re.match('^[0-9]+$', row[MpxRow.end_index])
@@ -77,7 +77,7 @@ def get_mpxs_map(tabDelimitedValues):
                                             start_pos=row[MpxRow.start_index],
                                             end_pos=row[MpxRow.end_index])
             except Target.DoesNotExist:
-                print 'reference to non existing MS: %s' % row[MpxRow.name]
+                print('reference to non existing MS: %s' % row[MpxRow.name])
                 raise
             if row[MpxRow.mpx]:
                 mpxs_map[row[MpxRow.mpx]].append(target)
@@ -106,18 +106,18 @@ def create_mpx_objects_from_mpxs_map(mpxs_map):
                 if len(name_filtered) == 1:
                     enrichments.append(name_filtered[0])
                 else:
-                    print 'Warning: multiple dedicated enrichments for target %s' % str(target)
+                    print('Warning: multiple dedicated enrichments for target %s' % str(target))
                     enrichments.append(dedicated_enrichments[0])
             else:
                 nonspecific_enrichments = target.targetenrichment_set.all()
                 if len(nonspecific_enrichments) == 1:
-                    print 'Warning: non specific enrichment for target %s' % str(target)
+                    print('Warning: non specific enrichment for target %s' % str(target))
                     enrichments.append(nonspecific_enrichments[0])
                 elif len(dedicated_enrichments) > 1:
-                    print 'Warning: multiple non specific enrichments for target %s' % str(target)
+                    print('Warning: multiple non specific enrichments for target %s' % str(target))
                     enrichments.append(nonspecific_enrichments[0])
                 else:
-                    print 'Error: no enrichments found for target %s' % str(target)
+                    print('Error: no enrichments found for target %s' % str(target))
                     raise
         mpx_object.primers = enrichments
         mpx_object.save()

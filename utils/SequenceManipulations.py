@@ -45,7 +45,7 @@ class SeqsUtil:
         #Now find any sub-sequences found in both sequences
         #(Python 2.3 would require slightly different code here)
         matches = set(dict_one).intersection(dict_two)
-        print "%i unique matches" % len(matches)
+        print("%i unique matches" % len(matches))
         #Create lists of x and y co-ordinates for scatter plot
         x = []
         y = []
@@ -76,7 +76,7 @@ class SeqsUtilTest (TestCase):
         s2 = ''
         s3 = 'CGTCD'
         self.su.IsSimpleSeq(s1)
-        self.assert_(self.su.IsSimpleSeq(s1))
+        self.assertTrue(self.su.IsSimpleSeq(s1))
         self.assertFalse(self.su.IsSimpleSeq(s2))
         self.assertFalse(self.su.IsSimpleSeq(s3))
 
@@ -97,7 +97,7 @@ class SeqsUtilTest (TestCase):
 
     def test_SeqDotPlot(self):
         s1 = self.su.RandomDNASeq(100)
-        print s1
+        print(s1)
         s2 = s1[0:30] + self.su.RandomDNASeq(70)
         self.su.SeqDotPlot(s1,s2,6)
 
@@ -106,7 +106,7 @@ num2base = {0:'A', 1:'C', 2:'G', 3:'T'}
 basecomp = {'A':'T', 'T':'A', 'C':'G', 'G':'C','a':'t', 't':'a', 'c':'g', 'g':'c'}
 bases = set('ACTG')
 purines = set('AG')
-basestring = 'ACTG'
+str = 'ACTG'
 
 #import string
 #_translation_table = string.maketrans('TAGCtagc', 'ATCGATCG')
@@ -136,7 +136,7 @@ def regionalmutation(seq, i, j, percentage): #randomize region i to j according 
     assert re.match('^[ACTGactg]+$',seq)
     if i>j: #correction for bad input where indices are switched
         i, j = j, i
-    mutations = sample(range(i,j), int(round((j-i)*percentage)))
+    mutations = sample(list(range(i,j)), int(round((j-i)*percentage)))
     for m in mutations:
         seq = mutate(seq, m, sample(list(bases - set(seq[m])), 1)[0])
     return seq

@@ -23,7 +23,7 @@ class UGS(models.Model,BaseStrandMixin):
         return self.slice.sequence
 
     def __unicode__(self):
-        return u"{}({})".format(self.slice, self.strand)
+        return "{}({})".format(self.slice, self.strand)
 
     def __len__(self):
         return len(self.slice)
@@ -42,7 +42,7 @@ class Target(models.Model):
     objects = InheritanceManager
 
     def __unicode__(self):
-        return u"{} @ {}".format(self.name, self.slice)
+        return "{} @ {}".format(self.name, self.slice)
 
 class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
@@ -90,7 +90,7 @@ class TargetEnrichment(models.Model):
         return None
 
     def __unicode__(self):
-        return u"{}, {}".format(self.left, self.right)
+        return "{}, {}".format(self.left, self.right)
 
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
@@ -119,7 +119,7 @@ class RestrictionSite(models.Model):
         return self.enzyme.sequence
 
     def __unicode__(self):
-        return u"{} @ {}".format(self.enzyme.name, self.slice)
+        return "{} @ {}".format(self.enzyme.name, self.slice)
 
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
@@ -128,7 +128,7 @@ class Microsatellite(Target):
     repeat_unit_ref_seq = models.CharField(max_length=50) #string of acutal unit in genome.
 
     def __unicode__(self):
-        return u"{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,
+        return "{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,
             self.slice)
 
 
@@ -137,7 +137,7 @@ class SNP(Target):
     modified = models.CharField(max_length=10, null=True) #Y
 
     def __unicode__(self):
-        return u"{}:{} @ {}".format(self.name, self.mutation, self.slice)
+        return "{}:{} @ {}".format(self.name, self.mutation, self.slice)
 
 
 # TODO: add indel

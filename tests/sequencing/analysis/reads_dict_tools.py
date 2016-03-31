@@ -82,7 +82,7 @@ _CUSTOM_READ_ID_FMT = "M00321:123:000000000-ABCDE:1:1111:22222:{:05}"
 
 
 def _read_id_gen(start=1, FMT=_CUSTOM_READ_ID_FMT):
-    for i in xrange(start,100000):
+    for i in range(start,100000):
         yield FMT.format(i)
 
 

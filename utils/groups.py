@@ -2,6 +2,7 @@ __author__ = 'ofirr'
 
 import math
 from random import randint
+from functools import reduce
 
 def random_groups(groups, random_groups_keys, group_sizes_range=(10,24)):
     """create a dict representing groups with random sizes within range"""

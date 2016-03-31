@@ -151,11 +151,11 @@ def _validate_amplicon_mapping(reads_matches):
     # For example, make sure left primer is mapped to the left of the amplicon
     # and the right primer to the right of the amplicon using ".pos" property
     # of pysam.calignmentfile.AlignedSegment objects
-    for read_id, matches in reads_matches.iteritems():
+    for read_id, matches in reads_matches.items():
         if len(matches) != 2:
             # place proper bin
             continue
-        amplicons, directions = zip(*matches)
+        amplicons, directions = list(zip(*matches))
         u1, u2 = amplicons
         if u1 != u2:
             # place proper bin
@@ -189,7 +189,7 @@ def seperate_reads_by_amplicons(margin_assignment):
     reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
-    for amplicon, read_ids in reads_by_amplicon.iteritems():
+    for amplicon, read_ids in reads_by_amplicon.items():
         amplicon_readsm_fastq_name = _extract_amplicon_reads(reads, read_ids)
         amplicon_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
         amplicon_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)
@@ -210,11 +210,11 @@ def _get_ms_length_range(ms):
             #Xcomb{ti} = 1:5;
     #end
     # TODO: put better boundries
-    n = ms.repeat_number
+    n = int(ms.repeat_number)
     if n > 3:
-        return xrange(3,2*n-2)
+        return range(3,2*n-2)
     else:
-        return xrange(1,6)
+        return range(1,6)
 
 
 def _get_ms_variations(ms):
@@ -263,7 +263,7 @@ def _build_ms_variations(amplicon, padding):
             "outside its boundaries".format(amplicon.id))
     # FIXME: kill this +-1 when we move to 0-based.
     segments = [(points[2*i]+1, points[2*i+1]) \
-        for i in xrange(len(points)//2) if points[2*i] < points[2*i+1]]
+        for i in range(len(points)//2) if points[2*i] < points[2*i+1]]
     # FIXME: maybe store these slices?
     fmt = "{}".join([amplicon.slice.chromosome.getdna(*a) for a in segments])
     full_fmt = "{pad}{left}{slice}{right}{pad}".format(
@@ -343,7 +343,7 @@ def separate_reads_by_genotypes(histogram):
     reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
     readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
-    for genotypes, read_ids in genotypes_reads.iteritems():
+    for genotypes, read_ids in genotypes_reads.items():
         genotypes_readsm_fastq_name = _extract_amplicon_reads(readsm, read_ids)
         genotypes_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
         genotypes_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)

@@ -8,8 +8,8 @@ from linapp.migrations.mig_0004.rejoin.common import unpack_slice, target_types
 # This is too big to do atomically.
 # @transaction.atomic
 def rejoin_restriction_sites(apps, schema_editor):
-    print
-    print "Reverting Restriction Sites:"
+    print()
+    print("Reverting Restriction Sites:")
     db_alias = schema_editor.connection.alias
     # first, migrate the restriction site types.
     RestrictionEnzyme = apps.get_model("planning", "RestrictionEnzyme")

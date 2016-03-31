@@ -30,8 +30,8 @@ def prepare_target_dict(old_target, apps, schema_editor):
 
 @transaction.atomic
 def convert_microsatellites(qs, apps, schema_editor):
-    print
-    print "Converting Microsatellites:"
+    print()
+    print("Converting Microsatellites:")
     db_alias = schema_editor.connection.alias
     Microsatellite = apps.get_model("planning", "Microsatellite")
     for old_target in bar(qs.select_related("microsatellite")):
@@ -54,8 +54,8 @@ def convert_microsatellites(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_known_snps(qs, apps, schema_editor):
-    print
-    print "Converting known SNPs:"
+    print()
+    print("Converting known SNPs:")
     db_alias = schema_editor.connection.alias
     SNP = apps.get_model("planning", "SNP")
     for old_target in bar(qs.select_related("snp")):
@@ -70,8 +70,8 @@ def convert_known_snps(qs, apps, schema_editor):
 
 @transaction.atomic
 def convert_unknown_snps(qs, apps, schema_editor):
-    print
-    print "Converting unknown SNPs:"
+    print()
+    print("Converting unknown SNPs:")
     db_alias = schema_editor.connection.alias
     SNP = apps.get_model("planning", "SNP")
     for old_target in bar(qs):
@@ -82,8 +82,8 @@ def convert_unknown_snps(qs, apps, schema_editor):
 # This is too big to do atomically.
 # @transaction.atomic 
 def convert_restrictionsites(qs, apps, schema_editor):
-    print
-    print "Converting Restriction Sites:"
+    print()
+    print("Converting Restriction Sites:")
     # first, migrate the restriction site types.
     db_alias = schema_editor.connection.alias
     OldRestrictionSiteType = apps.get_model("linapp", "RestrictionSiteType")

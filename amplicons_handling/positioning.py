@@ -9,7 +9,7 @@ def chunks(l, n):
     """
     Yield successive n-sized chunks from l.
     """
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         yield l[i:i+n]
 
 
@@ -80,7 +80,7 @@ def create_next_primers_plates(assembly):
         name_rev = 'hg19_Tails_plt{}_Rev'.format(next_primers_plate_num)
         plate_rev = Plate.objects.create(name=name_rev, type=stk_primers_type)
     else:
-        print 'ERROR: unsupported assembly'
+        print('ERROR: unsupported assembly')
         raise
     return plate_united, plate_fw, plate_rev
 
@@ -89,9 +89,9 @@ def insertion_plates_to_db(te_list, assembly='hg19', plate_size=96):
     pairs_plates, stk_fw_plates, stk_rv_plates = [], [], []
     for plate_te in chunks(te_list, plate_size):
         pairs_plate, stk_fw_plate, stk_rv_plate = create_next_primers_plates(assembly)
-        print pairs_plate
-        print stk_fw_plate
-        print stk_rv_plate
+        print(pairs_plate)
+        print(stk_fw_plate)
+        print(stk_rv_plate)
         pairs_plates.append(pairs_plate)
         stk_fw_plates.append(stk_fw_plate)
         stk_rv_plates.append(stk_rv_plate)

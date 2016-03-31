@@ -57,43 +57,43 @@ def create_te_and_ter(old_te, ter_model, planning_version, apps, schema_editor, 
 
 @transaction.atomic
 def convert_pcr1_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting normal PCR1 target enrichments:"
+    print()
+    print("Converting normal PCR1 target enrichments:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, "PCR1PrimerPairTER", 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_pcr1_with_tag_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting PCR1 target enrichments with company tag:"
+    print()
+    print("Converting PCR1 target enrichments with company tag:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, "PCR1WithCompanyTagPrimerPairTER", 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_deprecated_pcr1_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting deprecated PCR1 target enrichments:"
+    print()
+    print("Converting deprecated PCR1 target enrichments:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, "PCR1PrimerPairTERDeprecated", 1, apps, schema_editor, force_loc=True)
 
 @transaction.atomic
 def convert_no_tail_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting no-tail target enrichments:"
+    print()
+    print("Converting no-tail target enrichments:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, "TargetedNoTailPrimerPairTER", 0, apps, schema_editor)
 
 @transaction.atomic
 def convert_theoretical_pcr1_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting theoretical PCR1 target enrichments:"
+    print()
+    print("Converting theoretical PCR1 target enrichments:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, None, 1, apps, schema_editor)
 
 @transaction.atomic
 def convert_theoretical_no_tail_target_enrichments(qs, apps, schema_editor):
-    print
-    print "Converting theoretical no-tail target enrichments:"
+    print()
+    print("Converting theoretical no-tail target enrichments:")
     for old_te in bar(qs):
         create_te_and_ter(old_te, None, 0, apps, schema_editor)
 

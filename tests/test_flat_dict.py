@@ -123,9 +123,9 @@ def test_sub_flat_dict():
     fd = FlatDict(BIG_D)
     d1 = {k: s for k, s in fd.items(1)}
     d2 = {k: s for k, s in fd.items((1,))}
-    d3 = {k: s for k, s in fd.sub(1).items()}
+    d3 = {k: s for k, s in list(fd.sub(1).items())}
     for d in (d1, d2, d3):
-        assert set(d.iterkeys()) == {2, 5}
+        assert set(d.keys()) == {2, 5}
         sfd2 = d[2]
         sfd5 = d[5]
         assert set(sfd2.keys()) == {3, 4}

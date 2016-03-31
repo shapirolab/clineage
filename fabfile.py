@@ -128,7 +128,7 @@ def showkeys():
     """ Displays authorized public ssh keys for user """
     with hide('stdout'):
         keys = run('cat .ssh/authorized_keys')
-    print keys
+    print(keys)
 
 
 @task

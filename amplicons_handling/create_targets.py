@@ -1,9 +1,9 @@
 import csv
 import argparse
-from parser_primer_file import get_case_from_columns, process_row
-from primer_design import primer3_design, bowtie2_design, sort_unique_primers
-from primers_insertion import create_primers_in_db
-from positioning import insertion_plates_to_db, create_primer_order_file_xls
+from .parser_primer_file import get_case_from_columns, process_row
+from .primer_design import primer3_design, bowtie2_design, sort_unique_primers
+from .primers_insertion import create_primers_in_db
+from .positioning import insertion_plates_to_db, create_primer_order_file_xls
 from django.core.management import setup_environ
 import sys
 sys.path.append('/home/ofirr/CLineage')
@@ -25,7 +25,7 @@ def proccess_input_target_file(input_file, margins):
                 assem = row['Assembly']
             obj, created = process_row(row, row_case, margins)
             obj_list.append(obj)
-            print "Target {} INFO: {}".format(obj, created)
+            print("Target {} INFO: {}".format(obj, created))
     return obj_list, assem
 
 
@@ -71,7 +71,7 @@ if '__main__' == __name__:
                                        margins)
     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
-    print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
+    print('amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets)))
     ptf, ptr = PrimerTail.objects.all()
     te_list, colliding_amplicons = create_primers_in_db(chosen_target_primers, te_type, pf_tail=ptf, pr_tail=ptr)
     pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list, assembly)
