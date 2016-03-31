@@ -69,7 +69,13 @@ def test_flat_dict():
         7: {},
     }
     with pytest.raises(KeyError):
-        fd[1,2,5]
+        fd[1, 2, 5]
+    with pytest.raises(KeyError):
+        fd.keys((1, 2, 5))
+    with pytest.raises(KeyError):
+        fd.reads((1, 2, 5))
+    with pytest.raises(KeyError):
+        fd.items((1, 2, 5))
 
 
 def test_flat_dict2():
@@ -107,14 +113,18 @@ def test_flat_dict2():
         6: {'+': ['f1'], '-': []},
         7: {'+': [], '-': []},
     }
-    assert fd[1,2,5] == {'+': [], '-': []}
+    assert fd[1, 2, 5] == {'+': [], '-': []}
+    assert set(fd.keys((1, 2, 5))) == set()
+    assert dict(fd.reads((1, 2, 5))) == {}
+    assert dict(fd.items((1, 2, 5))) == {}
 
 
 def test_sub_flat_dict():
     fd = FlatDict(BIG_D)
     d1 = {k: s for k, s in fd.items(1)}
     d2 = {k: s for k, s in fd.items((1,))}
-    for d in (d1,d2):
+    d3 = {k: s for k, s in fd.sub(1).items()}
+    for d in (d1, d2, d3):
         assert set(d.iterkeys()) == {2, 5}
         sfd2 = d[2]
         sfd5 = d[5]

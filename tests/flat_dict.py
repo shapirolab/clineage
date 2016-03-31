@@ -50,15 +50,24 @@ class _FlatDict(object):
             self._keys_tree[nk] = set()
 
     def keys(self, nk=()):
-        return iter(self._keys_tree[nk])
+        if self._has_default:
+            return iter(self._keys_tree.get(nk, []))
+        else:
+            return iter(self._keys_tree[nk])
 
     def items(self, nk=()):
-        for k in self.keys(nk):
-            yield k, _SubFlatDict(self, nk + (k,))
+        keys = self.keys(nk)
+        def inner():
+            for k in keys:
+                yield k, _SubFlatDict(self, nk + (k,))
+        return inner()
 
     def reads(self, nk=()):
-        for k in self.keys(nk):
-            yield k, self[nk + (k,)]
+        keys = self.keys(nk)
+        def inner():
+            for k in self.keys(nk):
+                yield k, self[nk + (k,)]
+        return inner()
 
     def __getitem__(self, nk=()):
         if self._has_default:
