@@ -75,6 +75,12 @@ class _FlatDict(object):
         else:
             return self._d[nk]
 
+    def __contains__(self, nk=()):
+        return (nk in self._keys_tree)
+
+    def __iter__(self):
+        return iter(self._keys_tree)
+
     def sub(self, nk=()):
         return _SubFlatDict(self, nk)
 
@@ -107,4 +113,10 @@ class _SubFlatDict(object):
     items = _submethod("items")
     reads = _submethod("reads")
     __getitem__ = _submethod("__getitem__")
+    __contains__ = _submethod("__contains__")
     sub = _submethod("sub")
+
+    def __iter__(self):
+        for k in self._fd:
+            if k[:len(self._prefix_keys)] == self._prefix_keys:
+                yield k[len(self._prefix_keys):]

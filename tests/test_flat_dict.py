@@ -68,6 +68,21 @@ def test_flat_dict():
         6: {'+': ['f1']},
         7: {},
     }
+    assert set(iter(fd)) == {
+        (1,),
+        (1, 2),
+        (1, 2, 3),
+        (1, 2, 4),
+        (1, 2, 4, 9),
+        (1, 5),
+        (6,),
+        (7,),
+        (),
+    }
+    assert 1 in fd
+    assert (1,) in fd
+    assert (1, 2, 4) in fd
+    assert (1, 3) not in fd
     with pytest.raises(KeyError):
         fd[1, 2, 5]
     with pytest.raises(KeyError):
@@ -113,6 +128,21 @@ def test_flat_dict2():
         6: {'+': ['f1'], '-': []},
         7: {'+': [], '-': []},
     }
+    assert set(iter(fd)) == {
+        (1,),
+        (1, 2),
+        (1, 2, 3),
+        (1, 2, 4),
+        (1, 2, 4, 9),
+        (1, 5),
+        (6,),
+        (7,),
+        (),
+    }
+    assert 1 in fd
+    assert (1,) in fd
+    assert (1, 2, 4) in fd
+    assert (1, 3) not in fd
     assert fd[1, 2, 5] == {'+': [], '-': []}
     assert set(fd.keys((1, 2, 5))) == set()
     assert dict(fd.reads((1, 2, 5))) == {}
@@ -137,11 +167,18 @@ def test_sub_flat_dict():
             3: {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
             4: {'-': ['d2']},
         }
-
-
-def test_flat_dict__in():
-    d = FlatDict(READS_DICT_ADAM, [R1, R2, RM])
-    assert 1 in d
-    assert (1, 1) in d
-    assert (1, 1, UNASSEMBLED) in d
-    assert (1, 1, UNASSEMBLED, 28727) not in d
+    sfd = fd.sub(1)
+    assert set(iter(sfd)) == {
+        (2,),
+        (2, 3),
+        (2, 4),
+        (2, 4, 9),
+        (5,),
+        (),
+    }
+    assert 1 not in sfd
+    assert (1,) not in sfd
+    assert 2 in sfd
+    assert (2,) in sfd
+    assert (2, 4) in sfd
+    assert (2, 9) not in sfd
