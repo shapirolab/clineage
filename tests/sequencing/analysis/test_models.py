@@ -6,7 +6,7 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, seperate_reads_by_amplicons, \
     get_adam_ms_variations, align_reads_to_ms_variations, \
     separate_reads_by_genotypes
-from sequencing.analysis.models import AdamMSVariations, BowtieIndexMixin, \
+from sequencing.analysis.models import AdamMSVariations, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
 from targeted_enrichment.amplicons.models import Amplicon
 from targeted_enrichment.planning.models import PhasedMicrosatellites
@@ -14,9 +14,6 @@ from targeted_enrichment.planning.models import PhasedMicrosatellites
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups, strip_fasta_records
 from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
-
-index_files = ["{}.{}.bt2".format(BowtieIndexMixin.INDEX_PREFIX,x) for x in
-    ["1","2","3","4","1.rev","2.rev"]]
 
 
 @pytest.mark.django_db
