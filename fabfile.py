@@ -14,10 +14,10 @@ CONF_DIR = os.path.abspath(os.path.join(PROJ_DIR, 'conf'))
 env.user = "dcsoft"
 env.gunicorn_port = 9000
 env.code_dir = '~/clineage/'
-env.venv_dir = '~/.virtualenvs/clineage/'
+env.venv_dir = '~/.venvs/cl/'
 env.venv_command = '. {}bin/activate'.format(env.venv_dir)
 env.log_dir = '~/logs/clineage/'
-env.clone_url = "git@bitbucket.org:ofirr/clineage.git"
+env.clone_url = "dcgit@math102-lx.wisdom.weizmann.ac.il:~/clineage"
 env.pidfile = '~/clineage.pid'
 # env.pip_version = "1.5.4"
 
