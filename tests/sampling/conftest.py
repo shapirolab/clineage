@@ -8,7 +8,7 @@ from tests.accounts.conftest import *
 
 
 @pytest.fixture()
-def organ(db):
+def organ(transactional_db):
     o = Organ.objects.create(
         name="Blood",
     )
@@ -16,7 +16,7 @@ def organ(db):
 
 
 @pytest.fixture()
-def tissue(db):
+def tissue(transactional_db):
     t = Tissue.objects.create(
         name="Blood",
     )
@@ -24,7 +24,7 @@ def tissue(db):
 
 
 @pytest.fixture()
-def composition(db):
+def composition(transactional_db):
     sc = SampleComposition.objects.create(
         name="Single Cell"
     )

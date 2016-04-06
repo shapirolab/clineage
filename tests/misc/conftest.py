@@ -4,7 +4,7 @@ from misc.models import Taxa
 
 
 @pytest.fixture()
-def human_taxa(db):
+def human_taxa(transactional_db):
     t = Taxa.objects.create(
         name="Homo sapiens",
         taxonomy_id=9606,

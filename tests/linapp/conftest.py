@@ -4,7 +4,7 @@ from linapp.models import Protocol, ProtocolType
 
 
 @pytest.fixture()
-def protocoltype(db):
+def protocoltype(transactional_db):
     pt = ProtocolType.objects.create(
         name='test protocol type'
     )

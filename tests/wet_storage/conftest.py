@@ -4,7 +4,7 @@ from wet_storage.models import PlateContext, PlatePlastica, PlateType, Plate, Sa
 
 
 @pytest.fixture()
-def platecontext(db):
+def platecontext(transactional_db):
     pc = PlateContext.objects.create(
         description='Storage'
     )
@@ -12,7 +12,7 @@ def platecontext(db):
 
 
 @pytest.fixture()
-def plateplastica_pairs(db):
+def plateplastica_pairs(transactional_db):
     pp = PlatePlastica.objects.create(
         description='Tetrad',
         rows=8,
@@ -22,7 +22,7 @@ def plateplastica_pairs(db):
 
 
 @pytest.fixture()
-def plateplastica_stk(db):
+def plateplastica_stk(transactional_db):
     pp = PlatePlastica.objects.create(
         description='Deep-Well Square',
         rows=8,

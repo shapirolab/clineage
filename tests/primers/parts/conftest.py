@@ -6,7 +6,7 @@ from primers.parts.models import DNABarcode1, DNABarcode2, \
 
 
 @pytest.fixture()
-def dnabarcode1(db):
+def dnabarcode1(transactional_db):
     b1 = DNABarcode1.objects.create(
         name='D710',
         _sequence='TCCGCGAA'
@@ -15,7 +15,7 @@ def dnabarcode1(db):
 
 
 @pytest.fixture()
-def dnabarcode2(db):
+def dnabarcode2(transactional_db):
     b2 = DNABarcode2.objects.create(
         name='D508',
         _sequence='GTACTGAC'
@@ -24,7 +24,7 @@ def dnabarcode2(db):
 
 
 @pytest.fixture()
-def dnabarcode1_a(db):
+def dnabarcode1_a(transactional_db):
     b3 = DNABarcode1.objects.create(
         name='D718',
         _sequence='TGGGAGCC'
@@ -33,7 +33,7 @@ def dnabarcode1_a(db):
 
 
 @pytest.fixture()
-def dnabarcode2_a(db):
+def dnabarcode2_a(transactional_db):
     b4 = DNABarcode2.objects.create(
         name='D502',
         _sequence='ATAGAGGC'
@@ -42,7 +42,7 @@ def dnabarcode2_a(db):
 
 
 @pytest.fixture()
-def illuminareadingadaptor1(db):
+def illuminareadingadaptor1(transactional_db):
     ira1 = IlluminaReadingAdaptor1.objects.create(
         name='Illumina Standard Reading Adaptor1',
         _sequence='ACACTCTTTCCCTACACGACGCTCTTCCGATCT'
@@ -51,7 +51,7 @@ def illuminareadingadaptor1(db):
 
 
 @pytest.fixture()
-def illuminareadingadaptor2(db):
+def illuminareadingadaptor2(transactional_db):
     ira2 = IlluminaReadingAdaptor2.objects.create(
         name='Illumina Standard Reading Adaptor2',
         _sequence='AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'

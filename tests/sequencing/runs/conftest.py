@@ -7,7 +7,7 @@ from tests.primers.parts.conftest import *
 from tests.lib_prep.workflows.conftest import *
 
 @pytest.fixture()
-def machinetype(db):
+def machinetype(transactional_db):
     mt = MachineType.objects.create(
         company="Illumina",
         model="NextSeq",
@@ -47,7 +47,7 @@ def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent
 
 
 @pytest.fixture()
-def demultiplexingscheme(db):
+def demultiplexingscheme(transactional_db):
     ds = DemultiplexingScheme.objects.create(
         name='test demux scheme',
         description='wrovhnwpovnwecpqkewmc',
