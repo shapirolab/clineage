@@ -9,22 +9,42 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PRIMER3_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/PCRPrimersDesign/Primer3/primer3_core'
 
 BOWTIE2_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2'
 
-DATA_STORE = os.path.join(PROJECT_PATH,"storage")
+DATA_STORE = os.path.join(BASE_DIR,"storage")
 
 DOJANGO_DOJO_VERSION = "1.7.2"
 
 MANAGERS = ADMINS
 
 DATABASES = {
+    #'default': {
+        #'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        #'NAME': 'emptydb',                      # Or path to database file if using sqlite3.
+        #'USER': 'dcsoft',                      # Not used with sqlite3.
+        #'PASSWORD': 'dc123pie',                  # Not used with sqlite3.
+        #'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        #'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.
+        #'TEST': {
+            #'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+            #'NAME': 'test_emptydb',                      # Or path to database file if using sqlite3.
+            #'USER': 'dcsoft',                      # Not used with sqlite3.
+            #'PASSWORD': 'dc123pie',                  # Not used with sqlite3.
+            #'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+            #'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.
+        #},
+    #},
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': './db.sqlite3',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'TEST': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
+        }
     }
 }
 
@@ -65,7 +85,7 @@ MEDIA_URL = 'http://localhost:8000/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_PATH, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -98,9 +118,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            PROJECT_PATH + '/templates/',
-            PROJECT_PATH + '/templates/forms',
-            PROJECT_PATH + '/dojango/templates/',
+            BASE_DIR + '/templates/',
+            BASE_DIR + '/templates/forms',
+            BASE_DIR + '/dojango/templates/',
         ],
         'OPTIONS': {
             'context_processors': [
@@ -137,7 +157,7 @@ LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'clineage.urls'
 
-PROJECT_PATH = os.path.realpath(os.path.dirname(__file__) + '/..')
+BASE_DIR = os.path.realpath(os.path.dirname(__file__) + '/..')
 
 
 LOGIN_EXEMPT_URLS = [r'^soap/',
