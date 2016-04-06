@@ -25,16 +25,18 @@ pear_with_defaults = pear["-v", "40",
 
 
 bowtie2build = local["bowtie2-build"]
+bowtie2build_fixed_seed = bowtie2build["--seed", "1"]
 
 # bowtie2-build \
 #     ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged.fa \
 #     ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged
 
 bowtie2 = local["bowtie2"]
-bowtie2_with_defaults = bowtie2["-p", "24",
+bowtie2_fixed_seed = bowtie2["--seed", "1"]
+bowtie2_with_defaults = bowtie2_fixed_seed["-p", "24",
                                 "-a",
-                                "--very-sensitive",]
-bowtie2_with_defaults2 = bowtie2["-p", "24",
+                                "--very-sensitive"]
+bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
 
 # bowtie2 \
@@ -103,7 +105,7 @@ def create_reads_index(merged_reads, included_reads, padding):
         index_dump_dir=index_dir,
         padding=padding,
     )
-    bowtie2build(fasta, ri.index_files_prefix)
+    bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
     os.unlink(fasta)
     ri.save()
     return ri
