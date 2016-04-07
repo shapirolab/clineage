@@ -14,7 +14,7 @@ from wet_storage.models import SampleLocation
 class GeneticBackground(models.Model):
     name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 class Organ(models.Model):
@@ -22,19 +22,19 @@ class Organ(models.Model):
     #rank = models.IntegerField()
     #parent = models.IntegerField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 class Tissue(models.Model):
     name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 class SampleComposition(models.Model):#e.g. single cell or bulk
     name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ class SampleStatus(models.Model):
         verbose_name = 'Sample status'
         verbose_name_plural = 'Samples status'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 
@@ -55,18 +55,18 @@ class Coordinates(models.Model):#XYZ coordinates of laser capture.
     y = models.DecimalField(max_digits=10, decimal_places=4)
     z = models.DecimalField(max_digits=10, decimal_places=4)
     #TODO: discuss Z vs slides
-    def __unicode__(self):
+    def __str__(self):
         return '(x={0},y={1},z={2})'.format(self.x,self.y,self.z)
 ### -------------------------------------------------------------------------------------
 class FACSMarker(models.Model):
     name = models.CharField(max_length=50)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 class Location(models.Model):  # Freetext location
     name = models.CharField(max_length=50)
 
-    def __unicode__(self):#TODO: exapnd
+    def __str__(self):#TODO: exapnd
         return self.name
 ### -------------------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ class Individual(models.Model):
     sacrificed = models.DateTimeField(null=True, blank=True)
     partner = models.ForeignKey(User, null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -101,7 +101,7 @@ class ExtractionEvent(models.Model):
     user_performed = models.ForeignKey(User, related_name='+')
     user_documented = models.ForeignKey(User, related_name='+')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}>{}'.format(str(self.individual), self.name)
 
     def get_absolute_url(self):
@@ -117,7 +117,7 @@ class Extraction(models.Model):
     physical_locations = fields.GenericRelation('SampleLocation',
                                content_type_field='content_type',
                                object_id_field='object_id')
-    def __unicode__(self):
+    def __str__(self):
         return '{}>{}'.format(str(self.extraction_event), self.name)
 
     def get_absolute_url(self):
@@ -133,7 +133,7 @@ class SamplingEvent(models.Model):
     user = models.ForeignKey(User, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     attachment = models.FileField(upload_to=sampling_event_path, null=True, blank=True)
-    def __unicode__(self):
+    def __str__(self):
         return '{}>{}'.format(str(self.extraction), self.name)
 
     def get_absolute_url(self):
@@ -166,7 +166,7 @@ class Cell(models.Model):
     status = models.ForeignKey(SampleStatus, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     classification = models.CharField(max_length=50, null=True, blank=True)
-    def __unicode__(self):
+    def __str__(self):
         return '{}>{}'.format(str(self.sampling), self.name)
 
     def get_absolute_url(self):

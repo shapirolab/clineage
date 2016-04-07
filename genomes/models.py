@@ -26,7 +26,7 @@ class Assembly(models.Model):
     name = models.CharField(max_length=50)
     friendly_name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.friendly_name
 
     class Meta:
@@ -41,7 +41,7 @@ class Chromosome(models.Model):
     sequence_length = models.IntegerField(null=True)
     cyclic = models.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}:{}".format(self.assembly, self.name)
 
     def get_path(self, ext="txt"):
@@ -151,7 +151,7 @@ class DNASlice(models.Model):
         right = self.get_right_surrounding_restriction(restriction_type)
         return left, right
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}:{}-{}".format(self.chromosome.name, self.start_pos,
             self.end_pos)
 

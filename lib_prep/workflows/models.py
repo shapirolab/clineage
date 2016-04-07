@@ -18,7 +18,7 @@ class BarcodePair(models.Model):
 #class CellContentType(models.Model):
     #name = models.CharField(max_length=50)
 
-    #def __unicode__(self):
+    #def __str__(self):
         #return self.name
 
 
@@ -39,7 +39,7 @@ class AmplifiedContent(models.Model):  # aka DNA
                                content_type_field='content_type',
                                object_id_field='object_id')
 
-    def __unicode__(self):
+    def __str__(self):
         return '{}>{}'.format(str(self.cell), self.name)
 
     def get_absolute_url(self):

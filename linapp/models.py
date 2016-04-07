@@ -21,7 +21,7 @@ class LineageRole(models.Model):
     read = models.BooleanField(default=True)
     write = models.BooleanField(default=False)
     delete = models.BooleanField(default=False)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     @staticmethod
     def emptyRole():
@@ -45,7 +45,7 @@ class UserProfile(models.Model):
 
 class ProtocolType(models.Model):
     name = models.CharField(max_length=100)
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 class Protocol(models.Model):
@@ -57,7 +57,7 @@ class Protocol(models.Model):
     type = models.ForeignKey(ProtocolType)
     file = models.FilePathField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 ### -------------------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ class UserReport(models.Model):
     individual = models.ManyToManyField('sampling.Individual')
     creation_date = models.DateField(auto_now_add=True) #Automatically set the field to now when the object is first created.
 
-    def __unicode__(self):
+    def __str__(self):
         return self.partner.username if self.partner else 'detached'
 
     @staticmethod

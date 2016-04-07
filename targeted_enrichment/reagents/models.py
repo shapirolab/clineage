@@ -22,7 +22,7 @@ class TargetEnrichmentFailureType(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class TargetedEnrichmentReagent(models.Model):
@@ -43,7 +43,7 @@ class TargetedEnrichmentReagent(models.Model):
 
 
 class TwoPrimersUnicodeMixin(object):
-    def __unicode__(self):
+    def __str__(self):
         return "{}, {}".format(self.left_primer, self.right_primer)
 
 class PCR1PrimerPairTERBase(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):

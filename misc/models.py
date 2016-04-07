@@ -14,7 +14,7 @@ class Taxa(models.Model):
     parent = models.IntegerField(null=True, blank=True)
     friendly_name = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 ### -------------------------------------------------------------------------------------
