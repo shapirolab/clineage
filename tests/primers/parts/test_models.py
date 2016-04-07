@@ -3,22 +3,22 @@ import pytest
 
 @pytest.mark.django_db
 def test_dnabarcode1(dnabarcode1):
-    assert dnabarcode1._sequence == "TCCGCGAA"
+    assert dnabarcode1.ref_sequence.seq == b"TCCGCGAA"
 
 
 @pytest.mark.django_db
 def test_dnabarcode2(dnabarcode2):
-    assert dnabarcode2._sequence == "GTACTGAC"
+    assert dnabarcode2.ref_sequence.seq == b"GTACTGAC"
 
 
 @pytest.mark.django_db
 def test_illuminareadingadaptor1(illuminareadingadaptor1):
-    assert illuminareadingadaptor1._sequence == "ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
+    assert illuminareadingadaptor1.ref_sequence.seq == b"ACACTCTTTCCCTACACGACGCTCTTCCGATCT"
 
 
 @pytest.mark.django_db
 def test_illuminareadingadaptor1(illuminareadingadaptor2):
-    assert illuminareadingadaptor2._sequence == "AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+    assert illuminareadingadaptor2.ref_sequence.seq == b"AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
 
 
 @pytest.mark.django_db
@@ -35,9 +35,9 @@ def test_illuminareadingadaptor2cuts_numbers(illuminareadingadaptor2cuts):
 
 @pytest.mark.django_db
 def test_illuminareadingadaptor1cuts_primer1tail(illuminareadingadaptor1cuts):
-    assert illuminareadingadaptor1cuts.primer1tail.seq == "CTACACGACGCTCTTCCGATCT"
+    assert illuminareadingadaptor1cuts.primer1tail.seq == b"CTACACGACGCTCTTCCGATCT"
 
 
 @pytest.mark.django_db
 def test_illuminareadingadaptor2cuts_primer1tail(illuminareadingadaptor2cuts):
-    assert illuminareadingadaptor2cuts.primer1tail.seq == "CAGACGTGTGCTCTTCCGATCT"
+    assert illuminareadingadaptor2cuts.primer1tail.seq == b"CAGACGTGTGCTCTTCCGATCT"

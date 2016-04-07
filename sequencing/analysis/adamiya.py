@@ -111,8 +111,8 @@ def create_reads_index(merged_reads, included_reads, padding):
 def _primers_seqrecords_generator(amplicons):
     for uw in amplicons:
         # NOTE: [1:] is workaround adam bug ?
-        yield SeqRecord(Seq(uw.left_margin.seq), id=amplicon_margin_to_name(uw, LEFT), name='', description='')[1:]
-        yield SeqRecord(Seq(uw.right_margin.seq), id=amplicon_margin_to_name(uw, RIGHT), name='', description='')[1:]
+        yield SeqRecord(Seq(str(uw.left_margin)), id=amplicon_margin_to_name(uw, LEFT), name='', description='')[1:]
+        yield SeqRecord(Seq(str(uw.right_margin)), id=amplicon_margin_to_name(uw, RIGHT), name='', description='')[1:]
         # name='', description='' are workarounds for the '<unknown description>' that is being outputted and
         # breaks the downstream bowtie2 alignment.
 
