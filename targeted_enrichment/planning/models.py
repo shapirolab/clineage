@@ -21,7 +21,7 @@ class UGS(models.Model,BaseStrandMixin):
     def ref_sequence(self):
         return self.slice.sequence
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}({})".format(self.slice, self.strand)
 
 class UGSPlus(UGS,PlusStrandMixin):
@@ -37,7 +37,7 @@ class Target(models.Model):
     
     objects = InheritanceManager
 
-    def __unicode__(self):
+    def __str__(self):
         return "{} @ {}".format(self.name, self.slice)
 
 class TargetEnrichment(models.Model):
@@ -85,7 +85,7 @@ class TargetEnrichment(models.Model):
             return max(lttaas), min(rttaas)
         return None
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}, {}".format(self.left, self.right)
 
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
@@ -99,7 +99,7 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
         self.sequence_len = len(self.sequence)
         return super(RestrictionEnzyme, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class RestrictionSite(models.Model):
@@ -110,7 +110,7 @@ class RestrictionSite(models.Model):
     def sequence(self):
         return self.enzyme.sequence
 
-    def __unicode__(self):
+    def __str__(self):
         return "{} @ {}".format(self.enzyme.name, self.slice)
 
 class Microsatellite(Target):
@@ -118,7 +118,7 @@ class Microsatellite(Target):
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,
             self.slice)
 
@@ -127,7 +127,7 @@ class SNP(Target):
     mutation = models.CharField(max_length=10, null=True) #X>Y
     modified = models.CharField(max_length=10, null=True) #Y
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}:{} @ {}".format(self.name, self.mutation, self.slice)
 
 

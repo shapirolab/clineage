@@ -22,7 +22,7 @@ class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
     class Meta:
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -38,5 +38,5 @@ class Panel(models.Model):#collection of targets
                                                 # TODO: m2m pri_mux, well on the m2m table.
     name = models.CharField(max_length=50)
     tes = models.ManyToManyField(TargetEnrichment, related_name='panels')
-    def __unicode__(self):
+    def __str__(self):
         return self.name

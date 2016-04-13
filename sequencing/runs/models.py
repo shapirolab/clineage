@@ -7,7 +7,7 @@ class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.company + '_' + self.model
 
 
@@ -16,8 +16,8 @@ class Machine(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     type = models.ForeignKey(MachineType)
 
-    def __unicode__(self):
-        return self.type.__unicode__() + '_' + self.machineid
+    def __str__(self):
+        return self.type.__str__() + '_' + self.machineid
 
 
 

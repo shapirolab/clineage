@@ -23,7 +23,7 @@ class KitSynthetic(models.Model,BaseStrandMixin):
     def ref_sequence(self):
         return DNA(self._sequence)
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}({})".format(self.name, self.strand)
 
 class ReadingAdaptorCuts(models.Model):
@@ -45,7 +45,7 @@ class ReadingAdaptorCuts(models.Model):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}[:{}:{}:]".format(self.ira, self.overlap_start,
             self.overlap_end)
 

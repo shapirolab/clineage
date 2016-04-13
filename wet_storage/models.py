@@ -13,7 +13,8 @@ from utils.wells import index2str, str2index
 class StorageType(models.Model):
     name = models.CharField(max_length=100, blank=True)
     temperature = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=1)
-    def __unicode__(self):
+
+    def __str__(self):
         return "%s (temp:%s\xB0c)" % (self.name, str(self.temperature))
 ### -------------------------------------------------------------------------------------
 class StorageBox(models.Model):
@@ -21,12 +22,14 @@ class StorageBox(models.Model):
     storage_type = models.ForeignKey(StorageType)
     name = models.CharField(max_length=100, blank=True)
     barcode = models.CharField(max_length=20, blank=True)
-    def __unicode__(self):
+
+    def __str__(self):
         return "%s (type:%s)" % (self.name, self.storage_type.name)
 ### -------------------------------------------------------------------------------------
 class PlateContext(models.Model): #The plate's context in use. e.g. pcr
     description = models.CharField(max_length=30, blank=True)
-    def __unicode__(self):
+
+    def __str__(self):
         return "%s" %self.description
 ### -------------------------------------------------------------------------------------
 class PlatePlastica(models.Model): #The plate's physical form. e.g. deepwell square
@@ -39,7 +42,7 @@ class PlatePlastica(models.Model): #The plate's physical form. e.g. deepwell squ
     def wells(self):
         return self.rows*self.columns
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" %self.description
 ### -------------------------------------------------------------------------------------
 class PlateType(models.Model):  # TODO: kill and modify as follows:
@@ -47,7 +50,8 @@ class PlateType(models.Model):  # TODO: kill and modify as follows:
     friendly = models.CharField(max_length=100)
     context = models.ForeignKey(PlateContext, null=True)  # TODO: kill and modify to plate inheritance
     plastic = models.ForeignKey(PlatePlastica, null=True)  # TODO: relocate as field of Plate
-    def __unicode__(self):
+
+    def __str__(self):
         return "%s" % self.friendly
 ### -------------------------------------------------------------------------------------
 class PlateFullException(Exception):
@@ -64,8 +68,10 @@ class Plate(models.Model):
     timestamp = models.DateField(null=True, blank=True)
     state = models.CharField(max_length=20, blank=True)
     lastusedwell = models.CharField(max_length=4, default='A1')
-    def __unicode__(self):
+
+    def __str__(self):
         return self.name
+
     def get_absolute_url(self):
         return reverse('plate_detail', kwargs={'pk': self.pk})
 
@@ -92,7 +98,8 @@ class PlateStorage(models.Model):
     plate = models.ForeignKey(Plate)
     inner_location = models.CharField(max_length=100, blank=True)
     notes = models.CharField(max_length=250, blank=True)
-    def __unicode__(self):
+
+    def __str__(self):
         return '%s in %s' % (self.plate.name, self.storageBox.name)
 ### -------------------------------------------------------------------------------------
 class SampleLocation(models.Model):
@@ -104,7 +111,8 @@ class SampleLocation(models.Model):
     volume = models.DecimalField(null=True, max_digits=10, decimal_places=3, blank=True)
     concentration = models.DecimalField(null=True, max_digits=10, decimal_places=5, blank=True)
     timestamp = models.DateTimeField(auto_now=True)
-    def __unicode__(self):
+
+    def __str__(self):
         return 'plate %s at %s' % (self.plate.name, self.well)
 
     class Meta:

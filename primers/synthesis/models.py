@@ -50,7 +50,7 @@ class BasePrimer(models.Model,BaseStrandMixin):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class TargetedHeadMixin(object):
