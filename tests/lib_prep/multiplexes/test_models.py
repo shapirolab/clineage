@@ -12,9 +12,9 @@ def test_pcr1multiplex(pcr1multiplex, te_28727):
 
 
 @pytest.mark.django_db
-def test_pcr1multiplexcollection(pcr1multiplexcollection, te_28727):
-    assert pcr1multiplexcollection.panel.name == 'test Panel'
-    assert pcr1multiplexcollection.mpxs.count() == 1
-    assert pcr1multiplexcollection.mpxs.get().ters.count() == 2
-    assert pcr1multiplexcollection.mpxs.get().ters.select_subclasses().get(te=te_28727)\
+def test_pcr1panel(pcr1panel, te_28727):
+    assert pcr1panel.name == 'test PCR1Panel'
+    assert pcr1panel.mpxs.count() == 1
+    assert pcr1panel.mpxs.get().ters.count() == 2
+    assert pcr1panel.mpxs.get().ters.select_subclasses().get(te=te_28727)\
         .te.targets.get(name='X_81316201_81316236').slice.start_pos == 81316201

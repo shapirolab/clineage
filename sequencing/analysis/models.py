@@ -15,7 +15,6 @@ from sequencing.runs.models import Demultiplexing
 from targeted_enrichment.planning.models import Microsatellite, SNP
 from targeted_enrichment.amplicons.models import Amplicon
 from lib_prep.workflows.models import Library, BarcodedContent
-from lib_prep.multiplexes.models import Panel
 
 
 def delete_files(sender, instance, **kwargs):

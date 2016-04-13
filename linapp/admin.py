@@ -7,7 +7,7 @@ from linapp.models import LineageRole, UserProfile, ProtocolType, Protocol, \
     UserReport
 from lib_prep.workflows.models import BarcodedContent, CellContentProtocol, \
     AmplifiedContent
-from lib_prep.multiplexes.models import PCR1Multiplex, Panel
+from lib_prep.multiplexes.models import PCR1Multiplex, PCR1Panel
 from misc.models import Taxa
 from genomes.models import Assembly, Chromosome, DNASlice
 from targeted_enrichment.reagents.models import TargetEnrichmentFailureType, \
@@ -49,7 +49,7 @@ admin.site.register(CellContentProtocol)
 admin.site.register(AmplifiedContent)
 
 admin.site.register(PCR1Multiplex)
-admin.site.register(Panel)
+admin.site.register(PCR1Panel)
 
 admin.site.register(Taxa)
 

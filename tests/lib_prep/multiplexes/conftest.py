@@ -1,6 +1,6 @@
 import pytest
 
-from lib_prep.multiplexes.models import PCR1Multiplex, Panel, PCR1MultiplexCollection
+from lib_prep.multiplexes.models import PCR1Multiplex, PCR1Panel
 
 from tests.targeted_enrichment.planning.conftest import *
 from tests.targeted_enrichment.reagents.conftest import *
@@ -16,18 +16,9 @@ def pcr1multiplex(ter_28727, ter_28734):
 
 
 @pytest.fixture()
-def panel(te_28727, te_28734):
-    p = Panel.objects.create(
-        name='test Panel'
-    )
-    p.tes = [te_28727, te_28734]
-    return p
-
-
-@pytest.fixture()
-def pcr1multiplexcollection(panel, pcr1multiplex):
-    pcr1mc = PCR1MultiplexCollection.objects.create(
-        panel=panel
+def pcr1panel(pcr1multiplex):
+    pcr1mc = PCR1Panel.objects.create(
+        name='test PCR1Panel'
     )
     pcr1mc.mpxs = [pcr1multiplex]
     return pcr1mc

@@ -34,14 +34,6 @@ class PCR1Multiplex(TERMultiplex):
     #TODO: physical_locations(MPXPlate)
 
 
-class Panel(models.Model):#collection of targets
-                                                # TODO: m2m pri_mux, well on the m2m table.
-    name = models.CharField(max_length=50)
-    tes = models.ManyToManyField(TargetEnrichment, related_name='panels')
-    def __str__(self):
-        return self.name
-
-class PCR1MultiplexCollection(models.Model):
+class PCR1Panel(models.Model):  # PCR1MultiplexCollection
+    name = models.CharField(max_length=20)
     mpxs = models.ManyToManyField(PCR1Multiplex)
-    panel = models.ForeignKey(Panel)
-

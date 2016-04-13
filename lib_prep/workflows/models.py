@@ -9,7 +9,7 @@ from linapp.models import Protocol
 from wet_storage.models import SampleLocation
 from sampling.models import Cell
 from primers.parts.models import DNABarcode1, DNABarcode2
-from lib_prep.multiplexes.models import PCR1MultiplexCollection
+from lib_prep.multiplexes.models import PCR1Panel
 
 class BarcodePair(models.Model):
     left = models.ForeignKey(DNABarcode1)
@@ -65,7 +65,7 @@ class BarcodedContent(models.Model): # cell + barcode
         raise NotImplementedError()
 
 class MagicalPCR1Library(Library):
-    mpx_collection = models.ForeignKey(PCR1MultiplexCollection)
+    panel = models.ForeignKey(PCR1Panel)
     # magicalpcr1barcodedcontent_set is a related field
 
     @property
@@ -75,7 +75,7 @@ class MagicalPCR1Library(Library):
     @property
     def amplicons(self):
         #TODO: make nice and queryful.
-        for mpx in self.mpx_collection.mpxs.all():
+        for mpx in self.panel.mpxs.all():
             for ter in mpx.ters.select_subclasses():
                 yield ter.pcr1amplicon
 

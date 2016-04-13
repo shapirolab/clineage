@@ -50,11 +50,11 @@ def amplifiedcontent(human_cell_with_se, cellcontentprotocol):
 
 
 @pytest.fixture()
-def magicalpcr1library(pcr1multiplexcollection):
+def magicalpcr1library(pcr1panel):
     mpl = MagicalPCR1Library.objects.create(
         id=1,
         name="lib1",
-        mpx_collection=pcr1multiplexcollection,
+        panel=pcr1panel,
     )
     return mpl
 
