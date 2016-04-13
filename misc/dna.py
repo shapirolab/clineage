@@ -1,7 +1,15 @@
-from utils import SequenceManipulations as sm
 
-__author__ = 'ofirr'
+basecomp = {'A': 'T',
+            'T': 'A',
+            'C': 'G',
+            'G': 'C'}
 
+def _rc(seq):
+    n = len(seq)
+    l = [None]*n
+    for i in xrange(n):
+        l[n-i-1] = basecomp[seq[i]]
+    return ''.join(l)
 
 class DNA(object):
 
@@ -21,13 +29,7 @@ class DNA(object):
         return self._seq
 
     def rev_comp(self):
-        return DNA(sm.complement(self.seq)[::-1])
-
-    def rev(self):
-        return DNA(self.seq[::-1])
-
-    def comp(self):
-        return DNA(sm.complement(self.seq))
+        return DNA(_rc(self.seq))
 
     def __add__(self, other):
         if not isinstance(other,DNA):
