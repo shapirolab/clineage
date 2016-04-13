@@ -18,9 +18,6 @@ class SearchMarginesDoesNotExist(Exception):
     pass
 
 
-### -------------------------------------------------------------------------------------
-### Full Genomes
-### -------------------------------------------------------------------------------------
 class Assembly(models.Model):
     taxa = models.ForeignKey(Taxa)
     name = models.CharField(max_length=50)
@@ -34,6 +31,7 @@ class Assembly(models.Model):
 
     def get_path(self):
         return os.path.join(self.taxa.friendly_name, self.friendly_name)
+
 
 class Chromosome(models.Model):
     name = models.CharField(max_length=50)
@@ -92,11 +90,8 @@ class Chromosome(models.Model):
             raise ValueError('could not find %s within %s:%d-%d' % (sequence, self.name, start-10, stop+10))
 
         return start - l + index, start - l + index + len(sequence) - 1
-### -------------------------------------------------------------------------------------
-### -------------------------------------------------------------------------------------
-###
-# New!
-###
+
+
 class DNASlice(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     # TODO: decide indexing method
@@ -120,36 +115,6 @@ class DNASlice(models.Model):
     def cache(self):
         self._sequence = self._get_seq()
         self.save()
-
-    def get_margine(self, pos):
-        if self.chromosome.cyclic:
-            return pos
-        if 0 <= pos <= self.chromosome.sequence_length:
-            return pos
-        raise SearchMarginesDoesNotExist()
-
-    #def get_left_surrounding_restriction(self, restriction_type, max_seek=100):
-        #left_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            #.filter(chromosome=self.chromosome).\
-            #filter(start_pos__lte=self.start_pos-restriction_type.cut_delta).\
-            #filter(start_pos__gte=self.get_margine(self.start_pos-max_seek)).order_by('-start_pos')
-        #if left_restriction_site:
-            #return left_restriction_site[0]
-        #return self.get_left_surrounding_restriction(restriction_type, max_seek=max_seek*2)
-
-    #def get_right_surrounding_restriction(self, restriction_type, max_seek=100):
-        #right_restriction_site = RestrictionSite.objects.filter(restriction_type=restriction_type)\
-            #.filter(chromosome=self.chromosome).\
-            #filter(end_pos__gte=self.end_pos+(restriction_type.sequence_len-restriction_type.cut_delta)).\
-            #filter(end_pos__lte=self.get_margine(self.end_pos+max_seek)).order_by('start_pos')
-        #if right_restriction_site:
-            #return right_restriction_site[0]
-        #return self.get_right_surrounding_restriction(restriction_type, max_seek=max_seek*2)
-
-    def get_surrounding_restriction(self, restriction_type):
-        left = self.get_left_surrounding_restriction(restriction_type)
-        right = self.get_right_surrounding_restriction(restriction_type)
-        return left, right
 
     def __str__(self):
         return "{}:{}-{}".format(self.chromosome.name, self.start_pos,

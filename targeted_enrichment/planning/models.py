@@ -28,11 +28,14 @@ class UGS(models.Model,BaseStrandMixin):
     def __len__(self):
         return len(self.slice)
 
+
 class UGSPlus(UGS,PlusStrandMixin):
     pass
 
+
 class UGSMinus(UGS,MinusStrandMixin):
     pass
+
 
 class Target(models.Model):
     name = models.CharField(max_length=50)
@@ -43,6 +46,7 @@ class Target(models.Model):
 
     def __str__(self):
         return "{} @ {}".format(self.name, self.slice)
+
 
 class TargetEnrichment(models.Model):
     chromosome = models.ForeignKey(Chromosome)
@@ -62,35 +66,9 @@ class TargetEnrichment(models.Model):
         self.save()
         return self.targets.all()
 
-    def amplicon_indices(self): # TODO: kill
-        return (self.left.start_pos, self.right.end_pos)
-
-    @property
-    def amplicon(self):
-        return self.chromosome.getdna(*self.amplicon_indices())
-
-    def get_internal_restriction(self, restriction):
-        return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
-
-    def get_surrounding_restriction(self, restriction, max_seek=5000):
-        for x in range(0, max_seek, 10):
-            lamplicon = self.chromosome.getdna(self.amplicon_indices()[0]-x, self.amplicon_indices()[0])
-            lttaas = [self.amplicon_indices()[0] - m.start() for m in re.finditer(restriction, lamplicon)]
-            if lttaas:
-                break
-
-        for x in range(0, max_seek, 10):
-            ramplicon = self.chromosome.getdna(self.amplicon_indices()[1], self.amplicon_indices()[1]+x)
-            rttaas = [self.amplicon_indices()[1] + m.start() for m in re.finditer(restriction, ramplicon)]
-            if rttaas:
-                break
-
-        if lttaas and rttaas:
-            return max(lttaas), min(rttaas)
-        return None
-
     def __str__(self):
         return "{}, {}".format(self.left, self.right)
+
 
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
@@ -110,6 +88,7 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     def __str__(self):
         return self.name
 
+
 class RestrictionSite(models.Model):
     slice = models.ForeignKey(DNASlice)
     enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
@@ -120,6 +99,7 @@ class RestrictionSite(models.Model):
 
     def __str__(self):
         return "{} @ {}".format(self.enzyme.name, self.slice)
+
 
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
