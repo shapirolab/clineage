@@ -41,7 +41,7 @@ class PlateInputForm(forms.Form):
         required=False)
     plate_type = ModelChoiceField(queryset=PlateType.objects.all(), required=False)
     plate_name = CharField(max_length=200, required=False)
-    samples_in_wells = CharField(widget=Textarea)
+    samples_in_wells = CharField(widget=Textarea, strip=False)
 
     #plate storage fields
     # storage_type = ModelChoiceField(queryset=StorageType.objects.all())
