@@ -53,8 +53,8 @@ def distribute_multiplex(test_input = [(('sp1','A1'),('dp','B1')),(('sp2','B3'),
     script += ' '+'TE_LIST  AUT_AIR  TIPTYPE:200\n'
     script += '\nENDSCRIPT\n'
     print(script)
-    for i in range(0, len(inputPlates)/len(allowedPlates) + 1):
-        if i <= len(inputPlates)/len(allowedPlates):
+    for i in range(0, len(inputPlates)//len(allowedPlates) + 1):
+        if i <= len(inputPlates)//len(allowedPlates):
             last_index = len(allowedPlates)
         else:
             last_index = len(inputPlates) % len(allowedPlates)

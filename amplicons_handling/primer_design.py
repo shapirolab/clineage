@@ -37,10 +37,10 @@ def primer3_design(obj_list, input_name, output_name,
             primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
                                'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST={},{},{},{}\n=\n'.format(target.id,
                                                                                              amplicon,
-                                                                                             1000-(max_size-(len(target.referencevalue.sequence)/2+margins)),
-                                                                                             max_size-(len(target.referencevalue.sequence)/2+margins),
+                                                                                             1000-(max_size-(len(target.referencevalue.sequence)//2+margins)),
+                                                                                             max_size-(len(target.referencevalue.sequence)//2+margins),
                                                                                              1000+len(target.referencevalue.sequence),
-                                                                                             max_size-(len(target.referencevalue.sequence)/2+margins)))
+                                                                                             max_size-(len(target.referencevalue.sequence)//2+margins)))
 
     # Run the primer3 on the input
     primer3_output = ("{}_primer3.txt".format(str(output_name)))

@@ -29,7 +29,7 @@ def num2abc(num):
     """
     assert num > 0
     num -= 1
-    div = num/26
+    div = num // 26
     if div == 0:
         return chr(65+num)
     else:
@@ -121,7 +121,7 @@ def index_2_xy_index(index, dimentions=(8, 12)):
     assert index <= rows*columns
     index -= 1  # factor for 1 based indexing
     x = index % rows + 1  # factor for 0 based indexing
-    y = index / rows + 1  # factor for 0 based indexing
+    y = index // rows + 1  # factor for 0 based indexing
     return x, y
 
 
