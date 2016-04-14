@@ -8,6 +8,8 @@ from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, \
     PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
     TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer, ShortPadlockFirst
 from targeted_enrichment.planning.models import TargetEnrichment
+from targeted_enrichment.amplicons.models import PlainTargetedAmplicon, \
+    UMITargetedAmplicon, TargetedAmpliconWithCompanyTag
 from wet_storage.models import SampleLocation
 
 class TargetEnrichmentFailureType(models.Model):
@@ -26,7 +28,7 @@ class TargetEnrichmentFailureType(models.Model):
         return self.name
 
 class TargetedEnrichmentReagent(models.Model):
-    te = models.ForeignKey(TargetEnrichment)
+    te = models.ForeignKey(TargetEnrichment)  # TODO: maybe kill?
     passed_validation = models.NullBooleanField()
     validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
     validation_date = models.DateField(null=True, blank=True)
@@ -46,21 +48,25 @@ class TwoPrimersUnicodeMixin(object):
     def __str__(self):
         return "{}, {}".format(self.left_primer, self.right_primer)
 
-class PCR1PrimerPairTERBase(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
+
+class PCR1PrimerPairTERBase(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
     pass
 
 
 class PCR1PrimerPairTER(PCR1PrimerPairTERBase):
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
 class PCR1WithCompanyTagPrimerPairTER(PCR1PrimerPairTERBase):
+    amplicon = models.ForeignKey(TargetedAmpliconWithCompanyTag)
     left_primer = models.ForeignKey(PCR1WithCompanyTagPlusPrimer)
     right_primer = models.ForeignKey(PCR1WithCompanyTagMinusPrimer)
 
 
 class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
@@ -69,5 +75,10 @@ class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMi
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
 
+
 class ShortPadlockFirstTER(TargetedEnrichmentReagent):
+    amplicon = models.ForeignKey(UMITargetedAmplicon)
     padlock = models.ForeignKey(ShortPadlockFirst)
+
+    def __unicode__(self):
+        return "{}".format(self.padlock)

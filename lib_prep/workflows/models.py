@@ -77,7 +77,7 @@ class MagicalPCR1Library(Library):
         #TODO: make nice and queryful.
         for mpx in self.panel.mpxs.all():
             for ter in mpx.ters.select_subclasses():
-                yield ter.pcr1amplicon
+                yield ter.amplicon
 
 class MagicalPCR1BarcodedContent(BarcodedContent):
     content = models.ForeignKey(AmplifiedContent)
