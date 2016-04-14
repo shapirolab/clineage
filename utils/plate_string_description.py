@@ -4,7 +4,7 @@ from io import StringIO
 from utils.wells import xy_index_2_index, index2str
 import re
 from sampling.models import SampleComposition
-from django.utils.encoding import smart_bytes
+from django.utils.encoding import smart_text
 
 def plate_parser(plate_string, rows_number=8, columns_number=12):
     """
@@ -30,7 +30,7 @@ def plate_parser(plate_string, rows_number=8, columns_number=12):
 4, '12'), (95, '12'), (96, '')]
     """
     plate_string.replace('\x00', '')
-    plate_string = smart_bytes(plate_string)
+    plate_string = smart_text(plate_string)
     plate_string_io = StringIO(plate_string)
     dialect = csv.Sniffer().sniff(plate_string)  # TODO: default to 'excel-tab' dialect
     has_header = csv.Sniffer().has_header(plate_string)
