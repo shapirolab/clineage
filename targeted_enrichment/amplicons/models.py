@@ -13,6 +13,11 @@ class Amplicon(models.Model):
 
     objects = InheritanceManager()
 
+    # FIXME
+    @property
+    def subclass(self):
+        return Amplicon.objects.get_subclass(id=self.id)
+
     @property
     def left_margin(self):
         raise NotImplementedError()

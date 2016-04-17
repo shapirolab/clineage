@@ -236,6 +236,7 @@ def _get_mss_variations_seqrecords(mss, seq_fmt, prefix):
 
 
 def _build_ms_variations(amplicon, padding):
+    amplicon = amplicon.subclass
     # FIXME: What's the right API for this?
     targets = list(amplicon.ter.te.targets.select_related(
         "microsatellite",

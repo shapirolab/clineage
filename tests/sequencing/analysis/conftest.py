@@ -218,7 +218,7 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
                 os.symlink(f_d[r], f_d2[r])
             aar = AdamAmpliconReads.objects.create(
                 margin_assignment=ama,
-                amplicon=Amplicon.objects.select_subclasses().get(id=amp),
+                amplicon_id=amp,
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
