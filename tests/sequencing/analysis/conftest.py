@@ -6,8 +6,7 @@ import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
-    AdamMSVariations, AdamHistogram
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads
 from targeted_enrichment.amplicons.models import Amplicon
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
@@ -20,9 +19,6 @@ from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM
 from tests.flat_dict import FlatDict
 from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
-
-
-file_fixtures_path = os.path.join(*(os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1] + ("ngs_fixtures",)))
 
 
 @pytest.fixture(scope="session")
