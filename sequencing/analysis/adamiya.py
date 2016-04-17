@@ -16,7 +16,8 @@ from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     ms_genotypes_to_name, AdamHistogram, HistogramEntryReads
-from targeted_enrichment.planning.models import Microsatellite
+from targeted_enrichment.planning.models import Microsatellite, \
+    PhasedMicrosatellites
 
 pear = local["pear"]
 pear_with_defaults = pear["-v", "40",
@@ -235,23 +236,10 @@ def _get_mss_variations_seqrecords(mss, seq_fmt, prefix):
         )
 
 
-def _build_ms_variations(amplicon, padding):
+def _build_ms_variations(amplicon, padding, mss):
     amplicon = amplicon.subclass
-    # FIXME: What's the right API for this?
-    targets = list(amplicon.ter.te.targets.select_related(
-        "microsatellite",
-        "slice",
-    ))
-    mss = []
-    for t in targets:
-        try:
-            m = t.microsatellite
-        except Microsatellite.DoesNotExist:
-            pass
-        else:
-            mss.append(m)
     # This is so they are ordered properly for the format string.
-    mss = sorted(mss,key=lambda ms: ms.slice.start_pos)
+    mss = sorted(mss, key=lambda ms: ms.slice.start_pos)
     # FIXME: kill this +-1 when we move to 0-based.
     points = [amplicon.slice.start_pos-1]
     for ms in mss:
@@ -280,19 +268,26 @@ def _build_ms_variations(amplicon, padding):
     return fasta
 
 
-def get_adam_ms_variations(amplicon, padding):
+def get_adam_ms_variations(amplicon, padding, mss_version):
+    pms = PhasedMicrosatellites.objects.get(
+        slice=amplicon.slice,
+        planning_version=mss_version,
+    )
     try:
         return AdamMSVariations.objects.get(
             amplicon=amplicon,
             padding=padding,
+            microsatellites_version=pms,
         )
     except AdamMSVariations.DoesNotExist:
         index_dir = get_unique_path()
-        fasta = _build_ms_variations(amplicon, padding)
+        mss = list(pms.microsatellites.all())
+        fasta = _build_ms_variations(amplicon, padding, mss)
         os.mkdir(index_dir)
         mock_msv = AdamMSVariations(
             amplicon=amplicon,
             padding=padding,
+            microsatellites_version=pms,
             index_dump_dir=index_dir,
         )
         bowtie2build(fasta, mock_msv.index_files_prefix)
@@ -300,6 +295,7 @@ def get_adam_ms_variations(amplicon, padding):
         msv, c = AdamMSVariations.objects.get_or_create(
             amplicon=amplicon,
             padding=padding,
+            microsatellites_version=pms,
             defaults={"index_dump_dir": index_dir}
         )
         if not c:
@@ -307,9 +303,9 @@ def get_adam_ms_variations(amplicon, padding):
         return msv
 
 
-def align_reads_to_ms_variations(amplicon_reads, padding):
+def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
     assignment_sam = get_unique_path("sam")
-    msv = get_adam_ms_variations(amplicon_reads.amplicon, padding)
+    msv = get_adam_ms_variations(amplicon_reads.amplicon, padding, mss_version)
     bowtie2_with_defaults2('-x', msv.index_files_prefix,
                           '-U', amplicon_reads.fastqm,
                           '-S', assignment_sam)
@@ -318,6 +314,7 @@ def align_reads_to_ms_variations(amplicon_reads, padding):
             .merged_reads.sample_reads_id,
         amplicon_reads=amplicon_reads,
         assignment_sam=assignment_sam,
+        ms_variations=msv,
     )
     return ah
 
@@ -351,6 +348,8 @@ def separate_reads_by_genotypes(histogram):
         her = HistogramEntryReads.objects.create(
             histogram=histogram,
             amplicon=histogram.amplicon_reads.amplicon,
+            microsatellites_version=histogram.ms_variations \
+                .microsatellites_version,
             num_reads=len(read_ids),
             fastq1=genotypes_reads1_fastq_name,
             fastq2=genotypes_reads2_fastq_name,

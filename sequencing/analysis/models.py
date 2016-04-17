@@ -12,7 +12,8 @@ from django.db.models.signals import post_delete
 from django.dispatch.dispatcher import receiver
 
 from sequencing.runs.models import Demultiplexing
-from targeted_enrichment.planning.models import Microsatellite, SNP
+from targeted_enrichment.planning.models import Microsatellite, SNP, \
+    PhasedMicrosatellites
 from targeted_enrichment.amplicons.models import Amplicon
 from lib_prep.workflows.models import Library, BarcodedContent
 
@@ -175,6 +176,7 @@ post_delete.connect(delete_files, AdamAmpliconReads)
 class AdamMSVariations(BowtieIndexMixin):
     amplicon = models.ForeignKey(Amplicon)
     padding = models.PositiveIntegerField()
+    microsatellites_version = models.ForeignKey(PhasedMicrosatellites)
 
     class Meta:
         index_together=[
@@ -193,6 +195,7 @@ class Histogram(models.Model):
 class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
     assignment_sam = models.FilePathField()
+    ms_variations = models.ForeignKey(AdamMSVariations)
 
     def read_sam(self):
         for ms_genotypes_name, read_id in _read_sam(self.assignment_sam):
@@ -263,6 +266,7 @@ class SNPHistogramGenotype(models.Model):
 class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
     amplicon = models.ForeignKey(Amplicon)
+    microsatellites_version = models.ForeignKey(PhasedMicrosatellites)
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
     snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
     num_reads = models.PositiveIntegerField()

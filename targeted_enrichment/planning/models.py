@@ -49,22 +49,12 @@ class Target(models.Model):
 
 
 class TargetEnrichment(models.Model):
-    chromosome = models.ForeignKey(Chromosome)
+    chromosome = models.ForeignKey(Chromosome, null=True)
     left = models.ForeignKey(UGSPlus)
     right = models.ForeignKey(UGSMinus)
     # slice = models.ForeignKey(DNASlice)
-    targets = models.ManyToManyField(Target)
     partner = models.ManyToManyField(User) # TODO: external table.
     planning_version = models.IntegerField()
-
-    def update_enriched_targets(self): # return queryset of targets between the two primers and updates the m2m targets field
-        assert self.left.slice.chromosome == self.right.slice.chromosome
-        assert self.chromosome == self.left.slice.chromosome
-        # TODO: change to slice query.
-        self.targets = Target.objects.filter(slice__chromosome=self.chromosome, slice__start_pos__gte=self.left.slice.start_pos)\
-            .filter(slice__end_pos__lte=self.right.slice.end_pos)
-        self.save()
-        return self.targets.all()
 
     def __str__(self):
         return "{}, {}".format(self.left, self.right)
@@ -120,4 +110,7 @@ class SNP(Target):
         return "{}:{} @ {}".format(self.name, self.mutation, self.slice)
 
 
-# TODO: add indel
+class PhasedMicrosatellites(models.Model):
+    slice = models.ForeignKey(DNASlice)
+    microsatellites = models.ManyToManyField(Microsatellite)
+    planning_version = models.PositiveIntegerField(db_index=True)

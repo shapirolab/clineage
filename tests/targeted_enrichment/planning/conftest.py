@@ -1,6 +1,7 @@
 import pytest
 
-from targeted_enrichment.planning.models import UGSPlus, UGSMinus, TargetEnrichment, Microsatellite
+from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
+    TargetEnrichment, Microsatellite, PhasedMicrosatellites
 
 from tests.genomes.conftest import *
 
@@ -50,15 +51,24 @@ def ms_28727_b(slice_28727_target_b):
 
 
 @pytest.fixture()
-def te_28727(hg19_chromosome, ugs_28727_left, ugs_28727_right, ms_28727_a, ms_28727_b):
+def te_28727(hg19_chromosome, ugs_28727_left, ugs_28727_right):
     te = TargetEnrichment.objects.create(
         chromosome=hg19_chromosome,
         left=ugs_28727_left,
         right=ugs_28727_right,
         planning_version=1,
     )
-    te.targets = [ms_28727_a, ms_28727_b]
     return te
+
+
+@pytest.fixture()
+def pms_28727(ms_28727_a, ms_28727_b, slice_28727_amplicon):
+    pms = PhasedMicrosatellites.objects.create(
+        slice=slice_28727_amplicon,
+        planning_version=0,
+    )
+    pms.microsatellites = [ms_28727_a, ms_28727_b]
+    return pms
 
 
 @pytest.fixture()
@@ -92,14 +102,26 @@ def ms_28734_a(slice_28734_target_a):
 
 
 @pytest.fixture()
-def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right, ms_28734_a):
+def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
     te = TargetEnrichment.objects.create(
         chromosome=hg19_chromosome,
         left=ugs_28734_left,
         right=ugs_28734_right,
         planning_version=1,
     )
-    te.targets = [ms_28734_a]
     return te
 
 
+@pytest.fixture()
+def pms_28734(ms_28734_a, slice_28734_amplicon):
+    pms = PhasedMicrosatellites.objects.create(
+        slice=slice_28734_amplicon,
+        planning_version=0,
+    )
+    pms.microsatellites = [ms_28734_a]
+    return pms
+
+
+@pytest.fixture()
+def requires_pmss(pms_28727, pms_28734):
+    pass
