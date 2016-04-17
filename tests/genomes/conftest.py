@@ -67,6 +67,16 @@ def slice_28727_right(hg19_chromosome):
 
 
 @pytest.fixture()
+def slice_28727_amplicon(hg19_chromosome):
+    dnas = DNASlice.objects.create(
+        chromosome=hg19_chromosome,
+        start_pos=81316117,
+        end_pos=81316242,
+    )
+    return dnas
+
+
+@pytest.fixture()
 def slice_28734_left(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
@@ -92,5 +102,15 @@ def slice_28734_right(hg19_chromosome):
         chromosome=hg19_chromosome,
         start_pos=54384807,
         end_pos=54384829,
+    )
+    return dnas
+
+
+@pytest.fixture()
+def slice_28734_amplicon(hg19_chromosome):
+    dnas = DNASlice.objects.create(
+        chromosome=hg19_chromosome,
+        start_pos=54384697,
+        end_pos=54384806,
     )
     return dnas
