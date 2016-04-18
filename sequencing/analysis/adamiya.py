@@ -175,7 +175,7 @@ def _aggregate_read_ids_by_amplicon(validated_reads_amplicons):
     return reads_by_amplicon
 
 
-def _extract_amplicon_reads(indexed_reads, read_ids):
+def _extract_reads_by_id(indexed_reads, read_ids):
     amplicon_reads_fastq_name = get_unique_path("fastq")
     amplicon_reads = (indexed_reads[read_id] for read_id in read_ids)
     SeqIO.write(amplicon_reads, amplicon_reads_fastq_name, "fastq")
@@ -193,9 +193,9 @@ def seperate_reads_by_amplicons(margin_assignment):
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.items():
-        amplicon_readsm_fastq_name = _extract_amplicon_reads(reads, read_ids)
-        amplicon_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
-        amplicon_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)
+        amplicon_readsm_fastq_name = _extract_reads_by_id(reads, read_ids)
+        amplicon_reads1_fastq_name = _extract_reads_by_id(reads1, read_ids)
+        amplicon_reads2_fastq_name = _extract_reads_by_id(reads2, read_ids)
         aar = AdamAmpliconReads.objects.create(
             margin_assignment=margin_assignment,
             amplicon=amplicon,
@@ -344,9 +344,9 @@ def separate_reads_by_genotypes(histogram):
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
     readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
     for genotypes, read_ids in genotypes_reads.items():
-        genotypes_readsm_fastq_name = _extract_amplicon_reads(readsm, read_ids)
-        genotypes_reads1_fastq_name = _extract_amplicon_reads(reads1, read_ids)
-        genotypes_reads2_fastq_name = _extract_amplicon_reads(reads2, read_ids)
+        genotypes_readsm_fastq_name = _extract_reads_by_id(readsm, read_ids)
+        genotypes_reads1_fastq_name = _extract_reads_by_id(reads1, read_ids)
+        genotypes_reads2_fastq_name = _extract_reads_by_id(reads2, read_ids)
         her = HistogramEntryReads.objects.create(
             histogram=histogram,
             amplicon=histogram.amplicon_reads.amplicon,
