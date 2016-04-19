@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from sampling.models import Individual, SamplingEvent, SampleComposition, \
     SampleStatus
 from targeted_enrichment.planning.models import Target
-from lib_prep.multiplexes.models import Panel
 from lib_prep.workflows.models import CellContentProtocol
 from wet_storage.models import Plate, PlateType, StorageBox
 from linapp.widgets import *
