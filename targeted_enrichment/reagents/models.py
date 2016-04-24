@@ -54,19 +54,19 @@ class PCR1PrimerPairTERBase(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
 
 
 class PCR1PrimerPairTER(PCR1PrimerPairTERBase):
-    amplicon = models.ForeignKey(PlainTargetedAmplicon)
+    amplicon = models.ForeignKey(PlainTargetedAmplicon, null=True)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
 class PCR1WithCompanyTagPrimerPairTER(PCR1PrimerPairTERBase):
-    amplicon = models.ForeignKey(TargetedAmpliconWithCompanyTag)
+    amplicon = models.ForeignKey(TargetedAmpliconWithCompanyTag, null=True)
     left_primer = models.ForeignKey(PCR1WithCompanyTagPlusPrimer)
     right_primer = models.ForeignKey(PCR1WithCompanyTagMinusPrimer)
 
 
 class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
-    amplicon = models.ForeignKey(PlainTargetedAmplicon)
+    amplicon = models.ForeignKey(PlainTargetedAmplicon, null=True)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
@@ -77,7 +77,7 @@ class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMi
 
 
 class ShortPadlockFirstTER(TargetedEnrichmentReagent):
-    amplicon = models.ForeignKey(UMITargetedAmplicon)
+    amplicon = models.ForeignKey(UMITargetedAmplicon, null=True)
     padlock = models.ForeignKey(ShortPadlockFirst)
 
     def __unicode__(self):
