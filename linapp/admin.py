@@ -2,33 +2,32 @@
 from django.contrib import admin
 
 from wet_storage.models import StorageType, StorageBox, PlateContext, \
-PlatePlastica, PlateType, Plate, PlateStorage, SampleLocation
+    PlatePlastica, PlateType, Plate, PlateStorage, SampleLocation
 from linapp.models import LineageRole, UserProfile, ProtocolType, Protocol, \
-UserReport
-from lib_prep.workflows.models import CellContentType, CellContentProtocol, \
-CellContent
-from lib_prep.multiplexes.models import PCR1Multiplex, Panel
+    UserReport
+from lib_prep.workflows.models import BarcodedContent, CellContentProtocol, \
+    AmplifiedContent
+from lib_prep.multiplexes.models import PCR1Multiplex, PCR1Panel
 from misc.models import Taxa
 from genomes.models import Assembly, Chromosome, DNASlice
 from targeted_enrichment.reagents.models import TargetEnrichmentFailureType, \
-PCR1PrimerPairTER, PCR1WithCompanyTagPrimerPairTER, \
-PCR1PrimerPairTERDeprecated, TargetedNoTailPrimerPairTER
+    PCR1PrimerPairTER, PCR1WithCompanyTagPrimerPairTER, \
+    PCR1PrimerPairTERDeprecated, TargetedNoTailPrimerPairTER
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus, Target, \
-TargetEnrichment, RestrictionEnzyme, RestrictionSite, Microsatellite, SNP
+    TargetEnrichment, RestrictionEnzyme, RestrictionSite, Microsatellite, SNP
 from sampling.models import GeneticBackground, Organ, Tissue, \
-SampleComposition, SampleStatus, Coordinates, FACSMarker, Location, \
-Individual, ExtractionEvent, Extraction, SamplingEvent, FACS, LaserCapture, \
-CellSelector, Cell
+    SampleComposition, SampleStatus, Coordinates, FACSMarker, Location, \
+    Individual, ExtractionEvent, Extraction, SamplingEvent, FACS, \
+    LaserCapture, CellSelector, Cell
 from primers.parts.models import IlluminaReadingAdaptor1, \
-IlluminaReadingAdaptor2, IlluminaReadingAdaptor1Cuts, \
-IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor1, \
-IlluminaFlowCellAdaptor2, DNABarcode1, DNABarcode2
+    IlluminaReadingAdaptor2, IlluminaReadingAdaptor1Cuts, \
+    IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor1, \
+    IlluminaFlowCellAdaptor2, DNABarcode1, DNABarcode2
 from primers.synthesis.models import TargetedNoTailPlusPrimer, \
-TargetedNoTailMinusPrimer, PCR1PlusPrimer, PCR1MinusPrimer, \
-PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, PCR2PlusPrimer, \
-PCR2MinusPrimer
-from sequencing.runs.models import MachineType, Machine, NGSRun, \
-DemultiplexingScheme, MergingScheme, DemultiplexedReads, MergedReads
+    TargetedNoTailMinusPrimer, PCR1PlusPrimer, PCR1MinusPrimer, \
+    PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
+    PCR2PlusPrimer, PCR2MinusPrimer
+from sequencing.runs.models import MachineType, Machine, NGSRun
 
 admin.site.register(StorageType)
 admin.site.register(StorageBox)
@@ -45,12 +44,12 @@ admin.site.register(ProtocolType)
 admin.site.register(Protocol)
 admin.site.register(UserReport)
 
-admin.site.register(CellContentType)
+admin.site.register(BarcodedContent)
 admin.site.register(CellContentProtocol)
-admin.site.register(CellContent)
+admin.site.register(AmplifiedContent)
 
 admin.site.register(PCR1Multiplex)
-admin.site.register(Panel)
+admin.site.register(PCR1Panel)
 
 admin.site.register(Taxa)
 
@@ -111,7 +110,3 @@ admin.site.register(PCR2MinusPrimer)
 admin.site.register(MachineType)
 admin.site.register(Machine)
 admin.site.register(NGSRun)
-admin.site.register(DemultiplexingScheme)
-admin.site.register(MergingScheme)
-admin.site.register(DemultiplexedReads)
-admin.site.register(MergedReads)

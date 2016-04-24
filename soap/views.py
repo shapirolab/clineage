@@ -280,7 +280,7 @@ niki_service = csrf_exempt(DjangoApplication(Application([CLineageWebServices],
 #     status = models.ForeignKey(SampleStatus, null=True, blank=True)
 #     comment = models.TextField(null=True, blank=True)
 #
-#     def __unicode__(self):
+#     def __str__(self):
 #         return self.name
 #
 #     def get_absolute_url(self):

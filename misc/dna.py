@@ -1,8 +1,11 @@
 
-basecomp = {b'A': b'T',
-            b'T': b'A',
-            b'C': b'G',
-            b'G': b'C'}
+basecomp = {
+    b'A': b'T',
+    b'T': b'A',
+    b'C': b'G',
+    b'G': b'C',
+    b'N': b'N',
+}
 
 def _rc(seq):
     n = len(seq)
@@ -18,13 +21,13 @@ class DNA(object):
         if isinstance(seq, str):
             s = seq.upper()
             for i in s:
-                if i not in "ACGT":
+                if i not in "ACGTN":
                     raise ValueError("Invalid DNA base - not one of A,C,T,G.")
             self._seq = s.encode("ascii")
         elif isinstance(seq, bytes):
             s = seq.upper()
             for i in s:
-                if i not in b"ACGT":
+                if i not in b"ACGTN":
                     raise ValueError("Invalid DNA base - not one of A,C,T,G.")
             self._seq = s
         else:

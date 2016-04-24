@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from model_utils.managers import InheritanceManager
 
 from genomes.models import DNASlice, Chromosome
+from misc.dna import DNA
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
 
@@ -24,11 +25,17 @@ class UGS(models.Model,BaseStrandMixin):
     def __str__(self):
         return "{}({})".format(self.slice, self.strand)
 
+    def __len__(self):
+        return len(self.slice)
+
+
 class UGSPlus(UGS,PlusStrandMixin):
     pass
 
+
 class UGSMinus(UGS,MinusStrandMixin):
     pass
+
 
 class Target(models.Model):
     name = models.CharField(max_length=50)
@@ -40,60 +47,29 @@ class Target(models.Model):
     def __str__(self):
         return "{} @ {}".format(self.name, self.slice)
 
+
 class TargetEnrichment(models.Model):
-    chromosome = models.ForeignKey(Chromosome)
+    chromosome = models.ForeignKey(Chromosome, null=True)
     left = models.ForeignKey(UGSPlus)
     right = models.ForeignKey(UGSMinus)
     # slice = models.ForeignKey(DNASlice)
-    targets = models.ManyToManyField(Target)
     partner = models.ManyToManyField(User) # TODO: external table.
     planning_version = models.IntegerField()
-
-    def update_enriched_targets(self): # return queryset of targets between the two primers and updates the m2m targets field
-        assert self.left.slice.chromosome == self.right.slice.chromosome
-        assert self.chromosome == self.left.slice.chromosome
-        # TODO: change to slice query.
-        self.targets = Target.objects.filter(slice__chromosome=self.chromosome, slice__start_pos__gte=self.left.slice.start_pos)\
-            .filter(slice__end_pos__lte=self.right.slice.end_pos)
-        self.save()
-        return self.targets.all()
-
-    def amplicon_indices(self): # TODO: kill
-        return (self.left.start_pos, self.right.end_pos)
-
-    @property
-    def amplicon(self):
-        return self.chromosome.getdna(*self.amplicon_indices())
-
-    def get_internal_restriction(self, restriction):
-        return [self.amplicon_indices()[0] + m.start() for m in re.finditer(restriction, self.chromosome.getdna(*self.amplicon_indices()))]
-
-    def get_surrounding_restriction(self, restriction, max_seek=5000):
-        for x in range(0, max_seek, 10):
-            lamplicon = self.chromosome.getdna(self.amplicon_indices()[0]-x, self.amplicon_indices()[0])
-            lttaas = [self.amplicon_indices()[0] - m.start() for m in re.finditer(restriction, lamplicon)]
-            if lttaas:
-                break
-
-        for x in range(0, max_seek, 10):
-            ramplicon = self.chromosome.getdna(self.amplicon_indices()[1], self.amplicon_indices()[1]+x)
-            rttaas = [self.amplicon_indices()[1] + m.start() for m in re.finditer(restriction, ramplicon)]
-            if rttaas:
-                break
-
-        if lttaas and rttaas:
-            return max(lttaas), min(rttaas)
-        return None
 
     def __str__(self):
         return "{}, {}".format(self.left, self.right)
 
+
 class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
     name = models.CharField(max_length=50)
-    sequence = models.CharField(max_length=50) # TODO: DNAField
+    _sequence = models.CharField(max_length=50) # TODO: DNAField
     cut_delta = models.IntegerField()  # position of cutting site relative to start_pos
     sticky_bases = models.IntegerField()
     sequence_len = models.PositiveIntegerField()
+
+    @property
+    def sequence(self):
+        return DNA(self._sequence)
 
     def save(self, *args, **kwargs):
         self.sequence_len = len(self.sequence)
@@ -101,6 +77,7 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
 
     def __str__(self):
         return self.name
+
 
 class RestrictionSite(models.Model):
     slice = models.ForeignKey(DNASlice)
@@ -113,10 +90,12 @@ class RestrictionSite(models.Model):
     def __str__(self):
         return "{} @ {}".format(self.enzyme.name, self.slice)
 
+
 class Microsatellite(Target):
     repeat_unit_len = models.PositiveIntegerField() #length of repeat Nmer
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
+    repeat_unit_ref_seq = models.CharField(max_length=50) #string of acutal unit in genome.
 
     def __str__(self):
         return "{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,
@@ -131,4 +110,7 @@ class SNP(Target):
         return "{}:{} @ {}".format(self.name, self.mutation, self.slice)
 
 
-# TODO: add indel
+class PhasedMicrosatellites(models.Model):
+    slice = models.ForeignKey(DNASlice)
+    microsatellites = models.ManyToManyField(Microsatellite)
+    planning_version = models.PositiveIntegerField(db_index=True)

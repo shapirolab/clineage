@@ -23,7 +23,7 @@ from utils.user_cells_report import user_cells_table_values, get_partner_report
 from linapp.forms import PlateInputForm, MultipleCellForm
 from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
 from sampling.models import FACS, LaserCapture, SampleComposition
-from lib_prep.workflows.models import CellContentType, CellContent
+from lib_prep.workflows.models import AmplifiedContent
 from misc.models import Taxa
 from genomes.models import Assembly
 from targeted_enrichment.planning.models import Microsatellite, TargetEnrichment
@@ -191,18 +191,18 @@ class CellDelete(DeleteView):
     model = Cell
 
 class CellContentCreate(JsonFormMixin, CreateView):
-    model = CellContent
+    model = AmplifiedContent
     fields = "__all__"
 
 class CellContentUpdate(JsonFormMixin, UpdateView):
-    model = CellContent
+    model = AmplifiedContent
     fields = "__all__"
 
 class CellContentDetail(DetailView):
-    model = CellContent
+    model = AmplifiedContent
 
 class CellContentDelete(DeleteView):
-    model = CellContent
+    model = AmplifiedContent
 
 
 class PlateCreate(JsonFormMixin, CreateView):
@@ -244,7 +244,6 @@ def plate_input(request):
     if request.method == 'POST':
         plate_form = PlateInputForm(request.POST, prefix='platecells')
         if plate_form.is_valid():
-            plate_content_type = CellContentType.objects.get()
             individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
             inserting_user = plate_form.cleaned_data['user']
@@ -293,12 +292,10 @@ def plate_input(request):
                         composition=well_composition,
                         comment=plate_form.cleaned_data['comment'] + '\r\ncomposition comment:%s' % cell_value,
                     )
-                    new_cell_content = CellContent.objects.create(
+                    new_cell_content = AmplifiedContent.objects.create(
                         cell=new_cell,
-                        type=plate_content_type,
                         name=plate_form.cleaned_data['cells_name_prefix'] + index2str(index),
                         protocol=cell_content_protocol,
-                        #seq_ready=False,
                         user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
@@ -326,7 +323,6 @@ def plate_input_with_names(request):
     if request.method == 'POST':
         plate_form = PlateInputForm(request.POST, prefix='platecells')
         if plate_form.is_valid():
-            plate_content_type = CellContentType.objects.get()
             individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
             inserting_user = plate_form.cleaned_data['user']
@@ -376,12 +372,10 @@ def plate_input_with_names(request):
                         composition=SampleComposition.objects.get(name='Single Cell'),
                         comment=plate_form.cleaned_data['comment'] + '\r\ncomposition comment:%s' % cell_value,
                     )
-                    new_cell_content = CellContent.objects.create(
+                    new_cell_content = AmplifiedContent.objects.create(
                         cell=new_cell,
-                        type=plate_content_type,
                         name=cell_value,
                         protocol=cell_content_protocol,
-                        #seq_ready=False,
                         user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
