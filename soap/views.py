@@ -16,7 +16,7 @@ from Bio.SeqUtils.MeltingTemp import Tm_staluc
 from genomes.models import Assembly, Chromosome
 from targeted_enrichment.planning.models import Target, Microsatellite
 from wet_storage.models import Plate
-from lib_prep.multiplexes.models import Panel
+from lib_prep.multiplexes.models import PCR1Panel
 from linapp.queries import get_targets_by_panel, get_targets_by_aar
 
 
@@ -133,9 +133,9 @@ class CLineageWebServices(ServiceBase):
         '''
 
         try:
-            panel = Panel.objects.get(name=panel_name)
-        except Panel.DoesNotExist:
-            raise ArgumentError('Panel not found: {}'.format(panel_name))
+            panel = PCR1Panel.objects.get(name=panel_name)
+        except PCR1Panel.DoesNotExist:
+            raise ArgumentError('PCR1Panel not found: {}'.format(panel_name))
         # for row in get_targets_by_panel(panel):
         for row in get_targets_by_panel(panel):
             yield row
@@ -183,7 +183,7 @@ class CLineageWebServices(ServiceBase):
 
         try:
             aar_plate = Plate.objects.get(name=aar_plate_name)
-        except Panel.DoesNotExist:
+        except Plate.DoesNotExist:
             raise ArgumentError('Plate not found: {}'.format(aar_plate_name))
         # for row in get_targets_by_panel(panel):
         for row in get_targets_by_aar(aar_plate):
