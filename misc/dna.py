@@ -68,3 +68,10 @@ class DNA(object):
             raise TypeError("unsupported operand type(s) for ==: '%s' and '%s'"
                             % (type(self), type(other)))
         return self.seq == other.seq
+
+    def __len__(self):
+        return len(self.seq)
+
+    def __hash__(self):
+        return self.seq.__hash__()
+
