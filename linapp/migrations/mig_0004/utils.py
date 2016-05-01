@@ -100,7 +100,7 @@ def getdna(self, start, stop):
        and stop <= self.sequence_length:
         with open(_chromosome_get_abs_path(self), 'r+b') as f:
             mm = mmap.mmap(f.fileno(), 0)
-            return mm[start-1:stop].upper()
+            return mm[start-1:stop].decode("ASCII").upper()
     if self.cyclic:
         if start > self.sequence_length:
             start = start-self.sequence_length
