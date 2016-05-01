@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from misc.dna import DNA
 from django.db import migrations, models
 import django.db.models.deletion
+from django.db import IntegrityError
 from utils.ms_utils import ms_type_permutations
 from frogress import bar
 import os
@@ -60,15 +61,25 @@ def getdna(self, start, stop):
 def get_repeat_unit_ref_seq_forward(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Microsatellite = apps.get_model("planning", "Microsatellite")
-    for rut_dict in Microsatellite.objects.using(db_alias).values('repeat_unit_type').distinct():
-        rut = DNA(rut_dict['repeat_unit_type'])
-        repeat_type_variants = set(ms_type_permutations(rut))
-        print('Migrating MSs of type {}'.format(rut))
-        for ms in bar(Microsatellite.objects.using(db_alias).filter(repeat_unit_type=rut)):
-            repeat_unit_ref_seq = get_sequence(ms.slice)[:ms.repeat_unit_len]
-            assert repeat_unit_ref_seq in repeat_type_variants
-            ms.repeat_unit_ref_seq = repeat_unit_ref_seq
-            ms.save()
+    rut_canon = {}
+    for ms in bar(Microsatellite.objects.using(db_alias).all()):
+        repeat_unit_ref_seq = get_sequence(ms.slice)[:ms.repeat_unit_len]
+        if repeat_unit_ref_seq not in rut_canon:
+            repeat_type_variants = set(ms_type_permutations(repeat_unit_ref_seq))
+            canon = min(repeat_type_variants, key=lambda x: x.seq)
+            for in_rut in repeat_type_variants:
+                rut_canon[in_rut] = canon
+        canon = rut_canon[repeat_unit_ref_seq]
+        msrut = DNA(ms.repeat_unit_type)
+        if msrut != rut_canon[msrut]:
+            raise IntegrityError(
+                "MS {} has non canonic repeat_unit_type".format(ms))
+        if canon != msrut:
+            raise IntegrityError(
+                "ref seq {} does not match repeat unit type of {}".format(
+                    repeat_unit_ref_seq, ms))
+        ms.repeat_unit_ref_seq = repeat_unit_ref_seq
+        ms.save()
 
 
 def get_repeat_unit_ref_seq_reverse(apps, schema_editor):
