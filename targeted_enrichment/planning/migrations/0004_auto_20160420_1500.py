@@ -92,7 +92,7 @@ def populate_phased_mss(apps, schema_editor):
     for amplicon in bar(Amplicon.objects.using(db_alias). \
         select_related("slice")):
         # We do the select related, because we need the slices next.
-        pms = PhasedMicrosatellites.objects.create(
+        pms = PhasedMicrosatellites.objects.using(db_alias).create(
             planning_version=0,
             slice=amplicon.slice,
         )
