@@ -2,3 +2,4 @@
 clineage/local_settings.py
 fabfile.py
 *.sqlite3
+.cache/
