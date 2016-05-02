@@ -83,6 +83,14 @@ def get_repeat_unit_ref_seq_forward(apps, schema_editor):
         ms.save()
 
 
+def populate_phased_mss(apps, schema_editor):
+    pass
+
+
+def populate_te_targets(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -97,6 +105,20 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('planning_version', models.PositiveIntegerField(db_index=True)),
             ],
+        ),
+        migrations.AddField(
+            model_name='phasedmicrosatellites',
+            name='microsatellites',
+            field=models.ManyToManyField(to='planning.Microsatellite'),
+        ),
+        migrations.AddField(
+            model_name='phasedmicrosatellites',
+            name='slice',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='genomes.DNASlice'),
+        ),
+        migrations.RunPython(
+            code=populate_phased_mss,
+            reverse_code=populate_te_targets,
         ),
         migrations.RemoveField(
             model_name='targetenrichment',
@@ -116,15 +138,5 @@ class Migration(migrations.Migration):
             model_name='targetenrichment',
             name='chromosome',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='genomes.Chromosome'),
-        ),
-        migrations.AddField(
-            model_name='phasedmicrosatellites',
-            name='microsatellites',
-            field=models.ManyToManyField(to='planning.Microsatellite'),
-        ),
-        migrations.AddField(
-            model_name='phasedmicrosatellites',
-            name='slice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='genomes.DNASlice'),
         ),
     ]
