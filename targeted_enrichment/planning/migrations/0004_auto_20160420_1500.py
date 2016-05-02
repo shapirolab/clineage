@@ -62,6 +62,7 @@ def get_repeat_unit_ref_seq_forward(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Microsatellite = apps.get_model("planning", "Microsatellite")
     rut_canon = {}
+    print()
     for ms in bar(Microsatellite.objects.using(db_alias).all()):
         repeat_unit_ref_seq = get_sequence(ms.slice)[:ms.repeat_unit_len]
         if repeat_unit_ref_seq not in rut_canon:
@@ -80,10 +81,6 @@ def get_repeat_unit_ref_seq_forward(apps, schema_editor):
                     repeat_unit_ref_seq, ms))
         ms.repeat_unit_ref_seq = repeat_unit_ref_seq
         ms.save()
-
-
-def get_repeat_unit_ref_seq_reverse(apps, schema_editor):
-    pass
 
 
 class Migration(migrations.Migration):
@@ -111,7 +108,10 @@ class Migration(migrations.Migration):
             field=models.CharField(default='X', max_length=50),
             preserve_default=False,
         ),
-        migrations.RunPython(get_repeat_unit_ref_seq_forward, get_repeat_unit_ref_seq_reverse),
+        migrations.RunPython(
+            code=get_repeat_unit_ref_seq_forward,
+            reverse_code=migrations.RunPython.noop,
+        ),
         migrations.AlterField(
             model_name='targetenrichment',
             name='chromosome',
