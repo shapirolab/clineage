@@ -72,6 +72,7 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
 
 
 class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
 

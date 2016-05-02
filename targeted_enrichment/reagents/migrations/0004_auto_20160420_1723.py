@@ -25,6 +25,11 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='amplicons.PlainTargetedAmplicon'),
         ),
         migrations.AddField(
+            model_name='targetednotailprimerpairter',
+            name='amplicon',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='amplicons.PlainTargetedAmplicon'),
+        ),
+        migrations.AddField(
             model_name='pcr1withcompanytagprimerpairter',
             name='amplicon',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='amplicons.TargetedAmpliconWithCompanyTag'),
