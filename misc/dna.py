@@ -57,6 +57,9 @@ class DNA(object):
     def __str__(self):
         return self.seq.decode("ascii")
 
+    def __format__(self, fmt):
+        return str(self).format(fmt)
+
     def __repr__(self):
         return "DNA(\"%s\")" % (self.seq)
 
