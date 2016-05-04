@@ -44,7 +44,7 @@ class TwoPrimersUnicodeMixin(object):
     def __str__(self):
         return "{}, {}".format(self.left_primer, self.right_primer)
 
-class PCR1PrimerPairTERBase(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
+class PCR1PrimerPairTERBase(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
     pass
 
 
@@ -63,6 +63,6 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
-class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
+class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
