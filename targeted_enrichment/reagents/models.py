@@ -12,6 +12,7 @@ from targeted_enrichment.amplicons.models import PlainTargetedAmplicon, \
     UMITargetedAmplicon, TargetedAmpliconWithCompanyTag
 from wet_storage.models import SampleLocation
 
+
 class TargetEnrichmentFailureType(models.Model):
     """
     1 = No product
@@ -26,6 +27,7 @@ class TargetEnrichmentFailureType(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class TargetedEnrichmentReagent(models.Model):
     te = models.ForeignKey(TargetEnrichment)  # TODO: maybe kill?
@@ -71,8 +73,7 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
-class TargetedNoTailPrimerPairTER(TargetedEnrichmentReagent, TwoPrimersUnicodeMixin):
-    amplicon = models.ForeignKey(PlainTargetedAmplicon)
+class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
 

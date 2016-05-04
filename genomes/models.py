@@ -133,7 +133,7 @@ class DNASlice(models.Model):
                 self.sequence)
         sa = (self.start_pos-1)//full_width
         ea = (self.end_pos-1)//full_width
-        ret += ("{pos:<12}: "+" ".join(["{ind}"]*width)+"\n").format(
+        ret += ("{pos!s:<12}: "+" ".join(["{ind}"]*width)+"\n").format(
             pos=self.chromosome, ind="1234567890")
         for i in range(ea-sa+1):
             ret += ("{pos:<12}: "+" ".join(["{}"]*width)+"\n").format(
