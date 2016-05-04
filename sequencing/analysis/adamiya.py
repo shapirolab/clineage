@@ -27,10 +27,6 @@ pear_with_defaults = pear["-v", "40",
 bowtie2build = local["bowtie2-build"]
 bowtie2build_fixed_seed = bowtie2build["--seed", "1"]
 
-# bowtie2-build \
-#     ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged.fa \
-#     ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged
-
 bowtie2 = local["bowtie2"]
 bowtie2_fixed_seed = bowtie2["--seed", "1"]
 bowtie2_with_defaults = bowtie2_fixed_seed["-p", "24",
@@ -38,29 +34,6 @@ bowtie2_with_defaults = bowtie2_fixed_seed["-p", "24",
                                 "--very-sensitive"]
 bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
-
-# bowtie2 \
-#     -p 24 \
-#     -a \
-#     --very-sensitive \
-#     -x ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged \
-#     -f ${TargetsFolder}/${TargetsName}_Primers.fa \
-#         > ${fastq_folder}/Cluster/processing/${fastqName}/merged/${fastq_R1}_final_merged_Primers.sam
-
-# /net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2/bowtie2 \
-#     -a --very-sensitive \
-#     -x index_1 \
-#     -f /net/mraid11/export/dcstor/Ofir/ngs_fixtures/28727_and_28734_Primers.fa \
-#     -S test2.sam
-
-
-
-#~/data/home/Adam/Software/PEAR-master/src/pear
-    # -f  ${fastq_folder}/Cluster/processing/${fastqName}/${fastq_R1}_cutadapt_ListBoth.fastq
-    # -r ${fastq_folder}/Cluster/processing/${fastqName}/${fastq_R2}_cutadapt_ListBoth.fastq
-    # -o ${fastq_folder}/Cluster/processing/${fastqName}/${fastq_R1}_cutadapt_ListBoth_PEAR
-    # -v 40
-    # -m 300
 
 
 def merge(sample_reads):
@@ -359,3 +332,6 @@ def separate_reads_by_genotypes(histogram):
         )
         her.microsatellite_genotypes.add(*genotypes)
         yield her
+
+
+def run_parallel(
