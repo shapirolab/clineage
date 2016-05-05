@@ -1,5 +1,6 @@
 
 import itertools
+import functools
 from plumbum import local
 import os
 import uuid
@@ -15,9 +16,12 @@ from misc.utils import get_unique_path
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
-    ms_genotypes_to_name, AdamHistogram, HistogramEntryReads
+    ms_genotypes_to_name, AdamHistogram, HistogramEntryReads, SampleReads, \
+    delete_files
 from targeted_enrichment.planning.models import Microsatellite, \
     PhasedMicrosatellites
+
+from distributed.executor import as_completed
 
 pear = local["pear"]
 pear_with_defaults = pear["-v", "40",
@@ -102,7 +106,7 @@ def _create_panel_fasta(amplicons):
 
 def align_primers_to_reads(reads_index):
     assignment_sam = get_unique_path("sam")
-    amplicons = reads_index.merged_reads.sample_reads.library.amplicons
+    amplicons = reads_index.merged_reads.sample_reads.library.subclass.amplicons
     panel_fasta = _create_panel_fasta(amplicons)
     bowtie2_with_defaults('-x', reads_index.index_files_prefix,
                           '-f', panel_fasta,
@@ -274,13 +278,14 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
             defaults={"index_dump_dir": index_dir}
         )
         if not c:
-            delete_files(mock_msv)
+            delete_files(AdamMSVariations, mock_msv)
         return msv
 
 
 def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
     assignment_sam = get_unique_path("sam")
-    msv = get_adam_ms_variations(amplicon_reads.amplicon, padding, mss_version)
+    msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding, 
+        mss_version)
     bowtie2_with_defaults2('-x', msv.index_files_prefix,
                           '-U', amplicon_reads.fastqm,
                           '-S', assignment_sam)
@@ -334,4 +339,32 @@ def separate_reads_by_genotypes(histogram):
         yield her
 
 
-def run_parallel(
+def double_map(executor, func, future_lists, *params):
+    for f in as_completed(future_lists):
+        l = f.result()
+        yield from executor.map(func, l, *[itertools.repeat(p) for p in params])
+
+
+def list_iterator(f):
+    @functools.wraps(f)
+    def inner(*args, **kwargs):
+        return list(f(*args, **kwargs))
+    return inner
+
+
+def run_parallel(executor, demux, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
+    sample_reads = SampleReads.objects.filter(demux=demux)
+    merged_reads = executor.map(merge, sample_reads)
+    reads_indices = executor.map(create_reads_index, merged_reads,
+        itertools.repeat(included_reads), itertools.repeat(read_padding))
+    adam_margin_assignments = executor.map(align_primers_to_reads,
+        reads_indices)
+    adam_amplicon_reads_lists = executor.map(
+        list_iterator(seperate_reads_by_amplicons), adam_margin_assignments)
+    adam_histograms = double_map(executor, align_reads_to_ms_variations,
+        adam_amplicon_reads_lists, ref_padding, mss_version)
+    histogram_entry_reads_lists = executor.map(
+        list_iterator(separate_reads_by_genotypes), adam_histograms)
+    # NOTE: this is required, as_completed can't get an iterator.
+    for f in as_completed(list(histogram_entry_reads_lists)):
+        yield from f.result()

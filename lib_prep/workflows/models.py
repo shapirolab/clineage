@@ -42,6 +42,11 @@ class AmplifiedContent(models.Model):  # aka DNA
 class Library(models.Model):
     name = models.CharField(max_length=50)
 
+    # FIXME
+    @property
+    def subclass(self):
+        return Library.objects.get_subclass(id=self.id)
+
     @property
     def barcoded_contents(self):
         raise NotImplementedError()

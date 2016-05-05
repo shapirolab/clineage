@@ -2,7 +2,7 @@ import pytest
 import os
 from Bio import SeqIO
 
-from sequencing.analysis.adamiya import merge
+from sequencing.analysis.adamiya import merge, run_parallel
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups
@@ -86,3 +86,9 @@ def test_map_runmerge(executor, adam_reads_fd, sample_reads_d):
         assert set(srs_to_tups(SeqIO.parse(mr.unassembled_reverse_fastq, "fastq"))) == \
             set(rc_srs_to_tups(adam_reads_fd[l_id, bc_id, UNASSEMBLED][R2]))
         mr.delete()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_pmss):
+    hers = list(run_parallel(executor, demultiplexing))
+    assert hers != []
