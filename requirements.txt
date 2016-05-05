@@ -13,4 +13,4 @@ lxml==3.6.0
 Cython==0.23.5
 pysam==0.9.0
 plumbum==1.6.1.post0
--e git+https://github.com/ofirr/distributed.git@07afdf1c1cc33fcdf04f040a5c59f587b1f9400b#egg=distributed
+-e git+https://github.com/dask/distributed.git@9d57e2d80e35b78b77f2232c4dd1a2cfc191961b#egg=distributed
