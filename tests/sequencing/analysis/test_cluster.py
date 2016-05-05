@@ -12,7 +12,7 @@ from distributed.utils_test import cluster
 from distributed.executor import Future, as_completed, Executor
 
 
-@pytest.yield_fixture()
+@pytest.yield_fixture(scope="session")
 def executor(): 
     with cluster(4) as (d, workers):
         yield Executor(("127.0.0.1", d["port"]))
