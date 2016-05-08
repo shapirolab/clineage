@@ -191,6 +191,11 @@ class Histogram(models.Model):
 
     objects = InheritanceManager()
 
+    # FIXME
+    @property
+    def subclass(self):
+        return Histogram.objects.get_subclass(id=self.id)
+
 
 class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
