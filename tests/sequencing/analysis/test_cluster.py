@@ -13,8 +13,9 @@ from distributed.executor import Future, as_completed, Executor
 
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, AdamHistogram, AdamMSVariations, \
-    HistogramEntryReads
+    HistogramEntryReads, MicrosatelliteHistogramGenotype
 
+import django
 
 @pytest.yield_fixture(scope="session")
 def executor(): 
@@ -92,6 +93,9 @@ def test_map_runmerge(executor, adam_reads_fd, sample_reads_d):
         mr.delete()
 
 
+@pytest.mark.xfail(django.db.connection.vendor == "sqlite",
+    raises=MicrosatelliteHistogramGenotype.MultipleObjectsReturned,
+    reason="SQLite isn't transactional enough for distributing.")
 @pytest.mark.django_db(transaction=True)
 def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_pmss):
     herss = {inc: set(run_parallel(executor, demultiplexing, inc)) for \
