@@ -8,6 +8,8 @@ def protocoltype(transactional_db):
     pt = ProtocolType.objects.create(
         name='test protocol type'
     )
+    # So our objects don't have "special" objects in fields
+    pt = ProtocolType.objects.get(pk=pt.pk)
     return pt
 
 
@@ -20,4 +22,6 @@ def protocol(protocoltype):
         fulldescription='full long description......\r\n.......more description....\r\n.......',
         type=protocoltype,
     )
+    # So our objects don't have "special" objects in fields
+    p = Protocol.objects.get(pk=p.pk)
     return p

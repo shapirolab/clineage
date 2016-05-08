@@ -11,4 +11,6 @@ def human_taxa(transactional_db):
         rank='species',
         friendly_name="Human",
     )
+    # So our objects don't have "special" objects in fields
+    t = Taxa.objects.get(pk=t.pk)
     return t

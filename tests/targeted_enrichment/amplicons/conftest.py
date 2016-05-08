@@ -14,6 +14,8 @@ def pu_28727(ugs_28727_left, ugs_28727_right, slice_28727_amplicon):
         left_ugs = ugs_28727_left,
         right_ugs = ugs_28727_right,
     )
+    # So our objects don't have "special" objects in fields
+    pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)
     return pu
 
 
@@ -25,6 +27,8 @@ def pu_28734(ugs_28734_left, ugs_28734_right, slice_28734_amplicon):
         left_ugs = ugs_28734_left,
         right_ugs = ugs_28734_right,
     )
+    # So our objects don't have "special" objects in fields
+    pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)
     return pu
 
 

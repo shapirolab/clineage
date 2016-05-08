@@ -12,6 +12,8 @@ def pcr1multiplex(ter_28727, ter_28734):
         name='test PCR1Multiplex'
     )
     pcr1m.ters = [ter_28727, ter_28734]
+    # So our objects don't have "special" objects in fields
+    pcr1m = PCR1Multiplex.objects.get(pk=pcr1m.pk)
     return pcr1m
 
 
@@ -21,4 +23,6 @@ def pcr1panel(pcr1multiplex):
         name='test PCR1Panel'
     )
     pcr1mc.mpxs = [pcr1multiplex]
+    # So our objects don't have "special" objects in fields
+    pcr1mc = PCR1Panel.objects.get(pk=pcr1mc.pk)
     return pcr1mc

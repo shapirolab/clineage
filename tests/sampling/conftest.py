@@ -12,6 +12,8 @@ def organ(transactional_db):
     o = Organ.objects.create(
         name="Blood",
     )
+    # So our objects don't have "special" objects in fields
+    o = Organ.objects.get(pk=o.pk)
     return o
 
 
@@ -20,6 +22,8 @@ def tissue(transactional_db):
     t = Tissue.objects.create(
         name="Blood",
     )
+    # So our objects don't have "special" objects in fields
+    t = Tissue.objects.get(pk=t.pk)
     return t
 
 
@@ -28,6 +32,8 @@ def composition(transactional_db):
     sc = SampleComposition.objects.create(
         name="Single Cell"
     )
+    # So our objects don't have "special" objects in fields
+    sc = SampleComposition.objects.get(pk=sc.pk)
     return sc
 
 
@@ -38,6 +44,8 @@ def human_individual(human_taxa):
         sex="M",
         name="Yossi",
     )
+    # So our objects don't have "special" objects in fields
+    i = Individual.objects.get(pk=i.pk)
     return i
 
 
@@ -50,6 +58,8 @@ def human_extractionevent(human_individual, user):
         user_performed=user,
         user_documented=user,
     )
+    # So our objects don't have "special" objects in fields
+    ee = ExtractionEvent.objects.get(pk=ee.pk)
     return ee
 
 
@@ -61,6 +71,8 @@ def human_extraction(human_extractionevent, organ, tissue):
         organ=organ,
         tissue=tissue,
     )
+    # So our objects don't have "special" objects in fields
+    e = Extraction.objects.get(pk=e.pk)
     return e
 
 
@@ -70,6 +82,8 @@ def human_samplingevent(human_extraction):
         extraction=human_extraction,
         name='human_samplingevent',
     )
+    # So our objects don't have "special" objects in fields
+    e = SamplingEvent.objects.get(pk=e.pk)
     return e
 
 
@@ -80,6 +94,8 @@ def human_cell_no_se(human_individual, composition):
         name='human_cell_no_se',
         composition=composition,
     )
+    # So our objects don't have "special" objects in fields
+    c = Cell.objects.get(pk=c.pk)
     return c
 
 
@@ -91,6 +107,8 @@ def human_cell_with_se(human_individual, composition, human_samplingevent):
         name='human_cell_with_se',
         composition=composition,
     )
+    # So our objects don't have "special" objects in fields
+    c = Cell.objects.get(pk=c.pk)
     return c
 
 

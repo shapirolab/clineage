@@ -16,6 +16,8 @@ def ter_28727(te_28727, primer_28727_left, primer_28727_right, pu_28727):
         right_primer=primer_28727_right,
         amplicon=pu_28727,
     )
+    # So our objects don't have "special" objects in fields
+    ter = PCR1PrimerPairTER.objects.get(pk=ter.pk)
     return ter
 
 
@@ -28,5 +30,7 @@ def ter_28734(te_28734, primer_28734_left, primer_28734_right, pu_28734):
         right_primer=primer_28734_right,
         amplicon=pu_28734,
     )
+    # So our objects don't have "special" objects in fields
+    ter = PCR1PrimerPairTER.objects.get(pk=ter.pk)
     return ter
 

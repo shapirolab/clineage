@@ -8,6 +8,8 @@ def platecontext(transactional_db):
     pc = PlateContext.objects.create(
         description='Storage'
     )
+    # So our objects don't have "special" objects in fields
+    pc = PlateContext.objects.get(pk=pc.pk)
     return pc
 
 
@@ -18,6 +20,8 @@ def plateplastica_pairs(transactional_db):
         rows=8,
         columns=12,
     )
+    # So our objects don't have "special" objects in fields
+    pp = PlatePlastica.objects.get(pk=pp.pk)
     return pp
 
 
@@ -28,6 +32,8 @@ def plateplastica_stk(transactional_db):
         rows=8,
         columns=12,
     )
+    # So our objects don't have "special" objects in fields
+    pp = PlatePlastica.objects.get(pk=pp.pk)
     return pp
 
 
@@ -38,6 +44,8 @@ def platetype_pairs(platecontext, plateplastica_pairs):
         context=platecontext,
         plastic=plateplastica_pairs,
     )
+    # So our objects don't have "special" objects in fields
+    pt = PlateType.objects.get(pk=pt.pk)
     return pt
 
 
@@ -48,6 +56,8 @@ def platetype_stk(platecontext, plateplastica_stk):
         context=platecontext,
         plastic=plateplastica_stk,
     )
+    # So our objects don't have "special" objects in fields
+    pt = PlateType.objects.get(pk=pt.pk)
     return pt
 
 
@@ -57,6 +67,8 @@ def plate_united(platetype_pairs):
         type=platetype_pairs,
         name='United_hg19_Tails_plt1',
     )
+    # So our objects don't have "special" objects in fields
+    p = Plate.objects.get(pk=p.pk)
     return p
 
 
@@ -66,6 +78,8 @@ def plate_fwd(platetype_stk):
         type=platetype_stk,
         name='hg19_Tails_plt1_Fw',
     )
+    # So our objects don't have "special" objects in fields
+    p = Plate.objects.get(pk=p.pk)
     return p
 
 
@@ -75,6 +89,8 @@ def plate_rev(platetype_stk):
         type=platetype_stk,
         name='hg19_Tails_plt1_Rev',
     )
+    # So our objects don't have "special" objects in fields
+    p = Plate.objects.get(pk=p.pk)
     return p
 
 
@@ -88,6 +104,8 @@ def samplelocation_28727_united(plate_united, ter_28727):
         concentration=50.0,
         timestamp=datetime.datetime(2014, 1, 15, 13, 51, 35),
     )
+    # So our objects don't have "special" objects in fields
+    sl = SampleLocation.objects.get(pk=sl.pk)
     return sl
 
 
@@ -101,4 +119,6 @@ def samplelocation_28734_united(plate_united, ter_28727):
         concentration=50.0,
         timestamp=datetime.datetime(2014, 1, 15, 13, 51, 37),
     )
+    # So our objects don't have "special" objects in fields
+    sl = SampleLocation.objects.get(pk=sl.pk)
     return sl

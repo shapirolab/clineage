@@ -12,6 +12,8 @@ def machinetype(transactional_db):
         company="Illumina",
         model="NextSeq",
     )
+    # So our objects don't have "special" objects in fields
+    mt = MachineType.objects.get(pk=mt.pk)
     return mt
 
 
@@ -21,6 +23,8 @@ def machine(machinetype):
         machineid="1",
         type=machinetype,
     )
+    # So our objects don't have "special" objects in fields
+    m = Machine.objects.get(pk=m.pk)
     return m
 
 @pytest.fixture()
@@ -30,6 +34,8 @@ def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
         reading_adaptor2=illuminareadingadaptor2,
         read_length=151,
     )
+    # So our objects don't have "special" objects in fields
+    nk = NGSKit.objects.get(pk=nk.pk)
     return nk
 
 
@@ -43,6 +49,8 @@ def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent
         date=datetime.date.today(),
     )
     n.libraries = [magicalpcr1library]
+    # So our objects don't have "special" objects in fields
+    n = NGSRun.objects.get(pk=n.pk)
     return n
 
 
@@ -52,6 +60,8 @@ def demultiplexingscheme(transactional_db):
         name='test demux scheme',
         description='wrovhnwpovnwecpqkewmc',
     )
+    # So our objects don't have "special" objects in fields
+    ds = DemultiplexingScheme.objects.get(pk=ds.pk)
     return ds
 
 
@@ -61,4 +71,6 @@ def demultiplexing(demultiplexingscheme, ngsrun):
         ngs_run=ngsrun,
         demux_scheme=demultiplexingscheme
     )
+    # So our objects don't have "special" objects in fields
+    dm = Demultiplexing.objects.get(pk=dm.pk)
     return dm

@@ -11,6 +11,8 @@ def ugs_28727_left(slice_28727_left):
     ugsp = UGSPlus.objects.create(
         slice=slice_28727_left,
     )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
     return ugsp
 
 
@@ -19,6 +21,8 @@ def ugs_28727_right(slice_28727_right):
     ugsm = UGSMinus.objects.create(
         slice=slice_28727_right,
     )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
     return ugsm
 
 
@@ -33,6 +37,8 @@ def ms_28727_a(slice_28727_target_a):
         repeat_number=23,
         repeat_unit_ref_seq='TCT',
     )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
     return ms
 
 
@@ -47,6 +53,8 @@ def ms_28727_b(slice_28727_target_b):
         repeat_number=12,
         repeat_unit_ref_seq='CTG',
     )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
     return ms
 
 
@@ -58,6 +66,8 @@ def te_28727(hg19_chromosome, ugs_28727_left, ugs_28727_right):
         right=ugs_28727_right,
         planning_version=1,
     )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
     return te
 
 
@@ -68,6 +78,8 @@ def pms_28727(ms_28727_a, ms_28727_b, slice_28727_amplicon):
         planning_version=0,
     )
     pms.microsatellites = [ms_28727_a, ms_28727_b]
+    # So our objects don't have "special" objects in fields
+    pms = PhasedMicrosatellites.objects.get(pk=pms.pk)
     return pms
 
 
@@ -76,6 +88,8 @@ def ugs_28734_left(slice_28734_left):
     ugsp = UGSPlus.objects.create(
         slice=slice_28734_left,
     )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
     return ugsp
 
 
@@ -84,6 +98,8 @@ def ugs_28734_right(slice_28734_right):
     ugsm = UGSMinus.objects.create(
         slice=slice_28734_right,
     )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
     return ugsm
 
 
@@ -98,6 +114,8 @@ def ms_28734_a(slice_28734_target_a):
         repeat_number=6,
         repeat_unit_ref_seq='AGA',
     )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
     return ms
 
 
@@ -109,6 +127,8 @@ def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
         right=ugs_28734_right,
         planning_version=1,
     )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
     return te
 
 
@@ -119,6 +139,8 @@ def pms_28734(ms_28734_a, slice_28734_amplicon):
         planning_version=0,
     )
     pms.microsatellites = [ms_28734_a]
+    # So our objects don't have "special" objects in fields
+    pms = PhasedMicrosatellites.objects.get(pk=pms.pk)
     return pms
 
 

@@ -16,6 +16,8 @@ def barcodepair(dnabarcode1, dnabarcode2):
         left=dnabarcode1,
         right=dnabarcode2
     )
+    # So our objects don't have "special" objects in fields
+    bp = BarcodePair.objects.get(pk=bp.pk)
     return bp
 
 @pytest.fixture()
@@ -24,6 +26,8 @@ def barcodepair_a(dnabarcode1_a, dnabarcode2_a):
         left=dnabarcode1_a,
         right=dnabarcode2_a
     )
+    # So our objects don't have "special" objects in fields
+    bp = BarcodePair.objects.get(pk=bp.pk)
     return bp
 
 @pytest.fixture()
@@ -35,6 +39,8 @@ def cellcontentprotocol(protocoltype):
         fulldescription='full long description......\r\n.......more description....\r\n.......',
         type=protocoltype,
     )
+    # So our objects don't have "special" objects in fields
+    ccp = CellContentProtocol.objects.get(pk=ccp.pk)
     return ccp
 
 
@@ -46,6 +52,8 @@ def amplifiedcontent(human_cell_with_se, cellcontentprotocol):
         protocol=cellcontentprotocol,
         comment='some comment about this cell',
     )
+    # So our objects don't have "special" objects in fields
+    ac = AmplifiedContent.objects.get(pk=ac.pk)
     return ac
 
 
@@ -56,6 +64,8 @@ def magicalpcr1library(pcr1panel):
         name="lib1",
         panel=pcr1panel,
     )
+    # So our objects don't have "special" objects in fields
+    mpl = MagicalPCR1Library.objects.get(pk=mpl.pk)
     return mpl
 
 
@@ -67,6 +77,8 @@ def magicalpcr1barcodedcontent(barcodepair, amplifiedcontent, magicalpcr1library
         content=amplifiedcontent,
         library=magicalpcr1library,
     )
+    # So our objects don't have "special" objects in fields
+    mpbc = MagicalPCR1BarcodedContent.objects.get(pk=mpbc.pk)
     return mpbc
 
 
@@ -78,6 +90,8 @@ def magicalpcr1barcodedcontent_a(barcodepair_a, amplifiedcontent, magicalpcr1lib
         content=amplifiedcontent,
         library=magicalpcr1library,
     )
+    # So our objects don't have "special" objects in fields
+    mpbc = MagicalPCR1BarcodedContent.objects.get(pk=mpbc.pk)
     return mpbc
 
 

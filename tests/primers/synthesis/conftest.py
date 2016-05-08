@@ -13,6 +13,8 @@ def primer_28727_left(ugs_28727_left, illuminareadingadaptor1cuts):
         ugs=ugs_28727_left,
         irac=illuminareadingadaptor1cuts,
     )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
     return p
 
 
@@ -23,6 +25,8 @@ def primer_28727_right(ugs_28727_right, illuminareadingadaptor2cuts):
         ugs=ugs_28727_right,
         irac=illuminareadingadaptor2cuts,
     )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
     return p
 
 
@@ -33,6 +37,8 @@ def primer_28734_left(ugs_28734_left, illuminareadingadaptor1cuts):
         ugs=ugs_28734_left,
         irac=illuminareadingadaptor1cuts,
     )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
     return p
 
 
@@ -43,5 +49,7 @@ def primer_28734_right(ugs_28734_right, illuminareadingadaptor2cuts):
         ugs=ugs_28734_right,
         irac=illuminareadingadaptor2cuts,
     )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
     return p
 

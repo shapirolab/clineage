@@ -57,6 +57,8 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
             fastq1=fastq_r1,
             fastq2=fastq_r2,
         )
+        # So our objects don't have "special" objects in fields
+        sr = SampleReads.objects.get(pk=sr.pk)
         d[l_id, bc_id] = sr
     yield d
     for sr in d.values():
@@ -120,6 +122,8 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
             unassembled_forward_fastq="{}.unassembled.forward.fastq".format(dst_prefix),
             unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(dst_prefix),
         )
+        # So our objects don't have "special" objects in fields
+        mr = AdamMergedReads.objects.get(pk=mr.pk)
         d[l_id, bc_id] = mr
     yield d
     for mr in d.values():
@@ -186,6 +190,8 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
             index_dump_dir=dst_dir,
             padding=5,
         )
+        # So our objects don't have "special" objects in fields
+        ari = AdamReadsIndex.objects.get(pk=ari.pk)
         fake_sam = get_unique_path("sam")
         with open(fake_sam, "wb") as f:
             pass
@@ -193,6 +199,8 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
             reads_index=ari,
             assignment_sam=fake_sam,
         )
+        # So our objects don't have "special" objects in fields
+        ama = AdamMarginAssignment.objects.get(pk=ama.pk)
         d[l_id, bc_id, inc] = ari, ama
     yield d
     for ari, ama in d.values():
@@ -219,6 +227,8 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
             )
+            # So our objects don't have "special" objects in fields
+            aar = AdamAmpliconReads.objects.get(pk=aar.pk)
             d[l_id, bc_id, inc, amp] = aar
     yield d
     for aar in d.values():
