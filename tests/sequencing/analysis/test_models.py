@@ -19,7 +19,8 @@ from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
 @pytest.mark.django_db
 def test_samplereads(sample_reads_d):
     for sr in sample_reads_d.values():
-        assert sr.barcoded_content.content.name == 'human amplified content'
+        assert sr.barcoded_content.subclass.content.name == \
+            'human amplified content'
 
 
 @pytest.mark.django_db

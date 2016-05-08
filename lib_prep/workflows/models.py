@@ -68,6 +68,13 @@ class BarcodedContent(models.Model): # cell + barcode
                                              content_type_field='content_type',
                                              object_id_field='object_id')
 
+    objects = InheritanceManager()
+
+    # FIXME
+    @property
+    def subclass(self):
+        return BarcodedContent.objects.get_subclass(id=self.id)
+
     @property
     def cell(self):
         raise NotImplementedError()
