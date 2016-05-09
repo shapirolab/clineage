@@ -83,27 +83,6 @@ def get_repeat_unit_ref_seq_forward(apps, schema_editor):
         ms.save()
 
 
-def populate_phased_mss(apps, schema_editor):
-    db_alias = schema_editor.connection.alias
-    PhasedMicrosatellites = apps.get_model("planning", "PhasedMicrosatellites")
-    Amplicon = apps.get_model("amplicons", "Amplicon")
-    Microsatellite = apps.get_model("planning", "Microsatellite")
-    print()
-    for amplicon in bar(Amplicon.objects.using(db_alias). \
-        select_related("slice")):
-        # We do the select related, because we need the slices next.
-        pms = PhasedMicrosatellites.objects.using(db_alias).create(
-            planning_version=0,
-            slice=amplicon.slice,
-        )
-        # TODO: change to slice query.
-        pms.microsatellites = Microsatellite.objects.filter(
-            slice__chromosome=pms.slice.chromosome,
-            slice__start_pos__gte=pms.slice.start_pos,
-            slice__end_pos__lte=pms.slice.end_pos,
-        )
-
-
 def populate_te_targets(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Target = apps.get_model("planning", "Target")
@@ -129,29 +108,17 @@ class Migration(migrations.Migration):
     dependencies = [
         ('genomes', '0002_create_dnaslice'),
         ('planning', '0003_auto_20160215_1652'),
-        ('amplicons', '0002_create_ter_amplicons'),
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='PhasedMicrosatellites',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('planning_version', models.PositiveIntegerField(db_index=True)),
-            ],
-        ),
         migrations.AddField(
-            model_name='phasedmicrosatellites',
-            name='microsatellites',
-            field=models.ManyToManyField(to='planning.Microsatellite'),
-        ),
-        migrations.AddField(
-            model_name='phasedmicrosatellites',
-            name='slice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='genomes.DNASlice'),
+            model_name='microsatellite',
+            name='planning_version',
+            field=models.IntegerField(default=0),
+            preserve_default=False,
         ),
         migrations.RunPython(
-            code=populate_phased_mss,
+            code=migrations.RunPython.noop,
             reverse_code=populate_te_targets,
         ),
         migrations.RemoveField(
