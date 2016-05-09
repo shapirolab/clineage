@@ -1,7 +1,7 @@
 import pytest
 
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
-    TargetEnrichment, Microsatellite, PhasedMicrosatellites
+    TargetEnrichment, Microsatellite
 
 from tests.genomes.conftest import *
 
@@ -36,6 +36,7 @@ def ms_28727_a(slice_28727_target_a):
         repeat_unit_type='AAG',
         repeat_number=23,
         repeat_unit_ref_seq='TCT',
+        planning_version=0,
     )
     # So our objects don't have "special" objects in fields
     ms = Microsatellite.objects.get(pk=ms.pk)
@@ -52,6 +53,7 @@ def ms_28727_b(slice_28727_target_b):
         repeat_unit_type='AGC',
         repeat_number=12,
         repeat_unit_ref_seq='CTG',
+        planning_version=0,
     )
     # So our objects don't have "special" objects in fields
     ms = Microsatellite.objects.get(pk=ms.pk)
@@ -69,18 +71,6 @@ def te_28727(hg19_chromosome, ugs_28727_left, ugs_28727_right):
     # So our objects don't have "special" objects in fields
     te = TargetEnrichment.objects.get(pk=te.pk)
     return te
-
-
-@pytest.fixture()
-def pms_28727(ms_28727_a, ms_28727_b, slice_28727_amplicon):
-    pms = PhasedMicrosatellites.objects.create(
-        slice=slice_28727_amplicon,
-        planning_version=0,
-    )
-    pms.microsatellites = [ms_28727_a, ms_28727_b]
-    # So our objects don't have "special" objects in fields
-    pms = PhasedMicrosatellites.objects.get(pk=pms.pk)
-    return pms
 
 
 @pytest.fixture()
@@ -113,6 +103,7 @@ def ms_28734_a(slice_28734_target_a):
         repeat_unit_type='AAG',
         repeat_number=6,
         repeat_unit_ref_seq='AGA',
+        planning_version=0,
     )
     # So our objects don't have "special" objects in fields
     ms = Microsatellite.objects.get(pk=ms.pk)
@@ -133,17 +124,5 @@ def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
 
 
 @pytest.fixture()
-def pms_28734(ms_28734_a, slice_28734_amplicon):
-    pms = PhasedMicrosatellites.objects.create(
-        slice=slice_28734_amplicon,
-        planning_version=0,
-    )
-    pms.microsatellites = [ms_28734_a]
-    # So our objects don't have "special" objects in fields
-    pms = PhasedMicrosatellites.objects.get(pk=pms.pk)
-    return pms
-
-
-@pytest.fixture()
-def requires_pmss(pms_28727, pms_28734):
+def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a):
     pass

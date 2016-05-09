@@ -8,8 +8,6 @@ from sequencing.analysis.adamiya import merge, create_reads_index, \
     separate_reads_by_genotypes
 from sequencing.analysis.models import AdamMSVariations, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
-from targeted_enrichment.amplicons.models import Amplicon
-from targeted_enrichment.planning.models import PhasedMicrosatellites
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups, strip_fasta_records
@@ -124,28 +122,27 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
             assert not os.path.exists(ri.index_dump_dir)
 
 
-def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_pmss):
+def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites):
     for (l_id, bc, inc, amp), aar in adam_amplicon_reads_d.items():
-        pln_ver = 0
-        amplicon = Amplicon.objects.get(id=amp)
-        pms = PhasedMicrosatellites.objects.get(
-            slice=amplicon.slice,
-            planning_version=pln_ver,
-        )
+        ms_planning_version = 0
+        padding = 50
         # FIXME
         # test_align_reads_to_ms_variations
-        ah = align_reads_to_ms_variations(aar, 50, pln_ver)
+        ah = align_reads_to_ms_variations(aar, padding, ms_planning_version)
         assert ah.amplicon_reads_id == aar.id
         # TODO: make this check more explicit.
-        assert ah.ms_variations == AdamMSVariations.objects.get(amplicon_id=amp)
-        assert ah.ms_variations.microsatellites_version_id == pms.id
+        assert ah.ms_variations == AdamMSVariations.objects.get(
+            amplicon_id=amp,
+            padding=padding,
+            microsatellites_version=ms_planning_version
+        )
         assert os.path.isfile(ah.assignment_sam)
         gens = set()
         # test_separate_reads_by_genotypes
         for her in separate_reads_by_genotypes(ah):
             assert her.histogram_id == ah.id
             assert her.amplicon_id == amp
-            assert her.microsatellites_version_id == pms.id
+            assert her.microsatellites_version == ms_planning_version
             assert set(her.snp_genotypes.all()) == set()
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
                 msg in her.microsatellite_genotypes.all())
@@ -192,30 +189,31 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
     AdamMSVariations.objects.all().delete()
 
 
-def test_get_adam_ms_variations(pu_28727, pu_28734, pms_28727, pms_28734):
+def test_get_adam_ms_variations(pu_28727, pu_28734, requires_microsatellites):
+    ms_planning_version = 0
     assert AdamMSVariations.objects.count() == 0
-    amsv1 = get_adam_ms_variations(pu_28727, 50, 0)
+    amsv1 = get_adam_ms_variations(pu_28727, 50, ms_planning_version)
     assert amsv1.padding == 50
     assert amsv1.amplicon_id == pu_28727.id
-    assert amsv1.microsatellites_version_id == pms_28727.id
+    assert amsv1.microsatellites_version == ms_planning_version
     assert os.path.isdir(amsv1.index_dump_dir)
     assert AdamMSVariations.objects.count() == 1
-    amsv2 = get_adam_ms_variations(pu_28727, 30, 0)
+    amsv2 = get_adam_ms_variations(pu_28727, 30, ms_planning_version)
     assert amsv2.padding == 30
     assert amsv2.amplicon_id == pu_28727.id
-    assert amsv2.microsatellites_version_id == pms_28727.id
+    assert amsv2.microsatellites_version == ms_planning_version
     assert os.path.isdir(amsv2.index_dump_dir)
     assert AdamMSVariations.objects.count() == 2
-    amsv3 = get_adam_ms_variations(pu_28727, 50, 0)
+    amsv3 = get_adam_ms_variations(pu_28727, 50, ms_planning_version)
     assert amsv3.padding == 50
     assert amsv3.amplicon_id == pu_28727.id
-    assert amsv3.microsatellites_version_id == pms_28727.id
+    assert amsv3.microsatellites_version == ms_planning_version
     assert os.path.isdir(amsv3.index_dump_dir)
     assert AdamMSVariations.objects.count() == 2
-    amsv4 = get_adam_ms_variations(pu_28734, 50, 0)
+    amsv4 = get_adam_ms_variations(pu_28734, 50, ms_planning_version)
     assert amsv4.padding == 50
     assert amsv4.amplicon_id == pu_28734.id
-    assert amsv4.microsatellites_version_id == pms_28734.id
+    assert amsv4.microsatellites_version == ms_planning_version
     assert os.path.isdir(amsv4.index_dump_dir)
     assert AdamMSVariations.objects.count() == 3
     assert amsv1.id != amsv2.id
@@ -225,11 +223,11 @@ def test_get_adam_ms_variations(pu_28727, pu_28734, pms_28727, pms_28734):
     amsv3.delete()
     assert not os.path.exists(amsv3.index_dump_dir)
     assert AdamMSVariations.objects.count() == 2
-    amsv5 = get_adam_ms_variations(pu_28727, 50, 0)
+    amsv5 = get_adam_ms_variations(pu_28727, 50, ms_planning_version)
     assert AdamMSVariations.objects.count() == 3
     assert amsv5.padding == 50
     assert amsv5.amplicon_id == pu_28727.id
-    assert amsv5.microsatellites_version_id == pms_28727.id
+    assert amsv5.microsatellites_version == ms_planning_version
     assert os.path.isdir(amsv5.index_dump_dir)
     amsv2.delete()
     assert not os.path.exists(amsv2.index_dump_dir)

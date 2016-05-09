@@ -96,6 +96,7 @@ class Microsatellite(Target):
     repeat_unit_type = models.CharField(max_length=50) #string of repeat Nmer
     repeat_number = models.DecimalField(max_digits=5, decimal_places=1, null=True)
     repeat_unit_ref_seq = models.CharField(max_length=50) #string of acutal unit in genome.
+    planning_version = models.IntegerField()
 
     def __str__(self):
         return "{}x{} @ {}".format(self.repeat_number, self.repeat_unit_type,
@@ -110,7 +111,4 @@ class SNP(Target):
         return "{}:{} @ {}".format(self.name, self.mutation, self.slice)
 
 
-class PhasedMicrosatellites(models.Model):
-    slice = models.ForeignKey(DNASlice)
-    microsatellites = models.ManyToManyField(Microsatellite)
-    planning_version = models.PositiveIntegerField(db_index=True)
+# TODO: add indel

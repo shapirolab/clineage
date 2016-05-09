@@ -18,8 +18,7 @@ from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     ms_genotypes_to_name, AdamHistogram, HistogramEntryReads, SampleReads, \
     delete_files
-from targeted_enrichment.planning.models import Microsatellite, \
-    PhasedMicrosatellites
+from targeted_enrichment.planning.models import Microsatellite
 
 from distributed.executor import as_completed
 
@@ -248,25 +247,26 @@ def _build_ms_variations(amplicon, padding, mss):
 
 
 def get_adam_ms_variations(amplicon, padding, mss_version):
-    pms = PhasedMicrosatellites.objects.get(
-        slice=amplicon.slice,
-        planning_version=mss_version,
-    )
     try:
         return AdamMSVariations.objects.get(
             amplicon=amplicon,
             padding=padding,
-            microsatellites_version=pms,
+            microsatellites_version=mss_version,
         )
     except AdamMSVariations.DoesNotExist:
         index_dir = get_unique_path()
-        mss = list(pms.microsatellites.all())
+        mss = Microsatellite.objects.filter(
+            slice__start_pos__gte=amplicon.slice.start_pos,
+            slice__end_pos__lte=amplicon.slice.end_pos,
+            slice__chromosome_id=amplicon.slice.chromosome_id,
+            planning_version=mss_version,
+        )
         fasta = _build_ms_variations(amplicon, padding, mss)
         os.mkdir(index_dir)
         mock_msv = AdamMSVariations(
             amplicon=amplicon,
             padding=padding,
-            microsatellites_version=pms,
+            microsatellites_version=mss_version,
             index_dump_dir=index_dir,
         )
         bowtie2build(fasta, mock_msv.index_files_prefix)
@@ -274,7 +274,7 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
         msv, c = AdamMSVariations.objects.get_or_create(
             amplicon=amplicon,
             padding=padding,
-            microsatellites_version=pms,
+            microsatellites_version=mss_version,
             defaults={"index_dump_dir": index_dir}
         )
         if not c:
