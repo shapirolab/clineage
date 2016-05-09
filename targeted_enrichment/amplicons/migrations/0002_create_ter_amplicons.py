@@ -59,7 +59,7 @@ def populate_pcr1withcompanytagprimerpairter(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     PCR1WithCompanyTagPrimerPairTER = apps.get_model('reagents', 'PCR1WithCompanyTagPrimerPairTER')
     TargetedAmpliconWithCompanyTag = apps.get_model('amplicons', 'TargetedAmpliconWithCompanyTag')
-    for ter in TargetedAmpliconWithCompanyTag.objects.using(db_alias). \
+    for ter in PCR1WithCompanyTagPrimerPairTER.objects.using(db_alias). \
         select_related(*TER_SELECT_RELATED):
         amplicon = TargetedAmpliconWithCompanyTag.objects.using(db_alias). \
             create(
