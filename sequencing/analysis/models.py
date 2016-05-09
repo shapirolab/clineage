@@ -179,7 +179,7 @@ class AdamMSVariations(BowtieIndexMixin):
 
     class Meta:
         index_together=[
-            ("amplicon","padding")
+            ("amplicon", "padding", "microsatellites_version")
         ]
 
 post_delete.connect(delete_files, AdamMSVariations)
@@ -283,5 +283,10 @@ class HistogramEntryReads(models.Model):
         yield self.fastq1
         yield self.fastq2
         yield self.fastqm
+
+    class Meta:
+        index_together=[
+            ("histogram", "amplicon", "microsatellites_version")
+        ]
 
 post_delete.connect(delete_files, HistogramEntryReads)
