@@ -3,6 +3,8 @@
 
 from django.db import migrations, models
 
+from utils.content_type_operation import AlterContentType
+
 
 class Migration(migrations.Migration):
 
@@ -14,15 +16,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='AmplifiedContent',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(max_length=50, null=True, blank=True)),
-                ('comment', models.TextField()),
-                ('cell', models.ForeignKey(to='sampling.Cell')),
-                ('protocol', models.ForeignKey(blank=True, to='workflows.CellContentProtocol', null=True)),
-            ],
+        migrations.RenameModel(
+            old_name='CellContent',
+            new_name='AmplifiedContent',
+        ),
+        AlterContentType(
+            from_model='cellcontent',
+            to_app='workflows',
+            to_model='amplifiedcontent',
+        ),
+        migrations.RemoveField(
+            model_name='AmplifiedContent',
+            name='type',
+        ),
+        migrations.RemoveField(
+            model_name='AmplifiedContent',
+            name='user',
         ),
         migrations.CreateModel(
             name='BarcodedContent',
@@ -44,22 +53,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
             ],
         ),
-        migrations.RemoveField(
-            model_name='cellcontent',
-            name='cell',
-        ),
-        migrations.RemoveField(
-            model_name='cellcontent',
-            name='protocol',
-        ),
-        migrations.RemoveField(
-            model_name='cellcontent',
-            name='type',
-        ),
-        migrations.RemoveField(
-            model_name='cellcontent',
-            name='user',
-        ),
         migrations.CreateModel(
             name='MagicalPCR1BarcodedContent',
             fields=[
@@ -75,9 +68,6 @@ class Migration(migrations.Migration):
                 ('mpx_collection', models.ForeignKey(to='multiplexes.PCR1MultiplexCollection')),
             ],
             bases=('workflows.library',),
-        ),
-        migrations.DeleteModel(
-            name='CellContent',
         ),
         migrations.DeleteModel(
             name='CellContentType',
