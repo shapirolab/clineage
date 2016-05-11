@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('parts', '0003_padlockamplificationminusprimer_padlockamplificationplusprimer'),
+        ('parts', '0003_add_padlock_parts'),
         ('planning', '0003_auto_20160215_1652'),
         ('synthesis', '0002_remove_temp_fks'),
     ]

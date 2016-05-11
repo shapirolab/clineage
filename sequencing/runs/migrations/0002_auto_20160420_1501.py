@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('parts', '0003_padlockamplificationminusprimer_padlockamplificationplusprimer'),
+        ('parts', '0003_add_padlock_parts'),
         ('workflows', '0004_auto_20160420_1501'),
         ('runs', '0001_initial'),
     ]

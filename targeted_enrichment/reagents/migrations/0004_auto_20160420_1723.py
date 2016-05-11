@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('amplicons', '0001_initial'),
-        ('reagents', '0003_shortpadlockfirstter'),
+        ('reagents', '0003_om6padlockter'),
     ]
 
     operations = [

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sampling', '0001_initial'),
-        ('parts', '0003_padlockamplificationminusprimer_padlockamplificationplusprimer'),
+        ('parts', '0003_add_padlock_parts'),
         ('multiplexes', '0002_pcr1multiplexcollection'),
         ('workflows', '0002_subclass_cell_content_protocol'),
     ]

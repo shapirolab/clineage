@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('planning', '0003_auto_20160215_1652'),
-        ('synthesis', '0003_shortpadlockfirst'),
+        ('synthesis', '0003_om6padlock'),
         ('reagents', '0002_remove_temp_fks'),
     ]
 
