@@ -35,13 +35,8 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='amplicons.TargetedAmpliconWithCompanyTag'),
         ),
         migrations.AddField(
-            model_name='shortpadlockfirstter',
+            model_name='om6padlockter',
             name='amplicon',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='amplicons.UMITargetedAmplicon'),
-        ),
-        migrations.AddField(
-            model_name='shortpadlockfirstter',
-            name='old_adam_te_pk',
-            field=models.PositiveIntegerField(null=True),
         ),
     ]

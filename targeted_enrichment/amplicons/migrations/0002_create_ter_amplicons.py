@@ -73,9 +73,9 @@ def populate_pcr1withcompanytagprimerpairter(apps, schema_editor):
 
 def populate_shortpadlockfirstter(apps, schema_editor):
     db_alias = schema_editor.connection.alias
-    ShortPadlockFirstTER = apps.get_model('reagents', 'ShortPadlockFirstTER')
+    OM6PadlockTER = apps.get_model('reagents', 'OM6PadlockTER')
     UMITargetedAmplicon = apps.get_model('amplicons', 'UMITargetedAmplicon')
-    for ter in ShortPadlockFirstTER.objects.using(db_alias). \
+    for ter in OM6PadlockTER.objects.using(db_alias). \
         select_related(
             "padlock",
             "padlock__left_ugs",
@@ -94,7 +94,7 @@ def populate_shortpadlockfirstter(apps, schema_editor):
             end_pos=ter.padlock.right_ugs.slice.start_pos - 1,  # 1 based!
         )
         amplicon = UMITargetedAmplicon.objects.using(db_alias).create(
-            umi_length=3,  # FIXME!
+            umi_length=ter.padlock.umi_length,
             left_ugs=ter.padlock.left_ugs,
             right_ugs=ter.padlock.left_ugs,
             slice=slice,
