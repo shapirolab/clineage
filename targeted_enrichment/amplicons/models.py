@@ -89,8 +89,8 @@ class UMITargetedAmplicon(TargetedAmplicon):
 
     @property
     def left_margin(self):
-        return DNA("N"*self.umi_length) + self.left_ugs.ref_sequence
+        return DNA.umi(self.umi_length) + self.left_ugs.ref_sequence
 
     @property
     def right_margin(self):
-        return self.right_ugs.ref_sequence + DNA("N"*self.umi_length)
+        return self.right_ugs.ref_sequence + DNA.umi(self.umi_length)
