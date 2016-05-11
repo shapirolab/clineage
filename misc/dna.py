@@ -33,6 +33,12 @@ class DNA(object):
         else:
             raise TypeError("DNA accepts only string (bytes) objects.")
 
+    @classmethod
+    def umi(cls, umi_length):
+        if not isinstance(umi_length, int):
+            raise TypeError("Bad umi_length type.")
+        return cls("N"*umi_length)
+
     @property
     def seq(self):
         return self._seq
