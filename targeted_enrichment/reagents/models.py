@@ -6,7 +6,7 @@ from model_utils.managers import InheritanceManager
 
 from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, \
     PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
-    TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer, ShortPadlockFirst
+    TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer, OM6Padlock
 from targeted_enrichment.planning.models import TargetEnrichment
 from targeted_enrichment.amplicons.models import PlainTargetedAmplicon, \
     UMITargetedAmplicon, TargetedAmpliconWithCompanyTag
@@ -79,9 +79,9 @@ class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReag
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
 
 
-class ShortPadlockFirstTER(TargetedEnrichmentReagent):
+class OM6PadlockTER(TargetedEnrichmentReagent):
     amplicon = models.ForeignKey(UMITargetedAmplicon)
-    padlock = models.ForeignKey(ShortPadlockFirst)
+    padlock = models.ForeignKey(OM6Padlock)
 
     def __unicode__(self):
         return "{}".format(self.padlock)

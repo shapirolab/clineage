@@ -11,6 +11,20 @@ from misc.dna import DNA
 
 ### -------------------------------------------------------------------------------------
 
+class NoStrandSynthetic(models.Model):
+    name = models.CharField(max_length=50)
+    _sequence = models.CharField(max_length=250)#DNAField(Sequence)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def sequence(self):
+        return DNA(self._sequence)
+
+    def __str__(self):
+        return "{}".format(self.name)
+
 
 class KitSynthetic(models.Model,BaseStrandMixin):
     name = models.CharField(max_length=50)
@@ -25,6 +39,7 @@ class KitSynthetic(models.Model,BaseStrandMixin):
 
     def __str__(self):
         return "{}({})".format(self.name, self.strand)
+
 
 class ReadingAdaptorCuts(models.Model):
     overlap_start = models.IntegerField()
@@ -48,6 +63,7 @@ class ReadingAdaptorCuts(models.Model):
     def __str__(self):
         return "{}[:{}:{}:]".format(self.ira, self.overlap_start,
             self.overlap_end)
+
 
 class IlluminaReadingAdaptor1(KitSynthetic,PlusStrandMixin):
     pass
@@ -73,8 +89,17 @@ class DNABarcode1(KitSynthetic,PlusStrandMixin):
 class DNABarcode2(KitSynthetic,MinusStrandMixin):
     pass
 
-class PadlockAmplificationPlusPrimer(KitSynthetic,PlusStrandMixin):
+class PadlockAmplificationPlusPrimerPart1(KitSynthetic,PlusStrandMixin):
     pass
 
-class PadlockAmplificationMinusPrimer(KitSynthetic,MinusStrandMixin):
+class PadlockAmplificationPlusPrimerPart2(KitSynthetic,PlusStrandMixin):
+    pass
+
+class PadlockAmplificationMinusPrimerPart1(KitSynthetic,MinusStrandMixin):
+    pass
+
+class PadlockAmplificationMinusPrimerPart2(KitSynthetic,MinusStrandMixin):
+    pass
+
+class Backbone(NoStrandSynthetic):
     pass

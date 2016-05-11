@@ -18,7 +18,10 @@ from django.contrib.contenttypes import fields
 from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
     IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
     IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, \
-    PadlockAmplificationPlusPrimer, PadlockAmplificationMinusPrimer
+    PadlockAmplificationPlusPrimerPart1, PadlockAmplificationPlusPrimerPart2, \
+    PadlockAmplificationMinusPrimerPart1, \
+    PadlockAmplificationMinusPrimerPart2, \
+    IlluminaReadingAdaptor1, IlluminaReadingAdaptor2, Backbone
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
     RestrictionEnzyme
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
@@ -152,7 +155,7 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
-class BaseShortPadlock(models.Model):
+class BasePadlockOligomixStock(models.Model):
     """
     A piece of DNA that selectively binds to the template in two locations,
     and by filling in the gap gets a circular DNA containing the targeted
@@ -162,122 +165,49 @@ class BaseShortPadlock(models.Model):
     Contains generic adaptors on each end, for amplification from oligomix.
     """
     name = models.CharField(max_length=50)
-    left_amp_primer = models.ForeignKey(PadlockAmplificationPlusPrimer)
-    right_amp_primer = models.ForeignKey(PadlockAmplificationMinusPrimer)
+    left_amp_primer_part1 = models.ForeignKey(PadlockAmplificationPlusPrimerPart1)
+    left_amp_primer_part2 = models.ForeignKey(PadlockAmplificationPlusPrimerPart2)
+    right_amp_primer_part1 = models.ForeignKey(PadlockAmplificationMinusPrimerPart1)
+    right_amp_primer_part2 = models.ForeignKey(PadlockAmplificationMinusPrimerPart2)
+    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
+    # padlock = models.ForeignKey(BasePadlock)
     physical_locations = fields.GenericRelation(SampleLocation,
                                              content_type_field='content_type',
                                              object_id_field='object_id')
 
-    @property
-    def left_region(self):
-        raise NotImplementedError()
-
-    @property
-    def right_region(self):
-        raise NotImplementedError()
-
-    @property
-    def left_tail(self):
-        raise NotImplementedError()
-
-    @property
-    def right_tail(self):
-        raise NotImplementedError()
-
-    @property
-    def backbone(self):
-        raise NotImplementedError()
 
     @property
     def sequence(self):
-        return self.left_amp_primer.sequence + \
-            self.right_region + self.right_tail + \
-            self.backbone + \
-            self.left_tail + self.left_region + \
-            self.right_amp_primer.sequence
+        return self.left_amp_primer_part1.sequence + \
+            self.restriction_enzyme.sequence + \
+            self.left_amp_primer_part2.sequence + \
+            self.padlock.sequence + \
+            self.right_amp_primer_part2.sequence + \
+            self.restriction_enzyme.sequence.rev_comp() + \
+            self.right_amp_primer_part1.sequence
 
     class Meta:
         abstract = True
 
-class ShortPadlockFirst(BaseShortPadlock):
+
+class OM6Padlock(models.Model):
     left_ugs = models.ForeignKey(UGSPlus)
     right_ugs = models.ForeignKey(UGSMinus)
-    irac1 = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
-    irac2 = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
-    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
-
-    @property
-    def left_region(self):
-        return self.left_ugs.ref_sequence
-
-    @property
-    def right_region(self):
-        return self.right_ugs.ref_sequence
-
-    @property
-    def left_tail(self):
-        return self.irac1.primer1tail
-
-    @property
-    def right_tail(self):
-        return self.irac2.primer1tail
-
-    @property
-    def backbone(self):
-        return self.restriction_enzyme.sequence
-
-
-class BaseLongPadlockTemplate(models.Model):
-    """
-    The original template from which a long padlock is generated, using stock
-    DNA as the backbone.
-    Contains the left and right targeting regions separated by a restriction
-    site, which is digested after annealing with the backbone.
-    """
-    name = models.CharField(max_length=50)
-    left_amp_primer = models.ForeignKey(PadlockAmplificationPlusPrimer)
-    right_amp_primer = models.ForeignKey(PadlockAmplificationMinusPrimer)
-    physical_locations = fields.GenericRelation(SampleLocation,
-                                             content_type_field='content_type',
-                                             object_id_field='object_id')
-
-    @property
-    def left_region(self):
-        raise NotImplementedError()
-
-    @property
-    def right_region(self):
-        raise NotImplementedError()
-
-    @property
-    def left_tail(self):
-        raise NotImplementedError()
-
-    @property
-    def right_tail(self):
-        raise NotImplementedError()
-
-    @property
-    def filler(self):
-        raise NotImplementedError()
-
-    @property
-    def left_backbone_adaptor(self):
-        raise NotImplementedError()
-
-    @property
-    def right_backbone_adaptor(self):
-        raise NotImplementedError()
+    ira1 = models.ForeignKey(IlluminaReadingAdaptor1)
+    ira2 = models.ForeignKey(IlluminaReadingAdaptor2)
+    backbone = models.ForeignKey(Backbone)
+    umi_length = models.PositiveSmallIntegerField()
 
     @property
     def sequence(self):
-        return self.right_backbone_adaptor + \
-            self.left_tail + self.left_region + \
-            self.right_amp_primer.sequence + \
-            self.filler + \
-            self.left_amp_primer.sequence + \
-            self.right_region + self.right_tail + \
-            self.left_backbone_adaptor
+        return self.right_ugs.ref_sequence + \
+            DNA.umi(self.umi_length) + \
+            self.ira2.ref_sequence + \
+            self.backbone + \
+            self.ira1.ref_sequence + \
+            DNA.umi(self.umi_length) + \
+            self.left_ugs.ref_sequence
 
-    class Meta:
-        abstract = True
+
+class OM6OligomixStock(BasePadlockOligomixStock):
+    padlock = models.ForeignKey(OM6Padlock)
