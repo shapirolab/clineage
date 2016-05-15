@@ -16,7 +16,9 @@ TER_SELECT_RELATED = [
 ]
 
 
-def get_target_amplicon_dict(ter):
+def get_target_amplicon_dict(ter, apps, schema_editor):
+    db_alias = schema_editor.connection.alias
+    DNASlice = apps.get_model('genomes', 'DNASlice')
     if ter.left_primer.ugs.slice.chromosome_id != \
         ter.right_primer.ugs.slice.chromosome_id:
         raise IntegrityError(
@@ -29,7 +31,7 @@ def get_target_amplicon_dict(ter):
     )
     return {
         "left_ugs": ter.left_primer.ugs,
-        "right_ugs": ter.left_primer.ugs,
+        "right_ugs": ter.right_primer.ugs,
         "slice": slice,
     }
 
@@ -40,16 +42,15 @@ def populate_plain_targeted_ters(apps, schema_editor):
     PCR1PrimerPairTERDeprecated = apps.get_model('reagents', 'PCR1PrimerPairTERDeprecated')
     TargetedNoTailPrimerPairTER = apps.get_model('reagents', 'TargetedNoTailPrimerPairTER')
     PlainTargetedAmplicon = apps.get_model('amplicons', 'PlainTargetedAmplicon')
-    DNASlice = apps.get_model('genomes', 'DNASlice')
     for TER in [
         PCR1PrimerPairTER,
         PCR1PrimerPairTERDeprecated,
         TargetedNoTailPrimerPairTER,
     ]:
         for ter in TER.objects.using(db_alias).select_related(
-            *TER_SELECT_RELATED):
+                *TER_SELECT_RELATED):
             amplicon = PlainTargetedAmplicon.objects.using(db_alias).create(
-                **get_target_amplicon_dict(ter)
+                **get_target_amplicon_dict(ter, apps, schema_editor)
             )
             ter.amplicon = amplicon
             ter.save()
@@ -65,7 +66,7 @@ def populate_pcr1withcompanytagprimerpairter(apps, schema_editor):
             create(
             left_tag=ter.left_primer.tag,
             right_tag=DNA(ter.right_primer.tag).rev_comp().seq.decode("ascii"),
-            **get_target_amplicon_dict(ter)
+            **get_target_amplicon_dict(ter, apps, schema_editor)
         )
         ter.amplicon = amplicon
         ter.save()
