@@ -55,51 +55,6 @@ class NGSRun(models.Model):
     user = models.ForeignKey(User)
     date = models.DateField()
 
-    @property
-    def barcoded_contents(self):
-        for library in self.libraries.select_subclasses():
-            it = library.barcoded_contents
-            if isinstance(it, QuerySet):
-                it = it.select_related(
-                    "barcodes",
-                    "barcodes__left",
-                    "barcodes__right"
-                )
-            for bc in it:
-                yield bc
-
-    def get_sample_sheets(self, demux_scheme, max_samples=None):
-        """
-        Create samplesheet(s) for this given run for demultiplexing with given
-        demux_scheme. If max_samples is specified, creates multiple
-        samplesheets, each with at most max_samples samples. Otherwise creates
-        a single samplesheet.
-        Currently, demux_scheme doesn't change anything.
-        FIXME: Use demux_scheme.
-        """
-        name = self.name
-        date = self.date
-        description = "_".join(lib.name for lib in self.libraries.all())
-        read_length = self.kit.read_length
-        fwd_read_adaptor = self.kit.fwd_read_adaptor
-        rev_read_adaptor = self.kit.rev_read_adaptor
-        return generate_sample_sheets(
-            barcodes=self.barcoded_contents,
-            name=name,
-            date=date,
-            description=description,
-            read_length=read_length,
-            fwd_read_adaptor=fwd_read_adaptor,
-            rev_read_adaptor=rev_read_adaptor,
-            demux_scheme=demux_scheme,
-            max_samples=max_samples
-        )
-
-    def run_demux(self):
-        sample_sheet = self.get_sample_sheets()
-        # FIXME
-        #run_bcl2fastq(folder, sample_sheet)
-
 
 class DemultiplexingScheme(models.Model):
     name = models.CharField(max_length=50)
