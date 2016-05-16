@@ -9,6 +9,7 @@ from linapp.models import Protocol
 from wet_storage.models import SampleLocation
 from sampling.models import Cell
 from primers.parts.models import DNABarcode1, DNABarcode2
+from primers.synthesis.models import PCR2PlusPrimer, PCR2MinusPrimer
 from lib_prep.multiplexes.models import PCR1Panel
 
 class BarcodePair(models.Model):
@@ -17,6 +18,15 @@ class BarcodePair(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class PCR2PrimerPairReagent(models.Model):
+    bp = models.ForeignKey(BarcodePair)  # TODO: maybe kill?
+    left_primer = models.ForeignKey(PCR2PlusPrimer)
+    right_primer = models.ForeignKey(PCR2MinusPrimer)
+    physical_locations = fields.GenericRelation(SampleLocation,
+                                                 content_type_field='content_type',
+                                                 object_id_field='object_id')
 
 
 class CellContentProtocol(Protocol):
