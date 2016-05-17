@@ -141,3 +141,11 @@ class DNASlice(models.Model):
                     j in range(width)],
                 pos=(sa+i)*full_width)
         return ret
+
+    class Meta:
+        unique_together = [
+            ("chromosome", "start_pos", "end_pos"),
+        ]
+        index_together = [
+            ("chromosome", "start_pos", "end_pos"),
+        ]
