@@ -24,7 +24,7 @@ def get_target_amplicon_dict(ter, apps, schema_editor):
         raise IntegrityError(
             "TER {} has ugss with slices from different " \
             "chromosomes.".format(ter))
-    slice = DNASlice.objects.using(db_alias).create(
+    slice, c = DNASlice.objects.using(db_alias).get_or_create(
         chromosome_id=ter.left_primer.ugs.slice.chromosome_id,
         start_pos=ter.left_primer.ugs.slice.end_pos + 1,  # 1 based!
         end_pos=ter.right_primer.ugs.slice.start_pos - 1,  # 1 based!
