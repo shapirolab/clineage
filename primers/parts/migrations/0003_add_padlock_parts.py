@@ -8,11 +8,64 @@ import django
 
 
 def split_cuts(apps, schema_editor):
-    pass
+    db_alias = schema_editor.connection.alias
+    IlluminaReadingAdaptor1Cuts = apps.get_model("parts", "IlluminaReadingAdaptor1Cuts")
+    IlluminaReadingAdaptor2Cuts = apps.get_model("parts", "IlluminaReadingAdaptor2Cuts")
+    IlluminaReadingAdaptor1ForTail = apps.get_model("parts", "IlluminaReadingAdaptor1ForTail")
+    IlluminaReadingAdaptor2ForTail = apps.get_model("parts", "IlluminaReadingAdaptor2ForTail")
+    IlluminaReadingAdaptor1ForHead = apps.get_model("parts", "IlluminaReadingAdaptor1ForHead")
+    IlluminaReadingAdaptor2ForHead = apps.get_model("parts", "IlluminaReadingAdaptor2ForHead")
+    for C, FT, FH in [
+        (IlluminaReadingAdaptor1Cuts, IlluminaReadingAdaptor1ForTail, IlluminaReadingAdaptor1ForHead),
+        (IlluminaReadingAdaptor2Cuts, IlluminaReadingAdaptor2ForTail, IlluminaReadingAdaptor2ForHead),
+    ]:
+        for c in C.objects.using(db_alias).select_related("ira"):
+            FT.objects.using(db_alias).create(
+                ira=c.ira,
+                tail_length=len(c.ira._sequence)-c.overlap_start,
+                id=c.id,
+            )
+            FH.objects.using(db_alias).create(
+                ira=c.ira,
+                head_length=c.overlap_end,
+                id=c.id,
+            )
 
 
 def rejoin_cuts(apps, schema_editor):
-    pass
+    db_alias = schema_editor.connection.alias
+    IlluminaReadingAdaptor1Cuts = apps.get_model("parts", "IlluminaReadingAdaptor1Cuts")
+    IlluminaReadingAdaptor2Cuts = apps.get_model("parts", "IlluminaReadingAdaptor2Cuts")
+    IlluminaReadingAdaptor1ForTail = apps.get_model("parts", "IlluminaReadingAdaptor1ForTail")
+    IlluminaReadingAdaptor2ForTail = apps.get_model("parts", "IlluminaReadingAdaptor2ForTail")
+    IlluminaReadingAdaptor1ForHead = apps.get_model("parts", "IlluminaReadingAdaptor1ForHead")
+    IlluminaReadingAdaptor2ForHead = apps.get_model("parts", "IlluminaReadingAdaptor2ForHead")
+    for C, FT, FH in [
+        (IlluminaReadingAdaptor1Cuts, IlluminaReadingAdaptor1ForTail, IlluminaReadingAdaptor1ForHead),
+        (IlluminaReadingAdaptor2Cuts, IlluminaReadingAdaptor2ForTail, IlluminaReadingAdaptor2ForHead),
+    ]:
+        fts = {ft.id: ft for ft in FT.objects.using(db_alias).select_related("ira")}
+        fhs = {fh.id: fh for fh in FH.objects.using(db_alias)}
+        ft_ira_ids = {ft.ira_id: ft for ft in fts.values()}
+        fh_ira_ids = {fh.ira_id: fh for fh in fhs.values()}
+        joint = {k: (fts[k], fhs[k]) for k in fts.keys() & fhs.keys() if fts[k].ira_id == fhs[k].ira_id}
+        rest = [(fts[k], fh_ira_ids[fts[k].ira_id]) for k in fts.keys() - joint.keys()] + \
+            [(ft_ira_ids[fhs[k].ira_id], fhs[k]) for k in fhs.keys() - joint.keys()]
+        for id, (ft, fh) in joint.items():
+            ira = ft.ira
+            C.objects.using(db_alias).create(
+                ira=ira,
+                overlap_start=len(ira._sequence)-ft.tail_length,
+                overlap_end=fh.head_length,
+                id=id,
+            )
+        for (ft, fh) in rest:
+            ira = ft.ira
+            C.objects.using(db_alias).create(
+                ira=ira,
+                overlap_start=len(ira._sequence)-ft.tail_length,
+                overlap_end=fh.head_length,
+            )
 
 
 class Migration(migrations.Migration):
