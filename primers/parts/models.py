@@ -26,7 +26,7 @@ class NoStrandSynthetic(models.Model):
         return "{}".format(self.name)
 
 
-class KitSynthetic(models.Model,BaseStrandMixin):
+class KitSynthetic(models.Model, BaseStrandMixin):
     name = models.CharField(max_length=50)
     _sequence = models.CharField(max_length=250)#DNAField(Sequence)
 
@@ -65,10 +65,10 @@ class ReadingAdaptorCuts(models.Model):
             self.overlap_end)
 
 
-class IlluminaReadingAdaptor1(KitSynthetic,PlusStrandMixin):
+class IlluminaReadingAdaptor1(KitSynthetic, PlusStrandMixin):
     pass
 
-class IlluminaReadingAdaptor2(KitSynthetic,MinusStrandMixin):
+class IlluminaReadingAdaptor2(KitSynthetic, MinusStrandMixin):
     pass
 
 class IlluminaReadingAdaptor1Cuts(ReadingAdaptorCuts):
@@ -77,28 +77,28 @@ class IlluminaReadingAdaptor1Cuts(ReadingAdaptorCuts):
 class IlluminaReadingAdaptor2Cuts(ReadingAdaptorCuts):
     ira = models.ForeignKey(IlluminaReadingAdaptor2)
 
-class IlluminaFlowCellAdaptor1(KitSynthetic,PlusStrandMixin):
+class IlluminaFlowCellAdaptor1(KitSynthetic, PlusStrandMixin):
     pass
 
-class IlluminaFlowCellAdaptor2(KitSynthetic,MinusStrandMixin):
+class IlluminaFlowCellAdaptor2(KitSynthetic, MinusStrandMixin):
     pass
 
-class DNABarcode1(KitSynthetic,PlusStrandMixin):
+class DNABarcode1(KitSynthetic, PlusStrandMixin):
     pass
 
-class DNABarcode2(KitSynthetic,MinusStrandMixin):
+class DNABarcode2(KitSynthetic, MinusStrandMixin):
     pass
 
-class PadlockAmplificationPlusPrimerPart1(KitSynthetic,PlusStrandMixin):
+class PadlockAmplificationPlusPrimerPart1(KitSynthetic, PlusStrandMixin):
     pass
 
-class PadlockAmplificationPlusPrimerPart2(KitSynthetic,PlusStrandMixin):
+class PadlockAmplificationPlusPrimerPart2(KitSynthetic, PlusStrandMixin):
     pass
 
-class PadlockAmplificationMinusPrimerPart1(KitSynthetic,MinusStrandMixin):
+class PadlockAmplificationMinusPrimerPart1(KitSynthetic, MinusStrandMixin):
     pass
 
-class PadlockAmplificationMinusPrimerPart2(KitSynthetic,MinusStrandMixin):
+class PadlockAmplificationMinusPrimerPart2(KitSynthetic, MinusStrandMixin):
     pass
 
 class Backbone(NoStrandSynthetic):
