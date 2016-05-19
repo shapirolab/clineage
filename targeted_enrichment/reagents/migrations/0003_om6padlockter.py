@@ -14,16 +14,35 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='OM6PadlockTER',
+            name='OM6PadlockTERBase',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('passed_validation', models.NullBooleanField()),
                 ('validation_date', models.DateField(blank=True, null=True)),
                 ('comment', models.CharField(blank=True, max_length=50, null=True)),
-                ('padlock', models.ForeignKey(to='synthesis.OM6Padlock')),
                 ('te', models.ForeignKey(to='planning.TargetEnrichment')),
                 ('validation_failure', models.ForeignKey(to='reagents.TargetEnrichmentFailureType', null=True)),
                 ('old_adam_te_pk', models.PositiveIntegerField(null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='OM6PadlockTER',
+            fields=[
+                ('om6padlockterbase_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='reagents.OM6PadlockTERBase')),
+                ('padlock', models.ForeignKey(to='synthesis.OM6Padlock')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='OM6PadlockTERDeprecated',
+            fields=[
+                ('om6padlockterbase_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='reagents.OM6PadlockTERBase')),
+                ('padlock', models.ForeignKey(to='synthesis.OM6PadlockDeprecated')),
             ],
             options={
                 'abstract': False,

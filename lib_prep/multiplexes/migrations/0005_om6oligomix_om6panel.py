@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=20)),
-                ('ters', models.ManyToManyField(to='reagents.OM6PadlockTER')),
+                ('ters', models.ManyToManyField(to='reagents.OM6PadlockTERBase')),
             ],
             options={
                 'abstract': False,

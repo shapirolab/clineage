@@ -2,7 +2,7 @@ from django.contrib.contenttypes import fields
 from django.db import models
 from targeted_enrichment.planning.models import TargetEnrichment
 from targeted_enrichment.reagents.models import PCR1PrimerPairTERBase, \
-    OM6PadlockTER
+    OM6PadlockTERBase
 from wet_storage.models import SampleLocation
 
 ### -------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class PCR1Panel(Panel):  # PCR1MultiplexCollection
 
 
 class OM6Oligomix(TERMultiplex):
-    ters = models.ManyToManyField(OM6PadlockTER)
+    ters = models.ManyToManyField(OM6PadlockTERBase)
     #physical_locations = fields.GenericRelation(SampleLocation,
                                #content_type_field='content_type',
                                #object_id_field='object_id')
