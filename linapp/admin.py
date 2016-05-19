@@ -20,8 +20,9 @@ from sampling.models import GeneticBackground, Organ, Tissue, \
     Individual, ExtractionEvent, Extraction, SamplingEvent, FACS, \
     LaserCapture, CellSelector, Cell
 from primers.parts.models import IlluminaReadingAdaptor1, \
-    IlluminaReadingAdaptor2, IlluminaReadingAdaptor1Cuts, \
-    IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor1, \
+    IlluminaReadingAdaptor2, IlluminaReadingAdaptor1ForTail, \
+    IlluminaReadingAdaptor1ForHead, IlluminaReadingAdaptor2ForTail, \
+    IlluminaReadingAdaptor2ForHead, IlluminaFlowCellAdaptor1, \
     IlluminaFlowCellAdaptor2, DNABarcode1, DNABarcode2
 from primers.synthesis.models import TargetedNoTailPlusPrimer, \
     TargetedNoTailMinusPrimer, PCR1PlusPrimer, PCR1MinusPrimer, \
@@ -91,8 +92,10 @@ admin.site.register(Cell)
 
 admin.site.register(IlluminaReadingAdaptor1)
 admin.site.register(IlluminaReadingAdaptor2)
-admin.site.register(IlluminaReadingAdaptor1Cuts)
-admin.site.register(IlluminaReadingAdaptor2Cuts)
+admin.site.register(IlluminaReadingAdaptor1ForTail)
+admin.site.register(IlluminaReadingAdaptor1ForHead)
+admin.site.register(IlluminaReadingAdaptor2ForTail)
+admin.site.register(IlluminaReadingAdaptor2ForHead)
 admin.site.register(IlluminaFlowCellAdaptor1)
 admin.site.register(IlluminaFlowCellAdaptor2)
 admin.site.register(DNABarcode1)

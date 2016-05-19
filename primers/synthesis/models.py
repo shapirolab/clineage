@@ -15,8 +15,9 @@ from django.contrib.contenttypes import fields
 #
 # AATGATACGGCGACCACCGAGATCTACAC[i5]ACACTCTTTCCCTACACGACGCTCTTCCGATCT[INSERT][A]GATCGGAAGAGCACACGTCTGAACTCCAGTCAC[i7]ATCTCGTATGCCGTCTTCTGCTTG
 
-from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
-    IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
+from primers.parts.models import IlluminaReadingAdaptor1ForTail, \
+    IlluminaReadingAdaptor1ForHead, IlluminaReadingAdaptor2ForTail, \
+    IlluminaReadingAdaptor2ForHead, IlluminaFlowCellAdaptor2, \
     IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, \
     PadlockAmplificationPlusPrimerPart1, PadlockAmplificationPlusPrimerPart2, \
     PadlockAmplificationMinusPrimerPart1, \
@@ -89,26 +90,26 @@ class TargetedNoTailMinusPrimer(NoTailMixin,TargetedMinusPrimer):
 class PCR1TailMixin(object):
     @property
     def tail(self):
-        return self.irac.primer1tail
+        return self.iraft.sequence
 
 class PCR1PlusPrimer(PCR1TailMixin,TargetedPlusPrimer):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the UGS leading to our target.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
 
 class PCR1MinusPrimer(PCR1TailMixin,TargetedMinusPrimer):
     """
     Primer that appends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the (rev-comp) UGS following our target.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
 
 class PCR1WithCompanyTagTailMixin(object):
     @property
     def tail(self):
-        return self.irac.primer1tail + DNA(self.tag)
+        return self.iraft.sequence + DNA(self.tag)
 
 class PCR1WithCompanyTagPlusPrimer(PCR1WithCompanyTagTailMixin,TargetedPlusPrimer):
     """
@@ -117,7 +118,7 @@ class PCR1WithCompanyTagPlusPrimer(PCR1WithCompanyTagTailMixin,TargetedPlusPrime
     at the UGS leading to our target.
     """
     tag = models.CharField(max_length=1) # DNAField
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
 
 class PCR1WithCompanyTagMinusPrimer(PCR1WithCompanyTagTailMixin,TargetedMinusPrimer):
     """
@@ -126,23 +127,24 @@ class PCR1WithCompanyTagMinusPrimer(PCR1WithCompanyTagTailMixin,TargetedMinusPri
     at the (rev-comp) UGS following our target.
     """
     tag = models.CharField(max_length=1) # DNAField
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
 
 class PCR2Mixin(object):
     @property
     def head(self):
-        return self.irac.overlap
+        # NOTE: this is not quite accurate...
+        return self.irafh.sequence
 
     @property
     def tail(self):
-        return self.ifca.sequence + self.barcode.sequence + self.irac.primer2tail
+        return self.ifca.sequence + self.barcode.sequence
 
 class PCR2PlusPrimer(PCR2Mixin,BasePrimer,PlusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, prepends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    irafh = models.ForeignKey(IlluminaReadingAdaptor1ForHead)
     barcode = models.ForeignKey(DNABarcode1)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor1)
 
@@ -151,7 +153,7 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     Primer that binds at (some of) the Illumina Read Adaptor, appends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    irafh = models.ForeignKey(IlluminaReadingAdaptor2ForHead)
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
@@ -193,8 +195,8 @@ class BasePadlockPrep(models.Model):
 class OM6Padlock(models.Model):
     left_ugs = models.ForeignKey(UGSPlus)
     right_ugs = models.ForeignKey(UGSMinus)
-    ira1 = models.ForeignKey(IlluminaReadingAdaptor1)
-    ira2 = models.ForeignKey(IlluminaReadingAdaptor2)
+    ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
+    ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
     backbone = models.ForeignKey(Backbone)
     umi_length = models.PositiveSmallIntegerField()
 
@@ -202,9 +204,9 @@ class OM6Padlock(models.Model):
     def sequence(self):
         return self.right_ugs.ref_sequence + \
             DNA.umi(self.umi_length) + \
-            self.ira2.ref_sequence + \
+            self.ira2ft.ref_sequence + \
             self.backbone + \
-            self.ira1.ref_sequence + \
+            self.ira1ft.ref_sequence + \
             DNA.umi(self.umi_length) + \
             self.left_ugs.ref_sequence
 

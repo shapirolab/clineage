@@ -41,28 +41,34 @@ class KitSynthetic(models.Model, BaseStrandMixin):
         return "{}({})".format(self.name, self.strand)
 
 
-class ReadingAdaptorCuts(models.Model):
-    overlap_start = models.IntegerField()
-    overlap_end = models.IntegerField()
+class IlluminaReadingAdaptorForTail(models.Model, BaseStrandMixin):
+    # ira = models.ForeignKey(IlluminaReadingAdaptor)
+    tail_length = models.IntegerField()
 
     @property
-    def primer1tail(self):
-        return self.ira.sequence[self.overlap_start:]
-
-    @property
-    def overlap(self):
-        return self.ira.sequence[self.overlap_start:self.overlap_end]
-
-    @property
-    def primer2tail(self):
-        return self.ira.sequence[:self.overlap_start]
+    def sequence(self):
+        return self.ira.sequence[-self.tail_length:]
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return "{}[:{}:{}:]".format(self.ira, self.overlap_start,
-            self.overlap_end)
+        return "{}[-{}:]".format(self.ira, self.tail_length)
+
+
+class IlluminaReadingAdaptorForHead(models.Model, BaseStrandMixin):
+    # ira = models.ForeignKey(IlluminaReadingAdaptor)
+    head_length = models.IntegerField()
+
+    @property
+    def sequence(self):
+        return self.ira.sequence[:self.head_length]
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return "{}[:{}]".format(self.ira, self.head_length)
 
 
 class IlluminaReadingAdaptor1(KitSynthetic, PlusStrandMixin):
@@ -71,10 +77,16 @@ class IlluminaReadingAdaptor1(KitSynthetic, PlusStrandMixin):
 class IlluminaReadingAdaptor2(KitSynthetic, MinusStrandMixin):
     pass
 
-class IlluminaReadingAdaptor1Cuts(ReadingAdaptorCuts):
+class IlluminaReadingAdaptor1ForTail(IlluminaReadingAdaptorForTail, PlusStrandMixin):
     ira = models.ForeignKey(IlluminaReadingAdaptor1)
 
-class IlluminaReadingAdaptor2Cuts(ReadingAdaptorCuts):
+class IlluminaReadingAdaptor2ForTail(IlluminaReadingAdaptorForTail, MinusStrandMixin):
+    ira = models.ForeignKey(IlluminaReadingAdaptor2)
+
+class IlluminaReadingAdaptor1ForHead(IlluminaReadingAdaptorForHead, PlusStrandMixin):
+    ira = models.ForeignKey(IlluminaReadingAdaptor1)
+
+class IlluminaReadingAdaptor2ForHead(IlluminaReadingAdaptorForHead, MinusStrandMixin):
     ira = models.ForeignKey(IlluminaReadingAdaptor2)
 
 class IlluminaFlowCellAdaptor1(KitSynthetic, PlusStrandMixin):
