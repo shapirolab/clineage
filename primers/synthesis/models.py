@@ -197,19 +197,38 @@ class OM6Padlock(models.Model):
     right_ugs = models.ForeignKey(UGSMinus)
     ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
     ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
-    backbone = models.ForeignKey(Backbone)
     umi_length = models.PositiveSmallIntegerField()
 
     @property
     def sequence(self):
-        return self.right_ugs.ref_sequence + \
+        return self.left_ugs.ref_sequence.rev_comp() + \
             DNA.umi(self.umi_length) + \
             self.ira2ft.ref_sequence + \
-            self.backbone + \
             self.ira1ft.ref_sequence + \
             DNA.umi(self.umi_length) + \
-            self.left_ugs.ref_sequence
+            self.right_ugs.ref_sequence.rev_comp()
 
 
 class OM6Prep(BasePadlockPrep):
     padlock = models.ForeignKey(OM6Padlock)
+
+
+class OM6PadlockDeprecated(models.Model):
+    left_ugs = models.ForeignKey(UGSPlus)
+    right_ugs = models.ForeignKey(UGSMinus)
+    ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
+    ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
+    umi_length = models.PositiveSmallIntegerField()
+
+    @property
+    def sequence(self):
+        return self.left_ugs.ref_sequence.rev_comp() + \
+            DNA.umi(self.umi_length) + \
+            self.ira2ft.ref_sequence + \
+            self.ira1ft.ref_sequence + \
+            DNA.umi(self.umi_length) + \
+            self.right_ugs.ref_sequence
+
+
+class OM6PrepDeprecated(BasePadlockPrep):
+    padlock = models.ForeignKey(OM6PadlockDeprecated)

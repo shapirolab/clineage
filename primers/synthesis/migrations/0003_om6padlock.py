@@ -21,7 +21,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('umi_length', models.PositiveSmallIntegerField()),
-                ('backbone', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.Backbone')),
                 ('ira1ft', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor1ForTail')),
                 ('ira2ft', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor2ForTail')),
                 ('left_ugs', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.UGSPlus')),
@@ -36,6 +35,33 @@ class Migration(migrations.Migration):
                 ('left_amp_primer_part1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationPlusPrimerPart1')),
                 ('left_amp_primer_part2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationPlusPrimerPart2')),
                 ('padlock', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='synthesis.OM6Padlock')),
+                ('restriction_enzyme', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.RestrictionEnzyme')),
+                ('right_amp_primer_part1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart1')),
+                ('right_amp_primer_part2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart2')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='OM6PadlockDeprecated',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('umi_length', models.PositiveSmallIntegerField()),
+                ('ira1ft', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor1ForTail')),
+                ('ira2ft', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor2ForTail')),
+                ('left_ugs', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.UGSPlus')),
+                ('right_ugs', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.UGSMinus')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='OM6PrepDeprecated',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=50)),
+                ('left_amp_primer_part1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationPlusPrimerPart1')),
+                ('left_amp_primer_part2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationPlusPrimerPart2')),
+                ('padlock', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='synthesis.OM6PadlockDeprecated')),
                 ('restriction_enzyme', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.RestrictionEnzyme')),
                 ('right_amp_primer_part1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart1')),
                 ('right_amp_primer_part2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart2')),
