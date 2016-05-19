@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='OM6OligomixStock',
+            name='OM6Prep',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
@@ -39,22 +39,22 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.AddField(
-            model_name='om6oligomixstock',
+            model_name='om6prep',
             name='padlock',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='synthesis.OM6Padlock'),
         ),
         migrations.AddField(
-            model_name='om6oligomixstock',
+            model_name='om6prep',
             name='restriction_enzyme',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='planning.RestrictionEnzyme'),
         ),
         migrations.AddField(
-            model_name='om6oligomixstock',
+            model_name='om6prep',
             name='right_amp_primer_part1',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart1'),
         ),
         migrations.AddField(
-            model_name='om6oligomixstock',
+            model_name='om6prep',
             name='right_amp_primer_part2',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.PadlockAmplificationMinusPrimerPart2'),
         ),

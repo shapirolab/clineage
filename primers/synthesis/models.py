@@ -155,7 +155,7 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
-class BasePadlockOligomixStock(models.Model):
+class BasePadlockPrep(models.Model):
     """
     A piece of DNA that selectively binds to the template in two locations,
     and by filling in the gap gets a circular DNA containing the targeted
@@ -209,5 +209,5 @@ class OM6Padlock(models.Model):
             self.left_ugs.ref_sequence
 
 
-class OM6OligomixStock(BasePadlockOligomixStock):
+class OM6Prep(BasePadlockPrep):
     padlock = models.ForeignKey(OM6Padlock)
