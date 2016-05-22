@@ -10,7 +10,7 @@ from wet_storage.models import SampleLocation
 from sampling.models import Cell
 from primers.parts.models import DNABarcode1, DNABarcode2
 from primers.synthesis.models import PCR2PlusPrimer, PCR2MinusPrimer
-from lib_prep.multiplexes.models import PCR1Panel
+from lib_prep.multiplexes.models import PCR1Panel, OM6Panel
 
 class BarcodePair(models.Model):
     left = models.ForeignKey(DNABarcode1)
@@ -89,6 +89,7 @@ class BarcodedContent(models.Model): # cell + barcode
     def cell(self):
         raise NotImplementedError()
 
+
 class MagicalPCR1Library(Library):
     panel = models.ForeignKey(PCR1Panel)
     # magicalpcr1barcodedcontent_set is a related field
@@ -104,9 +105,35 @@ class MagicalPCR1Library(Library):
             for ter in mpx.ters.select_subclasses():
                 yield ter.amplicon
 
+
 class MagicalPCR1BarcodedContent(BarcodedContent):
     content = models.ForeignKey(AmplifiedContent)
     library = models.ForeignKey(MagicalPCR1Library)
+
+    @property
+    def cell(self):
+        return self.content.cell
+
+
+class MagicalOM6Library(Library):
+    panel = models.ForeignKey(OM6Panel)
+    # magicalom6barcodedcontent_set is a related field
+
+    @property
+    def barcoded_contents(self):
+        return self.magicalom6barcodedcontent_set.all()
+
+    @property
+    def amplicons(self):
+        #TODO: make nice and queryful.
+        for mix in self.panel.mixs.all():
+            for ter in mix.ters:
+                yield ter.amplicon
+
+
+class MagicalOM6BarcodedContent(BarcodedContent):
+    content = models.ForeignKey(AmplifiedContent)
+    library = models.ForeignKey(MagicalOM6Library)
 
     @property
     def cell(self):
