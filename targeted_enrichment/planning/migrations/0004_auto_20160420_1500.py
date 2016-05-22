@@ -106,7 +106,7 @@ def populate_te_targets(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('genomes', '0002_create_dnaslice'),
+        ('genomes', '0003_dnaslice_index'),
         ('planning', '0003_auto_20160215_1652'),
     ]
 
