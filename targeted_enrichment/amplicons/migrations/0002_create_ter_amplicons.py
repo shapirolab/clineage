@@ -2,6 +2,8 @@
 # Generated manually, in form of Django 1.9.4 on 2016-05-02 19:56
 from __future__ import unicode_literals
 
+from frogress import bar
+
 from django.db import migrations, models
 import django.db.models.deletion
 from misc.dna import DNA
@@ -47,8 +49,10 @@ def populate_plain_targeted_ters(apps, schema_editor):
         PCR1PrimerPairTERDeprecated,
         TargetedNoTailPrimerPairTER,
     ]:
-        for ter in TER.objects.using(db_alias).select_related(
-                *TER_SELECT_RELATED):
+        print()
+        print("Populating PlainTargetedAmplicon-s for {}:" .format(TER.__name__))
+        for ter in bar(TER.objects.using(db_alias).select_related(
+                *TER_SELECT_RELATED)):
             amplicon = PlainTargetedAmplicon.objects.using(db_alias).create(
                 **get_target_amplicon_dict(ter, apps, schema_editor)
             )
@@ -60,8 +64,10 @@ def populate_pcr1withcompanytagprimerpairter(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     PCR1WithCompanyTagPrimerPairTER = apps.get_model('reagents', 'PCR1WithCompanyTagPrimerPairTER')
     TargetedAmpliconWithCompanyTag = apps.get_model('amplicons', 'TargetedAmpliconWithCompanyTag')
-    for ter in PCR1WithCompanyTagPrimerPairTER.objects.using(db_alias). \
-        select_related(*TER_SELECT_RELATED):
+    print()
+    print("Populating TargetedAmpliconWithCompanyTag-s for PCR1WithCompanyTagPrimerPairTER:")
+    for ter in bar(PCR1WithCompanyTagPrimerPairTER.objects.using(db_alias). \
+        select_related(*TER_SELECT_RELATED)):
         amplicon = TargetedAmpliconWithCompanyTag.objects.using(db_alias). \
             create(
             left_tag=ter.left_primer.tag,
@@ -76,14 +82,16 @@ def populate_shortpadlockfirstter(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     OM6PadlockTER = apps.get_model('reagents', 'OM6PadlockTER')
     UMITargetedAmplicon = apps.get_model('amplicons', 'UMITargetedAmplicon')
-    for ter in OM6PadlockTER.objects.using(db_alias). \
+    print()
+    print("Populating UMITargetedAmplicon-s for OM6PadlockTER:")
+    for ter in bar(OM6PadlockTER.objects.using(db_alias). \
         select_related(
             "padlock",
             "padlock__left_ugs",
             "padlock__left_ugs__slice",
             "padlock__right_ugs",
             "padlock__right_ugs__slice",
-        ):
+        )):
         if ter.padlock.left_ugs.slice.chromosome_id != \
             ter.padlock.right_ugs.slice.chromosome_id:
             raise IntegrityError(
