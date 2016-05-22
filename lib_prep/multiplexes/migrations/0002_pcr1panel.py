@@ -12,11 +12,11 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PCR1MultiplexCollection',
+            name='PCR1Panel',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=20)),
                 ('mpxs', models.ManyToManyField(to='multiplexes.PCR1Multiplex')),
-                ('panel', models.ForeignKey(to='multiplexes.Panel')),
             ],
         ),
     ]

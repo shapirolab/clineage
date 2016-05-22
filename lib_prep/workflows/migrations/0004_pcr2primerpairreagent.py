@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('synthesis', '0003_om6padlock'),
-        ('workflows', '0004_auto_20160420_1501'),
+        ('workflows', '0003_add_libs_etc'),
     ]
 
     operations = [

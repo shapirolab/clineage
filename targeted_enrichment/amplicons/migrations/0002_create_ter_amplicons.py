@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('amplicons', '0001_initial'),
-        ('reagents', '0004_auto_20160420_1723'),
+        ('reagents', '0004_ter_amplicon_fks'),
     ]
 
     operations = [

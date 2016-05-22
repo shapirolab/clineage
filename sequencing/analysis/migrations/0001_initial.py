@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('amplicons', '0002_create_ter_amplicons'),
-        ('planning', '0004_auto_20160420_1500'),
-        ('workflows', '0004_auto_20160420_1501'),
-        ('runs', '0002_auto_20160420_1501'),
+        ('planning', '0004_add_ms_repeat_unit_ref_seq_etc'),
+        ('workflows', '0003_add_libs_etc'),
+        ('runs', '0002_add_demux_etc'),
     ]
 
     operations = [

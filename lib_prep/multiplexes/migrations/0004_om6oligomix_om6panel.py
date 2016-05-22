@@ -8,8 +8,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reagents', '0005_auto_20160502_2002'),
-        ('multiplexes', '0004_auto_20160420_1501'),
+        ('reagents', '0005_nonnull_ter_amplicon_fks'),
+        ('multiplexes', '0003_kill_panel'),
     ]
 
     operations = [

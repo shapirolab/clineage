@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('reagents', '0004_auto_20160420_1723'),
+        ('reagents', '0004_ter_amplicon_fks'),
         ('amplicons', '0002_create_ter_amplicons'),
     ]
 

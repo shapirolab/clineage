@@ -2,6 +2,7 @@
 
 
 from django.db import migrations, models
+import django
 
 from utils.content_type_operation import AlterContentType
 
@@ -11,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('sampling', '0001_initial'),
         ('parts', '0003_add_padlock_parts'),
-        ('multiplexes', '0002_pcr1multiplexcollection'),
+        ('multiplexes', '0002_pcr1panel'),
         ('workflows', '0002_subclass_cell_content_protocol'),
     ]
 
@@ -51,6 +52,7 @@ class Migration(migrations.Migration):
             name='Library',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=50)),
             ],
         ),
         migrations.CreateModel(
@@ -65,7 +67,7 @@ class Migration(migrations.Migration):
             name='MagicalPCR1Library',
             fields=[
                 ('library_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='workflows.Library')),
-                ('mpx_collection', models.ForeignKey(to='multiplexes.PCR1MultiplexCollection')),
+                ('panel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='multiplexes.PCR1Panel')),
             ],
             bases=('workflows.library',),
         ),
