@@ -63,6 +63,7 @@ def get_repeat_unit_ref_seq_forward(apps, schema_editor):
     Microsatellite = apps.get_model("planning", "Microsatellite")
     rut_canon = {}
     print()
+    print("Populating repeat_unit_ref_seq in Microsatellite-s:")
     for ms in bar(Microsatellite.objects.using(db_alias).all()):
         repeat_unit_ref_seq = get_sequence(ms.slice)[:ms.repeat_unit_len]
         if repeat_unit_ref_seq not in rut_canon:
