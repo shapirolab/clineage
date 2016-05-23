@@ -18,20 +18,20 @@ def run_bcl2fastq(bcl_folder, sample_sheet_path):
 
 SAMPLE_ID = "Sample_ID"
 SAMPLE_NAME = "Sample_Name"
-LEFT_BARCODE_ID = "I7_Index_ID"
-LEFT_BARCODE_SEQ = "index"
-RIGHT_BARCODE_ID = "I5_Index_ID"
-RIGHT_BARCODE_SEQ = "index2"
+RIGHT_BARCODE_ID = "I7_Index_ID"
+RIGHT_BARCODE_SEQ = "index"
+LEFT_BARCODE_ID = "I5_Index_ID"
+LEFT_BARCODE_SEQ = "index2"
 
 SAMPLESHEET_HEADERS = [
     SAMPLE_ID,
     SAMPLE_NAME,
     "Sample_Plate",
     "Sample_Well",
-    LEFT_BARCODE_ID,
-    LEFT_BARCODE_SEQ,
     RIGHT_BARCODE_ID,
     RIGHT_BARCODE_SEQ,
+    LEFT_BARCODE_ID,
+    LEFT_BARCODE_SEQ,
     "Sample_Project",
     "Description",
 ]
