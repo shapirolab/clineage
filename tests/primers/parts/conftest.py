@@ -8,8 +8,8 @@ from primers.parts.models import DNABarcode1, DNABarcode2, \
 @pytest.fixture()
 def dnabarcode1(transactional_db):
     b1 = DNABarcode1.objects.create(
-        name='D710',
-        _sequence='TCCGCGAA'
+        name='D508',
+        _sequence='GTACTGAC'
     )
     # So our objects don't have "special" objects in fields
     b1 = DNABarcode1.objects.get(pk=b1.pk)
@@ -19,8 +19,8 @@ def dnabarcode1(transactional_db):
 @pytest.fixture()
 def dnabarcode2(transactional_db):
     b2 = DNABarcode2.objects.create(
-        name='D508',
-        _sequence='GTACTGAC'
+        name='D710',
+        _sequence='TCCGCGAA'
     )
     # So our objects don't have "special" objects in fields
     b2 = DNABarcode2.objects.get(pk=b2.pk)
@@ -30,8 +30,8 @@ def dnabarcode2(transactional_db):
 @pytest.fixture()
 def dnabarcode1_a(transactional_db):
     b3 = DNABarcode1.objects.create(
-        name='D718',
-        _sequence='TGGGAGCC'
+        name='D502',
+        _sequence='ATAGAGGC'
     )
     # So our objects don't have "special" objects in fields
     b3 = DNABarcode1.objects.get(pk=b3.pk)
@@ -41,8 +41,8 @@ def dnabarcode1_a(transactional_db):
 @pytest.fixture()
 def dnabarcode2_a(transactional_db):
     b4 = DNABarcode2.objects.create(
-        name='D502',
-        _sequence='ATAGAGGC'
+        name='D718',
+        _sequence='TGGGAGCC'
     )
     # So our objects don't have "special" objects in fields
     b4 = DNABarcode2.objects.get(pk=b4.pk)
