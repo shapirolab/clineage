@@ -30,6 +30,7 @@ def machine(machinetype):
 @pytest.fixture()
 def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
     nk = NGSKit.objects.create(
+        name="kit",
         reading_adaptor1=illuminareadingadaptor1,
         reading_adaptor2=illuminareadingadaptor2,
         read_length=151,
@@ -40,12 +41,11 @@ def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
 
 
 @pytest.fixture()
-def ngsrun(machine, ngskit, user, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
+def ngsrun(machine, ngskit, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
     n = NGSRun.objects.create(
         name="TestRun",
         machine=machine,
         kit=ngskit,
-        user=user,
         date=datetime.date.today(),
     )
     n.libraries = [magicalpcr1library]
