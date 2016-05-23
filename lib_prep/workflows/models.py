@@ -90,6 +90,26 @@ class BarcodedContent(models.Model): # cell + barcode
         raise NotImplementedError()
 
 
+class UnsupportedLibrary(Library):
+
+    @property
+    def barcoded_contents(self):
+        return self.unsupportedbarcodedcontent_set.all()
+
+    @property
+    def amplicons(self):
+        return ()
+
+
+class UnsupportedBarcodedContent(BarcodedContent):
+    content = models.ForeignKey(AmplifiedContent)
+    library = models.ForeignKey(UnsupportedLibrary)
+
+    @property
+    def cell(self):
+        return self.content.cell
+
+
 class MagicalPCR1Library(Library):
     panel = models.ForeignKey(PCR1Panel)
     # magicalpcr1barcodedcontent_set is a related field
