@@ -72,7 +72,9 @@ def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme):
         fwd_read_adaptor=fwd_read_adaptor,
         rev_read_adaptor=rev_read_adaptor,
     ))
-    w = csv.DictWriter(sio, fieldnames=SAMPLESHEET_HEADERS)
+    dia = csv.unix_dialect()
+    dia.quoting = csv.QUOTE_NONE
+    w = csv.DictWriter(sio, fieldnames=SAMPLESHEET_HEADERS, dialect=dia)
     w.writeheader()
     for bc in bcs:
         w.writerow({
