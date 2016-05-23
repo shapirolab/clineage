@@ -53,7 +53,6 @@ class NGSRun(models.Model):
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     kit = models.ForeignKey(NGSKit, null=True)
-    user = models.ForeignKey(User)
     date = models.DateField()
 
 
