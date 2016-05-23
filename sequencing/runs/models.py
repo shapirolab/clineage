@@ -27,6 +27,7 @@ class Machine(models.Model):
 
 
 class NGSKit(models.Model):
+    name = models.CharField(max_length=50)
     reading_adaptor1 = models.ForeignKey(IlluminaReadingAdaptor1)
     reading_adaptor2 = models.ForeignKey(IlluminaReadingAdaptor2)
     read_length = models.IntegerField(null=True)

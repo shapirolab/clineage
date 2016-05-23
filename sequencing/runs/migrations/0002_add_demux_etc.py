@@ -33,6 +33,7 @@ class Migration(migrations.Migration):
             name='NGSKit',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=50)),
                 ('read_length', models.IntegerField(null=True)),
                 ('reading_adaptor1', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor1')),
                 ('reading_adaptor2', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='parts.IlluminaReadingAdaptor2')),
