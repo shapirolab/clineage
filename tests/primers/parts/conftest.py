@@ -2,7 +2,9 @@ import pytest
 
 from primers.parts.models import DNABarcode1, DNABarcode2, \
     IlluminaReadingAdaptor1, IlluminaReadingAdaptor2, \
-    IlluminaReadingAdaptor1Cuts, IlluminaReadingAdaptor2Cuts
+    IlluminaReadingAdaptor1ForHead, IlluminaReadingAdaptor1ForTail, \
+    IlluminaReadingAdaptor2ForHead, IlluminaReadingAdaptor2ForTail
+
 
 
 @pytest.fixture()
@@ -72,11 +74,21 @@ def illuminareadingadaptor2(transactional_db):
 
 
 @pytest.fixture()
-def illuminareadingadaptor1cuts(illuminareadingadaptor1):
-    irac1 = IlluminaReadingAdaptor1Cuts.objects.create(
+def illuminareadingadaptor1fortail(illuminareadingadaptor1):
+    irac1 = IlluminaReadingAdaptor1ForTail.objects.create(
         ira=illuminareadingadaptor1,
-        overlap_start=11,
-        overlap_end=33,
+        tail_length=22,
+    )
+    # So our objects don't have "special" objects in fields
+    irac1 = IlluminaReadingAdaptor1ForTail.objects.get(pk=irac1.pk)
+    return irac1
+
+
+@pytest.fixture()
+def illuminareadingadaptor1forhead(illuminareadingadaptor1):
+    irac1 = IlluminaReadingAdaptor1ForHead.objects.create(
+        ira=illuminareadingadaptor1,
+        head_length=29,
     )
     # So our objects don't have "special" objects in fields
     irac1 = IlluminaReadingAdaptor1Cuts.objects.get(pk=irac1.pk)
@@ -84,11 +96,21 @@ def illuminareadingadaptor1cuts(illuminareadingadaptor1):
 
 
 @pytest.fixture()
-def illuminareadingadaptor2cuts(illuminareadingadaptor2):
-    irac2 = IlluminaReadingAdaptor2Cuts.objects.create(
+def illuminareadingadaptor2fortail(illuminareadingadaptor2):
+    irac2 = IlluminaReadingAdaptor2ForTail.objects.create(
         ira=illuminareadingadaptor2,
-        overlap_start=12,
-        overlap_end=34,
+        tail_length=22,
+    )
+    # So our objects don't have "special" objects in fields
+    irac2 = IlluminaReadingAdaptor2ForTail.objects.get(pk=irac2.pk)
+    return irac2
+
+
+@pytest.fixture()
+def illuminareadingadaptor2forhead(illuminareadingadaptor2):
+    irac2 = IlluminaReadingAdaptor2ForHead.objects.create(
+        ira=illuminareadingadaptor2,
+        head_length=30,
     )
     # So our objects don't have "special" objects in fields
     irac2 = IlluminaReadingAdaptor2Cuts.objects.get(pk=irac2.pk)
