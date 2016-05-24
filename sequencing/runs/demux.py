@@ -6,14 +6,21 @@ import os
 
 from misc.utils import get_unique_path
 
+from django.db.models.query import QuerySet
 
-def run_bcl2fastq(bcl_folder, sample_sheet_path):
+from sequencing.runs.models import Demultiplexing
+from sequencing.analysis.models import SampleReads
+
+
+def run_bcl2fastq(bcl_folder, sample_sheet_path, fastq_folder):
     bcl2fastq = local["bcl2fastq"]
     bcl2fastq_with_defaults = bcl2fastq["--no-lane-splitting",
-                                            "--processing-threads", 20]
+                                        "--processing-threads", 20]
     bcl2fastq_with_defaults(
         "--runfolder-dir", bcl_folder,
-        "--sample-sheet", sample_sheet_path)
+        "--sample-sheet", sample_sheet_path,
+        "--output-dir", fastq_folder,
+    )
 
 
 SAMPLE_ID = "Sample_ID"
@@ -91,8 +98,8 @@ def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme):
 
 
 UNDETERMINED = "Undetermined"
-SAMPLE_FASTQ_GZ_FORMAT = "{id}_S{idx:03d}_L001_R{read:d}_001.fastq.gz"
-SAMPLE_FASTQ_FORMAT = "{id}_S{idx:03d}_L001_R{read:d}_001.fastq"
+SAMPLE_FASTQ_GZ_FORMAT = "{id}_S{idx}_L001_R{read:d}_001.fastq.gz"
+SAMPLE_FASTQ_FORMAT = "{id}_S{idx}_L001_R{read:d}_001.fastq"
 
 
 def run_demux(ngs_run, demux_scheme):
@@ -111,22 +118,21 @@ def run_demux(ngs_run, demux_scheme):
             bc_libs_d[bc] = library
             bc_l.append(bc)
             bc_idx_d[bc] = len(bc_l)  # NOTE: this off-by-1 is intentional.
-    description = "_".join(lib.name for lib in ngsrun.libraries.all())
+    description = "_".join(lib.name for lib in ngs_run.libraries.all())
     sample_sheet = generate_sample_sheets(
         bcs=bc_l,
-        name=ngsrun.name,
-        date=ngsrun.date,
+        name=ngs_run.name,
+        date=ngs_run.date,
         description=description,
-        kit=ngsrun.kit,
+        kit=ngs_run.kit,
         demux_scheme=demux_scheme,
-        max_samples=max_samples
     )
     sample_sheet_path = get_unique_path("csv")
     with open(sample_sheet_path, "w") as f:
         f.write(sample_sheet)
     fastq_folder = get_unique_path()
     os.mkdir(fastq_folder)
-    run_bcl2fastq(fastq_folder, sample_sheet_path)
+    run_bcl2fastq(ngs_run.bcl_directory, sample_sheet_path, fastq_folder)
     demux = Demultiplexing.objects.create(
         ngs_run=ngs_run,
         demux_scheme=demux_scheme,
@@ -134,20 +140,20 @@ def run_demux(ngs_run, demux_scheme):
     files = []
     # TODO: nicer handling
     for read in [1, 2]:
-        os.unlink(os.path.join(sample_sheet_path, SAMPLE_FASTQ_GZ_FORMAT.format(
+        os.unlink(os.path.join(fastq_folder, SAMPLE_FASTQ_GZ_FORMAT.format(
             id=UNDETERMINED,
             idx=0,
             read=read,
         )))
     for bc, idx in bc_idx_d.items():
-        for fastqgz in [os.path.join(sample_sheet_path, 
+        for fastqgz in [os.path.join(fastq_folder, 
             SAMPLE_FASTQ_GZ_FORMAT.format(
                 id=bc.id,
                 idx=idx,
                 read=read,
             )) for read in [1, 2]]:
             local["gunzip"](fastqgz)
-        fastq1, fastq2 = [os.path.join(sample_sheet_path, 
+        fastq1, fastq2 = [os.path.join(fastq_folder, 
             SAMPLE_FASTQ_FORMAT.format(
                 id=bc.id,
                 idx=idx,
