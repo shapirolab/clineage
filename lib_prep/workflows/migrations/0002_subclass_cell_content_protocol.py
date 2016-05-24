@@ -7,6 +7,7 @@ from frogress import bar
 
 def populate_cell_content_protocol(apps, schema_editor):
     print()
+    print("Populate CellContentProtocol:")
     CellContent = apps.get_model("workflows", "CellContent")
     CellContentProtocol = apps.get_model("workflows", "CellContentProtocol")
     db_alias = schema_editor.connection.alias
@@ -25,6 +26,7 @@ def populate_cell_content_protocol(apps, schema_editor):
 
 def populate_protocol(apps, schema_editor):
     print()
+    print("Revert CellContent.protocol to Protocol:")
     CellContent = apps.get_model("workflows", "CellContent")
     db_alias = schema_editor.connection.alias
     for cc in bar(CellContent.objects.using(db_alias).all()):

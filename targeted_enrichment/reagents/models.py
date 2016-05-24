@@ -4,9 +4,15 @@ from django.db import models
 
 from model_utils.managers import InheritanceManager
 
-from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer
+from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, \
+    PCR1WithCompanyTagPlusPrimer, PCR1WithCompanyTagMinusPrimer, \
+    TargetedNoTailPlusPrimer, TargetedNoTailMinusPrimer, OM6Padlock, \
+    OM6PadlockDeprecated
 from targeted_enrichment.planning.models import TargetEnrichment
+from targeted_enrichment.amplicons.models import PlainTargetedAmplicon, \
+    UMITargetedAmplicon, TargetedAmpliconWithCompanyTag
 from wet_storage.models import SampleLocation
+
 
 class TargetEnrichmentFailureType(models.Model):
     """
@@ -23,8 +29,9 @@ class TargetEnrichmentFailureType(models.Model):
     def __str__(self):
         return self.name
 
+
 class TargetedEnrichmentReagent(models.Model):
-    te = models.ForeignKey(TargetEnrichment)
+    te = models.ForeignKey(TargetEnrichment)  # TODO: maybe kill?
     passed_validation = models.NullBooleanField()
     validation_failure = models.ForeignKey(TargetEnrichmentFailureType, null=True)
     validation_date = models.DateField(null=True, blank=True)
@@ -44,25 +51,45 @@ class TwoPrimersUnicodeMixin(object):
     def __str__(self):
         return "{}, {}".format(self.left_primer, self.right_primer)
 
+
 class PCR1PrimerPairTERBase(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
     pass
 
 
 class PCR1PrimerPairTER(PCR1PrimerPairTERBase):
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
 class PCR1WithCompanyTagPrimerPairTER(PCR1PrimerPairTERBase):
+    amplicon = models.ForeignKey(TargetedAmpliconWithCompanyTag)
     left_primer = models.ForeignKey(PCR1WithCompanyTagPlusPrimer)
     right_primer = models.ForeignKey(PCR1WithCompanyTagMinusPrimer)
 
 
 class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(PCR1PlusPrimer)
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
 class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
+    amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
+
+
+class OM6PadlockTERBase(TargetedEnrichmentReagent):
+    amplicon = models.ForeignKey(UMITargetedAmplicon)
+
+    def __unicode__(self):
+        return "{}".format(self.padlock)
+
+
+class OM6PadlockTER(OM6PadlockTERBase):
+    padlock = models.ForeignKey(OM6Padlock)
+
+
+class OM6PadlockTERDeprecated(OM6PadlockTERBase):
+    padlock = models.ForeignKey(OM6PadlockDeprecated)

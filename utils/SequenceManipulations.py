@@ -76,7 +76,7 @@ class SeqsUtilTest (TestCase):
         s2 = ''
         s3 = 'CGTCD'
         self.su.IsSimpleSeq(s1)
-        self.assert_(self.su.IsSimpleSeq(s1))
+        self.assertTrue(self.su.IsSimpleSeq(s1))
         self.assertFalse(self.su.IsSimpleSeq(s2))
         self.assertFalse(self.su.IsSimpleSeq(s3))
 

@@ -1,8 +1,11 @@
 
-basecomp = {b'A': b'T',
-            b'T': b'A',
-            b'C': b'G',
-            b'G': b'C'}
+basecomp = {
+    b'A': b'T',
+    b'T': b'A',
+    b'C': b'G',
+    b'G': b'C',
+    b'N': b'N',
+}
 
 def _rc(seq):
     n = len(seq)
@@ -18,17 +21,23 @@ class DNA(object):
         if isinstance(seq, str):
             s = seq.upper()
             for i in s:
-                if i not in "ACGT":
+                if i not in "ACGTN":
                     raise ValueError("Invalid DNA base - not one of A,C,T,G.")
             self._seq = s.encode("ascii")
         elif isinstance(seq, bytes):
             s = seq.upper()
             for i in s:
-                if i not in b"ACGT":
+                if i not in b"ACGTN":
                     raise ValueError("Invalid DNA base - not one of A,C,T,G.")
             self._seq = s
         else:
             raise TypeError("DNA accepts only string (bytes) objects.")
+
+    @classmethod
+    def umi(cls, umi_length):
+        if not isinstance(umi_length, int):
+            raise TypeError("Bad umi_length type.")
+        return cls("N"*umi_length)
 
     @property
     def seq(self):
@@ -68,3 +77,10 @@ class DNA(object):
             raise TypeError("unsupported operand type(s) for ==: '%s' and '%s'"
                             % (type(self), type(other)))
         return self.seq == other.seq
+
+    def __len__(self):
+        return len(self.seq)
+
+    def __hash__(self):
+        return self.seq.__hash__()
+

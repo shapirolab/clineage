@@ -15,10 +15,16 @@ from django.contrib.contenttypes import fields
 #
 # AATGATACGGCGACCACCGAGATCTACAC[i5]ACACTCTTTCCCTACACGACGCTCTTCCGATCT[INSERT][A]GATCGGAAGAGCACACGTCTGAACTCCAGTCAC[i7]ATCTCGTATGCCGTCTTCTGCTTG
 
-from primers.parts.models import IlluminaReadingAdaptor1Cuts, \
-    IlluminaReadingAdaptor2Cuts, IlluminaFlowCellAdaptor2, \
-    IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2
-from targeted_enrichment.planning.models import UGSPlus, UGSMinus
+from primers.parts.models import IlluminaReadingAdaptor1ForTail, \
+    IlluminaReadingAdaptor1ForHead, IlluminaReadingAdaptor2ForTail, \
+    IlluminaReadingAdaptor2ForHead, IlluminaFlowCellAdaptor2, \
+    IlluminaFlowCellAdaptor1, DNABarcode1, DNABarcode2, \
+    PadlockAmplificationPlusPrimerPart1, PadlockAmplificationPlusPrimerPart2, \
+    PadlockAmplificationMinusPrimerPart1, \
+    PadlockAmplificationMinusPrimerPart2, \
+    IlluminaReadingAdaptor1, IlluminaReadingAdaptor2, Backbone
+from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
+    RestrictionEnzyme
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 from misc.dna import DNA
 
@@ -84,26 +90,26 @@ class TargetedNoTailMinusPrimer(NoTailMixin,TargetedMinusPrimer):
 class PCR1TailMixin(object):
     @property
     def tail(self):
-        return self.irac.primer1tail
+        return self.iraft.sequence
 
 class PCR1PlusPrimer(PCR1TailMixin,TargetedPlusPrimer):
     """
     Primer that prepends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the UGS leading to our target.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
 
 class PCR1MinusPrimer(PCR1TailMixin,TargetedMinusPrimer):
     """
     Primer that appends (part of) the Illumina Read Adaptor to a targeted
     amplicon, binding at the (rev-comp) UGS following our target.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
 
 class PCR1WithCompanyTagTailMixin(object):
     @property
     def tail(self):
-        return self.irac.primer1tail + DNA(self.tag)
+        return self.iraft.sequence + DNA(self.tag)
 
 class PCR1WithCompanyTagPlusPrimer(PCR1WithCompanyTagTailMixin,TargetedPlusPrimer):
     """
@@ -112,7 +118,7 @@ class PCR1WithCompanyTagPlusPrimer(PCR1WithCompanyTagTailMixin,TargetedPlusPrime
     at the UGS leading to our target.
     """
     tag = models.CharField(max_length=1) # DNAField
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
 
 class PCR1WithCompanyTagMinusPrimer(PCR1WithCompanyTagTailMixin,TargetedMinusPrimer):
     """
@@ -121,23 +127,24 @@ class PCR1WithCompanyTagMinusPrimer(PCR1WithCompanyTagTailMixin,TargetedMinusPri
     at the (rev-comp) UGS following our target.
     """
     tag = models.CharField(max_length=1) # DNAField
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    iraft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
 
 class PCR2Mixin(object):
     @property
     def head(self):
-        return self.irac.overlap
+        # NOTE: this is not quite accurate...
+        return self.irafh.sequence
 
     @property
     def tail(self):
-        return self.ifca.sequence + self.barcode.sequence + self.irac.primer2tail
+        return self.ifca.sequence + self.barcode.sequence
 
 class PCR2PlusPrimer(PCR2Mixin,BasePrimer,PlusStrandMixin):
     """
     Primer that binds at (some of) the Illumina Read Adaptor, prepends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor1Cuts)
+    irafh = models.ForeignKey(IlluminaReadingAdaptor1ForHead)
     barcode = models.ForeignKey(DNABarcode1)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor1)
 
@@ -146,7 +153,82 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     Primer that binds at (some of) the Illumina Read Adaptor, appends the
     rest, the DNA barcode, and the Illumina FlowCell Adaptors.
     """
-    irac = models.ForeignKey(IlluminaReadingAdaptor2Cuts)
+    irafh = models.ForeignKey(IlluminaReadingAdaptor2ForHead)
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
+class BasePadlockPrep(models.Model):
+    """
+    A piece of DNA that selectively binds to the template in two locations,
+    and by filling in the gap gets a circular DNA containing the targeted
+    region.
+    Binds to the amplicon at left_region and right_region, and prepends
+    left_tail and append right_tail to the new amplicon.
+    Contains generic adaptors on each end, for amplification from oligomix.
+    """
+    name = models.CharField(max_length=50)
+    left_amp_primer_part1 = models.ForeignKey(PadlockAmplificationPlusPrimerPart1)
+    left_amp_primer_part2 = models.ForeignKey(PadlockAmplificationPlusPrimerPart2)
+    right_amp_primer_part1 = models.ForeignKey(PadlockAmplificationMinusPrimerPart1)
+    right_amp_primer_part2 = models.ForeignKey(PadlockAmplificationMinusPrimerPart2)
+    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
+    # padlock = models.ForeignKey(BasePadlock)
+    physical_locations = fields.GenericRelation(SampleLocation,
+                                             content_type_field='content_type',
+                                             object_id_field='object_id')
+
+
+    @property
+    def sequence(self):
+        return self.left_amp_primer_part1.sequence + \
+            self.restriction_enzyme.sequence + \
+            self.left_amp_primer_part2.sequence + \
+            self.padlock.sequence + \
+            self.right_amp_primer_part2.sequence + \
+            self.restriction_enzyme.sequence.rev_comp() + \
+            self.right_amp_primer_part1.sequence
+
+    class Meta:
+        abstract = True
+
+
+class OM6Padlock(models.Model):
+    left_ugs = models.ForeignKey(UGSPlus)
+    right_ugs = models.ForeignKey(UGSMinus)
+    ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
+    ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
+    umi_length = models.PositiveSmallIntegerField()
+
+    @property
+    def sequence(self):
+        return self.left_ugs.ref_sequence.rev_comp() + \
+            DNA.umi(self.umi_length) + \
+            self.ira2ft.ref_sequence + \
+            self.ira1ft.ref_sequence + \
+            DNA.umi(self.umi_length) + \
+            self.right_ugs.ref_sequence.rev_comp()
+
+
+class OM6Prep(BasePadlockPrep):
+    padlock = models.ForeignKey(OM6Padlock)
+
+
+class OM6PadlockDeprecated(models.Model):
+    left_ugs = models.ForeignKey(UGSPlus)
+    right_ugs = models.ForeignKey(UGSMinus)
+    ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
+    ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
+    umi_length = models.PositiveSmallIntegerField()
+
+    @property
+    def sequence(self):
+        return self.left_ugs.ref_sequence.rev_comp() + \
+            DNA.umi(self.umi_length) + \
+            self.ira2ft.ref_sequence + \
+            self.ira1ft.ref_sequence + \
+            DNA.umi(self.umi_length) + \
+            self.right_ugs.ref_sequence
+
+
+class OM6PrepDeprecated(BasePadlockPrep):
+    padlock = models.ForeignKey(OM6PadlockDeprecated)

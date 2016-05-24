@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('barcode', models.CharField(max_length=20, blank=True)),
                 ('timestamp', models.DateField(null=True, blank=True)),
                 ('state', models.CharField(max_length=20, blank=True)),
-                ('lastusedwell', models.CharField(default=b'A1', max_length=4)),
+                ('lastusedwell', models.CharField(default='A1', max_length=4)),
             ],
         ),
         migrations.CreateModel(
