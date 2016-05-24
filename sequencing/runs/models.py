@@ -1,12 +1,9 @@
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.query import QuerySet
 from lib_prep.workflows.models import Library, BarcodedContent
 from primers.parts.models import IlluminaReadingAdaptor1, \
     IlluminaReadingAdaptor2
-
-from sequencing.runs.demux import run_bcl2fastq, generate_sample_sheets
 
 
 class MachineType(models.Model):
