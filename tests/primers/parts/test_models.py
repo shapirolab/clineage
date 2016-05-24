@@ -3,12 +3,12 @@ import pytest
 
 @pytest.mark.django_db
 def test_dnabarcode1(dnabarcode1):
-    assert dnabarcode1.ref_sequence.seq == b"TCCGCGAA"
+    assert dnabarcode1.ref_sequence.seq == b"GTACTGAC"
 
 
 @pytest.mark.django_db
 def test_dnabarcode2(dnabarcode2):
-    assert dnabarcode2.ref_sequence.seq == b"GTACTGAC"
+    assert dnabarcode2.ref_sequence.seq == b"TCCGCGAA"
 
 
 @pytest.mark.django_db
@@ -22,22 +22,22 @@ def test_illuminareadingadaptor1(illuminareadingadaptor2):
 
 
 @pytest.mark.django_db
-def test_illuminareadingadaptor1cuts_numbers(illuminareadingadaptor1cuts):
-    assert illuminareadingadaptor1cuts.overlap_start == 11
-    assert illuminareadingadaptor1cuts.overlap_end == 33
+def test_illuminareadingadaptor1fortail(illuminareadingadaptor1fortail):
+    assert illuminareadingadaptor1fortail.sequence.seq == b"CTACACGACGCTCTTCCGATCT"
 
 
 @pytest.mark.django_db
-def test_illuminareadingadaptor2cuts_numbers(illuminareadingadaptor2cuts):
-    assert illuminareadingadaptor2cuts.overlap_start == 12
-    assert illuminareadingadaptor2cuts.overlap_end == 34
+def test_illuminareadingadaptor2fortail(illuminareadingadaptor2fortail):
+    assert illuminareadingadaptor2fortail.sequence.seq == b"CAGACGTGTGCTCTTCCGATCT"
 
 
+@pytest.mark.xfail
 @pytest.mark.django_db
-def test_illuminareadingadaptor1cuts_primer1tail(illuminareadingadaptor1cuts):
-    assert illuminareadingadaptor1cuts.primer1tail.seq == b"CTACACGACGCTCTTCCGATCT"
+def test_illuminareadingadaptor1forhead(illuminareadingadaptor1forhead):
+    assert illuminareadingadaptor1forhead.sequence.seq == b""
 
 
+@pytest.mark.xfail
 @pytest.mark.django_db
-def test_illuminareadingadaptor2cuts_primer1tail(illuminareadingadaptor2cuts):
-    assert illuminareadingadaptor2cuts.primer1tail.seq == b"CAGACGTGTGCTCTTCCGATCT"
+def test_illuminareadingadaptor2forhead(illuminareadingadaptor2forhead):
+    assert illuminareadingadaptor2forhead.sequence.seq == b""
