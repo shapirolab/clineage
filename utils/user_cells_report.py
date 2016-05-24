@@ -180,7 +180,7 @@ def user_cells_table_values(partner_name, individual_name=None, cell_folder=None
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name), palette_name)
     for individual in sorted(list(individuals), key=lambda i: i.name):
         for cell, file_name in get_cells_filenames_in_folder(sorted_cells(individual), cell_folder):
-            for cell_cont in cell.cellcontent_set.all():
+            for cell_cont in cell.amplifiedcontent_set.all():
                 assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
                 sampling = cell.sampling
                 if sampling:
