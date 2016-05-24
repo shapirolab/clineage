@@ -44,7 +44,7 @@ def ngskit(illuminareadingadaptor1, illuminareadingadaptor2):
 
 
 @pytest.yield_fixture()
-def ngsrun(machine, ngskit, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
+def ngsrun(machine, ngskit, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a, temp_storage):
     d = get_unique_path()
     os.mkdir(d)
     n = NGSRun.objects.create(

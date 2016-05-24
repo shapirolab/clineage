@@ -109,3 +109,5 @@ Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,ind
                     num=num,
                     read=read,
             ))
+        sr.delete()
+    os.rmdir(fastq_folder)

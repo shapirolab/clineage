@@ -133,6 +133,7 @@ def run_demux(ngs_run, demux_scheme):
     fastq_folder = get_unique_path()
     os.mkdir(fastq_folder)
     run_bcl2fastq(ngs_run.bcl_directory, sample_sheet_path, fastq_folder)
+    os.unlink(sample_sheet_path)
     demux = Demultiplexing.objects.create(
         ngs_run=ngs_run,
         demux_scheme=demux_scheme,
