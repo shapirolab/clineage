@@ -3,8 +3,9 @@ import pytest
 from primers.parts.models import DNABarcode1, DNABarcode2, \
     IlluminaReadingAdaptor1, IlluminaReadingAdaptor2, \
     IlluminaReadingAdaptor1ForHead, IlluminaReadingAdaptor1ForTail, \
-    IlluminaReadingAdaptor2ForHead, IlluminaReadingAdaptor2ForTail
-
+    IlluminaReadingAdaptor2ForHead, IlluminaReadingAdaptor2ForTail, \
+    PadlockAmplificationPlusPrimerPart1, PadlockAmplificationPlusPrimerPart2, \
+    PadlockAmplificationMinusPrimerPart1, PadlockAmplificationMinusPrimerPart2
 
 
 @pytest.fixture()
@@ -116,3 +117,46 @@ def illuminareadingadaptor2forhead(illuminareadingadaptor2):
     irac2 = IlluminaReadingAdaptor2Cuts.objects.get(pk=irac2.pk)
     return irac2
 
+
+@pytest.fixture()
+def padlockamplificationplusprimerpart1(transactional_db):
+    pp1 = PadlockAmplificationPlusPrimerPart1.objects.create(
+        name="liming_om6_mly1f_1",
+        _sequence="TATGAGTGTG",
+    )
+    # So our objects don't have "special" objects in fields
+    pp1 = PadlockAmplificationPlusPrimerPart1.objects.get(pk=pp1.pk)
+    return pp1
+
+
+@pytest.fixture()
+def padlockamplificationplusprimerpart2(transactional_db):
+    pp2 = PadlockAmplificationPlusPrimerPart2.objects.create(
+        name="liming_om6_mly1f_2",
+        _sequence="GTTGC",
+    )
+    # So our objects don't have "special" objects in fields
+    pp2 = PadlockAmplificationPlusPrimerPart2.objects.get(pk=pp2.pk)
+    return pp2
+
+
+@pytest.fixture()
+def padlockamplificationminusprimerpart1(transactional_db):
+    mp1 = PadlockAmplificationMinusPrimerPart1.objects.create(
+        name="liming_om6_mly1r_1",
+        _sequence="GCTTCCTGAT",
+    )
+    # So our objects don't have "special" objects in fields
+    mp1 = PadlockAmplificationMinusPrimerPart1.objects.get(pk=mp1.pk)
+    return mp1
+
+
+@pytest.fixture()
+def padlockamplificationminusprimerpart2(transactional_db):
+    mp2 = PadlockAmplificationMinusPrimerPart2.objects.create(
+        name="liming_om6_mly1r_2",
+        _sequence="CGATG",
+    )
+    # So our objects don't have "special" objects in fields
+    mp2 = PadlockAmplificationMinusPrimerPart2.objects.get(pk=mp2.pk)
+    return mp2
