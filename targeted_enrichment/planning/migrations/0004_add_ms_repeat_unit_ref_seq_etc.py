@@ -89,6 +89,7 @@ def populate_te_targets(apps, schema_editor):
     Target = apps.get_model("planning", "Target")
     TargetEnrichment = apps.get_model("planning", "TargetEnrichment")
     print()
+    print("Populating target M2M in TEs:")
     for te in bar(TargetEnrichment.objects.using(db_alias).all()):
         if te.left.slice.chromosome != te.right.slice.chromosome:
             raise IntegrityError(
