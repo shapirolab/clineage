@@ -342,7 +342,7 @@ def separate_reads_by_genotypes(histogram):
 def double_map(executor, func, future_lists, *params):
     for f in as_completed(future_lists):
         l = f.result()
-        yield from executor.map(func, l, *[itertools.repeat(p) for p in params])
+        yield from executor.map(func, l, *[itertools.repeat(p) for p in params], pure=False)
 
 
 def list_iterator(f):
@@ -354,17 +354,17 @@ def list_iterator(f):
 
 def run_parallel(executor, demux, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
     sample_reads = SampleReads.objects.filter(demux=demux)
-    merged_reads = executor.map(merge, sample_reads)
+    merged_reads = executor.map(merge, sample_reads, pure=False)
     reads_indices = executor.map(create_reads_index, merged_reads,
-        itertools.repeat(included_reads), itertools.repeat(read_padding))
+        itertools.repeat(included_reads), itertools.repeat(read_padding), pure=False)
     adam_margin_assignments = executor.map(align_primers_to_reads,
-        reads_indices)
+        reads_indices, pure=False)
     adam_amplicon_reads_lists = executor.map(
-        list_iterator(seperate_reads_by_amplicons), adam_margin_assignments)
+        list_iterator(seperate_reads_by_amplicons), adam_margin_assignments, pure=False)
     adam_histograms = double_map(executor, align_reads_to_ms_variations,
         adam_amplicon_reads_lists, ref_padding, mss_version)
     histogram_entry_reads_lists = executor.map(
-        list_iterator(separate_reads_by_genotypes), adam_histograms)
+        list_iterator(separate_reads_by_genotypes), adam_histograms, pure=False)
     # NOTE: this is required, as_completed can't get an iterator.
     for f in as_completed(list(histogram_entry_reads_lists)):
         yield from f.result()
