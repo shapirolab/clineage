@@ -46,7 +46,7 @@ class NGSKit(models.Model):
 
 class NGSRun(models.Model):
     libraries = models.ManyToManyField(Library)
-    bcl_directory = models.FilePathField(allow_files=False, allow_folders=True, null=True)
+    bcl_directory = models.FilePathField(max_length=200, allow_files=False, allow_folders=True, null=True)
     name = models.CharField(max_length=100, unique=True)
     machine = models.ForeignKey(Machine)
     kit = models.ForeignKey(NGSKit, null=True)

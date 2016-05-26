@@ -33,7 +33,7 @@ def delete_files(sender, instance, **kwargs):
 
 class BowtieIndexMixin(models.Model):
     INDEX_PREFIX = "index"
-    index_dump_dir = models.FilePathField(allow_files=False, allow_folders=True)
+    index_dump_dir = models.FilePathField(max_length=200, allow_files=False, allow_folders=True)
 
     class Meta:
         abstract=True
@@ -58,8 +58,8 @@ class SampleReads(models.Model):
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
     library = models.ForeignKey(Library)
-    fastq1 = models.FilePathField()
-    fastq2 = models.FilePathField()
+    fastq1 = models.FilePathField(max_length=200)
+    fastq2 = models.FilePathField(max_length=200)
 
     @property
     def files(self):
@@ -73,10 +73,10 @@ class AdamMergedReads(models.Model):
     sample_reads = models.ForeignKey(SampleReads)
     # TODO: Add default path?
     # TODO: Custom FASTQ field that caches #sequences
-    assembled_fastq = models.FilePathField()
-    discarded_fastq = models.FilePathField()
-    unassembled_forward_fastq = models.FilePathField()
-    unassembled_reverse_fastq = models.FilePathField()
+    assembled_fastq = models.FilePathField(max_length=200)
+    discarded_fastq = models.FilePathField(max_length=200)
+    unassembled_forward_fastq = models.FilePathField(max_length=200)
+    unassembled_reverse_fastq = models.FilePathField(max_length=200)
 
     @property
     def files(self):
@@ -124,7 +124,7 @@ def _read_sam(sam_path):
 
 class AdamMarginAssignment(models.Model):
     reads_index = models.ForeignKey(AdamReadsIndex)
-    assignment_sam = models.FilePathField()
+    assignment_sam = models.FilePathField(max_length=200)
 
     def read_sam(self):
         for read_id, margin_name in _read_sam(self.assignment_sam):
@@ -155,9 +155,9 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
     margin_assignment = models.ForeignKey(AdamMarginAssignment)
     amplicon = models.ForeignKey(Amplicon)
     target_offset = models.IntegerField(null=True)
-    fastq1 = models.FilePathField()
-    fastq2 = models.FilePathField()
-    fastqm = models.FilePathField()
+    fastq1 = models.FilePathField(max_length=200)
+    fastq2 = models.FilePathField(max_length=200)
+    fastqm = models.FilePathField(max_length=200)
 
     class Meta:
         index_together = (
@@ -198,7 +198,7 @@ class Histogram(models.Model):
 
 class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
-    assignment_sam = models.FilePathField()
+    assignment_sam = models.FilePathField(max_length=200)
     ms_variations = models.ForeignKey(AdamMSVariations)
 
     def read_sam(self):
@@ -274,9 +274,9 @@ class HistogramEntryReads(models.Model):
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
     snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
     num_reads = models.PositiveIntegerField()
-    fastq1 = models.FilePathField()
-    fastq2 = models.FilePathField()
-    fastqm = models.FilePathField(null=True)
+    fastq1 = models.FilePathField(max_length=200)
+    fastq2 = models.FilePathField(max_length=200)
+    fastqm = models.FilePathField(max_length=200, null=True)
 
     @property
     def files(self):
