@@ -147,7 +147,7 @@ class MagicalOM6Library(Library):
     def amplicons(self):
         #TODO: make nice and queryful.
         for mix in self.panel.mixs.all():
-            for ter in mix.ters:
+            for ter in mix.ters.select_subclasses():
                 yield ter.amplicon
 
 
