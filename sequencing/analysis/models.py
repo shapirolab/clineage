@@ -87,14 +87,16 @@ class AdamMergedReads(models.Model):
 
     def included_reads_generator(self, included_reads):
         if included_reads == 'M':
-            return SeqIO.parse(self.assembled_fastq, "fastq")
+            it = SeqIO.parse(self.assembled_fastq, "fastq")
         elif included_reads == 'F':
-            return itertools.chain(
+            it = itertools.chain(
                 SeqIO.parse(self.assembled_fastq, "fastq"),
                 SeqIO.parse(self.unassembled_forward_fastq, "fastq")
             )
         else:
             raise ValueError("included_reads should be one of {}".format(AdamReadsIndex.INCLUDED_READS_OPTIONS))
+        return itertools.filterfalse(lambda re.fullmatch("N*"), it)
+            
 
 post_delete.connect(delete_files, AdamMergedReads)
 
