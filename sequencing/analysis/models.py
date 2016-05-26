@@ -22,13 +22,13 @@ def delete_files(sender, instance, **kwargs):
     for filename in getattr(instance, "files", []):
         try:
             os.unlink(filename)
-        except OSError:
-            raise
+        except FileNotFoundError:
+            pass
     for dirname in getattr(instance, "dirs", []):
         try:
             os.rmdir(dirname)
-        except OSError:
-            raise
+        except FileNotFoundError:
+            pass
 
 
 class BowtieIndexMixin(models.Model):
