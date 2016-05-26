@@ -355,16 +355,23 @@ def list_iterator(f):
 def run_parallel(executor, demux, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
     sample_reads = SampleReads.objects.filter(demux=demux)
     merged_reads = executor.map(merge, sample_reads, pure=False)
+    for f in merged_reads:
+        yield f
     reads_indices = executor.map(create_reads_index, merged_reads,
         itertools.repeat(included_reads), itertools.repeat(read_padding), pure=False)
+    for f in reads_indices:
+        yield f
     adam_margin_assignments = executor.map(align_primers_to_reads,
         reads_indices, pure=False)
+    for f in adam_margin_assignments:
+        yield f
     adam_amplicon_reads_lists = executor.map(
         list_iterator(seperate_reads_by_amplicons), adam_margin_assignments, pure=False)
+    for f in adam_amplicon_reads_lists:
+        yield f
     adam_histograms = double_map(executor, align_reads_to_ms_variations,
         adam_amplicon_reads_lists, ref_padding, mss_version)
-    histogram_entry_reads_lists = executor.map(
-        list_iterator(separate_reads_by_genotypes), adam_histograms, pure=False)
-    # NOTE: this is required, as_completed can't get an iterator.
-    for f in as_completed(list(histogram_entry_reads_lists)):
-        yield from f.result()
+    for f in adam_histograms:
+        yield f
+        f2 = executor.submit(list_iterator(separate_reads_by_genotypes), f, pure=False)
+        yield f2
