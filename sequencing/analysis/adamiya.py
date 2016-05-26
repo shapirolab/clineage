@@ -352,8 +352,7 @@ def list_iterator(f):
     return inner
 
 
-def run_parallel(executor, demux, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
-    sample_reads = SampleReads.objects.filter(demux=demux)
+def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
     merged_reads = executor.map(merge, sample_reads, pure=False)
     for f in merged_reads:
         yield f

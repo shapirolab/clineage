@@ -98,7 +98,7 @@ def test_map_runmerge(executor, adam_reads_fd, sample_reads_d):
     reason="SQLite isn't transactional enough for distributing.")
 @pytest.mark.django_db(transaction=True)
 def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites):
-    herss = {inc: set(run_parallel(executor, demultiplexing, inc)) for \
+    herss = {inc: set(run_parallel(executor, demultiplexing.samplereads_set.all(), inc)) for \
         inc in ["M", "F"]}
     for inc, hers in herss.items():
         parts = set()
