@@ -95,7 +95,7 @@ class AdamMergedReads(models.Model):
             )
         else:
             raise ValueError("included_reads should be one of {}".format(AdamReadsIndex.INCLUDED_READS_OPTIONS))
-        return itertools.filterfalse(lambda re.fullmatch("N*"), it)
+        return itertools.filterfalse(lambda rec: re.fullmatch("N*", str(rec.seq)), it)
             
 
 post_delete.connect(delete_files, AdamMergedReads)
