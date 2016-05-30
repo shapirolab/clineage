@@ -17,7 +17,7 @@ c.execute('''CREATE TABLE histogram
 
 
 f = open(SIMULATED_HISTS_PATH, 'rb').read()
-print 'loading existing simulations'
+print('loading existing simulations')
 sim_hists = loads(f)
 
 for seeds in bar(sim_hists):

@@ -9,12 +9,12 @@ from pickle import loads
 
 def load_or_create_calling(callingfile):
     try:
-        print 'loading existing calling'
+        print('loading existing calling')
         f = open(callingfile, 'rb').read()
         calling = loads(f)
-        print 'done loading existing calling'
+        print('done loading existing calling')
     except:
-        print 'initializing new calling'
+        print('initializing new calling')
         calling = defaultdict(lambda: defaultdict(dict))
     return calling
 
@@ -40,18 +40,18 @@ def load_or_create_simulations_file(simulationsfile, **kwargs):
     """
     try:
         f = open(simulationsfile, 'rb').read()
-        print 'loading existing simulations'
+        print('loading existing simulations')
         sim_hists = loads(f)
-        print 'done loading existing simulations'
-    except IOError, e:
-        print 'generating simulated histograms'
+        print('done loading existing simulations')
+    except IOError as e:
+        print('generating simulated histograms')
         # sim_hists = generate_sim_hists_of_up_to_k_alleles(**kwargs)
         sim_hists = generate_biallelic_reads_of_multiple_proportions(**kwargs)
         with open(simulationsfile, 'wb') as f:
             f.write(dumps(sim_hists))
-        print 'done generating simulated histograms'
+        print('done generating simulated histograms')
     except:
-        print 'Somethig really unexpected happened'
+        print('Somethig really unexpected happened')
         raise
     return sim_hists
 
@@ -72,7 +72,7 @@ def generate_output_file(input_file,
         owrtr = csv.writer(out, dialect='excel-tab')
         with gzip.open(input_file, 'rb') as f:
             rdr = csv.reader(f, dialect='excel-tab')
-            header_row = rdr.next()
+            header_row = next(rdr)
             if verbose:
                 header_row.extend(['shift', 'cycle', 'score', 'median', 'reads'])
             else:

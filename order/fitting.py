@@ -1,4 +1,4 @@
-from hist_dist import pop_dist
+from .hist_dist import pop_dist
 
 
 def match_cycles(hist, sim_hists, method='cor', reads=50, min_cycles=0, max_cycles=100, **kwargs):

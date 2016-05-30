@@ -1,12 +1,12 @@
 import sys
 import numpy as np
 from order.utils.parsers import uncalled_inputs
-from preprocessing import flatten_index, inflate_index
-from fitting import match_cycles
-from hist import Histogram
+from .preprocessing import flatten_index, inflate_index
+from .fitting import match_cycles
+from .hist import Histogram
 from itertools import combinations
 # import concurrent.futures
-from itertools import repeat, izip, imap
+from itertools import repeat
 from frogress import bar
 
 
@@ -81,16 +81,15 @@ def call_multi_hist(hist,
     """
     h = Histogram(hist, **kwargs)  # normalize, nsamples, truncate, cut_peak, trim_extremes
     med = int(np.median(h.sample))
-    best_score = sys.maxint
+    best_score = sys.maxsize
     res = {}
     for allele_number in range(1, max_alleles+1):
         for measured_hist_shift in range(max(0, med-shift_margins), med+shift_margins):
             normalized_shifted_reads_hist = h-measured_hist_shift
             possible_hist_seeds = combinations(
-                range(
+                list(range(
                     max(5, measured_hist_shift-max_distance_from_median),
-                    min(measured_hist_shift+max_distance_from_median, max_ms_length)
-                ), allele_number
+                    min(measured_hist_shift+max_distance_from_median, max_ms_length))), allele_number
             )
             for seeds in set([frozenset(possible_hist_seed) for possible_hist_seed in possible_hist_seeds]).intersection(set(dup_sim_hist.keys())):
                 if measured_hist_shift == int(np.mean(list(seeds))):

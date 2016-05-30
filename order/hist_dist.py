@@ -2,19 +2,19 @@ import numpy as np
 from scipy import stats
 from emd import emd
 from math import sqrt, log10
-from hist import get_lims
+from .hist import get_lims
 
 
 
 
 def inflate_hist(hist, reads):
     pop = []
-    for k in hist.keys():
+    for k in list(hist.keys()):
         pop.extend([k]*int(hist[k]*reads))
     if not pop:
-        print 'ERROR: empty histogram'
-        print reads
-        print hist
+        print('ERROR: empty histogram')
+        print(reads)
+        print(hist)
         raise
     return pop
 
@@ -26,7 +26,7 @@ def pop_dist_sub(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(range(li, ri))
+    score = float(sum(deltas))/len(list(range(li, ri)))
     return score
 
 
@@ -37,7 +37,7 @@ def pop_dist_subpeaks(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(range(li, ri))
+    score = float(sum(deltas))/len(list(range(li, ri)))
     return score
 
 
@@ -47,8 +47,8 @@ def pop_dist_ks_alon(hist1, hist2, reads):
     Uses
     """
     li, ri = get_lims(hist1, hist2)
-    cdf1 = np.cumsum([hist1[i] for i in xrange(li,ri)])
-    cdf2 = np.cumsum([hist2[i] for i in xrange(li,ri)])
+    cdf1 = np.cumsum([hist1[i] for i in range(li,ri)])
+    cdf2 = np.cumsum([hist2[i] for i in range(li,ri)])
     d = np.max(np.abs(cdf1-cdf2))
     return 1-stats.distributions.kstwobign.sf(d*np.sqrt(reads))
 
@@ -59,8 +59,8 @@ def pop_dist_ks_alon_one(hist1, hist2, reads):
     Uses
     """
     li, ri = get_lims(hist1, hist2)
-    cdf1 = np.cumsum([hist1[i] for i in xrange(li, ri)])
-    cdf2 = np.cumsum([hist2[i] for i in xrange(li, ri)])
+    cdf1 = np.cumsum([hist1[i] for i in range(li, ri)])
+    cdf2 = np.cumsum([hist2[i] for i in range(li, ri)])
     d = np.max(np.abs(cdf1-cdf2))
     return 1-(stats.distributions.ksone.sf(d, reads)*2)
 
@@ -83,7 +83,7 @@ def alt_ks_2samp(hist1, hist2, reads, sample_depth):
     """
     pop1 = inflate_hist(hist1, reads)
     hist2.normalize()
-    pop2 = np.random.choice(hist2._hist.keys(), sample_depth, p=hist2._hist.values())
+    pop2 = np.random.choice(list(hist2._hist.keys()), sample_depth, p=list(hist2._hist.values()))
     d, p = stats.ks_2samp(pop1, pop2)
     return 1-p
 
@@ -95,7 +95,7 @@ def alt2_ks_2samp(hist1, hist2, reads):
     """
     pop1 = inflate_hist(hist1, reads)
     hist2.normalize()
-    pop2 = stats.rv_discrete(name='custm', values=(hist2._hist.keys(), hist2._hist.values()))
+    pop2 = stats.rv_discrete(name='custm', values=(list(hist2._hist.keys()), list(hist2._hist.values())))
     d, p = stats.kstest(pop1, pop2.cdf)
     return 1-p
 
@@ -105,7 +105,7 @@ def pop_dist_emd(hist1, hist2):
     Calculate the distance between two populations in the form of histograms
     Uses
     """
-    return emd(hist1.keys(), hist2.keys(), hist1.values(), hist2.values())
+    return emd(list(hist1.keys()), list(hist2.keys()), list(hist1.values()), list(hist2.values()))
 
 
 def pop_dist_corr(hist1, hist2):
@@ -123,9 +123,9 @@ def pop_dist_corr(hist1, hist2):
     try:
         p = dot_product/sqrt(h1_sum_of_squares*h2_sum_of_squares)
     except ZeroDivisionError:
-        print type(hist1), type(hist2)
-        print hist1
-        print hist2
+        print(type(hist1), type(hist2))
+        print(hist1)
+        print(hist2)
         raise
     return 1-p
 
@@ -207,8 +207,8 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
             return pop_dist_kl(hist1, hist2)
         if method == 'pr':
             return prob(hist1, hist2)
-        print 'unknown method'
+        print('unknown method')
         raise
     else:
-        print 'empty hist object'
+        print('empty hist object')
         raise

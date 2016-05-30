@@ -4,7 +4,7 @@ os.chdir('/home/ofirr/s/Ofir/hcc/hist_calling')
 from order.utils.output_formatters import generate_output_file, load_or_create_simulations_file, save_calling_file
 import numpy
 from frogress import bar
-from itertools import izip, repeat
+from itertools import repeat
 import itertools
 from order.utils.parsers import parse_input_file
 
@@ -233,11 +233,11 @@ for meth in ['con']:
         kwargs['method'] = meth
         calling = defaultdict(lambda: defaultdict(dict))
         uncalled_inputs_groups = list(grouper(1, uncalled_inputs_for_loc(input_file, calling, H1_map, locs_filter=[loc], reads_threshold=reads_threshold)))
-        inputs_generator = list(izip(uncalled_inputs_groups, repeat((sim_hists, kwargs))))
+        inputs_generator = list(zip(uncalled_inputs_groups, repeat((sim_hists, kwargs))))
         for input_params in inputs_generator:
             results = helper(input_params)
             for result in results:
                 loc, cell, row_hist, res = result
                 calling[loc][cell] = res
-                print meth, calling[loc][cell]['seeds_and_proportions'], calling[loc][cell]['score'], calling[loc][cell]['reads'], loc, cell
+                print(meth, calling[loc][cell]['seeds_and_proportions'], calling[loc][cell]['score'], calling[loc][cell]['reads'], loc, cell)
                 #print meth, loc, cell

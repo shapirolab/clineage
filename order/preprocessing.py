@@ -30,9 +30,9 @@ def generate_bin_hist_pure_optimized(d,
     try:
         bin_margines = int(round(max_mean)) + margines
     except:
-        print up(d), dw(d), d, cycles, upb.mean(), dwb.mean()
+        print(up(d), dw(d), d, cycles, upb.mean(), dwb.mean())
         raise
-    n = np.convolve(upb.pmf(range(bin_margines)), dwb.pmf(range(bin_margines))[::-1])
+    n = np.convolve(upb.pmf(list(range(bin_margines))), dwb.pmf(list(range(bin_margines)))[::-1])
     nd = {i: n[i] for i in range(bin_margines*2-1)}
     nh = Histogram(nd,
                    normalize=normalize,
@@ -102,7 +102,7 @@ def get_method(method):
         return generate_dyn_hist
     if method == 'mat':
         return generate_mat_hist
-    print 'unknown method'
+    print('unknown method')
     raise
 
 
@@ -125,7 +125,7 @@ def generate_sim_hists(max_ms_length=60,
     :return:
     """
     sim_hists = defaultdict(dict)
-    for d in bar(range(max_ms_length)):
+    for d in bar(list(range(max_ms_length))):
         for cycles in range(max_cycles):
             sim_hists[d][cycles] = generate_hist(d, cycles, method, **kwargs)
     return sim_hists
@@ -134,9 +134,9 @@ def generate_sim_hists(max_ms_length=60,
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     dup_sim_hist = defaultdict(lambda: defaultdict(dict))
     for allele_number in range(1, max_alleles+1):
-        for seeds in combinations(sim_hists.keys(), allele_number):  # iterate over all possible original lengths
+        for seeds in combinations(list(sim_hists.keys()), allele_number):  # iterate over all possible original lengths
             shift = int(np.mean(seeds))
-            for cycles in bar(sim_hists[0].keys()):
+            for cycles in bar(list(sim_hists[0].keys())):
                 first_seed = seeds[0]  # initial microsatellite length (length = seed[0]
                 sum_hist = sim_hists[first_seed][cycles] + first_seed  # add generated histogram based on seed and shift it on the x axis according to the seed's value (simulated microsatellite length
                 for seed in seeds[1:]:
@@ -180,9 +180,9 @@ def generate_simulated_proportional_alleles_precalculated(seeds, seeds_hists, cy
 def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', steps=100,  **kwargs):
     # print min_ms_length, max_ms_length, min_cycles, max_cycles
     sim_hists = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
-    for seeds in bar(list(combinations_with_replacement(range(min_ms_length, max_ms_length), 2))):
+    for seeds in bar(list(combinations_with_replacement(list(range(min_ms_length, max_ms_length)), 2))):
         for cycles in range(min_cycles, max_cycles):
-            for p1 in [float(x)/steps for x in xrange(1, steps-1)]:
+            for p1 in [float(x)/steps for x in range(1, steps-1)]:
                 # print p1
                 sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles, cycles), (p1, 1 - p1), method, **kwargs)
     return sim_hists

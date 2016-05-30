@@ -22,8 +22,8 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     for h in [model_hist, syn_hist]:
         # h.sq_normalize()
         h.normalize()
-        if len(h.keys()) == 0:
-            print h
+        if len(list(h.keys())) == 0:
+            print(h)
             raise
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
@@ -54,9 +54,9 @@ def distance_from_model_across_lengths(msmodel, syn_hist_list, cycles_tup, dista
 
 def get_x_from_list(l, step):
     assert len(l) % step == 0
-    for i in xrange(0, len(l), step):
+    for i in range(0, len(l), step):
         res = []
-        for j in xrange(step):
+        for j in range(step):
             res.append(l[i+j])
         yield tuple(res)
 

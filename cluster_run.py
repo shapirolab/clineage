@@ -5,7 +5,7 @@ from order.utils.output_formatters import load_or_create_calling
 from order.utils.output_formatters import generate_output_file, load_or_create_simulations_file, save_calling_file
 import numpy
 from frogress import bar
-from itertools import izip, repeat
+from itertools import repeat
 import itertools
 from order.utils.parsers import parse_input_file
 # from IPython.parallel import Client
@@ -121,9 +121,9 @@ uncalled_inputs_groups = grouper(1, uncalled_inputs_for_loc(input_file, calling,
 
 # flat_sim_hists = flatten_index(sim_hists)
 # inputs_generator = izip(uncalled_inputs_groups, repeat((flat_sim_hists, kwargs)))
-inputs_generator = izip(uncalled_inputs_groups, repeat((sim_hists, kwargs)))
+inputs_generator = zip(uncalled_inputs_groups, repeat((sim_hists, kwargs)))
 
-for results in bar(map(helper, inputs_generator)):
+for results in bar(list(map(helper, inputs_generator))):
 # for results in bar(lview.map(helper, inputs_generator)):
     for result in results:
         loc, cell, row_hist, res = result

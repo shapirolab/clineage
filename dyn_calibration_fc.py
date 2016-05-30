@@ -81,7 +81,7 @@ def inputs_generator(cycles_range):
     optimizer_methods = ["L-BFGS-B"]
     # optimizer_method = "L-BFGS-B"
 
-    for c1, c2 in itertools.product(range(*c1), range(*c2)):
+    for c1, c2 in itertools.product(list(range(*c1)), list(range(*c2))):
         if c2 > c1:
             for optimizer_method in optimizer_methods:
                 yield alg, sim, optimizer_method, hist_pairs, (c1, c2), bounds, initial_guess, iterations, optimizer_options
@@ -109,12 +109,12 @@ if __name__ == '__main__':
     c1 = c1_min + n % (c1_max-c1_min)
     c2 = c2_min + n / (c1_max-c1_min)
     results = []
-    print c1, c2
+    print(c1, c2)
     with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
         # for result in executor.map(optimize_across_lengths, inputs_generator(cycles_range=((c1, c1+1), (c2, c2+1)))):
         for result in map(optimize_across_lengths, inputs_generator(cycles_range=((c1, c1+1), (c2, c2+1)))):
             results.append(result)
             alg, sim, optimizer_method, cycles_tup, ms_lengths, res = result
-            print alg, sim, optimizer_method, cycles_tup, ms_lengths, res
+            print(alg, sim, optimizer_method, cycles_tup, ms_lengths, res)
     with open('out/{}_{}_{}.pickle'.format(unique_id, n, user_id), 'wb') as f:
         f.write(dumps(results))
