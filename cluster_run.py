@@ -8,7 +8,7 @@ from order.utils.output_formatters import generate_calling_file, \
 import numpy
 from frogress import bar
 from IPython.parallel import Client
-from itertools import izip, repeat
+from itertools import repeat
 
 normalize = True
 truncate = False
@@ -93,7 +93,7 @@ kwargs = {'method': meth,
 
 flat_sim_hists = flatten_index(sim_hists)
 for result in bar(lview.map(helper,
-                            izip(
+                            zip(
                                 uncalled_inputs(input_file,
                                                 calling,
                                                 reads_threshold=reads_threshold),

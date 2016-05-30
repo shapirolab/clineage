@@ -27,18 +27,18 @@ def parse(path):
             cell_row = {'path':row['histpath']}
             cells.append(cell_row)
     if not cells:
-        print """
+        print("""
 no cells, file format should contain headers and formatted as follows:
 histpath
 /net/mraid11/export/data/dcsoft/home/LINEAGE/Miseq/MISEQR13/fastq/Output/A4-A2-cE2-AAR9-well-E5-BC-40_S37_L001_R1_001.hist
-        """
+        """)
         raise
     return cells
 
 
 def read_hist_file(path):
     hlines = open(path).readlines()[1:]
-    return {line.split('\t',1)[0] : Histogram(map(int,line.split('\t')[1:-1]), normalize=False, nsamples=None, trunc=False, cut_peak=False) for line in hlines}
+    return {line.split('\t',1)[0] : Histogram(list(map(int,line.split('\t')[1:-1])), normalize=False, nsamples=None, trunc=False, cut_peak=False) for line in hlines}
 
 
 def read_hists(cells, verbose=True):
@@ -51,7 +51,7 @@ def format_data(cells, loci_by_repeat_type):
     s += '\r\n'
     for cell in tqdm(cells):
         for repeat_type in ['AC']:
-            for loci in loci_by_repeat_type[repeat_type].keys():
+            for loci in list(loci_by_repeat_type[repeat_type].keys()):
                 if not loci_by_repeat_type[repeat_type][loci][cell['path']]:
                     continue
                 if not loci_by_repeat_type[repeat_type][loci][cell['path']].nsamples:
@@ -75,35 +75,35 @@ if '__main__' == __name__:
     output_file = args.output
     panel_name = args.panel_name
     assembly_name = args.assembly_name
-    print 'parsing input file'
+    print('parsing input file')
     cells = parse(cells_table_file)
-    print 'parsing hists'
+    print('parsing hists')
     cells_hists = read_hists(cells)
     loci = {}
     hists = []
-    for cell, locs in cells_hists.iteritems():
-        for loc in locs.keys():
+    for cell, locs in cells_hists.items():
+        for loc in list(locs.keys()):
             loci.setdefault(loc, dict())[cell] = locs[loc]
             hists.append(locs[loc])
-    print 'retrieving contextual data from DB'
+    print('retrieving contextual data from DB')
     X_chr = Chromosome.objects.get(assembly__friendly_name=assembly_name, name='X')
     try:
         panel = Panel.objects.get(name=panel_name)
     except Panel.DoesNotExist:
-        print 'No such panel: {}'.format(panel_name)
+        print('No such panel: {}'.format(panel_name))
         exit()
     
     mss = Microsatellite.objects.filter(chromosome=X_chr).filter(primer_pair__in = panel.targets.all())
     # mss = Microsatellite.objects.exclude(chromosome=X_chr).filter(primer_pair__in = panel.targets.all())
     loci_by_repeat_type = defaultdict(lambda: defaultdict(dict))
-    for ms in mss.filter(name__in=[key.split(":")[1] for key in loci.keys()]):
-        for key in loci.keys():
+    for ms in mss.filter(name__in=[key.split(":")[1] for key in list(loci.keys())]):
+        for key in list(loci.keys()):
             if ms.name == key.split(":")[1]:
                 loci_by_repeat_type[ms.repeat_unit_type][key] = loci[key]
-    print 'formatting'
+    print('formatting')
     s = format_data(cells, loci_by_repeat_type)
-    print
-    print 'writing file'
+    print()
+    print('writing file')
     f = gzip.open(output_file, 'wb')
     f.write(s)
     f.close()

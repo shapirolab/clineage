@@ -6,7 +6,7 @@ def update_probs(cycle, up, dw, probs):
     if cycle <= 0:
         return probs
     new_probs = defaultdict(float)
-    for key in probs.keys():
+    for key in list(probs.keys()):
         up_p = up(key)
         dw_p = dw(key)
         new_probs[key] += (1-up_p-dw_p)*probs[key]

@@ -1,4 +1,4 @@
-from hist_dist import pop_dist
+from .hist_dist import pop_dist
 #import numpy as np
 #from cv2 import *
 

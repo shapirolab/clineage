@@ -1,14 +1,14 @@
 import csv
-import StringIO
+import io
 import gzip
 from frogress import bar
 from collections import defaultdict
 
 def parse_spaces_hist(hist, header):
-    f = StringIO.StringIO('{}\r\n{}'.format(header.strip(), hist.strip()))
+    f = io.StringIO('{}\r\n{}'.format(header.strip(), hist.strip()))
     reader = csv.DictReader(f, delimiter=' ')
-    row = reader.next()
-    return {int(key) : int(row[key]) for key in row.keys()}
+    row = next(reader)
+    return {int(key) : int(row[key]) for key in list(row.keys())}
 
 
 def parse_input_file(input_file):
@@ -19,7 +19,7 @@ def parse_input_file(input_file):
     """
     with gzip.open(input_file, 'rb') as f:
         rdr = csv.reader(f, dialect='excel-tab')
-        header_row = rdr.next()
+        header_row = next(rdr)
         for row in rdr:
             row_hist = parse_spaces_hist(row[2], header_row[2])
             loc = row[0]
@@ -33,7 +33,7 @@ def uncalled_inputs(input_file, calling, reads_threshold=0):
             continue
         if sum(row_hist.values()) < reads_threshold:
             continue
-        yield loc, cell, row_hist        yield loc, cell, row_hist
+        yield loc, cell, row_hist
 
         
 def parse_output_file(output_file):
