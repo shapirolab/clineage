@@ -5,7 +5,7 @@ from collections import defaultdict
 from collections import Counter
 from scipy import optimize
 import os
-%matplotlib inline
+# %matplotlib inline
 
 os.chdir('/home/ofirr/s/Ofir/hcc/hist_calling/')
 from order.hist import Histogram
