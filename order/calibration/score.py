@@ -44,8 +44,8 @@ def optimize_across_lengths(input_tuple):
     alg, sim, optimizer_method, hist_pairs, cycles_tup, bounds, initial_guess, iterations, optimizer_options = input_tuple
     def nmes(x):
         assert len(x) % 2 == 0
-        up_params = list(x)[:len(x)/2]
-        dw_params = list(x)[len(x)/2:]
+        up_params = x[:len(x)/2]
+        dw_params = x[len(x)/2:]
         up = numpy.poly1d(up_params)
         dw = numpy.poly1d(dw_params)
         msmodel = (up, dw, sim)
