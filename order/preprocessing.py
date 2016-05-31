@@ -157,12 +157,6 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
     return hist_sum - shift
 
 
-def generate_biallelic_reads_of_multiple_proportions(max_ms_length=60, max_cycles=90, method='bin', **kwargs):
-    for seeds in combinations(range(max_ms_length), 2):
-        for cycles in range(max_cycles):
-            for p1 in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                dup_sim_hist[frozenset(seeds)][cycles][p1] = generate_simulated_proportional_alleles(seeds, cycles, [p1, 1-p1], method, **kwargs)
-
 def generate_sim_hists_of_up_to_k_alleles(**kwargs):
     """
         method='bin'
