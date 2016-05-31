@@ -20,7 +20,7 @@ def pop_dist_sub(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(list(range(li, ri)))
+    score = sum(deltas)/(ri-li)
     return score
 
 
@@ -31,7 +31,7 @@ def pop_dist_subpeaks(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(list(range(li, ri)))
+    score = sum(deltas) / (ri - li)
     return score
 
 

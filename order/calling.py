@@ -56,9 +56,9 @@ def call_multi_hist(hist,
         for measured_hist_shift in range(max(0, med-shift_margins), med+shift_margins):
             normalized_shifted_reads_hist = h-measured_hist_shift
             possible_hist_seeds = combinations(
-                list(range(
+                range(
                     max(5, measured_hist_shift-max_distance_from_median),
-                    min(measured_hist_shift+max_distance_from_median, max_ms_length))), allele_number
+                    min(measured_hist_shift+max_distance_from_median, max_ms_length)), allele_number
             )
             for seeds in possible_hist_seeds:
                 if measured_hist_shift == int(np.mean(seeds)):

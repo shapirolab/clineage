@@ -30,7 +30,7 @@ def generate_bin_hist_pure_optimized(d,
     except:
         print(up(d), dw(d), d, cycles, upb.mean(), dwb.mean())
         raise
-    n = np.convolve(upb.pmf(list(range(bin_margines))), dwb.pmf(list(range(bin_margines)))[::-1])
+    n = np.convolve(upb.pmf(range(bin_margines)), dwb.pmf(range(bin_margines))[::-1])
     nd = {i:n[i] for i in range(bin_margines*2-1)}
     nh = Histogram(nd,
                    normalize=normalize,
@@ -122,7 +122,7 @@ def generate_sim_hists(max_ms_length=60,
     :return:
     """
     sim_hists = defaultdict(dict)
-    for d in bar(list(range(max_ms_length))):
+    for d in bar(range(max_ms_length)):
         for cycles in range(max_cycles):
             sim_hists[d][cycles] = generate_hist(d, cycles, method, **kwargs)
     return sim_hists
@@ -158,7 +158,7 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
 
 
 def generate_biallelic_reads_of_multiple_proportions(max_ms_length=60, max_cycles=90, method='bin', **kwargs):
-    for seeds in combinations(list(range(max_ms_length)), 2):
+    for seeds in combinations(range(max_ms_length), 2):
         for cycles in range(max_cycles):
             for p1 in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
                 dup_sim_hist[frozenset(seeds)][cycles][p1] = generate_simulated_proportional_alleles(seeds, cycles, [p1, 1-p1], method, **kwargs)
