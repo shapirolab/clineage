@@ -30,7 +30,7 @@ def generate_bin_hist_pure_optimized(d,
     except:
         print(up(d), dw(d), d, cycles, upb.mean(), dwb.mean())
         raise
-    n = np.convolve(upb.pmf(range(bin_margines)), dwb.pmf(range(bin_margines))[::-1])
+    n = np.convolve(upb.pmf(np.arange(bin_margines)), dwb.pmf(np.arange(bin_margines))[::-1])
     nd = {i:n[i] for i in range(bin_margines*2-1)}
     nh = Histogram(nd,
                    normalize=normalize,
