@@ -38,7 +38,17 @@ histpath
 
 def read_hist_file(path):
     hlines = open(path).readlines()[1:]
-    return {line.split('\t',1)[0] : Histogram(list(map(int,line.split('\t')[1:-1])), normalize=False, nsamples=None, trunc=False, cut_peak=False) for line in hlines}
+    return {
+        line.split('\t',1)[0]:
+            Histogram(
+                [int(x) for x in line.split('\t')[1:-1]],
+                normalize=False,
+                nsamples=None,
+                trunc=False,
+                cut_peak=False
+            )
+        for line in hlines
+    }
 
 
 def read_hists(cells, verbose=True):
