@@ -6,7 +6,7 @@ def shift_population(data, shift):
     Shift population in the form of a histogram (Counter)
     """
     shifted_data = Counter()
-    for i in list(data.keys()):
+    for i in data.keys():
         shifted_data.update({i+shift: data[i]})
     return shifted_data
 
@@ -26,6 +26,6 @@ def normalize(counter_hist):
     Normalize histogram (Counter)
     """
     m = float(sum(counter_hist.values()))
-    for k in list(counter_hist.keys()):
+    for k in counter_hist.keys():
         counter_hist[k] = counter_hist[k]/ m
     return counter_hist

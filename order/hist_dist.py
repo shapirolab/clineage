@@ -7,7 +7,7 @@ from .hist import get_lims
 
 def inflate_hist(hist, reads):
     pop = []
-    for k in list(hist.keys()):
+    for k in hist.keys():
         for i in range(int(hist[k]*reads)):
             pop.append(k)
     return pop
@@ -53,7 +53,7 @@ def alt_ks_2samp(hist1, hist2, reads, sample_depth):
     """
     pop1 = inflate_hist(hist1, reads)
     hist2.normalize()
-    pop2 = np.random.choice(list(hist2._hist.keys()), sample_depth, p=list(hist2._hist.values()))
+    pop2 = np.random.choice(hist2._hist.keys(), sample_depth, p=hist2._hist.values())
     d, p = stats.ks_2samp(pop1, pop2)
     return 1-p
 
@@ -65,7 +65,7 @@ def alt2_ks_2samp(hist1, hist2, reads):
     """
     pop1 = inflate_hist(hist1, reads)
     hist2.normalize()
-    pop2 = stats.rv_discrete(name='custm', values=(list(hist2._hist.keys()), list(hist2._hist.values())))
+    pop2 = stats.rv_discrete(name='custm', values=(hist2._hist.keys(), hist2._hist.values()))
     d, p = stats.kstest(pop1, pop2.cdf)
     return 1-p
 
@@ -75,7 +75,7 @@ def pop_dist_emd(hist1, hist2):
     Calculate the distance between two populations in the form of histograms
     Uses
     """
-    return emd(list(hist1.keys()), list(hist2.keys()), list(hist1.values()), list(hist2.values()))
+    return emd(hist1.keys(), hist2.keys(), hist1.values(), hist2.values())
 
 
 def pop_dist_corr(hist1, hist2):

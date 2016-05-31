@@ -51,7 +51,7 @@ def format_data(cells, loci_by_repeat_type):
     s += '\r\n'
     for cell in tqdm(cells):
         for repeat_type in ['AC']:
-            for loci in list(loci_by_repeat_type[repeat_type].keys()):
+            for loci in loci_by_repeat_type[repeat_type].keys():
                 if not loci_by_repeat_type[repeat_type][loci][cell['path']]:
                     continue
                 if not loci_by_repeat_type[repeat_type][loci][cell['path']].nsamples:
@@ -82,7 +82,7 @@ if '__main__' == __name__:
     loci = {}
     hists = []
     for cell, locs in cells_hists.items():
-        for loc in list(locs.keys()):
+        for loc in locs.keys():
             loci.setdefault(loc, dict())[cell] = locs[loc]
             hists.append(locs[loc])
     print('retrieving contextual data from DB')
@@ -96,8 +96,8 @@ if '__main__' == __name__:
     mss = Microsatellite.objects.filter(chromosome=X_chr).filter(primer_pair__in = panel.targets.all())
     # mss = Microsatellite.objects.exclude(chromosome=X_chr).filter(primer_pair__in = panel.targets.all())
     loci_by_repeat_type = defaultdict(lambda: defaultdict(dict))
-    for ms in mss.filter(name__in=[key.split(":")[1] for key in list(loci.keys())]):
-        for key in list(loci.keys()):
+    for ms in mss.filter(name__in=[key.split(":")[1] for key in loci.keys()]):
+        for key in loci.keys():
             if ms.name == key.split(":")[1]:
                 loci_by_repeat_type[ms.repeat_unit_type][key] = loci[key]
     print('formatting')

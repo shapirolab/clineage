@@ -131,9 +131,9 @@ def generate_sim_hists(max_ms_length=60,
 def generate_duplicate_sim_hist(sim_hists, max_alleles=2):
     dup_sim_hist = defaultdict(lambda: defaultdict(dict))
     for allele_number in range(1, max_alleles+1):
-        for seeds in combinations(list(sim_hists.keys()), allele_number):  # iterate over all possible original lengths
+        for seeds in combinations(sim_hists.keys(), allele_number):  # iterate over all possible original lengths
             shift = int(np.mean(seeds))
-            for cycles in bar(list(sim_hists[0].keys())):
+            for cycles in bar(sim_hists[0].keys()):
                 first_seed = seeds[0]  # initial microsatellite length (length = seed[0]
                 sum_hist = sim_hists[first_seed][cycles] + first_seed  # add generated histogram based on seed and shift it on the x axis according to the seed's value (simulated microsatellite length
                 for seed in seeds[1:]:

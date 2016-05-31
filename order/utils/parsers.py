@@ -8,7 +8,7 @@ def parse_spaces_hist(hist, header):
     f = io.StringIO('{}\r\n{}'.format(header.strip(), hist.strip()))
     reader = csv.DictReader(f, delimiter=' ')
     row = next(reader)
-    return {int(key) : int(row[key]) for key in list(row.keys())}
+    return {int(key) : int(row[key]) for key in row.keys()}
 
 
 def parse_input_file(input_file):
