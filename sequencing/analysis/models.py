@@ -168,7 +168,6 @@ def name_to_amplicon_margin(name):
 class AdamAmpliconReads(models.Model):  # This contains the actual data.
     margin_assignment = models.ForeignKey(AdamMarginAssignment)
     amplicon = models.ForeignKey(Amplicon)
-    target_offset = models.IntegerField(null=True)
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
     fastqm = models.FilePathField(max_length=200)
