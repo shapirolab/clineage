@@ -11,7 +11,7 @@ class MachineType(models.Model):
     model = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.company + '_' + self.model
+        return "{}_{}".format(self.company, self.model)
 
 
 class Machine(models.Model):
@@ -20,7 +20,7 @@ class Machine(models.Model):
     type = models.ForeignKey(MachineType)
 
     def __str__(self):
-        return self.type.__str__() + '_' + self.machineid
+        return "{}_{}".format(self.type, self.machineid)
 
 
 class NGSKit(models.Model):
@@ -43,6 +43,9 @@ class NGSKit(models.Model):
         """
         return self.reading_adaptor1.sequence.rev_comp()
 
+    def __str__(self):
+        return self.name
+
 
 class NGSRun(models.Model):
     libraries = models.ManyToManyField(Library)
@@ -52,12 +55,21 @@ class NGSRun(models.Model):
     kit = models.ForeignKey(NGSKit, null=True)
     date = models.DateField()
 
+    def __str__(self):
+        return self.name
+
 
 class DemultiplexingScheme(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class Demultiplexing(models.Model):
     ngs_run = models.ForeignKey(NGSRun)
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
+
+    def __str__(self):
+        return "{}|{}".format(self.ngs_run, self.pk)

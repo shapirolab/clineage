@@ -11,16 +11,17 @@ from sampling.models import Cell
 from primers.parts.models import DNABarcode1, DNABarcode2
 from primers.synthesis.models import PCR2PlusPrimer, PCR2MinusPrimer
 from lib_prep.multiplexes.models import PCR1Panel, OM6Panel
+from targeted_enrichment.reagents.models import TwoPrimersStrMixin
 
 class BarcodePair(models.Model):
     left = models.ForeignKey(DNABarcode1)
     right = models.ForeignKey(DNABarcode2)
 
     def __str__(self):
-        return self.name
+        return "{}, {}".format(self.left, self.right)
 
 
-class PCR2PrimerPairReagent(models.Model):
+class PCR2PrimerPairReagent(TwoPrimersStrMixin, models.Model):
     bp = models.ForeignKey(BarcodePair)  # TODO: maybe kill?
     left_primer = models.ForeignKey(PCR2PlusPrimer)
     right_primer = models.ForeignKey(PCR2MinusPrimer)
@@ -43,7 +44,7 @@ class AmplifiedContent(models.Model):  # aka DNA
                                object_id_field='object_id')
 
     def __str__(self):
-        return '{}>{}'.format(str(self.cell), self.name)
+        return '{}>{}'.format(self.cell, self.name)
 
     def get_absolute_url(self):
         return reverse('cell_content_detail', kwargs={'pk': self.pk})
@@ -71,6 +72,9 @@ class Library(models.Model):
 
     objects = InheritanceManager()
 
+    def __str__(self):
+        return self.name
+
 
 class BarcodedContent(models.Model): # cell + barcode
     barcodes = models.ForeignKey(BarcodePair)
@@ -86,8 +90,11 @@ class BarcodedContent(models.Model): # cell + barcode
         return BarcodedContent.objects.get_subclass(id=self.id)
 
     @property
-    def cell(self):
+    def amplified_content(self):
         raise NotImplementedError()
+
+    def __str__(self):
+        return '{}/({})'.format(self.amplified_content, self.barcodes)
 
 
 class UnsupportedLibrary(Library):
@@ -106,8 +113,8 @@ class UnsupportedBarcodedContent(BarcodedContent):
     library = models.ForeignKey(UnsupportedLibrary)
 
     @property
-    def cell(self):
-        return self.content.cell
+    def amplified_content(self):
+        return self.content
 
 
 class MagicalPCR1Library(Library):
@@ -156,5 +163,5 @@ class MagicalOM6BarcodedContent(BarcodedContent):
     library = models.ForeignKey(MagicalOM6Library)
 
     @property
-    def cell(self):
-        return self.content.cell
+    def amplified_content(self):
+        return self.content

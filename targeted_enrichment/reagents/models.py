@@ -47,12 +47,12 @@ class TargetedEnrichmentReagent(models.Model):
         abstract = True
 
 
-class TwoPrimersUnicodeMixin(object):
+class TwoPrimersStrMixin(object):
     def __str__(self):
         return "{}, {}".format(self.left_primer, self.right_primer)
 
 
-class PCR1PrimerPairTERBase(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
+class PCR1PrimerPairTERBase(TwoPrimersStrMixin, TargetedEnrichmentReagent):
     pass
 
 
@@ -74,7 +74,7 @@ class PCR1PrimerPairTERDeprecated(PCR1PrimerPairTERBase): #TODO: kill?
     right_primer = models.ForeignKey(PCR1MinusPrimer)
 
 
-class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReagent):
+class TargetedNoTailPrimerPairTER(TwoPrimersStrMixin, TargetedEnrichmentReagent):
     amplicon = models.ForeignKey(PlainTargetedAmplicon)
     left_primer = models.ForeignKey(TargetedNoTailPlusPrimer)
     right_primer = models.ForeignKey(TargetedNoTailMinusPrimer)
@@ -83,7 +83,7 @@ class TargetedNoTailPrimerPairTER(TwoPrimersUnicodeMixin, TargetedEnrichmentReag
 class OM6PadlockTERBase(TargetedEnrichmentReagent):
     amplicon = models.ForeignKey(UMITargetedAmplicon)
 
-    def __unicode__(self):
+    def __str__(self):
         return "{}".format(self.padlock)
 
 

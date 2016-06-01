@@ -66,6 +66,9 @@ class SampleReads(models.Model):
         yield self.fastq1
         yield self.fastq2
 
+    def __str__(self):
+        return "{} @ {}".format(self.barcoded_content, self.demux)
+
 post_delete.connect(delete_files, SampleReads)
 
 
@@ -96,6 +99,9 @@ class AdamMergedReads(models.Model):
         else:
             raise ValueError("included_reads should be one of {}".format(AdamReadsIndex.INCLUDED_READS_OPTIONS))
         return itertools.filterfalse(lambda rec: re.fullmatch("N*", str(rec.seq)), it)
+
+    def __str__(self):
+        return "{}".format(self.sample_reads)
             
 
 post_delete.connect(delete_files, AdamMergedReads)
@@ -112,6 +118,9 @@ class AdamReadsIndex(BowtieIndexMixin):
 
     def included_reads_generator(self):
         return self.merged_reads.included_reads_generator(self.included_reads)
+
+    def __str__(self):
+        return "{}".format(self.merged_reads)
 
 post_delete.connect(delete_files, AdamReadsIndex)
 
@@ -135,6 +144,9 @@ class AdamMarginAssignment(models.Model):
     @property
     def files(self):
         yield self.assignment_sam
+
+    def __str__(self):
+        return "{}".format(self.reads_index)
 
 post_delete.connect(delete_files, AdamMarginAssignment)
 
@@ -172,6 +184,9 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
         yield self.fastq2
         yield self.fastqm
 
+    def __str__(self):
+        return "{}[{}]".format(self.margin_assignment, self.amplicon)
+
 post_delete.connect(delete_files, AdamAmpliconReads)
 
 class AdamMSVariations(BowtieIndexMixin):
@@ -183,6 +198,9 @@ class AdamMSVariations(BowtieIndexMixin):
         index_together=[
             ("amplicon", "padding", "microsatellites_version")
         ]
+
+    def __str__(self):
+        return "{} v. {}".format(amplicon, microsatellites_version)
 
 post_delete.connect(delete_files, AdamMSVariations)
 
@@ -212,6 +230,9 @@ class AdamHistogram(Histogram):
     @property
     def files(self):
         yield self.assignment_sam
+
+    def __str__(self):
+        return "{}".format(self.amplicon_reads)
 
 post_delete.connect(delete_files, AdamHistogram)
 
@@ -290,5 +311,14 @@ class HistogramEntryReads(models.Model):
         index_together=[
             ("histogram", "amplicon", "microsatellites_version")
         ]
+
+    def __str__(self):
+        return "{}: {}".format(self.histogram.subclass,
+            ", ".join([
+                "{}".format(msg) for msg in self.microsatellite_genotypes.all()
+            ] + [
+                "{}".format(sng) for sng in self.snp_genotypes.all()
+            ])
+        )
 
 post_delete.connect(delete_files, HistogramEntryReads)

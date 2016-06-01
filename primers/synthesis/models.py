@@ -188,13 +188,25 @@ class BasePadlockPrep(models.Model):
             self.restriction_enzyme.sequence.rev_comp() + \
             self.right_amp_primer_part1.sequence
 
+    def __str__(self):
+        return "{}".format(self.padlock)
+
     class Meta:
         abstract = True
 
 
-class OM6Padlock(models.Model):
+class TargetedPadlock(models.Model):
     left_ugs = models.ForeignKey(UGSPlus)
     right_ugs = models.ForeignKey(UGSMinus)
+
+    def __str__(self):
+        return "{}-P-{}".format(self.left_ugs, self.right_ugs)
+
+    class Meta:
+        abstract = True
+
+
+class OM6Padlock(TargetedPadlock):
     ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
     ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
     umi_length = models.PositiveSmallIntegerField()
@@ -213,9 +225,7 @@ class OM6Prep(BasePadlockPrep):
     padlock = models.ForeignKey(OM6Padlock)
 
 
-class OM6PadlockDeprecated(models.Model):
-    left_ugs = models.ForeignKey(UGSPlus)
-    right_ugs = models.ForeignKey(UGSMinus)
+class OM6PadlockDeprecated(TargetedPadlock):
     ira1ft = models.ForeignKey(IlluminaReadingAdaptor1ForTail)
     ira2ft = models.ForeignKey(IlluminaReadingAdaptor2ForTail)
     umi_length = models.PositiveSmallIntegerField()

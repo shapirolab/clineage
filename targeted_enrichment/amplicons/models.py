@@ -26,6 +26,13 @@ class Amplicon(models.Model):
     def right_margin(self):
         raise NotImplementedError()
 
+    @property
+    def sequence(self):
+        return self.left_margin + self.slice.sequence + self.right_margin
+
+    def __str__(self):
+        return "{}".format(self.slice)
+
 
 class RawAmplicon(Amplicon):
 
