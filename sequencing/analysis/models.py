@@ -67,7 +67,7 @@ class SampleReads(models.Model):
         yield self.fastq2
 
     def __str__(self):
-        return "{} @ {}".format(self.barcoded_content, self.demux)
+        return "{} @ {}".format(self.barcoded_content.subclass, self.demux)
 
 post_delete.connect(delete_files, SampleReads)
 

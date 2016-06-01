@@ -138,8 +138,8 @@ class MagicalPCR1BarcodedContent(BarcodedContent):
     library = models.ForeignKey(MagicalPCR1Library)
 
     @property
-    def cell(self):
-        return self.content.cell
+    def amplified_content(self):
+        return self.content
 
 
 class MagicalOM6Library(Library):
