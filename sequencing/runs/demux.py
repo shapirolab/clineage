@@ -101,8 +101,8 @@ def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme):
 
 
 UNDETERMINED = "Undetermined"
-SAMPLE_FASTQ_GZ_FORMAT = "{id}_S{idx}_L001_R{read:d}_001.fastq.gz"
-SAMPLE_FASTQ_FORMAT = "{id}_S{idx}_L001_R{read:d}_001.fastq"
+SAMPLE_FASTQ_GZ_FORMAT = "{id}_S{idx}_R{read:d}_001.fastq.gz"
+SAMPLE_FASTQ_FORMAT = "{id}_S{idx}_R{read:d}_001.fastq"
 
 
 def run_demux(ngs_run, demux_scheme):
