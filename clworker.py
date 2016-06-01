@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
-import clineage.wsgi
+import django
+django.setup()
 from distributed.cli.dworker import go
 go()

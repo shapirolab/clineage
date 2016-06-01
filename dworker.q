@@ -10,4 +10,4 @@ echo $TASK_ID
 echo $USER
 echo $HOSTNAME
 source /home/dcsoft/.venvs/cl/bin/activate
-PYTHONPATH='/home/dcsoft/clineage' ./clworker.py --nthreads 1 132.76.81.158:8786
+PYTHONPATH='/home/dcsoft/clineage' DJANGO_SETTINGS_MODULE='clineage.settings' ./clworker.py --nthreads 1 132.76.81.158:8786
