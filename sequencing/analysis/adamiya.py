@@ -13,7 +13,7 @@ import shutil
 from django.conf import settings
 from django.db import IntegrityError
 
-from misc.utils import get_unique_path
+from misc.utils import get_unique_path, unique_file_cm, unique_dir_cm, unlink
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
@@ -40,38 +40,44 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
 
 
-@contextlib.contextmanager
-def unlink(fname):
-    try:
-        yield fname
-    finally:
-        os.unlink(fname)
-
-
 def merge(sample_reads):
     prefix = get_unique_path()
-    # TODO: check by merging scheme.
-    pear_with_defaults("-f", sample_reads.fastq1,
-                       "-r", sample_reads.fastq2,
-                       "-o", prefix)
-    mr = AdamMergedReads.objects.create(
-        sample_reads=sample_reads,
+    outs = dict(
         assembled_fastq="{}.assembled.fastq".format(prefix),
         discarded_fastq="{}.discarded.fastq".format(prefix),
         unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
         unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
     )
+    # TODO: check by merging scheme.
+    try:
+        pear_with_defaults("-f", sample_reads.fastq1,
+                           "-r", sample_reads.fastq2,
+                           "-o", prefix)
+    except:
+        try:
+            for fname in outs.values():
+                os.unlink(fname)
+        except:
+            pass
+        raise
+    mr = AdamMergedReads.objects.create(
+        sample_reads=sample_reads,
+        **outs
+    )
     return mr
+
 
 def _pad_records(records, padding):
     for record in records:
         yield "N"*padding + record + "N"*padding
 
+
 def _create_padded_fasta(reads_iter, padding):
-    file_path = get_unique_path("fasta")
     padded_reads = _pad_records(reads_iter, padding)
-    SeqIO.write(padded_reads, file_path, "fasta")
-    return file_path
+    with unique_file_cm("fasta") as file_path:
+        SeqIO.write(padded_reads, file_path, "fasta")
+        return file_path
+
 
 def create_reads_index(merged_reads, included_reads, padding):
     """
@@ -79,19 +85,18 @@ def create_reads_index(merged_reads, included_reads, padding):
     of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
     padding controls how much to pad on each side of the reads.
     """
-    index_dir = get_unique_path()
     reads = merged_reads.included_reads_generator(included_reads)
-    with unlink(_create_padded_fasta(reads, padding)) as fasta:
+    with unique_dir_cm() as index_dir:
         # TODO: clean this double code.
-        os.mkdir(index_dir)
         ri = AdamReadsIndex(
             merged_reads=merged_reads,
             included_reads=included_reads,
             index_dump_dir=index_dir,
             padding=padding,
         )
-        bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
-    ri.save()
+        with unlink(_create_padded_fasta(reads, padding)) as fasta:
+            bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
+        ri.save()
     return ri
 
 
@@ -105,23 +110,23 @@ def _primers_seqrecords_generator(amplicons):
 
 
 def _create_panel_fasta(amplicons):
-    panel_fasta_name = get_unique_path("fasta")
-    SeqIO.write(_primers_seqrecords_generator(amplicons),
-        panel_fasta_name, "fasta")
-    return panel_fasta_name
+    panel_primers = _primers_seqrecords_generator(amplicons)
+    with unique_file_cm("fasta") as panel_fasta_name:
+        SeqIO.write(panel_primers, panel_fasta_name, "fasta")
+        return panel_fasta_name
 
 
 def align_primers_to_reads(reads_index):
-    assignment_sam = get_unique_path("sam")
     amplicons = reads_index.merged_reads.sample_reads.library.subclass.amplicons
-    with unlink(_create_panel_fasta(amplicons)) as panel_fasta:
-        bowtie2_with_defaults('-x', reads_index.index_files_prefix,
-                              '-f', panel_fasta,
-                              '-S', assignment_sam)
-    ama = AdamMarginAssignment.objects.create(
-        reads_index=reads_index,
-        assignment_sam=assignment_sam,
-    )
+    with unique_file_cm("sam") as assignment_sam:
+        with unlink(_create_panel_fasta(amplicons)) as panel_fasta:
+            bowtie2_with_defaults('-x', reads_index.index_files_prefix,
+                                  '-f', panel_fasta,
+                                  '-S', assignment_sam)
+        ama = AdamMarginAssignment.objects.create(
+            reads_index=reads_index,
+            assignment_sam=assignment_sam,
+        )
     return ama
 
 
@@ -158,11 +163,12 @@ def _aggregate_read_ids_by_amplicon(validated_reads_amplicons):
     return reads_by_amplicon
 
 
+@contextlib.contextmanager
 def _extract_reads_by_id(indexed_reads, read_ids):
-    amplicon_reads_fastq_name = get_unique_path("fastq")
     amplicon_reads = (indexed_reads[read_id] for read_id in read_ids)
-    SeqIO.write(amplicon_reads, amplicon_reads_fastq_name, "fastq")
-    return amplicon_reads_fastq_name
+    with unique_file_cm("fastq") as amplicon_reads_fastq_name:
+        SeqIO.write(amplicon_reads, amplicon_reads_fastq_name, "fastq")
+        yield amplicon_reads_fastq_name
 
 
 def seperate_reads_by_amplicons(margin_assignment):
@@ -176,16 +182,16 @@ def seperate_reads_by_amplicons(margin_assignment):
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.items():
-        amplicon_readsm_fastq_name = _extract_reads_by_id(reads, read_ids)
-        amplicon_reads1_fastq_name = _extract_reads_by_id(reads1, read_ids)
-        amplicon_reads2_fastq_name = _extract_reads_by_id(reads2, read_ids)
-        aar = AdamAmpliconReads.objects.create(
-            margin_assignment=margin_assignment,
-            amplicon=amplicon,
-            fastqm=amplicon_readsm_fastq_name,
-            fastq1=amplicon_reads1_fastq_name,
-            fastq2=amplicon_reads2_fastq_name,
-        )
+        with _extract_reads_by_id(reads, read_ids) as amplicon_readsm_fastq_name, \
+            _extract_reads_by_id(reads1, read_ids) as amplicon_reads1_fastq_name, \
+            _extract_reads_by_id(reads2, read_ids) as amplicon_reads2_fastq_name:
+            aar = AdamAmpliconReads.objects.create(
+                margin_assignment=margin_assignment,
+                amplicon=amplicon,
+                fastqm=amplicon_readsm_fastq_name,
+                fastq1=amplicon_reads1_fastq_name,
+                fastq2=amplicon_reads2_fastq_name,
+            )
         yield aar
 
 
@@ -246,11 +252,11 @@ def _build_ms_variations(amplicon, padding, mss):
         slice=fmt,
         right=amplicon.right_margin
     )
-    fasta = get_unique_path("fa")
     prefix = "{}".format(amplicon.id)
-    SeqIO.write(_get_mss_variations_seqrecords(mss, full_fmt, prefix),
-        fasta, "fasta")
-    return fasta
+    with unique_file_cm("fa") as fasta:
+        SeqIO.write(_get_mss_variations_seqrecords(mss, full_fmt, prefix),
+            fasta, "fasta")
+        return fasta
 
 
 def get_adam_ms_variations(amplicon, padding, mss_version):
@@ -268,33 +274,33 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
             slice__chromosome_id=amplicon.slice.chromosome_id,
             planning_version=mss_version,
         )
-        with unlink(_build_ms_variations(amplicon, padding, mss)) as fasta:
-            os.mkdir(index_dir)
+        with unique_dir_cm() as index_dir:
             mock_msv = AdamMSVariations(
                 amplicon=amplicon,
                 padding=padding,
                 microsatellites_version=mss_version,
                 index_dump_dir=index_dir,
             )
-            bowtie2build(fasta, mock_msv.index_files_prefix)
-        msv, c = AdamMSVariations.objects.get_or_create(
-            amplicon=amplicon,
-            padding=padding,
-            microsatellites_version=mss_version,
-            defaults={"index_dump_dir": index_dir}
-        )
+            with unlink(_build_ms_variations(amplicon, padding, mss)) as fasta:
+                bowtie2build(fasta, mock_msv.index_files_prefix)
+            msv, c = AdamMSVariations.objects.get_or_create(
+                amplicon=amplicon,
+                padding=padding,
+                microsatellites_version=mss_version,
+                defaults={"index_dump_dir": index_dir}
+            )
         if not c:
             delete_files(AdamMSVariations, mock_msv)
         return msv
 
 
 def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
-    assignment_sam = get_unique_path("sam")
     msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding, 
         mss_version)
-    bowtie2_with_defaults2('-x', msv.index_files_prefix,
-                          '-U', amplicon_reads.fastqm,
-                          '-S', assignment_sam)
+    with unique_file_cm("sam") as assignment_sam:
+        bowtie2_with_defaults2('-x', msv.index_files_prefix,
+                              '-U', amplicon_reads.fastqm,
+                              '-S', assignment_sam)
     ah = AdamHistogram.objects.create(
         sample_reads_id=amplicon_reads.margin_assignment.reads_index \
             .merged_reads.sample_reads_id,
@@ -328,20 +334,27 @@ def separate_reads_by_genotypes(histogram):
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
     readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
     for genotypes, read_ids in genotypes_reads.items():
-        genotypes_readsm_fastq_name = _extract_reads_by_id(readsm, read_ids)
-        genotypes_reads1_fastq_name = _extract_reads_by_id(reads1, read_ids)
-        genotypes_reads2_fastq_name = _extract_reads_by_id(reads2, read_ids)
-        her = HistogramEntryReads.objects.create(
-            histogram=histogram,
-            amplicon=histogram.amplicon_reads.amplicon,
-            microsatellites_version=histogram.ms_variations \
-                .microsatellites_version,
-            num_reads=len(read_ids),
-            fastq1=genotypes_reads1_fastq_name,
-            fastq2=genotypes_reads2_fastq_name,
-            fastqm=genotypes_readsm_fastq_name,
-        )
-        her.microsatellite_genotypes.add(*genotypes)
+        with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+            _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
+            _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+            her = HistogramEntryReads.objects.create(
+                histogram=histogram,
+                amplicon=histogram.amplicon_reads.amplicon,
+                microsatellites_version=histogram.ms_variations \
+                    .microsatellites_version,
+                num_reads=len(read_ids),
+                fastq1=genotypes_reads1_fastq_name,
+                fastq2=genotypes_reads2_fastq_name,
+                fastqm=genotypes_readsm_fastq_name,
+            )
+            try:
+                her.microsatellite_genotypes.add(*genotypes)
+            except:
+                try:
+                    her.delete()
+                except:
+                    pass
+                raise
         yield her
 
 
