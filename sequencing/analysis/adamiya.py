@@ -1,6 +1,7 @@
 
 import itertools
 import functools
+import contextlib
 from plumbum import local
 import os
 import uuid
@@ -39,6 +40,14 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
 
 
+@contextlib.contextmanager
+def unlink(fname):
+    try:
+        yield fname
+    finally:
+        os.unlink(fname)
+
+
 def merge(sample_reads):
     prefix = get_unique_path()
     # TODO: check by merging scheme.
@@ -72,17 +81,16 @@ def create_reads_index(merged_reads, included_reads, padding):
     """
     index_dir = get_unique_path()
     reads = merged_reads.included_reads_generator(included_reads)
-    fasta = _create_padded_fasta(reads, padding)
-    # TODO: clean this double code.
-    os.mkdir(index_dir)
-    ri = AdamReadsIndex(
-        merged_reads=merged_reads,
-        included_reads=included_reads,
-        index_dump_dir=index_dir,
-        padding=padding,
-    )
-    bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
-    os.unlink(fasta)
+    with unlink(_create_padded_fasta(reads, padding)) as fasta:
+        # TODO: clean this double code.
+        os.mkdir(index_dir)
+        ri = AdamReadsIndex(
+            merged_reads=merged_reads,
+            included_reads=included_reads,
+            index_dump_dir=index_dir,
+            padding=padding,
+        )
+        bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
     ri.save()
     return ri
 
@@ -106,11 +114,10 @@ def _create_panel_fasta(amplicons):
 def align_primers_to_reads(reads_index):
     assignment_sam = get_unique_path("sam")
     amplicons = reads_index.merged_reads.sample_reads.library.subclass.amplicons
-    panel_fasta = _create_panel_fasta(amplicons)
-    bowtie2_with_defaults('-x', reads_index.index_files_prefix,
-                          '-f', panel_fasta,
-                          '-S', assignment_sam)
-    os.unlink(panel_fasta)
+    with unlink(_create_panel_fasta(amplicons)) as panel_fasta:
+        bowtie2_with_defaults('-x', reads_index.index_files_prefix,
+                              '-f', panel_fasta,
+                              '-S', assignment_sam)
     ama = AdamMarginAssignment.objects.create(
         reads_index=reads_index,
         assignment_sam=assignment_sam,
@@ -261,16 +268,15 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
             slice__chromosome_id=amplicon.slice.chromosome_id,
             planning_version=mss_version,
         )
-        fasta = _build_ms_variations(amplicon, padding, mss)
-        os.mkdir(index_dir)
-        mock_msv = AdamMSVariations(
-            amplicon=amplicon,
-            padding=padding,
-            microsatellites_version=mss_version,
-            index_dump_dir=index_dir,
-        )
-        bowtie2build(fasta, mock_msv.index_files_prefix)
-        os.unlink(fasta)
+        with unlink(_build_ms_variations(amplicon, padding, mss)) as fasta:
+            os.mkdir(index_dir)
+            mock_msv = AdamMSVariations(
+                amplicon=amplicon,
+                padding=padding,
+                microsatellites_version=mss_version,
+                index_dump_dir=index_dir,
+            )
+            bowtie2build(fasta, mock_msv.index_files_prefix)
         msv, c = AdamMSVariations.objects.get_or_create(
             amplicon=amplicon,
             padding=padding,
