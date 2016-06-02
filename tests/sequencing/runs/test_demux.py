@@ -81,7 +81,7 @@ Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,ind
             ]):
             for read in [1, 2]:
                 gzip.open(os.path.join(fastq_folder,
-                    "{name}_S{num}_L001_R{read}_001.fastq.gz".format(
+                    "{name}_S{num}_R{read}_001.fastq.gz".format(
                         name=name,
                         num=num,
                         read=read,
@@ -104,7 +104,7 @@ Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,ind
         assert sr.library == magicalpcr1library
         for fastq, read in [(sr.fastq1, 1), (sr.fastq2, 2)]:
             assert fastq == os.path.join(fastq_folder,
-                "{name}_S{num}_L001_R{read}_001.fastq".format(
+                "{name}_S{num}_R{read}_001.fastq".format(
                     name=name,
                     num=num,
                     read=read,
