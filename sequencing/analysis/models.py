@@ -36,7 +36,7 @@ class BowtieIndexMixin(models.Model):
     index_dump_dir = models.FilePathField(max_length=200, allow_files=False, allow_folders=True)
 
     class Meta:
-        abstract=True
+        abstract = True
 
     @property
     def index_files_prefix(self):
@@ -60,6 +60,14 @@ class SampleReads(models.Model):
     library = models.ForeignKey(Library)
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
+
+    class Meta:
+        index_together = (
+            ("demux", "barcoded_content"),
+        )
+        unique_together = (
+            ("demux", "barcoded_content"),
+        )
 
     @property
     def files(self):
@@ -176,6 +184,9 @@ class AdamAmpliconReads(models.Model):  # This contains the actual data.
         index_together = (
             ("margin_assignment", "amplicon"),
         )
+        unique_together = (
+            ("margin_assignment", "amplicon"),
+        )
 
     @property
     def files(self):
@@ -194,9 +205,12 @@ class AdamMSVariations(BowtieIndexMixin):
     microsatellites_version = models.IntegerField()
 
     class Meta:
-        index_together=[
-            ("amplicon", "padding", "microsatellites_version")
-        ]
+        index_together = (
+            ("amplicon", "padding", "microsatellites_version"),
+        )
+        unique_together = (
+            ("amplicon", "padding", "microsatellites_version"),
+        )
 
     def __str__(self):
         return "{} v. {}".format(amplicon, microsatellites_version)
@@ -255,6 +269,14 @@ class MicrosatelliteHistogramGenotype(models.Model):
     microsatellite = models.ForeignKey(Microsatellite)
     repeat_number = models.PositiveIntegerField()
 
+    class Meta:
+        index_together = (
+            ("microsatellite", "repeat_number"),
+        )
+        unique_together = (
+            ("microsatellite", "repeat_number"),
+        )
+
     def __str__(self):
         return "{}={}".format(self.microsatellite.id, self.repeat_number)
 
@@ -289,6 +311,14 @@ class MicrosatelliteHistogramGenotype(models.Model):
 class SNPHistogramGenotype(models.Model):
     snp = models.ForeignKey(SNP)
     base = models.CharField(max_length=1)
+
+    class Meta:
+        index_together = (
+            ("snp", "base"),
+        )
+        unique_together = (
+            ("snp", "base"),
+        )
 
 
 class HistogramEntryReads(models.Model):
