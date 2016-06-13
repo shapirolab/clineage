@@ -115,8 +115,8 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, r
     for inc, hers in herss.items():
         parts = set()
         for her in hers:
-            amp = her.amplicon_id
-            sr = her.histogram.subclass.amplicon_reads.margin_assignment.reads_index.merged_reads.sample_reads
+            amp = her.histogram.amplicon_id
+            sr = her.histogram.sample_reads
             bc = sr.barcoded_content_id
             l_id = sr.library_id
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \

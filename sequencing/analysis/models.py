@@ -206,6 +206,8 @@ post_delete.connect(delete_files, AdamMSVariations)
 
 class Histogram(models.Model):
     sample_reads = models.ForeignKey(SampleReads)
+    microsatellites_version = models.IntegerField()
+    amplicon = models.ForeignKey(Amplicon)
 
     objects = InheritanceManager()
 
@@ -291,8 +293,6 @@ class SNPHistogramGenotype(models.Model):
 
 class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
-    amplicon = models.ForeignKey(Amplicon)
-    microsatellites_version = models.IntegerField()
     microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
     snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
     num_reads = models.PositiveIntegerField()
@@ -305,11 +305,6 @@ class HistogramEntryReads(models.Model):
         yield self.fastq1
         yield self.fastq2
         yield self.fastqm
-
-    class Meta:
-        index_together=[
-            ("histogram", "amplicon", "microsatellites_version")
-        ]
 
     def __str__(self):
         return "{}: {}".format(self.histogram.subclass,

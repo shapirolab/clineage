@@ -136,13 +136,13 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
             padding=padding,
             microsatellites_version=ms_planning_version
         )
+        assert ah.amplicon_id == amp
+        assert ah.microsatellites_version == ms_planning_version
         assert os.path.isfile(ah.assignment_sam)
         gens = set()
         # test_separate_reads_by_genotypes
         for her in separate_reads_by_genotypes(ah):
             assert her.histogram_id == ah.id
-            assert her.amplicon_id == amp
-            assert her.microsatellites_version == ms_planning_version
             assert set(her.snp_genotypes.all()) == set()
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
                 msg in her.microsatellite_genotypes.all())

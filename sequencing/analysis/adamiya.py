@@ -305,6 +305,8 @@ def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
         sample_reads_id=amplicon_reads.margin_assignment.reads_index \
             .merged_reads.sample_reads_id,
         amplicon_reads=amplicon_reads,
+        amplicon=amplicon_reads.amplicon,
+        microsatellites_version=msv.microsatellites_version,
         assignment_sam=assignment_sam,
         ms_variations=msv,
     )
@@ -339,9 +341,6 @@ def separate_reads_by_genotypes(histogram):
             _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
             her = HistogramEntryReads.objects.create(
                 histogram=histogram,
-                amplicon=histogram.amplicon_reads.amplicon,
-                microsatellites_version=histogram.ms_variations \
-                    .microsatellites_version,
                 num_reads=len(read_ids),
                 fastq1=genotypes_reads1_fastq_name,
                 fastq2=genotypes_reads2_fastq_name,
