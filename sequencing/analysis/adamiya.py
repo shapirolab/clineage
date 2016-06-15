@@ -40,7 +40,7 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
 
 
-def merge(sample_reads):
+def create_merge(sample_reads):
     prefix = get_unique_path()
     outs = dict(
         assembled_fastq="{}.assembled.fastq".format(prefix),
@@ -60,6 +60,25 @@ def merge(sample_reads):
         except:
             pass
         raise
+    return outs
+
+
+def merge(sample_reads, recover=False):
+    if recover:
+        try:
+            return AdamMergedReads.objects.get(
+                sample_reads=sample_reads)
+        except AdamMergedReads.DoesNotExist:
+            outs = create_merge(sample_reads)
+            mr, c = AdamMergedReads.objects.get_or_create(
+                sample_reads=sample_reads,
+                defaults=outs
+            )
+            if not c:
+                for fname in outs.values():
+                    os.unlink(fname)
+            return mr
+    outs = create_merge(sample_reads)
     mr = AdamMergedReads.objects.create(
         sample_reads=sample_reads,
         **outs
@@ -85,19 +104,33 @@ def create_reads_index(merged_reads, included_reads, padding):
     of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
     padding controls how much to pad on each side of the reads.
     """
-    reads = merged_reads.included_reads_generator(included_reads)
-    with unique_dir_cm() as index_dir:
-        # TODO: clean this double code.
-        ri = AdamReadsIndex(
+    try:
+        return AdamReadsIndex.objects.get(
             merged_reads=merged_reads,
             included_reads=included_reads,
-            index_dump_dir=index_dir,
             padding=padding,
         )
-        with unlink(_create_padded_fasta(reads, padding)) as fasta:
-            bowtie2build_fixed_seed(fasta, ri.index_files_prefix)
-        ri.save()
-    return ri
+    except AdamReadsIndex.DoesNotExist:
+        reads = merged_reads.included_reads_generator(included_reads)
+        with unique_dir_cm() as index_dir:
+            # TODO: clean this double code.
+            mock_ri = AdamReadsIndex(
+                merged_reads=merged_reads,
+                included_reads=included_reads,
+                index_dump_dir=index_dir,
+                padding=padding,
+            )
+            with unlink(_create_padded_fasta(reads, padding)) as fasta:
+                bowtie2build_fixed_seed(fasta, mock_ri.index_files_prefix)
+            ri, c = AdamReadsIndex.objects.get_or_create(
+                merged_reads=merged_reads,
+                included_reads=included_reads,
+                padding=padding,
+                defaults={"index_dump_dir": index_dir}
+            )
+        if not c:
+            delete_files(AdamReadsIndex, mock_ri)
+        return ri
 
 
 def _primers_seqrecords_generator(amplicons):
@@ -182,16 +215,27 @@ def seperate_reads_by_amplicons(margin_assignment):
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.items():
-        with _extract_reads_by_id(reads, read_ids) as amplicon_readsm_fastq_name, \
-            _extract_reads_by_id(reads1, read_ids) as amplicon_reads1_fastq_name, \
-            _extract_reads_by_id(reads2, read_ids) as amplicon_reads2_fastq_name:
-            aar = AdamAmpliconReads.objects.create(
+        try:
+            aar = AdamAmpliconReads.objects.get(
                 margin_assignment=margin_assignment,
-                amplicon=amplicon,
-                fastqm=amplicon_readsm_fastq_name,
-                fastq1=amplicon_reads1_fastq_name,
-                fastq2=amplicon_reads2_fastq_name,
-            )
+                amplicon=amplicon)
+        except AdamAmpliconReads.DoesNotExist:
+            with _extract_reads_by_id(reads, read_ids) as amplicon_readsm_fastq_name, \
+                _extract_reads_by_id(reads1, read_ids) as amplicon_reads1_fastq_name, \
+                _extract_reads_by_id(reads2, read_ids) as amplicon_reads2_fastq_name:
+                fastq_files = {
+                    'fastqm': amplicon_readsm_fastq_name,
+                    'fastq1': amplicon_reads1_fastq_name,
+                    'fastq2': amplicon_reads2_fastq_name,
+                }
+                aar, c = AdamAmpliconReads.objects.get_or_create(
+                    margin_assignment=margin_assignment,
+                    amplicon=amplicon,
+                    defaults=fastq_files
+                )
+                if not c:
+                    for fname in fastq_files.values():
+                        os.unlink(fname)
         yield aar
 
 
@@ -294,22 +338,51 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
         return msv
 
 
-def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
-    msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding, 
-        mss_version)
+def do_alignment_to_msv(msv, amplicon_reads):
     with unique_file_cm("sam") as assignment_sam:
         bowtie2_with_defaults2('-x', msv.index_files_prefix,
-                              '-U', amplicon_reads.fastqm,
-                              '-S', assignment_sam)
-    ah = AdamHistogram.objects.create(
-        sample_reads_id=amplicon_reads.margin_assignment.reads_index \
-            .merged_reads.sample_reads_id,
-        amplicon_reads=amplicon_reads,
-        amplicon=amplicon_reads.amplicon,
-        microsatellites_version=msv.microsatellites_version,
-        assignment_sam=assignment_sam,
-        ms_variations=msv,
-    )
+                               '-U', amplicon_reads.fastqm,
+                               '-S', assignment_sam)
+    return assignment_sam
+
+
+def align_reads_to_ms_variations(amplicon_reads, padding, mss_version, recover=False):
+    msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding,
+        mss_version)
+    if recover:
+        try:
+            ah = AdamHistogram.objects.get(
+                sample_reads_id=amplicon_reads.margin_assignment.reads_index \
+                    .merged_reads.sample_reads_id,
+                amplicon_reads=amplicon_reads,
+                amplicon=amplicon_reads.amplicon,
+                microsatellites_version=msv.microsatellites_version,
+                ms_variations=msv,
+            )
+        except AdamHistogram.DoesNotExist:
+            assignment_sam = do_alignment_to_msv(msv, amplicon_reads)
+            ah, c = AdamHistogram.objects.get_or_create(
+                sample_reads_id=amplicon_reads.margin_assignment.reads_index \
+                    .merged_reads.sample_reads_id,
+                amplicon_reads=amplicon_reads,
+                amplicon=amplicon_reads.amplicon,
+                microsatellites_version=msv.microsatellites_version,
+                ms_variations=msv,
+                defaults={'assignment_sam': assignment_sam}
+            )
+            if not c:
+                os.unlink(assignment_sam)
+    else:
+        assignment_sam = do_alignment_to_msv(msv, amplicon_reads)
+        ah = AdamHistogram.objects.create(
+            sample_reads_id=amplicon_reads.margin_assignment.reads_index \
+                .merged_reads.sample_reads_id,
+            amplicon_reads=amplicon_reads,
+            amplicon=amplicon_reads.amplicon,
+            microsatellites_version=msv.microsatellites_version,
+            assignment_sam=assignment_sam,
+            ms_variations=msv,
+        )
     return ah
 
 
@@ -381,10 +454,10 @@ def list_iterator(f):
     return inner
 
 
-def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
+def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50, recover=False):
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
-    merged_reads = executor.map(merge, sample_reads, pure=False)
+    merged_reads = executor.map(merge, sample_reads, itertools.repeat(recover), pure=False)
     reads_indices = executor.map(create_reads_index, merged_reads,
         itertools.repeat(included_reads), itertools.repeat(read_padding), pure=False)
     adam_margin_assignments = executor.map(close_connection_and(align_primers_to_reads),
@@ -394,7 +467,7 @@ def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read
         adam_margin_assignments, pure=False)
     yield merged_reads, reads_indices, adam_margin_assignments, adam_amplicon_reads_lists
     adam_histograms = double_map(executor, close_connection_and(align_reads_to_ms_variations),
-        adam_amplicon_reads_lists, ref_padding, mss_version)
+        adam_amplicon_reads_lists, ref_padding, mss_version, recover)
     for fs in adam_histograms:
         fs2 = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fs, pure=False)
         yield fs, fs2

@@ -4,7 +4,7 @@ from Bio import SeqIO
 
 from sequencing.analysis.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, seperate_reads_by_amplicons, \
-    get_adam_ms_variations, align_reads_to_ms_variations, \
+    get_adam_ms_variations, get_ms_variations_for_amplicon_reads, \
     separate_reads_by_genotypes
 from sequencing.analysis.models import AdamMSVariations, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
@@ -128,7 +128,7 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
         padding = 50
         # FIXME
         # test_align_reads_to_ms_variations
-        ah = align_reads_to_ms_variations(aar, padding, ms_planning_version)
+        ah = get_ms_variations_for_amplicon_reads(aar, padding, ms_planning_version)
         assert ah.amplicon_reads_id == aar.id
         # TODO: make this check more explicit.
         assert ah.ms_variations == AdamMSVariations.objects.get(
