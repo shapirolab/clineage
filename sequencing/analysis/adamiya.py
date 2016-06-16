@@ -357,6 +357,15 @@ def separate_reads_by_genotypes(histogram):
         yield her
 
 
+def close_connection_and(f):
+    @functools.wraps(f)
+    def inner(*args, **kwargs):
+        from django.db import connection
+        connection.close()
+        return f(*args, **kwargs)
+    return inner
+
+
 def double_map(executor, func, future_lists, *params):
     for f in as_completed(future_lists):
         l = f.result()
@@ -371,16 +380,17 @@ def list_iterator(f):
 
 
 def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
-    merged_reads = executor.map(merge, sample_reads, pure=False)
-    reads_indices = executor.map(create_reads_index, merged_reads,
+    merged_reads = executor.map(close_connection_and(merge), sample_reads, pure=False)
+    reads_indices = executor.map(close_connection_and(create_reads_index), merged_reads,
         itertools.repeat(included_reads), itertools.repeat(read_padding), pure=False)
-    adam_margin_assignments = executor.map(align_primers_to_reads,
+    adam_margin_assignments = executor.map(close_connection_and(align_primers_to_reads),
         reads_indices, pure=False)
     adam_amplicon_reads_lists = executor.map(
-        list_iterator(seperate_reads_by_amplicons), adam_margin_assignments, pure=False)
+        list_iterator(close_connection_and(seperate_reads_by_amplicons)), 
+        adam_margin_assignments, pure=False)
     yield merged_reads, reads_indices, adam_margin_assignments, adam_amplicon_reads_lists
-    adam_histograms = double_map(executor, align_reads_to_ms_variations,
+    adam_histograms = double_map(executor, close_connection_and(align_reads_to_ms_variations),
         adam_amplicon_reads_lists, ref_padding, mss_version)
     for fs in adam_histograms:
-        fs2 = executor.map(list_iterator(separate_reads_by_genotypes), fs, pure=False)
+        fs2 = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fs, pure=False)
         yield fs, fs2
