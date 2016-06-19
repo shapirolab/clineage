@@ -21,10 +21,8 @@ def distance_from_model(syn_len, syn_hist, cycles, msmodel, distance_measure='co
     model_hist = generate_hist(syn_len, cycles, method, ups=up, dws=dw, **kwargs)
     for h in [model_hist, syn_hist]:
         # h.sq_normalize()
-        h.normalize()
-        if len(list(h.keys())) == 0:
-            print(h)
-            raise
+        if distance_measure != 'con':
+            h.normalize()
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
 
