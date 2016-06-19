@@ -61,12 +61,12 @@ def get_x_from_list(l, step):
 
 def param_list_to_polynomes(x):
     assert len(x) % 2 == 0
-    # up_params = list(x)[:len(x)/2]
-    # dw_params = list(x)[len(x)/2:]
+    # up_params = x[:len(x)//2]
+    # dw_params = x[len(x)//2:]
     # ups = [hashable_poly1d([a, b, c]) for a, b, c in get_x_from_list(up_params, 3)]
     # dws = [hashable_poly1d([a, b, c]) for a, b, c in get_x_from_list(dw_params, 3)]
-    up_params = list(x)[:len(x)/4]
-    dw_params = list(x)[len(x)/4:]
+    up_params = x[:len(x)//4]
+    dw_params = x[len(x)//4:]
     ups = [hashable_poly1d([a, b]) for a, b in get_x_from_list(up_params, 2)]
     dws = [hashable_poly1d([a, b]) for a, b in get_x_from_list(dw_params, 2)]
     # ups = [Hashable_exp(a, b) for a, b in get_x_from_list(up_params, 2)]
