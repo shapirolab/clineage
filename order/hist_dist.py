@@ -1,10 +1,7 @@
 import numpy as np
 from scipy import stats
-from emd import emd
 from math import sqrt, log10
 from .hist import get_lims
-
-
 
 
 def inflate_hist(hist, reads):
@@ -26,7 +23,7 @@ def pop_dist_sub(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(list(range(li, ri)))
+    score = float(sum(deltas))/(ri-li)
     return score
 
 
@@ -37,7 +34,7 @@ def pop_dist_subpeaks(hist1, hist2):
     """
     li, ri = get_lims(hist1, hist2)
     deltas = [abs(hist2[x]-hist1[x]) for x in range(li, ri)]
-    score = float(sum(deltas))/len(list(range(li, ri)))
+    score = float(sum(deltas))/(ri-li)
     return score
 
 
@@ -98,14 +95,6 @@ def alt2_ks_2samp(hist1, hist2, reads):
     pop2 = stats.rv_discrete(name='custm', values=(list(hist2._hist.keys()), list(hist2._hist.values())))
     d, p = stats.kstest(pop1, pop2.cdf)
     return 1-p
-
-
-def pop_dist_emd(hist1, hist2):
-    """
-    Calculate the distance between two populations in the form of histograms
-    Uses
-    """
-    return emd(list(hist1.keys()), list(hist2.keys()), list(hist1.values()), list(hist2.values()))
 
 
 def pop_dist_corr(hist1, hist2):
@@ -185,8 +174,6 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
             return pop_dist_sub(hist1, hist2)
         if method == 'sp':
             return pop_dist_subpeaks(hist1, hist2)
-        if method == 'emd':
-            return pop_dist_emd(hist1, hist2)
         if method == 'ks':
             return pop_dist_ks_2samp(hist1, hist2, reads, sample_depth)
         if method == 'aks':
