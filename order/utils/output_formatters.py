@@ -1,7 +1,7 @@
 import csv
 import gzip
 from frogress import bar
-from cloud.serialization.cloudpickle import loads, dumps
+from cloudpickle import loads, dumps
 from order.preprocessing import generate_sim_hists_of_up_to_k_alleles, generate_biallelic_reads_of_multiple_proportions
 from collections import defaultdict
 from pickle import loads
