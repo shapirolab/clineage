@@ -238,9 +238,7 @@ class AdamHistogram(Histogram):
 
     def read_sam(self):
         for ms_genotypes_name, read_id in _read_sam(self.assignment_sam):
-            ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
-            assert int(prefix) == self.amplicon_reads.amplicon_id
-            yield read_id, ms_genotypes
+            yield read_id, ms_genotypes_name
     
     @property
     def files(self):

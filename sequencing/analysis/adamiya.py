@@ -18,7 +18,7 @@ from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     ms_genotypes_to_name, AdamHistogram, HistogramEntryReads, SampleReads, \
-    delete_files
+    delete_files, name_to_ms_genotypes
 from targeted_enrichment.planning.models import Microsatellite
 
 from distributed.executor import as_completed
@@ -315,9 +315,11 @@ def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
 
 def _collect_genotypes_from_sam(histogram):
     genotypes_reads = set()
-    for read_id, ms_genotypes in histogram.read_sam():
+    for read_id, ms_genotypes_name in histogram.read_sam():
         if read_id not in genotypes_reads:
             # We assume that the SAM is ordered by quality of match.
+            ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
+            assert int(prefix) == histogram.amplicon_reads.amplicon_id
             genotypes_reads.add(read_id)
             yield ms_genotypes, read_id
 
