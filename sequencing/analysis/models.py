@@ -131,7 +131,7 @@ class AdamMergedReads(PearOutputMixin):
 
     def __str__(self):
         return "{}".format(self.sample_reads)
-            
+
 post_delete.connect(delete_files, AdamMergedReads)
 
 
@@ -150,6 +150,14 @@ class AdamReadsIndex(BowtieIndexMixin):
     def __str__(self):
         return "{}".format(self.merged_reads)
 
+    class Meta:
+        index_together = (
+            ("merged_reads", "included_reads", "padding"),
+        )
+        unique_together = (
+            ("merged_reads", "included_reads", "padding"),
+        )
+
 post_delete.connect(delete_files, AdamReadsIndex)
 
 
@@ -162,7 +170,7 @@ def _read_sam(sam_path):
 
 
 class AdamMarginAssignment(models.Model):
-    reads_index = models.ForeignKey(AdamReadsIndex)
+    reads_index = models.ForeignKey(AdamReadsIndex, unique=True)
     assignment_sam = models.FilePathField(max_length=200)
 
     def read_sam(self):
@@ -266,6 +274,14 @@ class AdamHistogram(Histogram):
 
     def __str__(self):
         return "{}".format(self.amplicon_reads)
+
+    class Meta:
+        index_together = (
+            ("amplicon_reads", "ms_variations"),
+        )
+        unique_together = (
+            ("amplicon_reads", "ms_variations"),
+        )
 
 post_delete.connect(delete_files, AdamHistogram)
 
