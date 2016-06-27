@@ -134,7 +134,7 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
         os.unlink(mr.unassembled_reverse_fastq)
 
 
-@pytest.yield_fixture()
+@pytest.yield_fixture(scope="session")
 def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
     d = {}
     for l_id, l_d in adam_reads_fd.items():
