@@ -55,3 +55,32 @@ def unlink(fname):
         yield fname
     finally:
         os.unlink(fname)
+
+
+class NotCreated(Exception):
+    pass
+
+
+def raise_or_create(model, **kwargs):
+    """
+    get_or_create, returning the created object if it is created, or raising
+    a NotCreated with the gotten object otherwise. Useful for the unique_*_cms
+    above.
+    """
+    obj, c = model.objects.get_or_create(**kwargs)
+    if c:
+        return obj
+    else:
+        raise NotCreated(obj)
+
+
+def get_get_or_create(do_raise_or_create, model, **kwargs):
+    """
+    """
+    try:
+        return model.objects.get(**kwargs)
+    except model.DoesNotExist:
+        try:
+            return do_raise_or_create()
+        except NotCreated as nc:
+            return nc.args[0]

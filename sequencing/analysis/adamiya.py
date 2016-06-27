@@ -13,12 +13,13 @@ import shutil
 from django.conf import settings
 from django.db import IntegrityError
 
-from misc.utils import get_unique_path, unique_file_cm, unique_dir_cm, unlink
+from misc.utils import get_unique_path, unique_file_cm, unique_dir_cm, unlink, \
+    raise_or_create, get_get_or_create
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     ms_genotypes_to_name, AdamHistogram, HistogramEntryReads, SampleReads, \
-    delete_files, name_to_ms_genotypes
+    delete_files, name_to_ms_genotypes, BowtieIndexMixin, PearOutputMixin
 from targeted_enrichment.planning.models import Microsatellite
 
 from distributed.executor import as_completed
@@ -40,41 +41,24 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
                                  "-a"]
 
 
-def create_merge(sample_reads):
-    with unique_dir_cm() as pear_dir:
-        # TODO: clean this double code.
-        mock_mr = AdamMergedReads(
-            sample_reads=sample_reads,
-            pear_dump_dir=pear_dir,
-        )
-        pear_with_defaults("-f", sample_reads.fastq1,
-                           "-r", sample_reads.fastq2,
-                           "-o", mock_mr.pear_files_prefix)
-    return pear_dir
-
-
-def merge(sample_reads, recover=False):
-    if recover:
-        try:
-            return AdamMergedReads.objects.get(
-                sample_reads=sample_reads)
-        except AdamMergedReads.DoesNotExist:
-            pear_dir = create_merge(sample_reads)
-            mr, c = AdamMergedReads.objects.get_or_create(
+def merge(sample_reads):
+    def inner():
+        with unique_dir_cm() as pear_dir:
+            pear_output = PearOutputMixin(
+                pear_dump_dir=pear_dir,
+            )
+            pear_with_defaults("-f", sample_reads.fastq1,
+                               "-r", sample_reads.fastq2,
+                               "-o", pear_output.pear_files_prefix)
+            return raise_or_create(AdamMergedReads,
                 sample_reads=sample_reads,
                 defaults=dict(
                     pear_dump_dir=pear_dir,
                 ),
             )
-            if not c:
-                shutil.rmtree(pear_dir)
-            return mr
-    pear_dir = create_merge(sample_reads)
-    mr = AdamMergedReads.objects.create(
+    return get_get_or_create(inner, AdamMergedReads,
         sample_reads=sample_reads,
-        pear_dump_dir=pear_dir,
     )
-    return mr
 
 
 def _pad_records(records, padding):
@@ -95,33 +79,25 @@ def create_reads_index(merged_reads, included_reads, padding):
     of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
     padding controls how much to pad on each side of the reads.
     """
-    try:
-        return AdamReadsIndex.objects.get(
-            merged_reads=merged_reads,
-            included_reads=included_reads,
-            padding=padding,
-        )
-    except AdamReadsIndex.DoesNotExist:
+    def inner():
         reads = merged_reads.included_reads_generator(included_reads)
         with unique_dir_cm() as index_dir:
-            # TODO: clean this double code.
-            mock_ri = AdamReadsIndex(
-                merged_reads=merged_reads,
-                included_reads=included_reads,
-                index_dump_dir=index_dir,
-                padding=padding,
-            )
+            bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
             with unlink(_create_padded_fasta(reads, padding)) as fasta:
-                bowtie2build_fixed_seed(fasta, mock_ri.index_files_prefix)
-            ri, c = AdamReadsIndex.objects.get_or_create(
+                bowtie2build_fixed_seed(fasta, bowtie_index.index_files_prefix)
+            return raise_or_create(AdamReadsIndex,
                 merged_reads=merged_reads,
                 included_reads=included_reads,
                 padding=padding,
-                defaults={"index_dump_dir": index_dir}
+                defaults=dict(
+                    index_dump_dir=index_dir,
+                ),
             )
-        if not c:
-            delete_files(AdamReadsIndex, mock_ri)
-        return ri
+    return get_get_or_create(inner, AdamReadsIndex,
+        merged_reads=merged_reads,
+        included_reads=included_reads,
+        padding=padding,
+    )
 
 
 def _primers_seqrecords_generator(amplicons):
@@ -141,17 +117,22 @@ def _create_panel_fasta(amplicons):
 
 
 def align_primers_to_reads(reads_index):
-    amplicons = reads_index.merged_reads.sample_reads.library.subclass.amplicons
-    with unique_file_cm("sam") as assignment_sam:
-        with unlink(_create_panel_fasta(amplicons)) as panel_fasta:
-            bowtie2_with_defaults('-x', reads_index.index_files_prefix,
-                                  '-f', panel_fasta,
-                                  '-S', assignment_sam)
-        ama = AdamMarginAssignment.objects.create(
-            reads_index=reads_index,
-            assignment_sam=assignment_sam,
-        )
-    return ama
+    def inner():
+        amplicons = reads_index.merged_reads.sample_reads.library \
+            .subclass.amplicons
+        with unique_file_cm("sam") as assignment_sam:
+            with unlink(_create_panel_fasta(amplicons)) as panel_fasta:
+                bowtie2_with_defaults('-x', reads_index.index_files_prefix,
+                                      '-f', panel_fasta,
+                                      '-S', assignment_sam)
+            return raise_or_create(AdamMarginAssignment,
+                reads_index=reads_index,
+                defaults=dict(
+                    assignment_sam=assignment_sam,
+                ),
+            )
+    return get_get_or_create(inner, AdamMarginAssignment,
+        reads_index=reads_index)
 
 
 def _collect_mappings_from_sam(margin_assignment):
@@ -206,11 +187,7 @@ def seperate_reads_by_amplicons(margin_assignment):
         .sample_reads.fastq2, "fastq")
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.items():
-        try:
-            aar = AdamAmpliconReads.objects.get(
-                margin_assignment=margin_assignment,
-                amplicon=amplicon)
-        except AdamAmpliconReads.DoesNotExist:
+        def inner():
             with _extract_reads_by_id(reads, read_ids) as amplicon_readsm_fastq_name, \
                 _extract_reads_by_id(reads1, read_ids) as amplicon_reads1_fastq_name, \
                 _extract_reads_by_id(reads2, read_ids) as amplicon_reads2_fastq_name:
@@ -219,15 +196,15 @@ def seperate_reads_by_amplicons(margin_assignment):
                     'fastq1': amplicon_reads1_fastq_name,
                     'fastq2': amplicon_reads2_fastq_name,
                 }
-                aar, c = AdamAmpliconReads.objects.get_or_create(
+                return raise_or_create(AdamAmpliconReads,
                     margin_assignment=margin_assignment,
                     amplicon=amplicon,
                     defaults=fastq_files
                 )
-                if not c:
-                    for fname in fastq_files.values():
-                        os.unlink(fname)
-        yield aar
+        yield get_get_or_create(inner, AdamAmpliconReads, 
+                margin_assignment=margin_assignment,
+                amplicon=amplicon
+        )
 
 
 def _get_ms_length_range(ms):
@@ -295,14 +272,7 @@ def _build_ms_variations(amplicon, padding, mss):
 
 
 def get_adam_ms_variations(amplicon, padding, mss_version):
-    try:
-        return AdamMSVariations.objects.get(
-            amplicon=amplicon,
-            padding=padding,
-            microsatellites_version=mss_version,
-        )
-    except AdamMSVariations.DoesNotExist:
-        index_dir = get_unique_path()
+    def inner():
         mss = Microsatellite.objects.filter(
             slice__start_pos__gte=amplicon.slice.start_pos,
             slice__end_pos__lte=amplicon.slice.end_pos,
@@ -310,71 +280,47 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
             planning_version=mss_version,
         )
         with unique_dir_cm() as index_dir:
-            mock_msv = AdamMSVariations(
-                amplicon=amplicon,
-                padding=padding,
-                microsatellites_version=mss_version,
-                index_dump_dir=index_dir,
-            )
+            bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
             with unlink(_build_ms_variations(amplicon, padding, mss)) as fasta:
-                bowtie2build(fasta, mock_msv.index_files_prefix)
-            msv, c = AdamMSVariations.objects.get_or_create(
+                bowtie2build(fasta, bowtie_index.index_files_prefix)
+            return raise_or_create(AdamMSVariations,
                 amplicon=amplicon,
                 padding=padding,
                 microsatellites_version=mss_version,
-                defaults={"index_dump_dir": index_dir}
+                defaults=dict(
+                    index_dump_dir=index_dir,
+                ),
             )
-        if not c:
-            delete_files(AdamMSVariations, mock_msv)
-        return msv
+    return get_get_or_create(inner, AdamMSVariations,
+        amplicon=amplicon,
+        padding=padding,
+        microsatellites_version=mss_version,
+    )
 
 
-def do_alignment_to_msv(msv, amplicon_reads):
-    with unique_file_cm("sam") as assignment_sam:
-        bowtie2_with_defaults2('-x', msv.index_files_prefix,
-                               '-U', amplicon_reads.fastqm,
-                               '-S', assignment_sam)
-    return assignment_sam
-
-
-def align_reads_to_ms_variations(amplicon_reads, padding, mss_version, recover=False):
+def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
     msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding,
         mss_version)
-    if recover:
-        try:
-            ah = AdamHistogram.objects.get(
-                sample_reads_id=amplicon_reads.margin_assignment.reads_index \
-                    .merged_reads.sample_reads_id,
+    def inner():
+        with unique_file_cm("sam") as assignment_sam:
+            bowtie2_with_defaults2('-x', msv.index_files_prefix,
+                                   '-U', amplicon_reads.fastqm,
+                                   '-S', assignment_sam)
+            return raise_or_create(AdamHistogram,
                 amplicon_reads=amplicon_reads,
-                amplicon=amplicon_reads.amplicon,
-                microsatellites_version=msv.microsatellites_version,
                 ms_variations=msv,
+                defaults=dict(
+                    assignment_sam=assignment_sam,
+                    sample_reads_id=amplicon_reads.margin_assignment \
+                        .reads_index.merged_reads.sample_reads_id,
+                    amplicon=amplicon_reads.amplicon,
+                    microsatellites_version=msv.microsatellites_version,
+                ),
             )
-        except AdamHistogram.DoesNotExist:
-            assignment_sam = do_alignment_to_msv(msv, amplicon_reads)
-            ah, c = AdamHistogram.objects.get_or_create(
-                sample_reads_id=amplicon_reads.margin_assignment.reads_index \
-                    .merged_reads.sample_reads_id,
-                amplicon_reads=amplicon_reads,
-                amplicon=amplicon_reads.amplicon,
-                microsatellites_version=msv.microsatellites_version,
-                ms_variations=msv,
-                defaults={'assignment_sam': assignment_sam}
-            )
-            if not c:
-                os.unlink(assignment_sam)
-    else:
-        assignment_sam = do_alignment_to_msv(msv, amplicon_reads)
-        ah = AdamHistogram.objects.create(
-            sample_reads_id=amplicon_reads.margin_assignment.reads_index \
-                .merged_reads.sample_reads_id,
-            amplicon_reads=amplicon_reads,
-            amplicon=amplicon_reads.amplicon,
-            microsatellites_version=msv.microsatellites_version,
-            assignment_sam=assignment_sam,
-            ms_variations=msv,
-        )
-    return ah
+    return get_get_or_create(inner, AdamHistogram,
+        amplicon_reads=amplicon_reads,
+        ms_variations=msv,
+    )
 
 
 def _collect_genotypes_from_sam(histogram):
@@ -445,10 +391,10 @@ def list_iterator(f):
     return inner
 
 
-def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50, recover=False):
+def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read_padding=5, ref_padding=50):
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
-    merged_reads = executor.map(merge, sample_reads, itertools.repeat(recover), pure=False)
+    merged_reads = executor.map(merge, sample_reads, pure=False)
     reads_indices = executor.map(create_reads_index, merged_reads,
         itertools.repeat(included_reads), itertools.repeat(read_padding), pure=False)
     adam_margin_assignments = executor.map(close_connection_and(align_primers_to_reads),
@@ -458,7 +404,7 @@ def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read
         adam_margin_assignments, pure=False)
     yield merged_reads, reads_indices, adam_margin_assignments, adam_amplicon_reads_lists
     adam_histograms = double_map(executor, close_connection_and(align_reads_to_ms_variations),
-        adam_amplicon_reads_lists, ref_padding, mss_version, recover)
+        adam_amplicon_reads_lists, ref_padding, mss_version)
     for fs in adam_histograms:
         fs2 = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fs, pure=False)
         yield fs, fs2
