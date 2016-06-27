@@ -41,26 +41,16 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
 
 
 def create_merge(sample_reads):
-    prefix = get_unique_path()
-    outs = dict(
-        assembled_fastq="{}.assembled.fastq".format(prefix),
-        discarded_fastq="{}.discarded.fastq".format(prefix),
-        unassembled_forward_fastq="{}.unassembled.forward.fastq".format(prefix),
-        unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(prefix),
-    )
-    # TODO: check by merging scheme.
-    try:
+    with unique_dir_cm() as pear_dir:
+        # TODO: clean this double code.
+        mock_mr = AdamMergedReads(
+            sample_reads=sample_reads,
+            pear_dump_dir=pear_dir,
+        )
         pear_with_defaults("-f", sample_reads.fastq1,
                            "-r", sample_reads.fastq2,
-                           "-o", prefix)
-    except:
-        try:
-            for fname in outs.values():
-                os.unlink(fname)
-        except:
-            pass
-        raise
-    return outs
+                           "-o", mock_mr.pear_files_prefix)
+    return pear_dir
 
 
 def merge(sample_reads, recover=False):
@@ -69,19 +59,20 @@ def merge(sample_reads, recover=False):
             return AdamMergedReads.objects.get(
                 sample_reads=sample_reads)
         except AdamMergedReads.DoesNotExist:
-            outs = create_merge(sample_reads)
+            pear_dir = create_merge(sample_reads)
             mr, c = AdamMergedReads.objects.get_or_create(
                 sample_reads=sample_reads,
-                defaults=outs
+                defaults=dict(
+                    pear_dump_dir=pear_dir,
+                ),
             )
             if not c:
-                for fname in outs.values():
-                    os.unlink(fname)
+                shutil.rmtree(pear_dir)
             return mr
-    outs = create_merge(sample_reads)
+    pear_dir = create_merge(sample_reads)
     mr = AdamMergedReads.objects.create(
         sample_reads=sample_reads,
-        **outs
+        pear_dump_dir=pear_dir,
     )
     return mr
 

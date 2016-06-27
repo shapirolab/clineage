@@ -6,7 +6,7 @@ import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin
 from targeted_enrichment.amplicons.models import Amplicon
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
@@ -98,7 +98,9 @@ def adam_merged_reads_files_d(adam_reads_fd, temp_storage):
 def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
     d = {}
     for (l_id, bc_id), f_d in adam_merged_reads_files_d.items():
-        dst_prefix = get_unique_path()
+        dst_dir = get_unique_path()
+        os.mkdir(dst_dir)
+        dst_prefix = os.path.join(dst_dir, PearOutputMixin.PEAR_PREFIX)
         os.symlink(
             f_d[ASSEMBLED],
             "{}.assembled.fastq".format(dst_prefix)
@@ -117,10 +119,7 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
         )
         mr = AdamMergedReads.objects.create(
             sample_reads=sample_reads_d[l_id, bc_id],
-            assembled_fastq="{}.assembled.fastq".format(dst_prefix),
-            discarded_fastq="{}.discarded.fastq".format(dst_prefix),
-            unassembled_forward_fastq="{}.unassembled.forward.fastq".format(dst_prefix),
-            unassembled_reverse_fastq="{}.unassembled.reverse.fastq".format(dst_prefix),
+            pear_dump_dir=dst_dir,
         )
         # So our objects don't have "special" objects in fields
         mr = AdamMergedReads.objects.get(pk=mr.pk)
@@ -132,6 +131,7 @@ def adam_merged_reads_d(adam_merged_reads_files_d, sample_reads_d):
         os.unlink(mr.discarded_fastq)
         os.unlink(mr.unassembled_forward_fastq)
         os.unlink(mr.unassembled_reverse_fastq)
+        os.rmdir(mr.pear_dump_dir)
 
 
 @pytest.yield_fixture(scope="session")

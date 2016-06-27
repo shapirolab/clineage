@@ -31,6 +31,40 @@ def delete_files(sender, instance, **kwargs):
             pass
 
 
+def pear_property(suffix):
+    @property
+    def inner(self):
+        return "{}.{}.fastq".format(self.pear_files_prefix, suffix)
+    return inner
+
+class PearOutputMixin(models.Model):
+    PEAR_PREFIX = "pear"
+    pear_dump_dir = models.FilePathField(max_length=200, allow_files=False, allow_folders=True)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def pear_files_prefix(self):
+        return os.path.join(self.pear_dump_dir, self.PEAR_PREFIX)
+
+    assembled_fastq = pear_property("assembled")
+    discarded_fastq = pear_property("discarded")
+    unassembled_forward_fastq = pear_property("unassembled.forward")
+    unassembled_reverse_fastq = pear_property("unassembled.reverse")
+
+    @property
+    def files(self):
+        yield self.assembled_fastq
+        yield self.discarded_fastq
+        yield self.unassembled_forward_fastq
+        yield self.unassembled_reverse_fastq
+
+    @property
+    def dirs(self):
+        yield self.pear_dump_dir
+
+
 class BowtieIndexMixin(models.Model):
     INDEX_PREFIX = "index"
     index_dump_dir = models.FilePathField(max_length=200, allow_files=False, allow_folders=True)
@@ -80,21 +114,8 @@ class SampleReads(models.Model):
 post_delete.connect(delete_files, SampleReads)
 
 
-class AdamMergedReads(models.Model):
-    sample_reads = models.ForeignKey(SampleReads)
-    # TODO: Add default path?
-    # TODO: Custom FASTQ field that caches #sequences
-    assembled_fastq = models.FilePathField(max_length=200)
-    discarded_fastq = models.FilePathField(max_length=200)
-    unassembled_forward_fastq = models.FilePathField(max_length=200)
-    unassembled_reverse_fastq = models.FilePathField(max_length=200)
-
-    @property
-    def files(self):
-        yield self.assembled_fastq
-        yield self.discarded_fastq
-        yield self.unassembled_forward_fastq
-        yield self.unassembled_reverse_fastq
+class AdamMergedReads(PearOutputMixin):
+    sample_reads = models.ForeignKey(SampleReads, unique=True)
 
     def included_reads_generator(self, included_reads):
         if included_reads == 'M':
@@ -111,7 +132,6 @@ class AdamMergedReads(models.Model):
     def __str__(self):
         return "{}".format(self.sample_reads)
             
-
 post_delete.connect(delete_files, AdamMergedReads)
 
 
