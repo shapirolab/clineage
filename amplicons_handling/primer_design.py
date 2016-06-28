@@ -8,6 +8,7 @@ from django.conf import settings
 from collections import defaultdict
 from collections import Counter
 from frogress import bar
+from plumbum import local
 from .primers_insertion import create_primers_in_db
 from .positioning import insertion_plates_to_db, create_primer_order_file_xls
 from .primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
@@ -43,9 +44,13 @@ def primer3_design(obj_list, input_name, output_name,
                                                                                              max_size-(len(target.referencevalue.sequence)//2+margins)))
 
     # Run the primer3 on the input
+    ls = local["ls"]
     primer3_output = ("{}_primer3.txt".format(str(output_name)))
-    s = '{} < {} > {}'.format(settings.PRIMER3_PATH, primer3_input, primer3_output)
-    os.system(s)
+    primer_3 = local[settings.PRIMER3_PATH]
+    primer_3(primer3_input, primer3_output)
+
+    # s = '{} < {} > {}'.format(settings.PRIMER3_PATH, primer3_input, primer3_output)
+    # os.system(s)
     return primer3_output
 
 
@@ -64,8 +69,8 @@ def parse_primer3_output(output_name):
         assert len(left_primers) == len(right_primers)
         for i, primer_left in enumerate(left_primers):
             primer_right = right_primers[i]
-            target_primers[seq_id]['LEFT'][i] = primer_left
-            target_primers[seq_id]['RIGHT'][i] = primer_right
+            target_primers[seq_id][i]['LEFT'] = primer_left
+            target_primers[seq_id][i]['RIGHT'] = primer_right
     return target_primers
 
 
@@ -74,16 +79,20 @@ def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
     out_string = ''
     for seq_id in list(target_primers.keys()):
         for primer_number in list(target_primers[seq_id]['LEFT'].keys()):
-            out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['LEFT'][primer_number])
-            out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id]['RIGHT'][primer_number])
+            out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id][primer_number]['LEFT'])
+            out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id][primer_number]['RIGHT'])
     primer_data_check = '{}.fa'.format(str(input_fasta_file))
-    print('writing primers fasta file {}'.format(primer_data_check))
+    # print('writing primers fasta file {}'.format(primer_data_check))
     with open(primer_data_check, 'w+') as primers_output:
         primers_output.write(out_string)
     sam_file = '{}.sam'.format(str(output_file))
     print('running bowtie sam file output:{}'.format(sam_file))
-    s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
-    os.system(s)
+
+    BOWTIE_2 = local[settings.PRIMER3_PATH]
+    BOWTIE_2('-k 2 {} -f -U {} -S {}'.format(bowtie2_index, primer_data_check, sam_file))
+
+    # s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
+    # os.system(s)
     return sam_file, primer_data_check, target_primers
 
 
@@ -99,6 +108,45 @@ def primer_count_from_sam_file(sam_file):
     return name_count, primers_names
 
 
+def sort_best_primers(sam_file, target_primers, margins=300):
+    name_count, primers_names = primer_count_from_sam_file(sam_file)
+    chosen_target_primers = defaultdict(lambda: defaultdict(str))
+    discarded_targets = []
+    for target_id in bar(list(target_primers.keys())):
+        for primer_number in sorted(target_primers[target_id].keys()):
+            bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number['LEFT'], target_id)
+            bowtie2_key_right = 'PRIMER_RIGHT_{}_{}'.format(primer_number['RIGHT'], target_id)
+            right_primer = target_primers[target_id][primer_number]['RIGHT']
+            left_primer = target_primers[target_id][primer_number]['LEFT']
+            left_pos = primers_names[bowtie2_key_left]['Start_pos']
+            right_pos = primers_names[bowtie2_key_right]['End_pos']
+            if right_pos - left_pos <= margins:
+                break
+
+        if left_primer and right_primer:
+            target = Target.objects.get(pk=target_id)
+            # try:
+            #     primer_fw, primer_rv = check_primers(target,
+            #                                          left_primer,
+            #                                          right_primer,
+            #                                          target_enrichment_type=TargetEnrichmentType.objects.get(
+            #                                              name='PCR_with_tails'),
+            #                                          margins=margins)
+            #     #test_new?
+            #     chosen_target_primers[target_id]['LEFT'] = left_primer
+            #     chosen_target_primers[target_id]['RIGHT'] = right_primer
+            # except AmpliconCollisionError:
+            #     discarded_targets.append(target_id)
+            # except PrimerLocationError:
+            #     discarded_targets.append(target_id)
+            chosen_target_primers[target_id]['LEFT'] = left_primer
+            chosen_target_primers[target_id]['RIGHT'] = right_primer
+        else:
+            discarded_targets.append(target_id)
+
+    return chosen_target_primers, discarded_targets
+
+
 def sort_unique_primers(sam_file, target_primers, margins=300):
     name_count, primers_names = primer_count_from_sam_file(sam_file)
     chosen_target_primers = defaultdict(lambda: defaultdict(str))
@@ -108,12 +156,12 @@ def sort_unique_primers(sam_file, target_primers, margins=300):
         for primer_number_fr in sorted(target_primers[target_id]['LEFT'].keys()):
             bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number_fr, target_id)
             if name_count[bowtie2_key_left] == 1:
-                left_primer = target_primers[target_id]['LEFT'][primer_number_fr]
+                left_primer = target_primers[target_id][primer_number_fr]['LEFT']
                 right_primer = None
                 for primer_number_rv in sorted(target_primers[target_id]['RIGHT'].keys()):
                     bowtie2_key_right = 'PRIMER_RIGHT_{}_{}'.format(primer_number_rv, target_id)
                     if name_count[bowtie2_key_right] == 1:
-                        right_primer = target_primers[target_id]['RIGHT'][primer_number_rv]
+                        right_primer = target_primers[target_id][primer_number_rv]['RIGHT']
                         left_pos = primers_names[bowtie2_key_left]['Start_pos']
                         right_pos = primers_names[bowtie2_key_right]['End_pos']
                         if right_pos - left_pos <= margins:
@@ -140,51 +188,3 @@ def sort_unique_primers(sam_file, target_primers, margins=300):
             discarded_targets.append(target_id)
 
     return chosen_target_primers, discarded_targets
-
-
-# if '__main__' == __name__:
-#     parser = argparse.ArgumentParser(description='Analyses hist-pairs file')
-#     parser.add_argument('-i', '--input', type=str, dest='obj_list', help='list af targets for primers design')
-#     parser.add_argument('-p', '--inputFolder', type=str, dest='input_folder', help='path for target folder')
-#     parser.add_argument('-n', '--name', type=str, dest='input_name', help='files prefix for the targets')
-#     parser.add_argument('-o', '--output', type=str, dest='output_name', help='output file name prefix for the targets')
-#     parser.add_argument('-b', '--bowtie2Index', type=str, dest='bowtie2_index', help='path for bowtie2_index files')
-#     parser.add_argument('-t', '--tails', type=bool, dest='tails', help='primers have tails?')
-#     parser.add_argument('-r', '--primerNumReRun', type=int, dest='primer_num_rerun', default=10000, help='number of pair primers to constract')
-#     parser.add_argument('-m', '--margins', type=int, dest='margins', default=0, help='margins for the desired sequencing region')
-#     parser.add_argument('-a', '--minSize', type=int, dest='min_size', default=130, help='minimus amplicon size')
-#     parser.add_argument('-z', '--maxSize', type=int, dest='max_size', default=300, help='maximum amplicon size')
-#     parser.add_argument('-s', '--inSilico', type=bool, dest='insilico_test', default=True, help='Run in silico test for primers')
-#     args = parser.parse_args()
-#     obj_list = args.obj_list
-#     input_file = args.input_file
-#     input_folder = args.input_folder
-#     input_name = args.input_name
-#     output_name = args.output_name
-#     bowtie2_index = args.bowtie2_index
-#     primer_num_rerun = args.primer_num_rerun
-#     margins = args.margins
-#     min_size = args.min_size
-#     max_size = args.max_size
-#     insilico_test = args.insilico_test
-#     xls_name = ("PrimerOrder{}.xls".format(str(output_name)))
-#     is_tails = args.tails
-#     no_tails_te_type, tails_te_type = TargetEnrichmentType.objects.all()
-#     if is_tails:
-#         te_type = tails_te_type
-#     else:
-#         te_type = no_tails_te_type
-#     primer3_name_file = primer3_design(obj_list,
-#                                        input_name,
-#                                        output_name,
-#                                        min_size,
-#                                        max_size,
-#                                        primer_num_rerun,
-#                                        margins)
-#     sam_file, primer_data_check, target_primers = bowtie2_design(input_name, output_name, bowtie2_index, primer3_name_file)
-#     chosen_target_primers, discarded_targets = sort_unique_primers(sam_file, target_primers, margins=max_size)
-#     print 'amount of chosen tragets: {}, amount of discarded targets: {}'.format(len(chosen_target_primers), len(discarded_targets))
-#     ptf, ptr = PrimerTail.objects.all()
-#     te_list = create_primers_in_db(chosen_target_primers, te_type, margins, insilico_test, pf_tail=ptf, pr_tail=ptr)
-#     pairs_plates, stk_fw_plates, stk_rv_plates = insertion_plates_to_db(te_list)
-#     create_primer_order_file_xls(stk_fw_plates, stk_rv_plates, xls_name)
