@@ -1,10 +1,10 @@
-Django==1.9.4
-seaborn==0.7.0
+Django==1.9.7
+seaborn==0.7.1
 biopython==1.66
-django-mptt==0.8.3
+django-mptt==0.8.4
 mysqlclient==1.3.7
 spyne==2.12.11
-django-extensions==1.6.1
+django-extensions==1.6.7
 django-model-utils==2.5
 -e git+https://github.com/amosonn/frogress.git@bca0b7a21656b50c0d95cf1fc5000a50d275a627#egg=frogress
 lxml==3.6.0
