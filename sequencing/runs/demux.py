@@ -5,7 +5,7 @@ import io
 import os
 import resource
 
-from misc.utils import get_unique_path
+from misc.utils import get_unique_path, unique_dir_cm, unlink
 
 from django.db.models.query import QuerySet
 
@@ -130,45 +130,43 @@ def run_demux(ngs_run, demux_scheme):
         kit=ngs_run.kit,
         demux_scheme=demux_scheme,
     )
-    sample_sheet_path = get_unique_path("csv")
-    with open(sample_sheet_path, "w") as f:
-        f.write(sample_sheet)
-    fastq_folder = get_unique_path()
-    os.mkdir(fastq_folder)
-    run_bcl2fastq(ngs_run.bcl_directory, sample_sheet_path, fastq_folder)
-    os.unlink(sample_sheet_path)
-    demux = Demultiplexing.objects.create(
-        ngs_run=ngs_run,
-        demux_scheme=demux_scheme,
-    )
-    files = []
-    # TODO: nicer handling
-    for read in [1, 2]:
-        os.unlink(os.path.join(fastq_folder, SAMPLE_FASTQ_GZ_FORMAT.format(
-            id=UNDETERMINED,
-            idx=0,
-            read=read,
-        )))
-    for bc, idx in bc_idx_d.items():
-        for fastqgz in [os.path.join(fastq_folder, 
-            SAMPLE_FASTQ_GZ_FORMAT.format(
-                id=bc.id,
-                idx=idx,
-                read=read,
-            )) for read in [1, 2]]:
-            local["gunzip"](fastqgz)
-        fastq1, fastq2 = [os.path.join(fastq_folder, 
-            SAMPLE_FASTQ_FORMAT.format(
-                id=bc.id,
-                idx=idx,
-                read=read,
-            )) for read in [1, 2]]
-        files.append(fastq1)
-        files.append(fastq2)
-        yield SampleReads.objects.create(
-            demux=demux,
-            barcoded_content=bc,
-            library=bc_libs_d[bc],
-            fastq1=fastq1,
-            fastq2=fastq2,
+    with unique_dir_cm() as fastq_folder:
+        with unlink(get_unique_path("csv")) as sample_sheet_path:
+            with open(sample_sheet_path, "w") as f:
+                f.write(sample_sheet)
+            run_bcl2fastq(ngs_run.bcl_directory, sample_sheet_path, fastq_folder)
+        demux = Demultiplexing.objects.create(
+            ngs_run=ngs_run,
+            demux_scheme=demux_scheme,
         )
+        files = []
+        # TODO: nicer handling
+        for read in [1, 2]:
+            os.unlink(os.path.join(fastq_folder, SAMPLE_FASTQ_GZ_FORMAT.format(
+                id=UNDETERMINED,
+                idx=0,
+                read=read,
+            )))
+        for bc, idx in bc_idx_d.items():
+            for fastqgz in [os.path.join(fastq_folder, 
+                SAMPLE_FASTQ_GZ_FORMAT.format(
+                    id=bc.id,
+                    idx=idx,
+                    read=read,
+                )) for read in [1, 2]]:
+                local["gunzip"](fastqgz)
+            fastq1, fastq2 = [os.path.join(fastq_folder, 
+                SAMPLE_FASTQ_FORMAT.format(
+                    id=bc.id,
+                    idx=idx,
+                    read=read,
+                )) for read in [1, 2]]
+            files.append(fastq1)
+            files.append(fastq2)
+            yield SampleReads.objects.create(
+                demux=demux,
+                barcoded_content=bc,
+                library=bc_libs_d[bc],
+                fastq1=fastq1,
+                fastq2=fastq2,
+            )
