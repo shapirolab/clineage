@@ -342,6 +342,64 @@ class MicrosatelliteHistogramGenotype(models.Model):
         return self.microsatellite.repeat_unit_ref_seq * self.repeat_number
 
 
+class MicrosatelliteHistogramGenotypes(models.Model):
+    microsatellite_genotype1 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype2 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype3 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype4 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype5 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype6 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype7 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype8 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+
+    @staticmethod
+    def genotype_field_names():
+        for i in range(1,9):
+            yield 'microsatellite_genotype{}'.format(i)
+    
+    @property
+    def genotype_fields(self):
+        return [
+            self.microsatellite_genotype1,
+            self.microsatellite_genotype2,
+            self.microsatellite_genotype3,
+            self.microsatellite_genotype4,
+            self.microsatellite_genotype5,
+            self.microsatellite_genotype6,
+            self.microsatellite_genotype7,
+            self.microsatellite_genotype8,
+        ]
+
+    @property
+    def genotypes(self):
+        for genotype in self.genotype_fields:
+            if genotype is not None:
+                yield genotype
+
+    class Meta:
+        index_together = (
+            ("microsatellite_genotype1",
+             "microsatellite_genotype2",
+             "microsatellite_genotype3",
+             "microsatellite_genotype4",
+             "microsatellite_genotype5",
+             "microsatellite_genotype6",
+             "microsatellite_genotype7",
+             "microsatellite_genotype8",
+             ),
+        )
+        unique_together = (
+            ("microsatellite_genotype1",
+             "microsatellite_genotype2",
+             "microsatellite_genotype3",
+             "microsatellite_genotype4",
+             "microsatellite_genotype5",
+             "microsatellite_genotype6",
+             "microsatellite_genotype7",
+             "microsatellite_genotype8",
+             ),
+        )
+
 class SNPHistogramGenotype(models.Model):
     snp = models.ForeignKey(SNP)
     base = models.CharField(max_length=1)
@@ -355,10 +413,68 @@ class SNPHistogramGenotype(models.Model):
         )
 
 
+class SNPHistogramGenotypes(models.Model):
+    snp_genotype1 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype2 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype3 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype4 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype5 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype6 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype7 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype8 = models.ForeignKey(SNPHistogramGenotype, null=True)
+
+    @staticmethod
+    def genotype_field_names():
+        for i in range(1,9):
+            yield 'snp_genotype{}'.format(i)
+
+    @property
+    def genotype_fields(self):
+        return [
+            self.snp_genotype1,
+            self.snp_genotype2,
+            self.snp_genotype3,
+            self.snp_genotype4,
+            self.snp_genotype5,
+            self.snp_genotype6,
+            self.snp_genotype7,
+            self.snp_genotype8,
+        ]
+
+    @property
+    def genotypes(self):
+        for genotype in self.genotype_fields:
+            if genotype is not None:
+                yield genotype
+
+    class Meta:
+        index_together = (
+            ("snp_genotype1",
+             "snp_genotype2",
+             "snp_genotype3",
+             "snp_genotype4",
+             "snp_genotype5",
+             "snp_genotype6",
+             "snp_genotype7",
+             "snp_genotype8",
+             ),
+        )
+        unique_together = (
+            ("snp_genotype1",
+             "snp_genotype2",
+             "snp_genotype3",
+             "snp_genotype4",
+             "snp_genotype5",
+             "snp_genotype6",
+             "snp_genotype7",
+             "snp_genotype8",
+             ),
+        )
+
 class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
-    microsatellite_genotypes = models.ManyToManyField(MicrosatelliteHistogramGenotype)
-    snp_genotypes = models.ManyToManyField(SNPHistogramGenotype)
+    microsatellite_genotypes = models.ForeignKey(MicrosatelliteHistogramGenotypes)
+    snp_genotypes = models.ForeignKey(SNPHistogramGenotypes)
     num_reads = models.PositiveIntegerField()
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
@@ -373,9 +489,9 @@ class HistogramEntryReads(models.Model):
     def __str__(self):
         return "{}: {}".format(self.histogram.subclass,
             ", ".join([
-                "{}".format(msg) for msg in self.microsatellite_genotypes.all()
+                "{}".format(msg) for msg in self.microsatellite_genotypes.genotypes
             ] + [
-                "{}".format(sng) for sng in self.snp_genotypes.all()
+                "{}".format(sng) for sng in self.snp_genotypes.genotypes
             ])
         )
 

@@ -18,8 +18,9 @@ from misc.utils import get_unique_path, unique_file_cm, unique_dir_cm, unlink, \
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
-    ms_genotypes_to_name, AdamHistogram, HistogramEntryReads, SampleReads, \
-    delete_files, name_to_ms_genotypes, BowtieIndexMixin, PearOutputMixin
+    MicrosatelliteHistogramGenotypes, ms_genotypes_to_name, AdamHistogram, \
+    HistogramEntryReads, SampleReads, delete_files, name_to_ms_genotypes, \
+    BowtieIndexMixin, PearOutputMixin, SNPHistogramGenotypes
 from targeted_enrichment.planning.models import Microsatellite
 
 from distributed.executor import as_completed
@@ -348,24 +349,22 @@ def separate_reads_by_genotypes(histogram):
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
     readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
     for genotypes, read_ids in genotypes_reads.items():
+        ordered_genotypes = dict(zip(MicrosatelliteHistogramGenotypes.genotype_field_names(), sorted(list(genotypes), key=lambda g: g.pk)))
+        print(ordered_genotypes)
+        microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypes.objects.get_or_create(**ordered_genotypes)
+        snp_histogram_genotypes, c = SNPHistogramGenotypes.objects.get_or_create(**{fn:None for fn in SNPHistogramGenotypes.genotype_field_names()})
         with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
             _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
             _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
-            her = HistogramEntryReads.objects.create(
+            her, c = HistogramEntryReads.objects.get_or_create(
                 histogram=histogram,
                 num_reads=len(read_ids),
                 fastq1=genotypes_reads1_fastq_name,
                 fastq2=genotypes_reads2_fastq_name,
                 fastqm=genotypes_readsm_fastq_name,
+                microsatellite_genotypes = microsatellite_histogram_genotypes,
+                snp_genotypes = snp_histogram_genotypes
             )
-            try:
-                her.microsatellite_genotypes.add(*genotypes)
-            except:
-                try:
-                    her.delete()
-                except:
-                    pass
-                raise
         yield her
 
 

@@ -117,7 +117,7 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, r
             bc = sr.barcoded_content_id
             l_id = sr.library_id
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
-                msg in her.microsatellite_genotypes.all())
+                msg in her.microsatellite_genotypes.genotypes)
             parts.add((l_id, bc, amp, gen))
             
             her_fnames_d = {

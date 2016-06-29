@@ -143,9 +143,9 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
         # test_separate_reads_by_genotypes
         for her in separate_reads_by_genotypes(ah):
             assert her.histogram_id == ah.id
-            assert set(her.snp_genotypes.all()) == set()
+            assert set(her.snp_genotypes.genotypes) == set()
             gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
-                msg in her.microsatellite_genotypes.all())
+                msg in her.microsatellite_genotypes.genotypes)
             gens.add(gen)
 
             her_fnames_d = {
