@@ -343,14 +343,14 @@ class MicrosatelliteHistogramGenotype(models.Model):
 
 
 class MicrosatelliteHistogramGenotypes(models.Model):
-    microsatellite_genotype1 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype2 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype3 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype4 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype5 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype6 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype7 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
-    microsatellite_genotype8 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True)
+    microsatellite_genotype1 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype2 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype3 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype4 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype5 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype6 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype7 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+    microsatellite_genotype8 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
 
     @staticmethod
     def genotype_field_names():
@@ -414,14 +414,14 @@ class SNPHistogramGenotype(models.Model):
 
 
 class SNPHistogramGenotypes(models.Model):
-    snp_genotype1 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype2 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype3 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype4 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype5 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype6 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype7 = models.ForeignKey(SNPHistogramGenotype, null=True)
-    snp_genotype8 = models.ForeignKey(SNPHistogramGenotype, null=True)
+    snp_genotype1 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype2 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype3 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype4 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype5 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype6 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype7 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+    snp_genotype8 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
 
     @staticmethod
     def genotype_field_names():
