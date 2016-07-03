@@ -379,8 +379,12 @@ def close_connection_and(f):
 
 def double_map(executor, func, future_lists, *params):
     for f in as_completed(future_lists):
-        l = f.result()
-        yield executor.map(func, l, *[itertools.repeat(p) for p in params], pure=False)
+        try:
+            l = f.result()
+        except:
+            yield []
+        else:
+            yield executor.map(func, l, *[itertools.repeat(p) for p in params], pure=False)
 
 
 def list_iterator(f):
