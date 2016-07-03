@@ -348,11 +348,11 @@ def separate_reads_by_genotypes(histogram):
     reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
     reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
     readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
+    snp_histogram_genotypes, c = SNPHistogramGenotypes.objects.get_or_create(
+        **{fn: None for fn in SNPHistogramGenotypes.genotype_field_names()})
     for genotypes, read_ids in genotypes_reads.items():
-        ordered_genotypes = dict(zip(MicrosatelliteHistogramGenotypes.genotype_field_names(), sorted(list(genotypes), key=lambda g: g.pk)))
-        print(ordered_genotypes)
+        ordered_genotypes = dict(zip(MicrosatelliteHistogramGenotypes.genotype_field_names(), sorted(list(genotypes), key=lambda g: g.microsatellite.slice)))
         microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypes.objects.get_or_create(**ordered_genotypes)
-        snp_histogram_genotypes, c = SNPHistogramGenotypes.objects.get_or_create(**{fn:None for fn in SNPHistogramGenotypes.genotype_field_names()})
         with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
             _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
             _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
