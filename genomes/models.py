@@ -109,6 +109,20 @@ class DNASlice(models.Model):
     def __len__(self):
         return self.end_pos-self.start_pos+1
 
+    def __lt__(self, other):
+        if self.chromosome_id != other.chromosome_id:
+            return NotImplemented
+        if self.start_pos != other.start_pos:
+            return self.start_pos < other.start_pos
+        return self.end_pos < other.end_pos
+
+    def __gt__(self, other):
+        if self.chromosome_id != other.chromosome_id:
+            return NotImplemented
+        if self.start_pos != other.start_pos:
+            return self.start_pos > other.start_pos
+        return self.end_pos > other.end_pos
+
     def _get_seq(self):
         return self.chromosome.getdna(self.start_pos,self.end_pos)
 
