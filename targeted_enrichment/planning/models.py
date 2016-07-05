@@ -13,7 +13,7 @@ from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
 
 class UGS(models.Model,BaseStrandMixin):
-    slice = models.ForeignKey(DNASlice)
+    slice = models.ForeignKey(DNASlice, unique=True)
 
     class Meta:
         abstract = True
@@ -29,11 +29,11 @@ class UGS(models.Model,BaseStrandMixin):
         return len(self.slice)
 
 
-class UGSPlus(UGS,PlusStrandMixin):
+class UGSPlus(UGS, PlusStrandMixin):
     pass
 
 
-class UGSMinus(UGS,MinusStrandMixin):
+class UGSMinus(UGS, MinusStrandMixin):
     pass
 
 
