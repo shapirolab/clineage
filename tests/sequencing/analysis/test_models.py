@@ -3,7 +3,7 @@ import os
 from Bio import SeqIO
 
 from sequencing.analysis.adamiya import merge, create_reads_index, \
-    align_primers_to_reads, _create_panel_fasta, seperate_reads_by_amplicons, \
+    align_primers_to_reads, _create_panel_fasta, separate_reads_by_amplicons, \
     get_adam_ms_variations, separate_reads_by_genotypes, align_reads_to_ms_variations
 from sequencing.analysis.models import AdamMSVariations, \
     MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
@@ -80,9 +80,9 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
             ama = align_primers_to_reads(ri)
             assert os.path.isfile(ama.assignment_sam)
 
-            #test_seperate_reads_by_amplicons
+            #test_separate_reads_by_amplicons
             amps = set()
-            for aar in seperate_reads_by_amplicons(ama):
+            for aar in separate_reads_by_amplicons(ama):
                 amp = aar.amplicon_id
                 amps.add(amp)
                 aar_fnames_d = {

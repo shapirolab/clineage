@@ -177,7 +177,7 @@ def _extract_reads_by_id(indexed_reads, read_ids):
         yield amplicon_reads_fastq_name
 
 
-def seperate_reads_by_amplicons(margin_assignment):
+def separate_reads_by_amplicons(margin_assignment):
     reads_matches = _collect_mappings_from_sam(margin_assignment)
     validated_reads_amplicons = _validate_amplicon_mapping(reads_matches)
     reads_by_amplicon = _aggregate_read_ids_by_amplicon(validated_reads_amplicons)
@@ -411,7 +411,7 @@ def run_parallel(executor, sample_reads, included_reads="F", mss_version=0, read
     adam_margin_assignments = executor.map(close_connection_and(align_primers_to_reads),
         reads_indices, pure=False)
     adam_amplicon_reads_lists = executor.map(
-        list_iterator(close_connection_and(seperate_reads_by_amplicons)), 
+        list_iterator(close_connection_and(separate_reads_by_amplicons)), 
         adam_margin_assignments, pure=False)
     yield merged_reads, reads_indices, adam_margin_assignments, adam_amplicon_reads_lists
     adam_histograms = double_map(executor, close_connection_and(align_reads_to_ms_variations),
