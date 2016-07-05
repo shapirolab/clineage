@@ -300,7 +300,7 @@ def name_to_ms_genotypes(ms_genotypes_name):
 
 
 class MicrosatelliteHistogramGenotype(models.Model):
-    microsatellite = models.ForeignKey(Microsatellite)
+    microsatellite = models.ForeignKey(Microsatellite, null=True)
     repeat_number = models.PositiveIntegerField()
 
     class Meta:
@@ -342,15 +342,15 @@ class MicrosatelliteHistogramGenotype(models.Model):
         return self.microsatellite.repeat_unit_ref_seq * self.repeat_number
 
 
-class MicrosatelliteHistogramGenotypes(models.Model):
-    microsatellite_genotype1 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype2 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype3 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype4 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype5 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype6 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype7 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
-    microsatellite_genotype8 = models.ForeignKey(MicrosatelliteHistogramGenotype, null=True, related_name='+')
+class MicrosatelliteHistogramGenotypeSet(models.Model):
+    microsatellite_genotype1 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype2 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype3 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype4 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype5 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype6 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype7 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
+    microsatellite_genotype8 = models.ForeignKey(MicrosatelliteHistogramGenotype, related_name='+')
 
     @staticmethod
     def genotype_field_names():
@@ -373,7 +373,7 @@ class MicrosatelliteHistogramGenotypes(models.Model):
     @property
     def genotypes(self):
         for genotype in self.genotype_fields:
-            if genotype is not None:
+            if genotype.microsatellite is not None:
                 yield genotype
 
     class Meta:
@@ -403,7 +403,7 @@ class MicrosatelliteHistogramGenotypes(models.Model):
         )
 
 class SNPHistogramGenotype(models.Model):
-    snp = models.ForeignKey(SNP)
+    snp = models.ForeignKey(SNP, null=True)
     base = models.CharField(max_length=1)
 
     class Meta:
@@ -415,15 +415,15 @@ class SNPHistogramGenotype(models.Model):
         )
 
 
-class SNPHistogramGenotypes(models.Model):
-    snp_genotype1 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype2 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype3 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype4 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype5 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype6 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype7 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
-    snp_genotype8 = models.ForeignKey(SNPHistogramGenotype, null=True, related_name='+')
+class SNPHistogramGenotypeSet(models.Model):
+    snp_genotype1 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype2 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype3 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype4 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype5 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype6 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype7 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
+    snp_genotype8 = models.ForeignKey(SNPHistogramGenotype, related_name='+')
 
     @staticmethod
     def genotype_field_names():
@@ -446,7 +446,7 @@ class SNPHistogramGenotypes(models.Model):
     @property
     def genotypes(self):
         for genotype in self.genotype_fields:
-            if genotype is not None:
+            if genotype.snp is not None:
                 yield genotype
 
     class Meta:
@@ -477,8 +477,8 @@ class SNPHistogramGenotypes(models.Model):
 
 class HistogramEntryReads(models.Model):
     histogram = models.ForeignKey(Histogram)
-    microsatellite_genotypes = models.ForeignKey(MicrosatelliteHistogramGenotypes)
-    snp_genotypes = models.ForeignKey(SNPHistogramGenotypes)
+    microsatellite_genotypes = models.ForeignKey(MicrosatelliteHistogramGenotypeSet)
+    snp_genotypes = models.ForeignKey(SNPHistogramGenotypeSet)
     num_reads = models.PositiveIntegerField()
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
