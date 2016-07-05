@@ -378,26 +378,28 @@ class MicrosatelliteHistogramGenotypes(models.Model):
 
     class Meta:
         index_together = (
-            ("microsatellite_genotype1",
-             "microsatellite_genotype2",
-             "microsatellite_genotype3",
-             "microsatellite_genotype4",
-             "microsatellite_genotype5",
-             "microsatellite_genotype6",
-             "microsatellite_genotype7",
-             "microsatellite_genotype8",
+            (
+                "microsatellite_genotype1",
+                "microsatellite_genotype2",
+                "microsatellite_genotype3",
+                "microsatellite_genotype4",
+                "microsatellite_genotype5",
+                "microsatellite_genotype6",
+                "microsatellite_genotype7",
+                "microsatellite_genotype8",
              ),
         )
         unique_together = (
-            ("microsatellite_genotype1",
-             "microsatellite_genotype2",
-             "microsatellite_genotype3",
-             "microsatellite_genotype4",
-             "microsatellite_genotype5",
-             "microsatellite_genotype6",
-             "microsatellite_genotype7",
-             "microsatellite_genotype8",
-             ),
+            (
+                "microsatellite_genotype1",
+                "microsatellite_genotype2",
+                "microsatellite_genotype3",
+                "microsatellite_genotype4",
+                "microsatellite_genotype5",
+                "microsatellite_genotype6",
+                "microsatellite_genotype7",
+                "microsatellite_genotype8",
+            ),
         )
 
 class SNPHistogramGenotype(models.Model):
@@ -449,25 +451,27 @@ class SNPHistogramGenotypes(models.Model):
 
     class Meta:
         index_together = (
-            ("snp_genotype1",
-             "snp_genotype2",
-             "snp_genotype3",
-             "snp_genotype4",
-             "snp_genotype5",
-             "snp_genotype6",
-             "snp_genotype7",
-             "snp_genotype8",
+            (
+                "snp_genotype1",
+                "snp_genotype2",
+                "snp_genotype3",
+                "snp_genotype4",
+                "snp_genotype5",
+                "snp_genotype6",
+                "snp_genotype7",
+                "snp_genotype8",
              ),
         )
         unique_together = (
-            ("snp_genotype1",
-             "snp_genotype2",
-             "snp_genotype3",
-             "snp_genotype4",
-             "snp_genotype5",
-             "snp_genotype6",
-             "snp_genotype7",
-             "snp_genotype8",
+            (
+                "snp_genotype1",
+                "snp_genotype2",
+                "snp_genotype3",
+                "snp_genotype4",
+                "snp_genotype5",
+                "snp_genotype6",
+                "snp_genotype7",
+                "snp_genotype8",
              ),
         )
 
