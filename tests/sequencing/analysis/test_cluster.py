@@ -94,7 +94,7 @@ def test_map_runmerge(executor, adam_reads_fd, sample_reads_d):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites):
+def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
     herss = {inc: set() for inc in ["M", "F"]}
     for inc in herss.keys():
         # FIXME?

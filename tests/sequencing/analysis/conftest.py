@@ -6,7 +6,8 @@ import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin, SNPHistogramGenotype, \
+    MicrosatelliteHistogramGenotype
 from targeted_enrichment.amplicons.models import Amplicon
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
@@ -19,6 +20,12 @@ from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM
 from tests.flat_dict import FlatDict
 from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
+
+
+@pytest.fixture()
+def requires_none_genotypes(transactional_db):
+    MicrosatelliteHistogramGenotype.objects.create(microsatellite=None, repeat_number=1)
+    SNPHistogramGenotype.objects.create(snp=None, base="")
 
 
 @pytest.fixture(scope="session")

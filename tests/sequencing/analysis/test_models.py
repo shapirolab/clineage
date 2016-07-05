@@ -121,7 +121,7 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
             assert not os.path.exists(ri.index_dump_dir)
 
 
-def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites):
+def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
     for (l_id, bc, inc, amp), aar in adam_amplicon_reads_d.items():
         ms_planning_version = 0
         padding = 50
