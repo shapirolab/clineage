@@ -7,11 +7,14 @@ from django.conf import settings
 
 
 def get_unique_path(ext=None):
-    if ext is None:
-        fmt = "{}"
-    else:
-        fmt = "{{}}.{}".format(ext)
-    return os.path.join(settings.DATA_STORE, fmt.format(uuid.uuid4()))
+    unique = str(uuid.uuid4())
+    parts = (unique[:2], unique[2:4], unique[4:6])
+    fname = unique[6:]
+    if ext is not None:
+        fname += ".{}".format(ext)
+    subdir = os.path.join(settings.DATA_STORE, *parts)
+    os.makedirs(subdir, exist_ok=True)
+    return os.path.join(subdir, fname)
 
 
 @contextlib.contextmanager
