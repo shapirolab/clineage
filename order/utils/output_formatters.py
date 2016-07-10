@@ -84,9 +84,9 @@ def generate_output_file(input_file,
     :param calling:
     :return:
     """
-    with gzip.open(output_file, 'wb') as out:
+    with gzip.open(output_file, 'wt') as out:
         owrtr = csv.writer(out, dialect='excel-tab')
-        with gzip.open(input_file, 'rb') as f:
+        with gzip.open(input_file, 'rt') as f:
             rdr = csv.reader(f, dialect='excel-tab')
             header_row = next(rdr)
             if verbose:
