@@ -35,10 +35,10 @@ bowtie2build_fixed_seed = bowtie2build["--seed", "1"]
 
 bowtie2 = local["bowtie2"]
 bowtie2_fixed_seed = bowtie2["--seed", "1"]
-bowtie2_with_defaults = bowtie2_fixed_seed["-p", "24",
+bowtie2_with_defaults = bowtie2_fixed_seed["-p", "1",
                                 "-a",
                                 "--very-sensitive"]
-bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "24",
+bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "1",
                                  "-a"]
 
 
