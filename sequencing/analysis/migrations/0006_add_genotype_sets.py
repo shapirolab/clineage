@@ -113,14 +113,6 @@ class Migration(migrations.Migration):
             model_name='histogramentryreads',
             name='snp_genotypes',
         ),
-        migrations.AlterUniqueTogether(
-            name='adamhistogram',
-            unique_together=set([('amplicon_reads', 'ms_variations')]),
-        ),
-        migrations.AlterUniqueTogether(
-            name='adamreadsindex',
-            unique_together=set([('merged_reads', 'included_reads', 'padding')]),
-        ),
         migrations.AlterIndexTogether(
             name='adamhistogram',
             index_together=set([('amplicon_reads', 'ms_variations')]),
@@ -128,6 +120,14 @@ class Migration(migrations.Migration):
         migrations.AlterIndexTogether(
             name='adamreadsindex',
             index_together=set([('merged_reads', 'included_reads', 'padding')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='adamhistogram',
+            unique_together=set([('amplicon_reads', 'ms_variations')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='adamreadsindex',
+            unique_together=set([('merged_reads', 'included_reads', 'padding')]),
         ),
         migrations.AddField(
             model_name='histogramentryreads',
@@ -141,20 +141,20 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='analysis.SNPHistogramGenotypeSet'),
             preserve_default=False,
         ),
-        migrations.AlterUniqueTogether(
-            name='snphistogramgenotypeset',
-            unique_together=set([('snp_genotype1', 'snp_genotype2', 'snp_genotype3', 'snp_genotype4', 'snp_genotype5', 'snp_genotype6', 'snp_genotype7', 'snp_genotype8')]),
-        ),
         migrations.AlterIndexTogether(
             name='snphistogramgenotypeset',
             index_together=set([('snp_genotype1', 'snp_genotype2', 'snp_genotype3', 'snp_genotype4', 'snp_genotype5', 'snp_genotype6', 'snp_genotype7', 'snp_genotype8')]),
         ),
         migrations.AlterUniqueTogether(
-            name='microsatellitehistogramgenotypeset',
-            unique_together=set([('microsatellite_genotype1', 'microsatellite_genotype2', 'microsatellite_genotype3', 'microsatellite_genotype4', 'microsatellite_genotype5', 'microsatellite_genotype6', 'microsatellite_genotype7', 'microsatellite_genotype8')]),
+            name='snphistogramgenotypeset',
+            unique_together=set([('snp_genotype1', 'snp_genotype2', 'snp_genotype3', 'snp_genotype4', 'snp_genotype5', 'snp_genotype6', 'snp_genotype7', 'snp_genotype8')]),
         ),
         migrations.AlterIndexTogether(
             name='microsatellitehistogramgenotypeset',
             index_together=set([('microsatellite_genotype1', 'microsatellite_genotype2', 'microsatellite_genotype3', 'microsatellite_genotype4', 'microsatellite_genotype5', 'microsatellite_genotype6', 'microsatellite_genotype7', 'microsatellite_genotype8')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='microsatellitehistogramgenotypeset',
+            unique_together=set([('microsatellite_genotype1', 'microsatellite_genotype2', 'microsatellite_genotype3', 'microsatellite_genotype4', 'microsatellite_genotype5', 'microsatellite_genotype6', 'microsatellite_genotype7', 'microsatellite_genotype8')]),
         ),
     ]
