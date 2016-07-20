@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/home/ofirr/clineage/')
+import clineage.wsgi
 import glob
 import os
 import math
@@ -9,11 +12,6 @@ from frogress import bar as tqdm
 import frogress
 from collections import defaultdict
 from itertools import combinations
-from django.core.management import setup_environ
-import sys
-sys.path.append('/home/ofirr/CLineage/')
-from clineage import settings
-setup_environ(settings)
 from linapp.models import Microsatellite, Panel, Target, TargetEnrichment, Chromosome, Plate
 from scipy import stats
 from order.hist import Histogram
