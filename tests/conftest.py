@@ -15,9 +15,8 @@ def temp_storage():
     t = tempfile.mkdtemp()
     settings.DATA_STORE = t
     yield
-    files = os.listdir(t)
-    if files:
-        shutil.rmtree(t)
-        raise Exception("Extra files: {}".format(files))
-    else:
-        os.rmdir(t)
+    for root, dirs, files in os.walk(t, topdown=False):
+        if files:
+            shutil.rmtree(t)
+            raise Exception("Extra files in dir {}: {}".format(root, files))
+        os.rmdir(root)
