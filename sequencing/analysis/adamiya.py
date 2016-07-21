@@ -359,21 +359,26 @@ def separate_reads_by_genotypes(histogram):
             fillvalue=none_ms_genotype,
         ))
         microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypeSet.objects.get_or_create(**ordered_genotypes)
-        with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
-            _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
-            _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
-            her, c = HistogramEntryReads.objects.get_or_create(
-                histogram=histogram,
-                microsatellite_genotypes=microsatellite_histogram_genotypes,
-                snp_genotypes=snp_histogram_genotypes,
-                defaults=dict(
-                    num_reads=len(read_ids),
-                    fastq1=genotypes_reads1_fastq_name,
-                    fastq2=genotypes_reads2_fastq_name,
-                    fastqm=genotypes_readsm_fastq_name,
-                ),
-            )
-        yield her
+        def inner():
+            with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+                _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
+                _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+                return raise_or_create(HistogramEntryReads,
+                    histogram=histogram,
+                    microsatellite_genotypes=microsatellite_histogram_genotypes,
+                    snp_genotypes=snp_histogram_genotypes,
+                    defaults=dict(
+                        num_reads=len(read_ids),
+                        fastq1=genotypes_reads1_fastq_name,
+                        fastq2=genotypes_reads2_fastq_name,
+                        fastqm=genotypes_readsm_fastq_name,
+                    ),
+                )
+        yield get_get_or_create(inner, HistogramEntryReads, 
+            histogram=histogram,
+            microsatellite_genotypes=microsatellite_histogram_genotypes,
+            snp_genotypes=snp_histogram_genotypes,
+        )
 
 
 def close_connection_and(f):
