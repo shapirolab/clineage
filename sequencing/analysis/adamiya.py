@@ -43,7 +43,7 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "1",
 
 
 def merge(sample_reads):
-    def inner():
+    def inner(raise_or_create_with_defaults):
         with unique_dir_cm() as pear_dir:
             pear_output = PearOutputMixin(
                 pear_dump_dir=pear_dir,
@@ -51,11 +51,8 @@ def merge(sample_reads):
             pear_with_defaults("-f", sample_reads.fastq1,
                                "-r", sample_reads.fastq2,
                                "-o", pear_output.pear_files_prefix)
-            return raise_or_create(AdamMergedReads,
-                sample_reads=sample_reads,
-                defaults=dict(
-                    pear_dump_dir=pear_dir,
-                ),
+            return raise_or_create_with_defaults(
+                pear_dump_dir=pear_dir,
             )
     return get_get_or_create(inner, AdamMergedReads,
         sample_reads=sample_reads,
@@ -80,19 +77,14 @@ def create_reads_index(merged_reads, included_reads, padding):
     of ReadsIndex.INCLUDED_READS_OPTIONS, and chooses which of the reads we take.
     padding controls how much to pad on each side of the reads.
     """
-    def inner():
+    def inner(raise_or_create_with_defaults):
         reads = merged_reads.included_reads_generator(included_reads)
         with unique_dir_cm() as index_dir:
             bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
             with unlink(_create_padded_fasta(reads, padding)) as fasta:
                 bowtie2build_fixed_seed(fasta, bowtie_index.index_files_prefix)
-            return raise_or_create(AdamReadsIndex,
-                merged_reads=merged_reads,
-                included_reads=included_reads,
-                padding=padding,
-                defaults=dict(
-                    index_dump_dir=index_dir,
-                ),
+            return raise_or_create_with_defaults(
+                index_dump_dir=index_dir,
             )
     return get_get_or_create(inner, AdamReadsIndex,
         merged_reads=merged_reads,
@@ -118,7 +110,7 @@ def _create_panel_fasta(amplicons):
 
 
 def align_primers_to_reads(reads_index):
-    def inner():
+    def inner(raise_or_create_with_defaults):
         amplicons = reads_index.merged_reads.sample_reads.library \
             .subclass.amplicons
         with unique_file_cm("sam") as assignment_sam:
@@ -126,14 +118,12 @@ def align_primers_to_reads(reads_index):
                 bowtie2_with_defaults('-x', reads_index.index_files_prefix,
                                       '-f', panel_fasta,
                                       '-S', assignment_sam)
-            return raise_or_create(AdamMarginAssignment,
-                reads_index=reads_index,
-                defaults=dict(
-                    assignment_sam=assignment_sam,
-                ),
+            return raise_or_create_with_defaults(
+                assignment_sam=assignment_sam,
             )
     return get_get_or_create(inner, AdamMarginAssignment,
-        reads_index=reads_index)
+        reads_index=reads_index
+    )
 
 
 def _collect_mappings_from_sam(margin_assignment):
@@ -195,25 +185,21 @@ def separate_reads_by_amplicons(margin_assignment):
             .sample_reads.fastq2, "fastq")
         reads = SeqIO.to_dict(reads_gen)
         for amplicon, read_ids in reads_by_amplicon.items():
-            def inner():
+            def inner(raise_or_create_with_defaults):
                 with _extract_reads_by_id(reads, read_ids) as \
                         amplicon_readsm_fastq_name, \
                     _extract_reads_by_id(reads1, read_ids) as \
                         amplicon_reads1_fastq_name, \
                     _extract_reads_by_id(reads2, read_ids) as \
                         amplicon_reads2_fastq_name:
-                    return raise_or_create(AdamAmpliconReads,
-                        margin_assignment=margin_assignment,
-                        amplicon=amplicon,
-                        defaults=dict(
-                            fastqm=amplicon_readsm_fastq_name,
-                            fastq1=amplicon_reads1_fastq_name,
-                            fastq2=amplicon_reads2_fastq_name,
-                        ),
+                    return raise_or_create_with_defaults(
+                        fastqm=amplicon_readsm_fastq_name,
+                        fastq1=amplicon_reads1_fastq_name,
+                        fastq2=amplicon_reads2_fastq_name,
                     )
             yield get_get_or_create(inner, AdamAmpliconReads, 
-                    margin_assignment=margin_assignment,
-                    amplicon=amplicon,
+                margin_assignment=margin_assignment,
+                amplicon=amplicon,
             )
         margin_assignment.separation_finished = True
         margin_assignment.save()
@@ -284,7 +270,7 @@ def _build_ms_variations(amplicon, padding, mss):
 
 
 def get_adam_ms_variations(amplicon, padding, mss_version):
-    def inner():
+    def inner(raise_or_create_with_defaults):
         mss = Microsatellite.objects.filter(
             slice__start_pos__gte=amplicon.slice.start_pos,
             slice__end_pos__lte=amplicon.slice.end_pos,
@@ -295,13 +281,8 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
             bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
             with unlink(_build_ms_variations(amplicon, padding, mss)) as fasta:
                 bowtie2build(fasta, bowtie_index.index_files_prefix)
-            return raise_or_create(AdamMSVariations,
-                amplicon=amplicon,
-                padding=padding,
-                microsatellites_version=mss_version,
-                defaults=dict(
-                    index_dump_dir=index_dir,
-                ),
+            return raise_or_create_with_defaults(
+                index_dump_dir=index_dir,
             )
     return get_get_or_create(inner, AdamMSVariations,
         amplicon=amplicon,
@@ -313,21 +294,17 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
 def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
     msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding,
         mss_version)
-    def inner():
+    def inner(raise_or_create_with_defaults):
         with unique_file_cm("sam") as assignment_sam:
             bowtie2_with_defaults2('-x', msv.index_files_prefix,
                                    '-U', amplicon_reads.fastqm,
                                    '-S', assignment_sam)
-            return raise_or_create(AdamHistogram,
-                amplicon_reads=amplicon_reads,
-                ms_variations=msv,
-                defaults=dict(
-                    assignment_sam=assignment_sam,
-                    sample_reads_id=amplicon_reads.margin_assignment \
-                        .reads_index.merged_reads.sample_reads_id,
-                    amplicon=amplicon_reads.amplicon,
-                    microsatellites_version=msv.microsatellites_version,
-                ),
+            return raise_or_create_with_defaults(
+                assignment_sam=assignment_sam,
+                sample_reads_id=amplicon_reads.margin_assignment \
+                    .reads_index.merged_reads.sample_reads_id,
+                amplicon=amplicon_reads.amplicon,
+                microsatellites_version=msv.microsatellites_version,
             )
     return get_get_or_create(inner, AdamHistogram,
         amplicon_reads=amplicon_reads,
@@ -376,20 +353,15 @@ def separate_reads_by_genotypes(histogram):
                 fillvalue=none_ms_genotype,
             ))
             microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypeSet.objects.get_or_create(**ordered_genotypes)
-            def inner():
+            def inner(raise_or_create_with_defaults):
                 with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
                     _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
                     _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
-                    return raise_or_create(HistogramEntryReads,
-                        histogram=histogram,
-                        microsatellite_genotypes=microsatellite_histogram_genotypes,
-                        snp_genotypes=snp_histogram_genotypes,
-                        defaults=dict(
-                            num_reads=len(read_ids),
-                            fastq1=genotypes_reads1_fastq_name,
-                            fastq2=genotypes_reads2_fastq_name,
-                            fastqm=genotypes_readsm_fastq_name,
-                        ),
+                    return raise_or_create_with_defaults(
+                        num_reads=len(read_ids),
+                        fastq1=genotypes_reads1_fastq_name,
+                        fastq2=genotypes_reads2_fastq_name,
+                        fastqm=genotypes_readsm_fastq_name,
                     )
             yield get_get_or_create(inner, HistogramEntryReads, 
                 histogram=histogram,

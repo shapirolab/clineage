@@ -2,6 +2,7 @@ import os
 import uuid
 import contextlib
 import shutil
+import functools
 
 from django.conf import settings
 
@@ -83,7 +84,9 @@ def get_get_or_create(do_raise_or_create, model, **kwargs):
     try:
         return model.objects.get(**kwargs)
     except model.DoesNotExist:
+        raise_or_create_with_defaults = lambda **defaults: \
+            raise_or_create(model=model, defaults=defaults, **kwargs)
         try:
-            return do_raise_or_create()
+            return do_raise_or_create(raise_or_create_with_defaults)
         except NotCreated as nc:
             return nc.args[0]
