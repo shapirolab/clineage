@@ -172,6 +172,7 @@ def _read_sam(sam_path):
 class AdamMarginAssignment(models.Model):
     reads_index = models.ForeignKey(AdamReadsIndex, unique=True)
     assignment_sam = models.FilePathField(max_length=200)
+    separation_finished = models.BooleanField(default=False)
 
     def read_sam(self):
         for read_id, margin_name in _read_sam(self.assignment_sam):
@@ -263,6 +264,7 @@ class AdamHistogram(Histogram):
     amplicon_reads = models.ForeignKey(AdamAmpliconReads)
     assignment_sam = models.FilePathField(max_length=200)
     ms_variations = models.ForeignKey(AdamMSVariations)
+    separation_finished = models.BooleanField(default=False)
 
     def read_sam(self):
         for ms_genotypes_name, read_id in _read_sam(self.assignment_sam):

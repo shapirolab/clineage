@@ -178,37 +178,45 @@ def _extract_reads_by_id(indexed_reads, read_ids):
 
 
 def separate_reads_by_amplicons(margin_assignment):
-    reads_matches = _collect_mappings_from_sam(margin_assignment)
-    validated_reads_amplicons = _validate_amplicon_mapping(reads_matches)
-    reads_by_amplicon = _aggregate_read_ids_by_amplicon( \
-        validated_reads_amplicons)
-    reads_gen = margin_assignment.reads_index.included_reads_generator()
-    reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
-        .sample_reads.fastq1, "fastq")
-    reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
-        .sample_reads.fastq2, "fastq")
-    reads = SeqIO.to_dict(reads_gen)
-    for amplicon, read_ids in reads_by_amplicon.items():
-        def inner():
-            with _extract_reads_by_id(reads, read_ids) as \
-                    amplicon_readsm_fastq_name, \
-                _extract_reads_by_id(reads1, read_ids) as \
-                    amplicon_reads1_fastq_name, \
-                _extract_reads_by_id(reads2, read_ids) as \
-                    amplicon_reads2_fastq_name:
-                return raise_or_create(AdamAmpliconReads,
+    if margin_assignment.separation_finished:
+        for aar in AdamAmpliconReads.objects.filter(
+            margin_assignment=margin_assignment,
+        ):
+            yield aar
+    else:
+        reads_matches = _collect_mappings_from_sam(margin_assignment)
+        validated_reads_amplicons = _validate_amplicon_mapping(reads_matches)
+        reads_by_amplicon = _aggregate_read_ids_by_amplicon( \
+            validated_reads_amplicons)
+        reads_gen = margin_assignment.reads_index.included_reads_generator()
+        reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
+            .sample_reads.fastq1, "fastq")
+        reads2 = SeqIO.index(margin_assignment.reads_index.merged_reads \
+            .sample_reads.fastq2, "fastq")
+        reads = SeqIO.to_dict(reads_gen)
+        for amplicon, read_ids in reads_by_amplicon.items():
+            def inner():
+                with _extract_reads_by_id(reads, read_ids) as \
+                        amplicon_readsm_fastq_name, \
+                    _extract_reads_by_id(reads1, read_ids) as \
+                        amplicon_reads1_fastq_name, \
+                    _extract_reads_by_id(reads2, read_ids) as \
+                        amplicon_reads2_fastq_name:
+                    return raise_or_create(AdamAmpliconReads,
+                        margin_assignment=margin_assignment,
+                        amplicon=amplicon,
+                        defaults=dict(
+                            fastqm=amplicon_readsm_fastq_name,
+                            fastq1=amplicon_reads1_fastq_name,
+                            fastq2=amplicon_reads2_fastq_name,
+                        ),
+                    )
+            yield get_get_or_create(inner, AdamAmpliconReads, 
                     margin_assignment=margin_assignment,
                     amplicon=amplicon,
-                    defaults=dict(
-                        fastqm=amplicon_readsm_fastq_name,
-                        fastq1=amplicon_reads1_fastq_name,
-                        fastq2=amplicon_reads2_fastq_name,
-                    ),
-                )
-        yield get_get_or_create(inner, AdamAmpliconReads, 
-            margin_assignment=margin_assignment,
-            amplicon=amplicon,
-        )
+            )
+        margin_assignment.separation_finished = True
+        margin_assignment.save()
 
 
 def _get_ms_length_range(ms):
@@ -346,42 +354,50 @@ def _aggregate_read_ids_by_genotypes(genotype_read_iterator):
 
 
 def separate_reads_by_genotypes(histogram):
-    genotype_read_iterator = _collect_genotypes_from_sam(histogram)
-    genotypes_reads = _aggregate_read_ids_by_genotypes(genotype_read_iterator)
-    reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
-    reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
-    readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
-    none_ms_genotype = MicrosatelliteHistogramGenotype.objects.get(microsatellite=None)
-    none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
-    snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
-        **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
-    for genotypes, read_ids in genotypes_reads.items():
-        ordered_genotypes = dict(itertools.zip_longest(
-            MicrosatelliteHistogramGenotypeSet.genotype_field_names(),
-            sorted(list(genotypes), key=lambda g: g.microsatellite.slice),
-            fillvalue=none_ms_genotype,
-        ))
-        microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypeSet.objects.get_or_create(**ordered_genotypes)
-        def inner():
-            with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
-                _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
-                _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
-                return raise_or_create(HistogramEntryReads,
-                    histogram=histogram,
-                    microsatellite_genotypes=microsatellite_histogram_genotypes,
-                    snp_genotypes=snp_histogram_genotypes,
-                    defaults=dict(
-                        num_reads=len(read_ids),
-                        fastq1=genotypes_reads1_fastq_name,
-                        fastq2=genotypes_reads2_fastq_name,
-                        fastqm=genotypes_readsm_fastq_name,
-                    ),
-                )
-        yield get_get_or_create(inner, HistogramEntryReads, 
+    if histogram.separation_finished:
+        for her in HistogramEntryReads.objects.filter(
             histogram=histogram,
-            microsatellite_genotypes=microsatellite_histogram_genotypes,
-            snp_genotypes=snp_histogram_genotypes,
-        )
+        ):
+            yield her
+    else:
+        genotype_read_iterator = _collect_genotypes_from_sam(histogram)
+        genotypes_reads = _aggregate_read_ids_by_genotypes(genotype_read_iterator)
+        reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
+        reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
+        readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
+        none_ms_genotype = MicrosatelliteHistogramGenotype.objects.get(microsatellite=None)
+        none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
+        snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
+            **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
+        for genotypes, read_ids in genotypes_reads.items():
+            ordered_genotypes = dict(itertools.zip_longest(
+                MicrosatelliteHistogramGenotypeSet.genotype_field_names(),
+                sorted(list(genotypes), key=lambda g: g.microsatellite.slice),
+                fillvalue=none_ms_genotype,
+            ))
+            microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypeSet.objects.get_or_create(**ordered_genotypes)
+            def inner():
+                with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+                    _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
+                    _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+                    return raise_or_create(HistogramEntryReads,
+                        histogram=histogram,
+                        microsatellite_genotypes=microsatellite_histogram_genotypes,
+                        snp_genotypes=snp_histogram_genotypes,
+                        defaults=dict(
+                            num_reads=len(read_ids),
+                            fastq1=genotypes_reads1_fastq_name,
+                            fastq2=genotypes_reads2_fastq_name,
+                            fastqm=genotypes_readsm_fastq_name,
+                        ),
+                    )
+            yield get_get_or_create(inner, HistogramEntryReads, 
+                histogram=histogram,
+                microsatellite_genotypes=microsatellite_histogram_genotypes,
+                snp_genotypes=snp_histogram_genotypes,
+            )
+            histogram.separation_finished = True
+            histogram.save()
 
 
 def close_connection_and(f):
