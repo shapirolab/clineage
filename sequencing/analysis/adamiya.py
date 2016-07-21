@@ -292,8 +292,7 @@ def get_adam_ms_variations(amplicon, padding, mss_version):
 
 
 def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
-    msv = get_adam_ms_variations(amplicon_reads.amplicon.subclass, padding,
-        mss_version)
+    msv = get_adam_ms_variations(amplicon_reads.amplicon, padding, mss_version)
     def inner(raise_or_create_with_defaults):
         with unique_file_cm("sam") as assignment_sam:
             bowtie2_with_defaults2('-x', msv.index_files_prefix,
