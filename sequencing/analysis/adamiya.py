@@ -180,7 +180,8 @@ def _extract_reads_by_id(indexed_reads, read_ids):
 def separate_reads_by_amplicons(margin_assignment):
     reads_matches = _collect_mappings_from_sam(margin_assignment)
     validated_reads_amplicons = _validate_amplicon_mapping(reads_matches)
-    reads_by_amplicon = _aggregate_read_ids_by_amplicon(validated_reads_amplicons)
+    reads_by_amplicon = _aggregate_read_ids_by_amplicon( \
+        validated_reads_amplicons)
     reads_gen = margin_assignment.reads_index.included_reads_generator()
     reads1 = SeqIO.index(margin_assignment.reads_index.merged_reads \
         .sample_reads.fastq1, "fastq")
@@ -189,22 +190,24 @@ def separate_reads_by_amplicons(margin_assignment):
     reads = SeqIO.to_dict(reads_gen)
     for amplicon, read_ids in reads_by_amplicon.items():
         def inner():
-            with _extract_reads_by_id(reads, read_ids) as amplicon_readsm_fastq_name, \
-                _extract_reads_by_id(reads1, read_ids) as amplicon_reads1_fastq_name, \
-                _extract_reads_by_id(reads2, read_ids) as amplicon_reads2_fastq_name:
-                fastq_files = {
-                    'fastqm': amplicon_readsm_fastq_name,
-                    'fastq1': amplicon_reads1_fastq_name,
-                    'fastq2': amplicon_reads2_fastq_name,
-                }
+            with _extract_reads_by_id(reads, read_ids) as \
+                    amplicon_readsm_fastq_name, \
+                _extract_reads_by_id(reads1, read_ids) as \
+                    amplicon_reads1_fastq_name, \
+                _extract_reads_by_id(reads2, read_ids) as \
+                    amplicon_reads2_fastq_name:
                 return raise_or_create(AdamAmpliconReads,
                     margin_assignment=margin_assignment,
                     amplicon=amplicon,
-                    defaults=fastq_files
+                    defaults=dict(
+                        fastqm=amplicon_readsm_fastq_name,
+                        fastq1=amplicon_reads1_fastq_name,
+                        fastq2=amplicon_reads2_fastq_name,
+                    ),
                 )
         yield get_get_or_create(inner, AdamAmpliconReads, 
-                margin_assignment=margin_assignment,
-                amplicon=amplicon
+            margin_assignment=margin_assignment,
+            amplicon=amplicon,
         )
 
 
