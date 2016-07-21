@@ -32,5 +32,8 @@ urlpatterns = [
 
     #soap test
     url(r'^soap/', include('soap.urls')),
+
+    # Runs analysis
+    url(r'^analysis/', include('sequencing.analysis.urls')),
 ]
 
