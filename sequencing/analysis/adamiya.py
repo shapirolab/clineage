@@ -367,8 +367,8 @@ def separate_reads_by_genotypes(histogram):
                 microsatellite_genotypes=microsatellite_histogram_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
             )
-            histogram.separation_finished = True
-            histogram.save()
+        histogram.separation_finished = True
+        histogram.save()
 
 
 def close_connection_and(f):
