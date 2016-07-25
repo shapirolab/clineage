@@ -201,8 +201,9 @@ def separate_reads_by_amplicons(margin_assignment):
                 margin_assignment=margin_assignment,
                 amplicon=amplicon,
             )
-        margin_assignment.separation_finished = True
-        margin_assignment.save()
+        else:
+            margin_assignment.separation_finished = True
+            margin_assignment.save()
 
 
 def _get_ms_length_range(ms):
@@ -367,8 +368,9 @@ def separate_reads_by_genotypes(histogram):
                 microsatellite_genotypes=microsatellite_histogram_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
             )
-        histogram.separation_finished = True
-        histogram.save()
+        else:
+            histogram.separation_finished = True
+            histogram.save()
 
 
 def close_connection_and(f):
