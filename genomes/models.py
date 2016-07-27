@@ -106,7 +106,7 @@ class DNASlice(models.Model):
     )
     overlaps = models.ManyToManyField('genomes.DNASlice',
         related_name='+',
-        symmetrical=True,
+        symmetrical=False,
         through='genomes.DNASlice_Overlaps',
         through_fields=('slice1', 'slice2')
     )

@@ -76,6 +76,6 @@ CREATE VIEW genomes_dnaslice_overlaps AS
         migrations.AddField(
             model_name='dnaslice',
             name='overlaps',
-            field=models.ManyToManyField(symmetrical=True, through='genomes.DNASlice_Overlaps', to='genomes.DNASlice'),
+            field=models.ManyToManyField(related_name='+', through='genomes.DNASlice_Overlaps', to='genomes.DNASlice', through_fields=('slice1', 'slice2')),
         ),
     ]
