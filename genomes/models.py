@@ -98,6 +98,12 @@ class DNASlice(models.Model):
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
     _sequence = models.CharField(max_length=300,null=True,default=None)
+    contains = models.ManyToManyField(DNASlice,
+        related_name='contained',
+        symmetrical=False,
+        through='genomes.DNASliceIntersection',
+        through_fields=('outer', 'inner')
+    )
 
     @property
     def sequence(self):
@@ -163,3 +169,11 @@ class DNASlice(models.Model):
         index_together = [
             ("chromosome", "start_pos", "end_pos"),
         ]
+
+
+class DNASliceIntersection(models.Model):
+    inner = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING)
+    outer = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        managed = False
