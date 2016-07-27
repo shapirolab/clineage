@@ -172,8 +172,8 @@ class DNASlice(models.Model):
 
 
 class DNASliceIntersection(models.Model):
-    inner = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING)
-    outer = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING)
+    inner = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
+    outer = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
 
     class Meta:
         managed = False
