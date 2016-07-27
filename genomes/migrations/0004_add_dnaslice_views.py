@@ -45,4 +45,37 @@ CREATE VIEW genomes_dnaslice_contains AS
             name='contains',
             field=models.ManyToManyField(related_name='contained', through='genomes.DNASlice_Contains', to='genomes.DNASlice', through_fields=('outer', 'inner')),
         ),
+        migrations.CreateModel(
+            name='DNASlice_Overlaps',
+            fields=[
+                ('slice1', models.ForeignKey(to='genomes.DNASlice', on_delete=models.DO_NOTHING, related_name='+')),
+                ('slice2', models.ForeignKey(to='genomes.DNASlice', on_delete=models.DO_NOTHING, related_name='+')),
+            ],
+            options={
+                'managed': False,
+            },
+        ),
+        migrations.RunSQL(
+            sql="""
+CREATE VIEW genomes_dnaslice_overlaps AS 
+    SELECT
+        s1.id AS 'slice1_id',
+        s2.id AS 'slice2_id'
+    FROM
+        genomes_dnaslice s1,
+        genomes_dnaslice s2
+    WHERE
+        s1.chromosome_id = s2.chromosome_id AND
+        NOT s1.start_pos > s2.end_pos AND
+        NOT s1.end_pos < s2.start_pos AND
+        s1.id <> s2.id
+;
+""",
+            reverse_sql="DROP VIEW genomes_dnaslice_overlaps;"
+        ),
+        migrations.AddField(
+            model_name='dnaslice',
+            name='overlaps',
+            field=models.ManyToManyField(symmetrical=True, through='genomes.DNASlice_Overlaps', to='genomes.DNASlice'),
+        ),
     ]

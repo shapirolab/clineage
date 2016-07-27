@@ -91,6 +91,18 @@ def slice_28727_amplicon(hg19_chromosome):
 
 
 @pytest.fixture()
+def slice_28727_overlaps_some(hg19_chromosome):
+    dnas = DNASlice.objects.create(
+        chromosome=hg19_chromosome,
+        start_pos=81316110,
+        end_pos=81316142,
+    )
+    # So our objects don't have "special" objects in fields
+    dnas = DNASlice.objects.get(pk=dnas.pk)
+    return dnas
+
+
+@pytest.fixture()
 def slice_28734_left(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,

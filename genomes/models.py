@@ -104,6 +104,12 @@ class DNASlice(models.Model):
         through='genomes.DNASlice_Contains',
         through_fields=('outer', 'inner')
     )
+    overlaps = models.ManyToManyField('genomes.DNASlice',
+        related_name='+',
+        symmetrical=True,
+        through='genomes.DNASlice_Overlaps',
+        through_fields=('slice1', 'slice2')
+    )
 
     @property
     def sequence(self):
@@ -174,6 +180,14 @@ class DNASlice(models.Model):
 class DNASlice_Contains(models.Model):
     inner = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
     outer = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
+
+    class Meta:
+        managed = False
+
+
+class DNASlice_Overlaps(models.Model):
+    slice1 = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
+    slice2 = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
 
     class Meta:
         managed = False

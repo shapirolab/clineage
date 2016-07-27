@@ -18,10 +18,21 @@ def test_dnaslice(slice_28727_left):
 
 @pytest.mark.skipif(pytest.config.getoption("nomigrations"), reason="No migrations, no view.")
 @pytest.mark.django_db
-def test_dnaslice_contains(slice_28727_target_a, slice_28727_target_b, slice_28727_amplicon):
+def test_dnaslice_contains(slice_28727_target_a, slice_28727_target_b, slice_28727_amplicon, slice_28727_overlaps_some):
     assert set(slice_28727_amplicon.contains.all()) == set([slice_28727_target_a, slice_28727_target_b])
     assert set(slice_28727_amplicon.contained.all()) == set()
     assert set(slice_28727_target_a.contains.all()) == set()
     assert set(slice_28727_target_a.contained.all()) == set([slice_28727_amplicon])
     assert set(slice_28727_target_b.contains.all()) == set()
     assert set(slice_28727_target_b.contained.all()) == set([slice_28727_amplicon])
+    assert set(slice_28727_overlaps_some.contains.all()) == set()
+    assert set(slice_28727_overlaps_some.contained.all()) == set()
+
+
+@pytest.mark.skipif(pytest.config.getoption("nomigrations"), reason="No migrations, no view.")
+@pytest.mark.django_db
+def test_dnaslice_overlaps(slice_28727_target_a, slice_28727_target_b, slice_28727_amplicon, slice_28727_overlaps_some):
+    assert set(slice_28727_amplicon.overlaps.all()) == set([slice_28727_target_a, slice_28727_target_b, slice_28727_overlaps_some])
+    assert set(slice_28727_target_a.overlaps.all()) == set([slice_28727_amplicon, slice_28727_overlaps_some])
+    assert set(slice_28727_target_b.overlaps.all()) == set([slice_28727_amplicon])
+    assert set(slice_28727_overlaps_some.overlaps.all()) == set([slice_28727_target_a, slice_28727_amplicon])
