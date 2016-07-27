@@ -1,73 +1,10 @@
 from collections import defaultdict, Counter
-from order.binomial_sim import dyn_prob
 from order.hist import Histogram
 from itertools import combinations, product
 import numpy as np
 from order.optimize_probs import dyn_mat_model
 from scipy.stats import binom
 from frogress import bar
-
-def generate_bin_hist_pure_optimized(d,
-                           cycles,
-                           ups,
-                           dws,
-                           margines = 20,
-                           sample_depth=10000,
-                           normalize=False,
-                           truncate=False,
-                           cut_peak=False,
-                           trim_extremes=False,
-                           **kwargs):
-    # ups=[lambda d:0.00005*d**2 - 0.0009*d + 0.0036],
-    # dws=[lambda d:0.00009*d**2 - 0.00003*d - 0.0013],
-    up = ups[0]
-    dw = dws[0]
-    upb = binom(cycles, min(max(0, up(d)),1.0))
-    dwb = binom(cycles, min(max(0, dw(d)),1.0))
-    max_mean = max(upb.mean(), dwb.mean())
-    try:
-        bin_margines = int(round(max_mean)) + margines
-    except:
-        print(up(d), dw(d), d, cycles, upb.mean(), dwb.mean())
-        raise
-    n = np.convolve(upb.pmf(np.arange(bin_margines)), dwb.pmf(np.arange(bin_margines))[::-1])
-    nd = {i:n[i] for i in range(bin_margines*2-1)}
-    nh = Histogram(nd,
-                   normalize=normalize,
-                   nsamples=sample_depth,
-                   truncate=truncate,
-                   cut_peak=cut_peak,
-                   trim_extremes=trim_extremes
-                   ) - (bin_margines - 1)
-    nh.truncate(p=0.0001)
-    nh.normalize()
-    nh.clean_zero_entries()
-    return nh
-
-
-def generate_dyn_hist(d,
-                      cycles,
-                      up,
-                      dw,
-                      sample_depth=10000,
-                      normalize=True,
-                      truncate=False,
-                      cut_peak=False,
-                      trim_extremes=False,
-                      **kwargs):
-    dyn_hist = dyn_prob(cycles,
-                        d,
-                        up,
-                        dw,
-                        nsamples=sample_depth,
-                        normalize=normalize,
-                        truncate=truncate,
-                        cut_peak=cut_peak,
-                        trim_extremes=trim_extremes)
-    dyn_hist.truncate(p=0.0001)
-    dyn_hist.normalize()
-    dyn_hist.clean_zero_entries()
-    return dyn_hist - d
 
 
 def generate_mat_hist(d,
@@ -94,24 +31,20 @@ def generate_mat_hist(d,
 
 
 def get_method(method):
-    if method == 'bon':
-        return generate_bin_hist_pure_optimized
-    if method == 'dyn':
-        return generate_dyn_hist
     if method == 'mat':
         return generate_mat_hist
     print('unknown method')
     raise
 
 
-def generate_hist(d, cycles, method, **kwargs):
+def generate_hist(d, cycles, method='mat', **kwargs):
     generate_method_hist = get_method(method)
     return generate_method_hist(d, cycles, **kwargs)
 
 
 def generate_sim_hists(max_ms_length=60,
                        max_cycles=90,
-                       method='bin',
+                       method='mat',
                        **kwargs):
     """
     Creates a dictionary of simulated histogram indexed by [original_length][amplification_cycle]

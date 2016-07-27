@@ -117,6 +117,7 @@ def generate_hist_calls(input_file,
     """
     flat_sim_hists = flatten_index(sim_hists)
     print('starting {} auxiliary process'.format(workers))
+
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         for result in executor.map(helper,
                                    zip(
