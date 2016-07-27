@@ -15,7 +15,6 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DNASlice_Contains',
             fields=[
-                # ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('inner', models.ForeignKey(to='genomes.DNASlice', on_delete=models.DO_NOTHING, related_name='+')),
                 ('outer', models.ForeignKey(to='genomes.DNASlice', on_delete=models.DO_NOTHING, related_name='+')),
             ],
@@ -35,7 +34,8 @@ CREATE VIEW genomes_dnaslice_contains AS
     WHERE
         s1.chromosome_id = s2.chromosome_id AND
         s1.start_pos >= s2.start_pos AND
-        s1.end_pos <= s2.end_pos and s1.id <> s2.id
+        s1.end_pos <= s2.end_pos AND
+        s1.id <> s2.id
 ;
 """,
             reverse_sql="DROP VIEW genomes_dnaslice_contains;"
