@@ -242,7 +242,7 @@ class AdamMSVariations(BowtieIndexMixin):
         )
 
     def __str__(self):
-        return "{} v. {}".format(amplicon, microsatellites_version)
+        return "{} v. {}".format(self.amplicon, self.microsatellites_version)
 
 post_delete.connect(delete_files, AdamMSVariations)
 
