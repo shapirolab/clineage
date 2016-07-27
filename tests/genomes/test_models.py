@@ -18,7 +18,7 @@ def test_dnaslice(slice_28727_left):
 
 @pytest.mark.skipif(pytest.config.getoption("nomigrations"), reason="No migrations, no view.")
 @pytest.mark.django_db
-def test_dnasliceintersection(slice_28727_target_a, slice_28727_target_b, slice_28727_amplicon):
+def test_dnaslice_contains(slice_28727_target_a, slice_28727_target_b, slice_28727_amplicon):
     assert set(slice_28727_amplicon.contains.all()) == set([slice_28727_target_a, slice_28727_target_b])
     assert set(slice_28727_amplicon.contained.all()) == set()
     assert set(slice_28727_target_a.contains.all()) == set()

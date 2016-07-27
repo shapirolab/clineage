@@ -101,7 +101,7 @@ class DNASlice(models.Model):
     contains = models.ManyToManyField('genomes.DNASlice',
         related_name='contained',
         symmetrical=False,
-        through='genomes.DNASliceIntersection',
+        through='genomes.DNASlice_Contains',
         through_fields=('outer', 'inner')
     )
 
@@ -171,7 +171,7 @@ class DNASlice(models.Model):
         ]
 
 
-class DNASliceIntersection(models.Model):
+class DNASlice_Contains(models.Model):
     inner = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
     outer = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
 

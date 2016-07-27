@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='DNASliceIntersection',
+            name='DNASlice_Contains',
             fields=[
                 # ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('inner', models.ForeignKey(to='genomes.DNASlice', on_delete=models.DO_NOTHING, related_name='+')),
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-CREATE VIEW genomes_dnasliceintersection AS 
+CREATE VIEW genomes_dnaslice_contains AS 
     SELECT
         s1.id AS 'inner_id',
         s2.id AS 'outer_id'
@@ -38,11 +38,11 @@ CREATE VIEW genomes_dnasliceintersection AS
         s1.end_pos <= s2.end_pos and s1.id <> s2.id
 ;
 """,
-            reverse_sql="DROP VIEW genomes_dnasliceintersection;"
+            reverse_sql="DROP VIEW genomes_dnaslice_contains;"
         ),
         migrations.AddField(
             model_name='dnaslice',
             name='contains',
-            field=models.ManyToManyField(related_name='contained', through='genomes.DNASliceIntersection', to='genomes.DNASlice', through_fields=('outer', 'inner')),
+            field=models.ManyToManyField(related_name='contained', through='genomes.DNASlice_Contains', to='genomes.DNASlice', through_fields=('outer', 'inner')),
         ),
     ]
