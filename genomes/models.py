@@ -98,7 +98,7 @@ class DNASlice(models.Model):
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
     _sequence = models.CharField(max_length=300,null=True,default=None)
-    contains = models.ManyToManyField(DNASlice,
+    contains = models.ManyToManyField('genomes.DNASlice',
         related_name='contained',
         symmetrical=False,
         through='genomes.DNASliceIntersection',
