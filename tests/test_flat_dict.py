@@ -56,10 +56,10 @@ def test_flat_dict():
         (7,): set(),
         (): {1, 6, 7}
     }  # FIXME
-    assert fd[1,2,3] == {'+': ['a1', 'b1'], '-': ['a2', 'c2']}
-    assert set(fd.keys((1, 2))) == {3, 4}
+    assert fd[1, 2, 3] == {'+': ['a1', 'b1'], '-': ['a2', 'c2']}
+    assert set(fd.keys(1, 2)) == {3, 4}
     assert set(fd.keys()) == {1, 6, 7}
-    assert dict(fd.reads((1, 2))) == {
+    assert dict(fd.reads(1, 2)) == {
         3: {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
         4: {'-': ['d2']},
     }
@@ -86,15 +86,15 @@ def test_flat_dict():
     with pytest.raises(KeyError):
         fd[1, 2, 5]
     with pytest.raises(KeyError):
-        fd.keys((1, 2, 5))
+        fd.keys(1, 2, 5)
     with pytest.raises(KeyError):
-        fd.reads((1, 2, 5))
+        fd.reads(1, 2, 5)
     with pytest.raises(KeyError):
-        fd.items((1, 2, 5))
+        fd.items(1, 2, 5)
 
 
 def test_flat_dict2():
-    fd = FlatDict(BIG_D, deinterlaced_keys=['+','-'])
+    fd = FlatDict(BIG_D, deinterlaced_keys=['+', '-'])
     assert fd._fd._d == {
         (1,): {'+': ['a1', 'b1', 'e1'], '-': ['a2', 'c2', 'd2', 'e2']},
         (1, 2): {'+': ['a1', 'b1'], '-': ['a2', 'c2', 'd2']},
@@ -117,9 +117,9 @@ def test_flat_dict2():
         (): {1, 6, 7}
     }  # FIXME
     assert fd[1,2,3] == {'+': ['a1', 'b1'], '-': ['a2', 'c2']}
-    assert set(fd.keys((1, 2))) == {3, 4}
+    assert set(fd.keys(1, 2)) == {3, 4}
     assert set(fd.keys()) == {1, 6, 7}
-    assert dict(fd.reads((1, 2))) == {
+    assert dict(fd.reads(1, 2)) == {
         3: {'+': ['a1', 'b1'], '-': ['a2', 'c2']},
         4: {'+': [], '-': ['d2']},
     }
@@ -144,17 +144,16 @@ def test_flat_dict2():
     assert (1, 2, 4) in fd
     assert (1, 3) not in fd
     assert fd[1, 2, 5] == {'+': [], '-': []}
-    assert set(fd.keys((1, 2, 5))) == set()
-    assert dict(fd.reads((1, 2, 5))) == {}
-    assert dict(fd.items((1, 2, 5))) == {}
+    assert set(fd.keys(1, 2, 5)) == set()
+    assert dict(fd.reads(1, 2, 5)) == {}
+    assert dict(fd.items(1, 2, 5)) == {}
 
 
 def test_sub_flat_dict():
     fd = FlatDict(BIG_D)
     d1 = {k: s for k, s in fd.items(1)}
-    d2 = {k: s for k, s in fd.items((1,))}
-    d3 = {k: s for k, s in list(fd.sub(1).items())}
-    for d in (d1, d2, d3):
+    d2 = {k: s for k, s in list(fd.sub(1).items())}
+    for d in (d1, d2):
         assert set(d.keys()) == {2, 5}
         sfd2 = d[2]
         sfd5 = d[5]

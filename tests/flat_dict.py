@@ -24,7 +24,7 @@ def _update_deinterlaced_dict(d, e):
 
 def FlatDict(nested_dict, deinterlaced_keys=None):
     fd = _FlatDict(nested_dict, deinterlaced_keys)
-    return fd.sub(())
+    return fd.sub()
 
 
 class _FlatDict(object):
@@ -49,23 +49,23 @@ class _FlatDict(object):
                 a.add(nk[i])
             self._keys_tree[nk] = set()
 
-    def keys(self, nk=()):
+    def keys(self, *nk):
         if self._has_default:
             return iter(self._keys_tree.get(nk, []))
         else:
             return iter(self._keys_tree[nk])
 
-    def items(self, nk=()):
-        keys = self.keys(nk)
+    def items(self, *nk):
+        keys = self.keys(*nk)
         def inner():
             for k in keys:
-                yield k, _SubFlatDict(self, nk + (k,))
+                yield k, _SubFlatDict(self, *nk, k)
         return inner()
 
-    def reads(self, nk=()):
-        keys = self.keys(nk)
+    def reads(self, *nk):
+        keys = self.keys(*nk)
         def inner():
-            for k in self.keys(nk):
+            for k in keys:
                 yield k, self[nk + (k,)]
         return inner()
 
@@ -81,8 +81,8 @@ class _FlatDict(object):
     def __iter__(self):
         return iter(self._keys_tree)
 
-    def sub(self, nk=()):
-        return _SubFlatDict(self, nk)
+    def sub(self, *nk):
+        return _SubFlatDict(self, *nk)
 
 
 def _safe_tup(t):
@@ -92,6 +92,12 @@ def _safe_tup(t):
 
 
 def _submethod(method):
+    def _method(self, *nk):
+        return getattr(self._fd, method)(*(self._prefix_keys + nk))
+    return _method
+
+
+def _tup_submethod(method):
     def _method(self, nk=()):
         return getattr(self._fd, method)(self._prefix_keys + _safe_tup(nk))
     return _method
@@ -99,22 +105,22 @@ def _submethod(method):
 
 class _SubFlatDict(object):
     
-    def __init__(self, fd, prefix_keys):
+    def __init__(self, fd, *prefix_keys):
         if isinstance(fd, _FlatDict):
             self._fd = fd
-            self._prefix_keys = _safe_tup(prefix_keys)
+            self._prefix_keys = prefix_keys
         elif isinstance(fd, _SubFlatDict):
             self._fd = fd._fd
-            self._prefix_keys = fd._prefix_keys + _safe_tup(prefix_keys)
+            self._prefix_keys = fd._prefix_keys + prefix_keys
         else:
             raise TypeError()
 
     keys = _submethod("keys")
     items = _submethod("items")
     reads = _submethod("reads")
-    __getitem__ = _submethod("__getitem__")
-    __contains__ = _submethod("__contains__")
     sub = _submethod("sub")
+    __contains__ = _tup_submethod("__contains__")
+    __getitem__ = _tup_submethod("__getitem__")
 
     def __iter__(self):
         for k in self._fd:

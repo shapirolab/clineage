@@ -112,8 +112,8 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
                 assert not os.path.exists(aar.fastq1)
                 assert not os.path.exists(aar.fastq2)
                 assert not os.path.exists(aar.fastqm)
-            assert amps == set(adam_reads_fd.sub((l_id, bc_id, ASSEMBLED)).keys()) | \
-                (set(adam_reads_fd.sub((l_id, bc_id, UNASSEMBLED)).keys()) if \
+            assert amps == set(adam_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
+                (set(adam_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
                     inc == "F" else set())
             ama.delete()
             assert not os.path.exists(ama.assignment_sam)
@@ -177,10 +177,10 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
             assert not os.path.exists(her.fastq2)
             assert not os.path.exists(her.fastqm)
         if inc == "F":
-            assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys()) \
-                | set(adam_reads_fd.sub((l_id, bc, UNASSEMBLED, amp)).keys())
+            assert gens == set(adam_reads_fd.keys(l_id, bc, ASSEMBLED, amp)) \
+                | set(adam_reads_fd.keys(l_id, bc, UNASSEMBLED, amp))
         else:
-            assert gens == set(adam_reads_fd.sub((l_id, bc, ASSEMBLED, amp)).keys())
+            assert gens == set(adam_reads_fd.keys(l_id, bc, ASSEMBLED, amp))
         ah.delete()
         assert not os.path.exists(ah.assignment_sam)
         #assert filecmp.cmp(ah.assignment_sam,
