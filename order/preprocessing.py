@@ -90,6 +90,34 @@ def generate_simulated_proportional_alleles(seeds, cycles, proprtions, method, *
     return hist_sum - shift
 
 
+def generate_simulated_proportional_alleles_precalculated(seeds, seeds_hists, cycles, proprtions):
+    assert sum(proprtions) == 1
+    assert len(seeds) == len(cycles) == len(proprtions)
+    signals = []
+    for seed, cycles, proportion in zip(seeds, cycles, proprtions):
+        if proportion == 0.0:
+            continue
+        hist = seeds_hists[seed][cycles].ymul(proportion) + seed
+        signals.append(hist)
+    hist_sum = signals[0]
+    for signal in signals[1:]:
+        hist_sum = hist_sum.asym_add(signal)
+    hist_sum.normalize()
+    shift = int(np.mean(list(seeds)))
+    return hist_sum - shift
+
+
+def generate_biallelic_reads_of_multiple_proportions(min_cycles=20, max_cycles=90, min_ms_length=5, max_ms_length=60, method='bin', steps=100,  **kwargs):
+    # print min_ms_length, max_ms_length, min_cycles, max_cycles
+    sim_hists = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    for seeds in bar(list(combinations_with_replacement(list(range(min_ms_length, max_ms_length)), 2))):
+        for cycles in range(min_cycles, max_cycles):
+            for p1 in [float(x)/steps for x in range(1, steps-1)]:
+                # print p1
+                sim_hists[frozenset(seeds)][tuple(zip(seeds, (p1, 1 - p1)))][cycles] = generate_simulated_proportional_alleles(seeds, (cycles, cycles), (p1, 1 - p1), method, **kwargs)
+    return sim_hists
+
+
 def generate_sim_hists_of_up_to_k_alleles(**kwargs):
     """
         method='bin'

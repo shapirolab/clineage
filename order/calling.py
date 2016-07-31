@@ -5,22 +5,50 @@ from .preprocessing import flatten_index, inflate_index
 from .fitting import match_cycles
 from .hist import Histogram
 from itertools import combinations
-from collections import defaultdict
-from pickle import loads
 import concurrent.futures
 from itertools import repeat
 from frogress import bar
 
-def load_or_create_calling(callingfile):
-    try:
-        print('loading existing calling')
-        f = open(callingfile, 'rb').read()
-        calling = loads(f)
-        print('done loading existing calling')
-    except:
-        print('initializing new calling')
-        calling = defaultdict(lambda: defaultdict(dict))
-    return calling
+
+def get_proportions(diff, median, length_sensitivity=0.21, diff_sensetivity=0.65, steps=100):
+    assert length_sensitivity > 0
+    steps_from_equal_proportions = min(int(((diff**diff_sensetivity/(length_sensitivity*median))**3)*steps), steps/2)
+    proportions = []
+    for i in range(steps_from_equal_proportions):
+        step = i
+        proportions.append((steps/2-step)/float(steps))
+        proportions.append((steps/2+step)/float(steps))
+    if diff == 0:
+        return [0.5]
+    return proportions
+
+
+def float_intersect(floats_a, floats_b, epsilon=0.000001):
+    """
+    forgiving floats comparison. returns the floats_a version of the values
+    :param floats_a:
+    :param floats_b:
+    :param epsilon:
+    :return:
+    """
+    intersection = set()
+    for float_a in floats_a:
+        for float_b in floats_b:
+            if abs(float_a - float_b) < epsilon:
+                intersection.add(float_a)
+    return intersection
+
+
+def filter_seeds_and_proportions(dup_sim_hist_for_seed, length_sensitivity=5.0, diff_sensetivity=1.0, steps=100):
+    for seeds_and_proportions in dup_sim_hist_for_seed:
+        seed_a, seed_b = seeds_and_proportions
+        allele_a, proportion_a = seed_a
+        allele_b, proportion_b = seed_b
+        diff = abs(allele_a - allele_b)
+        max_len = max([allele_a, allele_b])
+        allowed_proportions = get_proportions(diff, max_len, length_sensitivity=length_sensitivity, diff_sensetivity=diff_sensetivity, steps=steps)
+        if float_intersect([proportion_a, proportion_b], allowed_proportions):
+            yield seeds_and_proportions
 
 
 def call_multi_hist(hist,
@@ -29,6 +57,9 @@ def call_multi_hist(hist,
                     max_alleles=2,
                     max_distance_from_median=30,
                     max_ms_length=60,
+                    proportional=False,
+                    length_sensitivity=5.0,
+                    diff_sensetivity=1.0,
                     **kwargs
                     ):
     """
@@ -60,21 +91,39 @@ def call_multi_hist(hist,
                     max(5, measured_hist_shift-max_distance_from_median),
                     min(measured_hist_shift+max_distance_from_median, max_ms_length)), allele_number
             )
-            for seeds in possible_hist_seeds:
+            for seeds in set([frozenset(possible_hist_seed) for possible_hist_seed in possible_hist_seeds]).intersection(set(dup_sim_hist.keys())):
                 if measured_hist_shift == int(np.mean(seeds)):
-                    c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
-                                                       dup_sim_hist[frozenset(seeds)],
-                                                       reads=h.nsamples,
-                                                       **kwargs)
-                    if best_score > s:
-                        best_score = s
-                        res = {
-                            'shifts': seeds,
-                            'cycle': c,
-                            'score': s,
-                            'median': med,
-                            'reads': h.nsamples
-                            }
+                    if not proportional:
+                        c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
+                                                           dup_sim_hist[frozenset(seeds)],
+                                                           reads=h.nsamples,
+                                                           proportional=proportional,
+                                                           **kwargs)
+                        if best_score > s:
+                            best_score = s
+                            res = {
+                                'shifts': seeds,
+                                'cycle': c,
+                                'score': s,
+                                'median': med,
+                                'reads': h.nsamples
+                                }
+                    else:
+                        for seeds_and_proportions in filter_seeds_and_proportions(dup_sim_hist[frozenset(seeds)], length_sensitivity=length_sensitivity, diff_sensetivity=diff_sensetivity):
+                            c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
+                                                           dup_sim_hist[frozenset(seeds)][seeds_and_proportions],
+                                                           reads=h.nsamples,
+                                                           **kwargs)
+                            if best_score > s:
+                                best_score = s
+                                res = {
+                                    'seeds_and_proportions': seeds_and_proportions,
+                                    'shifts': seeds,
+                                    'cycle': c,
+                                    'score': s,
+                                    'median': med,
+                                    'reads': h.nsamples
+                                    }
     return res
 
 
@@ -84,7 +133,7 @@ def helper(tup):
     flat_sim_hists, kwargs = extras
     sim_hists = inflate_index(flat_sim_hists)
     # print 'working on loc: {} , cell: ...{}'.format(loc, cell[-15:])
-    res = call_multi_hist(row_hist, sim_hists, **kwargs)
+    res = call_multi_hist(row_hist, sim_hists, proportional=False, **kwargs)
     return loc, cell, row_hist, res
 
 
@@ -116,11 +165,11 @@ def generate_hist_calls(input_file,
     :return:
     """
     flat_sim_hists = flatten_index(sim_hists)
-    print('starting {} auxiliary process'.format(workers))
+    print 'starting {} auxiliary process'.format(workers)
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         for result in executor.map(helper,
-                                   zip(
+                                   izip(
                                        uncalled_inputs(input_file,
                                                        calling,
                                                        reads_threshold=reads_threshold),
@@ -135,21 +184,21 @@ def generate_calling_file(input_file,
                           calling,
                           **kwargs):
     """
-    workers=1,
-    max_alleles=2,
-    max_distance_from_median=30,
-    reads_threshold=50
-    shift_margins=3
-    nsamples=None
-    method='cor',
-    score_threshold=0.006,
-    min_cycles=0,
-    max_cycles=80,
-    max_ms_length=60
-    normalize=True,
-    truncate=False,
-    cut_peak=False,
-    trim_extremes=False):
+        workers=1,
+        max_alleles=2,
+        max_distance_from_median=30,
+        reads_threshold=50
+        shift_margins=3
+        nsamples=None
+        method='cor',
+        score_threshold=0.006,
+        min_cycles=0,
+        max_cycles=80,
+        max_ms_length=60
+        normalize=True,
+        truncate=False,
+        cut_peak=False,
+        trim_extremes=False):
     :param input_file:
     :param sim_hists:
     :param calling:

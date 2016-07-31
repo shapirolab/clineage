@@ -23,14 +23,17 @@ def vnormalized(a, axis=-1, order=2):
 class Histogram(object):
     def __init__(self, h, normalize=False, nsamples=None, truncate=False, cut_peak=False, trim_extremes=False, **kwargs):
         if isinstance(h,list):
-            h = Counter({i+3:x for i,x in enumerate(h)})
+            self._hist = Counter({i+3:x for i,x in enumerate(h)})
         if isinstance(h,dict):
-            h = Counter(h)
-        self._hist = h
-        if nsamples is not None:
-            self.nsamples = nsamples
+            self._hist = Counter(h)
+        if isinstance(h, Histogram):
+            self._hist = h._hist.copy()
+            self.nsamples = h.nsamples
         else:
-            self.nsamples = sum(self.values())
+            if nsamples is not None:
+                self.nsamples = nsamples
+            else:
+                self.nsamples = sum(self.values())
         if trim_extremes:
             self.trim_extremes()
         if normalize:
@@ -194,7 +197,10 @@ class Histogram(object):
         if not sig(self):
             return 0
         return mu(((self-mu(self))/sig(self))**3)
-    
+
+    def copy(self, normalize=False):
+        return Histogram(self._hist, nsamples=self.nsamples, normalize=normalize)
+
     # Repr
     def __repr__(self):
         N = sum(self.values())
