@@ -6,8 +6,10 @@ import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin, SNPHistogramGenotype, \
-    MicrosatelliteHistogramGenotype
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin, \
+    SNPHistogramGenotype, MicrosatelliteHistogramGenotype, \
+    MicrosatelliteHistogramGenotypeSet, AdamMSVariations, AdamHistogram, \
+    Histogram, HistogramEntryReads, SNPHistogramGenotypeSet
 from targeted_enrichment.amplicons.models import Amplicon
 from sequencing.analysis.models import LEFT, RIGHT
 from misc.utils import get_unique_path
@@ -187,7 +189,7 @@ def adam_amplicon_reads_files_d(adam_reads_fd, temp_storage):
 
 
 @pytest.yield_fixture()
-def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
+def _chain_amplicon_reads(adam_amplicon_reads_files_d, adam_merged_reads_d):
     d = {}
     for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.items():
         dst_dir = get_unique_path()
@@ -217,12 +219,12 @@ def _chain(adam_amplicon_reads_files_d, adam_merged_reads_d):
 
 
 @pytest.yield_fixture()
-def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicons):
+def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain_amplicon_reads, requires_amplicons):
     d = {}
     extra_dirs = []
     extra_files = []
     for (l_id, bc_id, inc), f_d_d in adam_amplicon_reads_files_d.items():
-        ari, ama = _chain[l_id, bc_id, inc]
+        ari, ama = _chain_amplicon_reads[l_id, bc_id, inc]
         for amp, f_d in f_d_d.items():
             f_d2 = {}
             for r in [R1, R2, RM]:
@@ -246,3 +248,140 @@ def adam_amplicon_reads_d(adam_amplicon_reads_files_d, _chain, requires_amplicon
         os.unlink(aar.fastqm)
         os.unlink(aar.fastq1)
         os.unlink(aar.fastq2)
+
+
+@pytest.yield_fixture(scope="session")
+def adam_histogram_entry_reads_files_d(adam_reads_fd, temp_storage):
+    d = {}
+    for l_id, l_d in adam_reads_fd.items():
+        for bc_id, s_d in l_d.items():
+            # M
+            for amp, a_d in s_d.sub(ASSEMBLED).items():
+                d[l_id, bc_id, "M", amp] = {}
+                for msgs, r_d in a_d.reads():
+                    f_d = {
+                        RM: get_unique_path("fastq"),
+                        R1: get_unique_path("fastq"),
+                        R2: get_unique_path("fastq"),
+                        "num": len(r_d[RM])
+                    }
+                    for r in [R1, R2, RM]:
+                        SeqIO.write(r_d[r], f_d[r], "fastq")
+                    d[l_id, bc_id, "M", amp][msgs] = f_d
+            # F
+            all_amps = set(s_d.keys(ASSEMBLED)) | set(s_d.keys(UNASSEMBLED))
+            for amp in all_amps:
+                # Assuming there are no amplicons only present in UNASSEMBLED
+                all_msgss = set(s_d.keys(ASSEMBLED, amp)) | set(s_d.keys(UNASSEMBLED, amp))
+                d[l_id, bc_id, "F", amp] = {}
+                for msgs in all_msgss:
+                    f_d = {
+                        RM: get_unique_path("fastq"),
+                        R1: get_unique_path("fastq"),
+                        R2: get_unique_path("fastq"),
+                        "num": len(s_d[ASSEMBLED, amp, msgs][RM]) + \
+                            len(s_d[UNASSEMBLED, amp, msgs][R1]),
+                    }
+                    for r in [R1, R2]:
+                        SeqIO.write(itertools.chain(
+                            s_d[ASSEMBLED, amp, msgs][r],
+                            s_d[UNASSEMBLED, amp, msgs][r],
+                            ), f_d[r], "fastq")
+                    SeqIO.write(itertools.chain(
+                        s_d[ASSEMBLED, amp, msgs][RM],
+                        s_d[UNASSEMBLED, amp, msgs][R1],
+                        ), f_d[RM], "fastq")
+                    d[l_id, bc_id, "F", amp][msgs] = f_d
+    yield d
+    for f_d_d in d.values():
+        for f_d in f_d_d.values():
+            os.unlink(f_d[RM])
+            os.unlink(f_d[R1])
+            os.unlink(f_d[R2])
+
+
+@pytest.yield_fixture()
+def _chain_histogram_entry_reads(adam_histogram_entry_reads_files_d, adam_amplicon_reads_d):
+    d = {}
+    ahs = {}
+    amsvs = {}
+    for (l_id, bc_id, inc, amp), f_d_d in adam_histogram_entry_reads_files_d.items():
+        try:
+            amsv = amsvs[amp, 1]
+        except KeyError:
+            dst_dir = get_unique_path()
+            os.mkdir(dst_dir)
+            amsv = AdamMSVariations.objects.create(
+                amplicon_id=amp,
+                padding=5,
+                index_dump_dir=dst_dir,
+                microsatellites_version=1,
+            )
+            amsvs[amp, 1] = amsv
+        # So our objects don't have "special" objects in fields
+        amsv = AdamMSVariations.objects.get(pk=amsv.pk)
+        fake_sam = get_unique_path("sam")
+        with open(fake_sam, "wb") as f:
+            pass
+        aar = adam_amplicon_reads_d[l_id, bc_id, inc, amp]
+        ah = AdamHistogram.objects.create(
+            sample_reads=aar.margin_assignment.reads_index.merged_reads.sample_reads,
+            microsatellites_version=1,
+            amplicon_id=amp,
+            amplicon_reads=aar,
+            assignment_sam=fake_sam,
+            ms_variations=amsv,
+            separation_finished=True,
+        )
+        ahs[l_id, bc_id, inc, amp] = ah
+        # So our objects don't have "special" objects in fields
+        h = Histogram.objects.get(pk=ah.pk)
+        d[l_id, bc_id, inc, amp] = h
+    yield d
+    for ah in ahs.values():
+        os.unlink(ah.assignment_sam)
+    for amsv in amsvs.values():
+        os.rmdir(amsv.index_dump_dir)
+
+
+@pytest.yield_fixture()
+def adam_histogram_entry_reads_d(adam_histogram_entry_reads_files_d, _chain_histogram_entry_reads, requires_microsatellites, requires_none_genotypes):
+    d = {}
+    none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
+    snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
+        **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
+    for (l_id, bc_id, inc, amp), f_d_d in adam_histogram_entry_reads_files_d.items():
+        h = _chain_histogram_entry_reads[l_id, bc_id, inc, amp]
+        for msgs, f_d in f_d_d.items():
+            msg_objs = set()
+            for (microsatellite_id, repeat_number) in msgs:
+                msg, c = MicrosatelliteHistogramGenotype.objects.get_or_create(
+                    microsatellite_id=microsatellite_id,
+                    repeat_number=repeat_number,
+                )
+                msg_objs.add(msg)
+            ms_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(msg_objs)
+            f_d2 = {}
+            for r in [R1, R2, RM]:
+                f_d2[r] = get_unique_path("fastq")
+                os.symlink(f_d[r], f_d2[r])
+            her = HistogramEntryReads.objects.create(
+                histogram=h,
+                microsatellite_genotypes=ms_genotypes,
+                snp_genotypes=snp_histogram_genotypes,
+                num_reads=f_d["num"],
+                fastqm=f_d2[RM],
+                fastq1=f_d2[R1],
+                fastq2=f_d2[R2],
+            )
+            # So our objects don't have "special" objects in fields
+            her = HistogramEntryReads.objects.get(pk=her.pk)
+            d[l_id, bc_id, inc, amp, msgs] = her
+    yield d
+    for her in d.values():
+        # aar.margin_assignment.reads_index.delete()
+        # aar.margin_assignment.delete()
+        # aar.delete()
+        os.unlink(her.fastqm)
+        os.unlink(her.fastq1)
+        os.unlink(her.fastq2)
