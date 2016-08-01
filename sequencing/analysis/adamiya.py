@@ -342,17 +342,11 @@ def separate_reads_by_genotypes(histogram):
         reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
         reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
         readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
-        none_ms_genotype = MicrosatelliteHistogramGenotype.objects.get(microsatellite=None)
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
         for genotypes, read_ids in genotypes_reads.items():
-            ordered_genotypes = dict(itertools.zip_longest(
-                MicrosatelliteHistogramGenotypeSet.genotype_field_names(),
-                sorted(list(genotypes), key=lambda g: g.microsatellite.slice),
-                fillvalue=none_ms_genotype,
-            ))
-            microsatellite_histogram_genotypes, c = MicrosatelliteHistogramGenotypeSet.objects.get_or_create(**ordered_genotypes)
+            ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(genotypes)
             def inner(raise_or_create_with_defaults):
                 with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
                     _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
@@ -365,7 +359,7 @@ def separate_reads_by_genotypes(histogram):
                     )
             yield get_get_or_create(inner, HistogramEntryReads, 
                 histogram=histogram,
-                microsatellite_genotypes=microsatellite_histogram_genotypes,
+                microsatellite_genotypes=ms_histogram_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
             )
         else:

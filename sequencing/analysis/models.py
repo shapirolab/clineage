@@ -358,7 +358,21 @@ class MicrosatelliteHistogramGenotypeSet(models.Model):
     def genotype_field_names():
         for i in range(1,9):
             yield 'microsatellite_genotype{}'.format(i)
-    
+
+    @classmethod
+    def get_for_msgs(cls, msgs):
+        l = list(msgs)
+        names = list(cls.genotype_field_names())
+        assert len(names) >= len(l)
+        none_ms_genotype = MicrosatelliteHistogramGenotype.objects.get(microsatellite=None)
+        ordered_genotypes = dict(itertools.zip_longest(
+            names,
+            sorted(l, key=lambda g: g.microsatellite.slice),
+            fillvalue=none_ms_genotype,
+        ))
+        obj, c = cls.objects.get_or_create(**ordered_genotypes)
+        return obj
+
     @property
     def genotype_fields(self):
         return [
