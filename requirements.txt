@@ -13,6 +13,6 @@ lxml==3.6.0
 Cython==0.23.5
 pysam==0.9.0
 plumbum==1.6.1.post0
-distributed==1.10.2
+distributed==1.11.3
 sqlparse==0.2.0
 XlsxWriter==0.9.3
