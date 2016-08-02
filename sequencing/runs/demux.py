@@ -4,6 +4,7 @@ import csv
 import io
 import os
 import resource
+from Bio import SeqIO
 
 from misc.utils import get_unique_path, unique_dir_cm, unlink
 
@@ -163,10 +164,14 @@ def run_demux(ngs_run, demux_scheme):
                 )) for read in [1, 2]]
             files.append(fastq1)
             files.append(fastq2)
+            with open(fastq1) as f:
+                seq = SeqIO.parse(f, format="fastq")
+                num_reads = sum(1 for x in seq)
             yield SampleReads.objects.create(
                 demux=demux,
                 barcoded_content=bc,
                 library=bc_libs_d[bc],
+                num_reads=num_reads,
                 fastq1=fastq1,
                 fastq2=fastq2,
             )

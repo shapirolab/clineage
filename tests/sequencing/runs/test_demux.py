@@ -102,6 +102,8 @@ Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,ind
         assert sr.demux == demux
         assert sr.barcoded_content == bc
         assert sr.library == magicalpcr1library
+        # FIXME check with some reads.
+        assert sr.num_reads == 0
         for fastq, read in [(sr.fastq1, 1), (sr.fastq2, 2)]:
             assert fastq == os.path.join(fastq_folder,
                 "{name}_S{num}_R{read}_001.fastq".format(
