@@ -52,10 +52,14 @@ def sampling_event_for_individual(indi, report_dict):
             yield None, e, ee
 
 
+def sorted_cell_classifications(cells):
+    return sorted(list(set([cell.classification for cell in cells])), key=lambda x: (x is None, x))
+
+
 def cells_for_individual(indi, report_dict):
     for se, e, ee in sampling_event_for_individual(indi, report_dict):
         if se:
-            for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
+            for cls in sorted_cell_classifications(se.cell_set.all()):
                 if se.cell_set.filter(classification=cls):
                     yield cls, se, e, ee
 
@@ -73,7 +77,7 @@ def populate_report_dict(indi, report_dict, cellrow, color_map):
 
 def collect_cells_without_clasification(report_dict, indi, cellrow, color_map):
     report_dict[indi.name]['cells_list'] = 1 #temporary workaround TODO:revise
-    for cls in sorted(list(set([cell.classification for cell in indi.cell_set.all()]))):
+    for cls in sorted_cell_classifications(indi.cell_set.all()):
         report_dict[indi.name][str(cls)]['Cells_color'] = hex_to_rgb(color_map, indi.cell_set.filter(classification=cls)[0])
         report_dict[indi.name][str(cls)]['Cells_pos'] = [cellrow+1, cellrow+indi.cell_set.filter(classification=cls).count()]
         report_dict[indi.name][str(cls)]['Cells_classification_string'] = cls
@@ -126,18 +130,19 @@ def get_cells(partner_name, individual_name=None, cell_groups=None):
     return list(cell_groups.keys())
 
 
+#TODO: DRY
 def sorted_cells(individual):
     cell_list = []
     if not individual.extractionevent_set.all() or \
             not individual.extractionevent_set.all()[0].extraction_set.all() or \
             not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-        for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
+        for cls in sorted_cell_classifications(individual.cell_set.all()):
             for cell in individual.cell_set.filter(classification=cls):
                 cell_list.append(cell)
     for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
         for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
             for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
-                for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
+                for cls in sorted_cell_classifications(se.cell_set.all()):
                     for cell in se.cell_set.filter(classification=cls):
                         cell_list.append(cell)
     return cell_list
@@ -150,7 +155,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
         if not individual.extractionevent_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all() or \
                 not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
-            for cls in sorted(list(set([cell.classification for cell in individual.cell_set.all()]))):
+            for cls in sorted_cell_classifications(individual.cell_set.all()):
                 for cell in individual.cell_set.filter(classification=cls):
                     cell_groups[cell] = current_group
                 if individual.cell_set.filter(classification=cls):
@@ -159,7 +164,7 @@ def get_cells_grouping(partner_name, individual_name=None, current_group=0):
         for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
             for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
                 for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
-                    for cls in sorted(list(set([cell.classification for cell in se.cell_set.all()]))):
+                    for cls in sorted_cell_classifications(se.cell_set.all()):
                         for cell in se.cell_set.filter(classification=cls):
                             cell_groups[cell] = current_group
                         if se.cell_set.filter(classification=cls):
