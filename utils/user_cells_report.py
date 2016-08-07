@@ -125,9 +125,14 @@ def get_cells_filenames_in_folder(cells, cell_folder):
 
 
 def get_cells(partner_name, individual_name=None, cell_groups=None):
+    cells = set()
     if not cell_groups:
         cell_groups = get_cells_grouping(partner_name, individual_name=individual_name)
-    return list(cell_groups.keys())
+    cells |= set(cell_groups.keys())
+    partner, individuals = query_partner_individuals(partner_name, individual_name=None)
+    for i in individuals:
+        cells |= set(i.cell_set.all())
+    return list(cells)
 
 
 #TODO: DRY
