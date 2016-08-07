@@ -189,6 +189,7 @@ INSTALLED_APPS = (
     'sampling',
     'sequencing.analysis',
     'sequencing.runs',
+    'sequencing.calling',
     'targeted_enrichment.planning',
     'targeted_enrichment.reagents',
     'targeted_enrichment.amplicons',
