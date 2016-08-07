@@ -99,9 +99,9 @@ def get_partner_report(partner_name, individual_name=None, palette_name='hls'):
             report_dict[partner.username], cellrow = collect_cells_without_clasification(report_dict[partner.username], individual, cellrow, color_map)
         report_dict[partner.username][individual.name]['Collaborator_table'] = None
         if individuals.count() > 1:
-            report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_cell_data.csv'.format(partner.username)
+            report_dict[partner.username][individual.name]['Database_table'] = '{}_cell_data.csv'.format(partner.username)
         else:
-            report_dict[partner.username][individual.name]['Database_table'] = 's:/LINEAGE/Hiseq/NSR2/fastq_human/Output/{}_{}_cell_data.csv'.format(partner.username, individual.name)
+            report_dict[partner.username][individual.name]['Database_table'] = '{}_{}_cell_data.csv'.format(partner.username, individual.name)
         report_dict[partner.username], cellrow = populate_report_dict(individual, report_dict[partner.username], cellrow, color_map)
     return report_dict
 
