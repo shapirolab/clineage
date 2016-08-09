@@ -17,3 +17,7 @@ class CalledGenotype(models.Model):
     calling_scheme = models.ForeignKey(CallingScheme)
 
     objects = InheritanceManager()
+
+
+class HighestPeak(CalledGenotype):
+    confidence = models.FloatField()
