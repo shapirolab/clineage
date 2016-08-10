@@ -21,3 +21,13 @@ def test_get_primer3_output(sample_target):
     assert target_primers['PRIMER_LEFT_1_SEQUENCE'] == 'ACCACAGGTGATGAGCATTTACT'
     assert target_primers['PRIMER_RIGHT_1_SEQUENCE'] == 'GGTTCAGATCAGGACTTGTGGAT'
 
+
+@pytest.mark.django_db
+def test_create_target_enrichment_in_db(target_enrichment_sample):
+    ta_sample, te_sample = create_target_enrichment_in_db(target_enrichment_sample)
+
+    assert te_sample.left.sequence.seq.decode('utf-8') == 'ACCACAGGTGATGAGCATTTACT'
+    assert te_sample.right.sequence.seq.decode('utf-8') == 'GGTTCAGATCAGGACTTGTGGAT'
+    assert ta_sample.slice.start_pos == 81316078
+
+

@@ -38,10 +38,9 @@ def target_enrichment_sample(primer3_output):
 
 
 @pytest.fixture()
-def choose_primer_pair(sam_file, target_primers):
-    input_name = 'test_ugs_input.txt'
-    output_name = 'test_ugs_output.txt'
+def tate_tuple_sample(target_enrichment_sample):
+    ta, te = create_target_enrichment_in_db(target_enrichment_sample)
+    tate_tuple = (ta, te)
 
-    p = sort_best_primers(sam_file, target_primers)
-    # So our objects don't have "special" objects in fields
-    return p
+    return [tate_tuple]
+
