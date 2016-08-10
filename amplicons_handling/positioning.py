@@ -1,59 +1,44 @@
 __author__ = 'ofirr'
 import xlwt
 import xlrd
-from utils.wells import index2str, str2index
-from wet_storage.models import SampleLocation, Plate, PlateType
+from wet_storage.models import SampleLocation
+from lib_prep.multiplexes.models import OM6Oligomix
+from targeted_enrichment.reagents.models import OM6PadlockTER
+from primers.synthesis.models import OM6Padlock
+from primers.parts.models import IlluminaReadingAdaptor1ForTail, IlluminaReadingAdaptor2ForTail
 
 
-def chunks(l, n):
+def insertion_OM_to_db(tate_tuple, panel_name):
     """
-    Yield successive n-sized chunks from l.
+    creating list of ters for OM6 panel
+    :param tate_tuple: UMITargetedAmplicon, TargetEnrichment list of tuples
+    :panel_name: name for the panel
+    :return:
     """
-    for i in range(0, len(l), n):
-        yield l[i:i+n]
 
+    ira1ft = IlluminaReadingAdaptor1ForTail.objects.filter(id=2)
+    ira2ft = IlluminaReadingAdaptor2ForTail.objects.filter(id=2)
+    OMmix = OM6Oligomix.objects.create(name=panel_name)
+    ters = []
+    for tate in tate_tuple:
+        ta, te = tate
+        om6_padlock = OM6Padlock.objects.get_or_create(
+            left_ugs=te.left,
+            right_ugs=te.right,
+            ira1ft=ira1ft,
+            ira2ft=ira2ft,
+            umi_length=3,
 
-def position_in_plates(targetenrichments_group,
-                       stk_fw_plate,
-                       stk_rv_plate,
-                       pairs_plate,
-                       plate_size=96,
-                       pair_vol=50,
-                       pair_conc=60,
-                       stk_vol=100,
-                       stk_conc=100,
-                       first_well='A1'):
-    """
-    Positions up to 96 primer pairs in stk plates and mixed pairs.
-    returns three lists of (SampleLocation, created) tuples for pair, fw, rv
-    """
-    assert len(targetenrichments_group) <= plate_size + 1 - str2index(first_well)
-    fw_positions, rv_positions, pairs_positions = [], [], []
-    for i, te in enumerate(targetenrichments_group):
-        well = index2str(str2index(first_well)+i)
-        pair_location = SampleLocation.objects.get_or_create(
-            plate=pairs_plate,
-            well=well,
-            defaults={'reagent': te,
-                      'volume': pair_vol,
-                      'concentration': pair_conc})
-        pairs_positions.append(pair_location)
-        stk_fw_location = SampleLocation.objects.get_or_create(
-            plate=stk_fw_plate,
-            well=well,
-            defaults={'reagent': te.left,
-                      'volume': stk_vol,
-                      'concentration': stk_conc})
-        fw_positions.append(stk_fw_location)
-        stk_rv_location = SampleLocation.objects.get_or_create(
-            plate=stk_rv_plate,
-            well=well,
-            defaults={'reagent': te.right,
-                      'volume': stk_vol,
-                      'concentration': stk_conc})
-        rv_positions.append(stk_rv_location)
-    return fw_positions, rv_positions, pairs_positions
+        )
+        ter = OM6PadlockTER.objects.get_or_create(
+            te=te,
+            amplicon=ta,
+            padlock=om6_padlock,
+        )
+        ters.append(ter)
+    OMmix.ters = ters
 
+    return OMmix
 
 def create_next_primers_plates(assembly):
     """
