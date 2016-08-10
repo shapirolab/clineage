@@ -44,3 +44,9 @@ def tate_tuple_sample(target_enrichment_sample):
 
     return [tate_tuple]
 
+
+@pytest.fixture()
+def OMmix_sample(tate_tuple_sample):
+    OMmix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel')
+
+    return OMmix

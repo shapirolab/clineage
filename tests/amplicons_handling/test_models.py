@@ -41,3 +41,17 @@ def test_insertion_OM_to_db(tate_tuple_sample):
     assert sample_te.te.right.sequence.seq.decode('utf-8') == 'GGTTCAGATCAGGACTTGTGGAT'
     assert sample_ta.amplicon.left_ugs.sequence.seq.decode('utf-8') == 'ACCACAGGTGATGAGCATTTACT'
 
+
+@pytest.mark.django_db
+def test_order_file_xls(OMmix_sample):
+    create_primer_order_file_xls(OMmix_sample, '/home/veronika/s/niki/tests/sample_sheet.xls')
+
+    workbook = xlrd.open_workbook('/home/veronika/s/niki/tests/sample_sheet.xls')
+    worksheet = workbook.sheet_by_name('OM7')
+
+    row_0 = worksheet.row(0)
+    row_1 = worksheet.row(1)
+
+    assert row_0[0].value == 'TEID'
+    assert row_1[0].value == 1
+
