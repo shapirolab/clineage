@@ -18,23 +18,23 @@ def sample_target(slice_28727_amplicon):
 
 
 @pytest.fixture()
-def choose_primer_pair(sam_file, target_primers):
-    input_name = 'test_ugs_input.txt'
-    output_name = 'test_ugs_output.txt'
-
-    p = sort_best_primers(sam_file, target_primers)
-    # So our objects don't have "special" objects in fields
-    return p
+def target_list_sample(sample_target):
+    target_list = [sample_target]
+    return target_list
 
 
 @pytest.fixture()
-def choose_primer_pair(sam_file, target_primers):
-    input_name = 'test_ugs_input.txt'
-    output_name = 'test_ugs_output.txt'
+def primer3_output(sample_target):
+    target_primers = primer3_design(sample_target, primer_num_rerun=2)
 
-    p = sort_best_primers(sam_file, target_primers)
-    # So our objects don't have "special" objects in fields
-    return p
+    return target_primers
+
+
+@pytest.fixture()
+def target_enrichment_sample(primer3_output):
+    chosen_target_primers, discarded_targets = sort_best_primers(primer3_output, delta_min=-85)
+
+    return chosen_target_primers
 
 
 @pytest.fixture()

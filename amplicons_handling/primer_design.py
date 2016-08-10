@@ -76,58 +76,23 @@ def primer3_design(target, min_size=130, max_size=400, primer_num_rerun=10000, o
     return primer3_output
 
 
-def parse_primer3_output(output_name):
-    fasta_output_file = open(output_name, 'rb')
-    primer3_output = fasta_output_file.read()
-    fasta_string = primer3_output.split('\n=\n')
-    pid = re.compile('SEQUENCE_ID=(\w+)')
-    pl = re.compile('PRIMER_LEFT_\d+_SEQUENCE=([actgACTG]+)')
-    pr = re.compile('PRIMER_RIGHT_\d+_SEQUENCE=([actgACTG]+)')
-    target_primers = defaultdict(lambda: defaultdict(lambda: defaultdict(str)))
-    for seq in fasta_string[:-1]:
-        seq_id = pid.findall(seq)[0]
-        left_primers = pl.findall(seq)
-        right_primers = pr.findall(seq)
-        assert len(left_primers) == len(right_primers)
-        for i, primer_left in enumerate(left_primers):
-            primer_right = right_primers[i]
-            target_primers[seq_id][i]['LEFT'] = primer_left
-            target_primers[seq_id][i]['RIGHT'] = primer_right
+def parse_primers(primer3_output):
+    target_primers = dict()
+
+    number_of_primers = len(primer3_output) // 30
+    for i in range(1, number_of_primers):
+        target_primers[i] = {}
+        target_primers[i]['LEFT'] = primer3_output['PRIMER_LEFT_{}_SEQUENCE'.format(i)]
+        target_primers[i]['RIGHT'] = primer3_output['PRIMER_RIGHT_{}_SEQUENCE'.format(i)]
+        target_primers[i]['LEFT_TM'] = primer3_output['PRIMER_LEFT_{}_TM'.format(i)]
+        target_primers[i]['RIGHT_TM'] = primer3_output['PRIMER_RIGHT_{}_TM'.format(i)]
+        target_primers[i]['LEFT_START'] = primer3_output['PRIMER_LEFT_{}'.format(i)]
+        target_primers[i]['RIGHT_START'] = primer3_output['PRIMER_RIGHT_{}'.format(i)]
+    target_primers['TARGET_START'] = primer3_output['TARGET_START']
+    target_primers['id'] = primer3_output['SEQUENCE_ID']
     return target_primers
 
 
-def bowtie2_design(input_fasta_file, output_file, bowtie2_index, output_name):
-    target_primers = parse_primer3_output(output_name)
-    out_string = ''
-    for seq_id in list(target_primers.keys()):
-        for primer_number in list(target_primers[seq_id]['LEFT'].keys()):
-            out_string += '>PRIMER_LEFT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id][primer_number]['LEFT'])
-            out_string += '>PRIMER_RIGHT_{}_{}\n{}\n'.format(primer_number, seq_id, target_primers[seq_id][primer_number]['RIGHT'])
-    primer_data_check = '{}.fa'.format(str(input_fasta_file))
-    # print('writing primers fasta file {}'.format(primer_data_check))
-    with open(primer_data_check, 'w+') as primers_output:
-        primers_output.write(out_string)
-    sam_file = '{}.sam'.format(str(output_file))
-    print('running bowtie sam file output:{}'.format(sam_file))
-
-    BOWTIE_2 = local[settings.PRIMER3_PATH]
-    BOWTIE_2('-k 2 {} -f -U {} -S {}'.format(bowtie2_index, primer_data_check, sam_file))
-
-    # s = '{} -k 2 {} -f -U {} -S {}'.format(settings.BOWTIE2_PATH, bowtie2_index, primer_data_check, sam_file)
-    # os.system(s)
-    return sam_file, primer_data_check, target_primers
-
-
-def primer_count_from_sam_file(sam_file):
-    samfile = pysam.Samfile(sam_file, "r")
-    primer_keys = []
-    primers_names = defaultdict(lambda: defaultdict(int))
-    for sam_primer in samfile:
-        primer_keys.append(sam_primer.qname)
-        primers_names[sam_primer.qname]['Start_pos'] = sam_primer.reference_start
-        primers_names[sam_primer.qname]['End_pos'] = sam_primer.reference_end-1
-    name_count = Counter(primer_keys)
-    return name_count, primers_names
 
 
 def sort_best_primers(sam_file, target_primers, margins=300):
