@@ -93,85 +93,48 @@ def parse_primers(primer3_output):
     return target_primers
 
 
-
-
-def sort_best_primers(sam_file, target_primers, margins=300):
-    name_count, primers_names = primer_count_from_sam_file(sam_file)
-    chosen_target_primers = defaultdict(lambda: defaultdict(str))
+def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=-70, delta_man=0):
+    """
+    filtering primers based on different parameters that we choose
+    :param target_primers: primers dict for targets
+    :return: chosen_target_primers, discarded_targets
+    """
+    target_primers = parse_primers(primer3_output)
     discarded_targets = []
-    for target_id in bar(list(target_primers.keys())):
-        for primer_number in sorted(target_primers[target_id].keys()):
-            bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number['LEFT'], target_id)
-            bowtie2_key_right = 'PRIMER_RIGHT_{}_{}'.format(primer_number['RIGHT'], target_id)
-            right_primer = target_primers[target_id][primer_number]['RIGHT']
-            left_primer = target_primers[target_id][primer_number]['LEFT']
-            left_pos = primers_names[bowtie2_key_left]['Start_pos']
-            right_pos = primers_names[bowtie2_key_right]['End_pos']
-            if right_pos - left_pos <= margins:
-                break
+    chosen_target_primers = []
 
-        if left_primer and right_primer:
-            target = Target.objects.get(pk=target_id)
-            # try:
-            #     primer_fw, primer_rv = check_primers(target,
-            #                                          left_primer,
-            #                                          right_primer,
-            #                                          target_enrichment_type=TargetEnrichmentType.objects.get(
-            #                                              name='PCR_with_tails'),
-            #                                          margins=margins)
-            #     #test_new?
-            #     chosen_target_primers[target_id]['LEFT'] = left_primer
-            #     chosen_target_primers[target_id]['RIGHT'] = right_primer
-            # except AmpliconCollisionError:
-            #     discarded_targets.append(target_id)
-            # except PrimerLocationError:
-            #     discarded_targets.append(target_id)
-            chosen_target_primers[target_id]['LEFT'] = left_primer
-            chosen_target_primers[target_id]['RIGHT'] = right_primer
-        else:
-            discarded_targets.append(target_id)
+    # looking for the best length amplicon for PCR
+    target = Target.objects.get(name=target_primers['id'])
+    relative_target_pos = target_primers['TARGET_START'][0]
+    chromosome = target.slice.chromosome
 
-    return chosen_target_primers, discarded_targets
+    for tar in target_primers.keys():
+        if tar == 'id' or tar == 'TARGET_START':
+            continue
 
+        tar_size = target_primers[tar]['RIGHT_START'][0] + target_primers[tar]['RIGHT_START'][1] - \
+                   target_primers[tar]['LEFT_START'][0]
 
-def sort_unique_primers(sam_file, target_primers, margins=300):
-    name_count, primers_names = primer_count_from_sam_file(sam_file)
-    chosen_target_primers = defaultdict(lambda: defaultdict(str))
-    discarded_targets = []
-    for target_id in bar(list(target_primers.keys())):
-        left_primer = None
-        for primer_number_fr in sorted(target_primers[target_id]['LEFT'].keys()):
-            bowtie2_key_left = 'PRIMER_LEFT_{}_{}'.format(primer_number_fr, target_id)
-            if name_count[bowtie2_key_left] == 1:
-                left_primer = target_primers[target_id][primer_number_fr]['LEFT']
-                right_primer = None
-                for primer_number_rv in sorted(target_primers[target_id]['RIGHT'].keys()):
-                    bowtie2_key_right = 'PRIMER_RIGHT_{}_{}'.format(primer_number_rv, target_id)
-                    if name_count[bowtie2_key_right] == 1:
-                        right_primer = target_primers[target_id][primer_number_rv]['RIGHT']
-                        left_pos = primers_names[bowtie2_key_left]['Start_pos']
-                        right_pos = primers_names[bowtie2_key_right]['End_pos']
-                        if right_pos - left_pos <= margins:
-                            break
-                        else:
-                            right_primer = None
+        # checking deltaG for amplicons
 
-        if left_primer and right_primer:
-            target = Target.objects.get(pk=target_id)
-            try:
-                primer_fw, primer_rv = check_primers(target,
-                                 left_primer,
-                                 right_primer,
-                                 target_enrichment_type=TargetEnrichmentType.objects.get(name='PCR_with_tails'),
-                                 margins=margins)
-                chosen_target_primers[target_id]['LEFT'] = left_primer
-                chosen_target_primers[target_id]['RIGHT'] = right_primer
-            except AmpliconCollisionError:
-                discarded_targets.append(target_id)
-            except PrimerLocationError:
-                discarded_targets.append(target_id)
+        # template_slice = DNASlice(chromosome=chromosome,
+        #                           start_pos=target.slice.start_pos - (relative_target_pos -
+        #                                                               target_primers[tar]['LEFT_START'][0]),
+        #                           end_pos=target.slice.start_pos + (target_primers[tar]['RIGHT_START'][0] -
+        #                                                             relative_target_pos -
+        #                                                             target_primers[tar]['RIGHT_START'][1] + 1))
+        # ter = template_slice.sequence.seq.decode('utf-8')
+        # dctpd = RNA.fold(ter)[1]
+        # print(dctpd)
 
-        else:
-            discarded_targets.append(target_id)
+        if best_size + margin_size >= tar_size >= best_size - margin_size:
+        # if best_size + margin_size >= tar_size >= best_size - margin_size and delta_min < dctpd <= delta_man:
+            chosen_target_primers = target_primers[tar]
+            chosen_target_primers['id'] = target_primers['id']
+            chosen_target_primers['TARGET_START'] = target_primers['TARGET_START']
+            break
+
+    if not chosen_target_primers:
+        discarded_targets = target_primers['id']
 
     return chosen_target_primers, discarded_targets
