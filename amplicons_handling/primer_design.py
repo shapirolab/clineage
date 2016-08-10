@@ -1,56 +1,78 @@
 __author__ = 'veronika'
 
-import os
+import primer3
 import re
 import argparse
 import pysam
-from django.conf import settings
 from collections import defaultdict
 from collections import Counter
 from frogress import bar
 from plumbum import local
-from .primers_insertion import create_primers_in_db
-from .positioning import insertion_plates_to_db, create_primer_order_file_xls
-from .primers_insertion import check_primers, AmpliconCollisionError, PrimerLocationError
-from genomes.models import TargetEnrichmentType, PrimerTail
+# import sys
+# sys.path.append('/home/barakor/ViennaRNA/lib/python3.5/site-packages/')
+# import RNA
+
+from genomes.models import DNASlice
 from targeted_enrichment.planning.models import Target
 
+GLOBAL_ARGS = {
+    'PRIMER_TASK': 'pick_detection_primers',
+    'PRIMER_OPT_SIZE': 23,
+    'PRIMER_PICK_INTERNAL_OLIGO': 1,
+    'PRIMER_INTERNAL_MAX_SELF_END': 8,
+    'PRIMER_MIN_SIZE': 20,
+    'PRIMER_MAX_SIZE': 27,
+    'PRIMER_OPT_TM': 60.0,
+    'PRIMER_MIN_TM': 57.0,
+    'PRIMER_MAX_TM': 63.0,
+    'PRIMER_TM_FORMULA': 1,
+    'PRIMER_MIN_GC': 20.0,
+    'PRIMER_MAX_GC': 80.0,
+    'PRIMER_MAX_POLY_X': 100,
+    'PRIMER_INTERNAL_MAX_POLY_X': 100,
+    'PRIMER_DNA_CONC': 50.0,
+    'PRIMER_MAX_NS_ACCEPTED': 0,
+    'PRIMER_MAX_SELF_ANY': 12,
+    'PRIMER_MAX_SELF_END': 8,
+    'PRIMER_PAIR_MAX_COMPL_ANY': 12,
+    'PRIMER_PAIR_MAX_COMPL_END': 8,
+    'PRIMER_PAIR_MAX_DIFF_TM': 3,
+    'PRIMER_NUM_RETURN': 1000,
+    'PRIMER_FILE_FLAG': 0,
+    'P3_FILE_FLAG': 0,
+    'PRIMER_PRODUCT_SIZE_RANGE': [[130, 400]]
+}
 
-def create_amplicons_for_primer3(target):
-    amplicon = target.chromosome.getdna(target.start_pos-1000, target.end_pos+1000)
 
-    return amplicon
+def create_amplicon_for_primer3(slice, slice_margin):
+    template_slice = DNASlice(chromosome=slice.chromosome, start_pos=slice.start_pos-slice_margin, end_pos=slice.end_pos+slice_margin)
+    return template_slice
 
 
-def primer3_design(obj_list, input_name, output_name,
-                   min_size=130, max_size=400, primer_num_rerun=10000, margins=0):
-    primer3_input = ("{}.txt".format(str(input_name)))
-    with open(primer3_input, 'w+') as primer3_file:
-        primer3_file.write('PRIMER_TASK=pick_detection_primers\nPRIMER_OPT_SIZE=23\nPRIMER_MIN_SIZE=20\n'
-                                    'PRIMER_MAX_SIZE=27\nPRIMER_PRODUCT_SIZE_RANGE={}-{}\nP3_FILE_FLAG=0\n'
-                                    'PRIMER_EXPLAIN_FLAG=1\nPRIMER_MIN_TM=51\nPRIMER_OPT_TM=55\nPRIMER_MAX_TM=60\n'
-                                    'PRIMER_SALT_CORRECTIONS=1\nPRIMER_TM_FORMULA=1\nPRIMER_PAIR_MAX_DIFF_TM=3\n'
-                                    'PRIMER_NUM_RETURN={}\nPRIMER_FILE_FLAG=0\n'.format(min_size,
-                                                                                        max_size,
-                                                                                        primer_num_rerun))
-        for target in obj_list:
-            amplicon = create_amplicons_for_primer3(target)
-            primer3_file.write('SEQUENCE_ID={}\nSEQUENCE_TEMPLATE={}\n'
-                               'SEQUENCE_PRIMER_PAIR_OK_REGION_LIST={},{},{},{}\n=\n'.format(target.id,
-                                                                                             amplicon,
-                                                                                             1000-(max_size-(len(target.referencevalue.sequence)//2+margins)),
-                                                                                             max_size-(len(target.referencevalue.sequence)//2+margins),
-                                                                                             1000+len(target.referencevalue.sequence),
-                                                                                             max_size-(len(target.referencevalue.sequence)//2+margins)))
+def primer3_design(target, min_size=130, max_size=400, primer_num_rerun=10000, opt_tm=60.0, max_tm=63.0,
+                   min_tm=57.0, delta_tm=3.0, margins=0, slice_margin=1000):
+    primer3_template_margins = create_amplicon_for_primer3(target.slice, slice_margin)
 
-    # Run the primer3 on the input
-    ls = local["ls"]
-    primer3_output = ("{}_primer3.txt".format(str(output_name)))
-    primer_3 = local[settings.PRIMER3_PATH]
-    primer_3(primer3_input, primer3_output)
+    GLOBAL_ARGS['PRIMER_NUM_RETURN'] = primer_num_rerun
+    GLOBAL_ARGS['PRIMER_OPT_TM'] = opt_tm
+    GLOBAL_ARGS['PRIMER_MIN_TM'] = min_tm
+    GLOBAL_ARGS['PRIMER_MAX_TM'] = max_tm
+    GLOBAL_ARGS['PRIMER_PAIR_MAX_DIFF_TM'] = delta_tm
+    GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'] = [[min_size, max_size]]
 
-    # s = '{} < {} > {}'.format(settings.PRIMER3_PATH, primer3_input, primer3_output)
-    # os.system(s)
+    primer_details = dict()
+    primer_details['SEQUENCE_ID'] = target.name
+    primer_details['SEQUENCE_TEMPLATE'] = primer3_template_margins.sequence.seq.decode('utf-8')
+    slice_len = len(primer_details['SEQUENCE_TEMPLATE'])-2*slice_margin
+    primer_details['SEQUENCE_PRIMER_PAIR_OK_REGION_LIST'] = [slice_margin-(max_size-(slice_len//2+margins)),
+                                                             max_size-(slice_len//2+margins),
+                                                             slice_margin+slice_len,
+                                                             max_size-(slice_len//2+margins)]
+
+    primer3_output = primer3.bindings.designPrimers(primer_details, GLOBAL_ARGS)
+    primer3_output['SEQUENCE_ID'] = target.id
+    primer3_output['TARGET_START'] = (slice_margin, target.slice.end_pos - target.slice.start_pos)
+
     return primer3_output
 
 

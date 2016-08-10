@@ -1,21 +1,20 @@
 import pytest
-from .parser_primer_file import get_case_from_columns, process_row
-from .primer_design import primer3_design, bowtie2_design, sort_best_primers
-from .primers_insertion import create_primers_in_db
-from .positioning import insertion_plates_to_db, create_primer_order_file_xls
-from django.core.management import setup_environ
+from amplicons_handling.primer_design import primer3_design, sort_best_primers
+from amplicons_handling.primers_insertion import create_target_enrichment_in_db
+from amplicons_handling.positioning import insertion_OM_to_db
+from tests.genomes.conftest import *
+from targeted_enrichment.planning.models import Target
 
 
 @pytest.fixture()
-def primer3_28734(ugs_28734):
-    input_name = 'test_ugs_input.txt'
-    output_name = 'test_ugs_output.txt'
-
-    p = primer3_design(ugs_28734,
-                       input_name,
-                       output_name)
+def sample_target(slice_28727_amplicon):
+    target_28727 = Target.objects.create(
+        name='28727_test',
+        slice=slice_28727_amplicon,
+    )
     # So our objects don't have "special" objects in fields
-    return p
+    target_28727 = Target.objects.get(name=target_28727.name)
+    return target_28727
 
 
 @pytest.fixture()
