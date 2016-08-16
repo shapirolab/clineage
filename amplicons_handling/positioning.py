@@ -5,10 +5,9 @@ from wet_storage.models import SampleLocation
 from lib_prep.multiplexes.models import OM6Oligomix
 from targeted_enrichment.reagents.models import OM6PadlockTER
 from primers.synthesis.models import OM6Padlock
-from primers.parts.models import IlluminaReadingAdaptor1ForTail, IlluminaReadingAdaptor2ForTail
 
 
-def insertion_OM_to_db(tate_tuple, panel_name):
+def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft):
     """
     creating list of ters for OM6 panel
     :param tate_tuple: UMITargetedAmplicon, TargetEnrichment list of tuples
@@ -16,8 +15,6 @@ def insertion_OM_to_db(tate_tuple, panel_name):
     :return:
     """
 
-    ira1ft = IlluminaReadingAdaptor1ForTail.objects.filter(id=2)
-    ira2ft = IlluminaReadingAdaptor2ForTail.objects.filter(id=2)
     OMmix = OM6Oligomix.objects.create(name=panel_name)
     ters = []
     for tate in tate_tuple:

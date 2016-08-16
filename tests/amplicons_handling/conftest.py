@@ -3,6 +3,7 @@ from amplicons_handling.primer_design import primer3_design, sort_best_primers
 from amplicons_handling.primers_insertion import create_target_enrichment_in_db
 from amplicons_handling.positioning import insertion_OM_to_db
 from tests.genomes.conftest import *
+from tests.primers.parts.conftest import *
 from targeted_enrichment.planning.models import Target
 
 
@@ -46,7 +47,7 @@ def tate_tuple_sample(target_enrichment_sample):
 
 
 @pytest.fixture()
-def OMmix_sample(tate_tuple_sample):
-    OMmix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel')
+def OMmix_sample(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail):
+    OMmix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail)
 
     return OMmix
