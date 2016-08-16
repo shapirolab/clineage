@@ -19,7 +19,7 @@ def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft):
     ters = []
     for tate in tate_tuple:
         ta, te = tate
-        om6_padlock = OM6Padlock.objects.get_or_create(
+        om6_padlock, c = OM6Padlock.objects.get_or_create(
             left_ugs=te.left,
             right_ugs=te.right,
             ira1ft=ira1ft,
@@ -27,7 +27,7 @@ def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft):
             umi_length=3,
 
         )
-        ter = OM6PadlockTER.objects.get_or_create(
+        ter, c = OM6PadlockTER.objects.get_or_create(
             te=te,
             amplicon=ta,
             padlock=om6_padlock,
@@ -45,10 +45,10 @@ def create_primer_order_file_xls(OMmix, xls_name):
     sheet.write(0, 0, 'TEID')
     sheet.write(0, 1, 'Sequence')
 
-    for index, ter in enumerate(OMmix.ters.all()):
+    for index, ter in enumerate(OMmix.ters.select_subclasses()):
 
         name = ter.te.id
-        primer_sequence = ter.amplicon.slice.sequence.seq.decode('utf-8')
+        primer_sequence = ter.padlock.sequence.seq.decode('utf-8')
         sheet.write(index+1, 0,  name)
         sheet.write(index+1, 1,  primer_sequence)
     workbook.save(xls_name)

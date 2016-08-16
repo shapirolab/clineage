@@ -54,7 +54,8 @@ def create_target_enrichment_in_db(chosen_target_primers):
     ugs_left = create_ugs_fwd(chromosome,
                               target.slice.start_pos - (relative_target_pos - chosen_target_primers['LEFT_START'][0]),
                               target.slice.start_pos - (relative_target_pos - chosen_target_primers['LEFT_START'][0] -
-                                                        chosen_target_primers['LEFT_START'][1])-1)
+                                                        chosen_target_primers['LEFT_START'][1] + 1)
+                              )
 
     ugs_right = create_ugs_rev(chromosome,
                                target.slice.start_pos + (chosen_target_primers['RIGHT_START'][0] - relative_target_pos -
@@ -79,13 +80,13 @@ def create_target_enrichment_in_db(chosen_target_primers):
     except ValueError as ve:
         print(ve)
 
-    te = TargetEnrichment.objects.create(
+    te, c = TargetEnrichment.objects.get_or_create(
         chromosome=chromosome,
         left=ugs_left,
         right=ugs_right,
         planning_version=1,
     )
-    ta = UMITargetedAmplicon.objects.create(
+    ta, c = UMITargetedAmplicon.objects.get_or_create(
         left_ugs=ugs_left,
         right_ugs=ugs_right,
         umi_length=3,
