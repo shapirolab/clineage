@@ -389,9 +389,11 @@ class MicrosatelliteHistogramGenotypeSet(models.Model):
 
     @property
     def genotypes(self):
-        for genotype in self.genotype_fields:
-            if genotype.microsatellite is not None:
-                yield genotype
+        return {
+            genotype for genotype
+            in self.genotype_fields
+            if genotype.microsatellite is not None
+        }
 
     class Meta:
         index_together = (
