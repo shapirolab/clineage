@@ -2,7 +2,8 @@ import pytest
 import os
 from Bio import SeqIO
 
-from sequencing.analysis.adamiya import merge, run_parallel
+from sequencing.analysis.adamiya import merge
+from sequencing.analysis.parallel_adamiya import run_parallel
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups
