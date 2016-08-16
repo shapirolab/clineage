@@ -17,7 +17,7 @@ def test_create_amplicon_for_primer3(slice_28727_amplicon):
 @pytest.mark.django_db
 def test_get_primer3_output(sample_target):
     target_primers = primer3_design(sample_target)
-    assert target_primers['SEQUENCE_ID'] == '28727_test'
+    assert target_primers['SEQUENCE_ID'] == sample_target.id
     assert target_primers['PRIMER_LEFT_1_SEQUENCE'] == 'ACCACAGGTGATGAGCATTTACT'
     assert target_primers['PRIMER_RIGHT_1_SEQUENCE'] == 'GGTTCAGATCAGGACTTGTGGAT'
 
@@ -26,6 +26,9 @@ def test_get_primer3_output(sample_target):
 def test_create_target_enrichment_in_db(target_enrichment_sample):
     ta_sample, te_sample = create_target_enrichment_in_db(target_enrichment_sample)
 
+    assert target_enrichment_sample['RIGHT_START'][0] - \
+                target_enrichment_sample['LEFT_START'][0] == \
+           (te_sample.right.slice.end_pos - te_sample.left.slice.start_pos)
     assert te_sample.left.sequence.seq.decode('utf-8') == 'ACCACAGGTGATGAGCATTTACT'
     assert te_sample.right.sequence.seq.decode('utf-8') == 'GGTTCAGATCAGGACTTGTGGAT'
     assert ta_sample.slice.start_pos == 81316078

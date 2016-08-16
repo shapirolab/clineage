@@ -61,7 +61,7 @@ def primer3_design(target, min_size=130, max_size=400, primer_num_rerun=10000, o
     GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'] = [[min_size, max_size]]
 
     primer_details = dict()
-    primer_details['SEQUENCE_ID'] = target.name
+    primer_details['SEQUENCE_ID'] = target.id
     primer_details['SEQUENCE_TEMPLATE'] = primer3_template_margins.sequence.seq.decode('utf-8')
     slice_len = len(primer_details['SEQUENCE_TEMPLATE'])-2*slice_margin
     primer_details['SEQUENCE_PRIMER_PAIR_OK_REGION_LIST'] = [slice_margin-(max_size-(slice_len//2+margins)),
@@ -104,7 +104,7 @@ def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=
     chosen_target_primers = []
 
     # looking for the best length amplicon for PCR
-    target = Target.objects.get(name=target_primers['id'])
+    target = Target.objects.get(id=target_primers['id'])
     relative_target_pos = target_primers['TARGET_START'][0]
     chromosome = target.slice.chromosome
 
@@ -112,8 +112,7 @@ def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=
         if tar == 'id' or tar == 'TARGET_START':
             continue
 
-        tar_size = target_primers[tar]['RIGHT_START'][0] + target_primers[tar]['RIGHT_START'][1] - \
-                   target_primers[tar]['LEFT_START'][0]
+        tar_size = target_primers[tar]['RIGHT_START'][0] - target_primers[tar]['LEFT_START'][0]
 
         # checking deltaG for amplicons
 
