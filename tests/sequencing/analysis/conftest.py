@@ -18,7 +18,7 @@ from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
-from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, READS
+from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, NUM_READS
 from tests.flat_dict import FlatDict
 from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
@@ -45,7 +45,7 @@ def sample_reads_files_d(adam_reads_fd, temp_storage):
             fastq_r2 = get_unique_path("fastq")
             SeqIO.write(r_d[R1], fastq_r1, "fastq")
             SeqIO.write(r_d[R2], fastq_r2, "fastq")
-            d[l_id, bc_id] = {R1: fastq_r1, R2: fastq_r2, READS: len(r_d[R1])}
+            d[l_id, bc_id] = {R1: fastq_r1, R2: fastq_r2, NUM_READS: len(r_d[R1])}
     yield d
     for f_d in d.values():
         os.unlink(f_d[R1])
@@ -66,7 +66,7 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
             library=MagicalPCR1Library.objects.get(id=l_id),
             fastq1=fastq_r1,
             fastq2=fastq_r2,
-            num_reads=f_d[READS],
+            num_reads=f_d[NUM_READS],
         )
         # So our objects don't have "special" objects in fields
         sr = SampleReads.objects.get(pk=sr.pk)
@@ -264,7 +264,7 @@ def adam_histogram_entry_reads_files_d(adam_reads_fd, temp_storage):
                         RM: get_unique_path("fastq"),
                         R1: get_unique_path("fastq"),
                         R2: get_unique_path("fastq"),
-                        READS: len(r_d[RM])
+                        NUM_READS: len(r_d[RM])
                     }
                     for r in [R1, R2, RM]:
                         SeqIO.write(r_d[r], f_d[r], "fastq")
@@ -280,7 +280,7 @@ def adam_histogram_entry_reads_files_d(adam_reads_fd, temp_storage):
                         RM: get_unique_path("fastq"),
                         R1: get_unique_path("fastq"),
                         R2: get_unique_path("fastq"),
-                        READS: len(s_d[ASSEMBLED, amp, msgs][RM]) + \
+                        NUM_READS: len(s_d[ASSEMBLED, amp, msgs][RM]) + \
                             len(s_d[UNASSEMBLED, amp, msgs][R1]),
                     }
                     for r in [R1, R2]:
@@ -370,7 +370,7 @@ def adam_histogram_entry_reads_d(adam_histogram_entry_reads_files_d, _chain_hist
                 histogram=h,
                 microsatellite_genotypes=ms_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
-                num_reads=f_d[READS],
+                num_reads=f_d[NUM_READS],
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],

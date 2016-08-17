@@ -10,7 +10,7 @@ _REV_FMT = _DESC_FMT.format("{}", "2", "{}", "{}")
 R1 = "R1"
 R2 = "R2"
 RM = "RM"
-READS = "READS"
+NUM_READS = "NUM_READS"
 
 
 def strip_fasta_records(fasta_records):
