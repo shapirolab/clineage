@@ -2,22 +2,19 @@ from collections import defaultdict, Counter
 from order.hist import Histogram
 from itertools import combinations, combinations_with_replacement, product
 import numpy as np
-from order.optimize_probs import dyn_mat_model, dyn_mat_fs_model
 from frogress import bar
 
 
-def generate_mat_hist(d,
-                      cycles,
-                      ups,
-                      dws,
-                      sample_depth=10000,
-                      normalize=True,
-                      truncate=False,
-                      cut_peak=False,
-                      trim_extremes=False,
-                      **kwargs):
-    values = dyn_mat_model(ups, dws, d, cycles)
-    h = Histogram({i: values[i] for i in range(100)},
+def generate_mat_hist(ms_len, 
+        mat,
+        sample_depth=10000,
+        normalize=True,
+        truncate=False,
+        cut_peak=False,
+        trim_extremes=False,
+        n=50,
+        **kwargs):
+    h = Histogram({i: mat[ms_len, i] for i in range(n)},
                   nsamples=sample_depth,
                   normalize=normalize,
                   truncate=truncate,
@@ -26,43 +23,7 @@ def generate_mat_hist(d,
     h.truncate(p=0.0001)
     h.normalize()
     h.clean_zero_entries()
-    return h - d
-
-
-def generate_mat_fs_hist(d,
-                          cycles,
-                          ups,
-                          dws,
-                          sample_depth=10000,
-                          normalize=True,
-                          truncate=False,
-                          cut_peak=False,
-                          trim_extremes=False,
-                          **kwargs):
-    values = dyn_mat_fs_model(ups, dws, d, cycles)
-    h = Histogram({i: values[i] for i in range(100)},
-                  nsamples=sample_depth,
-                  normalize=normalize,
-                  truncate=truncate,
-                  cut_peak=cut_peak,
-                  trim_extremes=trim_extremes)
-    h.truncate(p=0.0001)
-    h.normalize()
-    h.clean_zero_entries()
-    return h - d
-
-def get_method(method):
-    if method == 'mat':
-        return generate_mat_hist
-    if method == 'new':
-        return generate_mat_fs_hist
-    print('unknown method')
-    raise
-
-
-def generate_hist(d, cycles, method='mat', **kwargs):
-    generate_method_hist = get_method(method)
-    return generate_method_hist(d, cycles, **kwargs)
+    return h - ms_len
 
 
 def generate_sim_hists(max_ms_length=60,

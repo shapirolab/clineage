@@ -165,6 +165,9 @@ def pop_dist(hist1, hist2, method='sub', reads=50, sample_depth=10000):
     Calculate the distance between two populations in the form of histograms
     Method is given as a parameter 
     """
+    if method != 'con':
+        hist1.normalize()
+        hist2.normalize()
     if hist1 and hist2:
         if method == 'sub':
             return pop_dist_sub(hist1, hist2)
