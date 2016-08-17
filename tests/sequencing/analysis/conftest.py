@@ -26,9 +26,9 @@ from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
 
 @pytest.fixture()
 def requires_none_genotypes(request, transactional_db):
-    if request.config.getoption("nomigrations"):
-        MicrosatelliteHistogramGenotype.objects.create(microsatellite=None, repeat_number=1)
-        SNPHistogramGenotype.objects.create(snp=None, base="")
+    MicrosatelliteHistogramGenotype.objects.get_or_create(microsatellite=None,
+        defaults=dict(repeat_number=1))
+    SNPHistogramGenotype.objects.get_or_create(snp=None, defaults=dict(base=""))
 
 
 @pytest.fixture(scope="session")
