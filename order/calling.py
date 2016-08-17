@@ -92,7 +92,7 @@ def call_multi_hist(hist,
                     min(measured_hist_shift+max_distance_from_median, max_ms_length)), allele_number
             )
             for seeds in set([frozenset(possible_hist_seed) for possible_hist_seed in possible_hist_seeds]).intersection(set(dup_sim_hist.keys())):
-                if measured_hist_shift == int(np.mean(seeds)):
+                if measured_hist_shift == int(np.mean(list(seeds))):
                     if not proportional:
                         c, s, best_sim_hist = match_cycles(normalized_shifted_reads_hist,
                                                            dup_sim_hist[frozenset(seeds)],
@@ -165,7 +165,7 @@ def generate_hist_calls(input_file,
     :return:
     """
     flat_sim_hists = flatten_index(sim_hists)
-    print 'starting {} auxiliary process'.format(workers)
+    print('starting {} auxiliary process'.format(workers))
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         for result in executor.map(helper,
