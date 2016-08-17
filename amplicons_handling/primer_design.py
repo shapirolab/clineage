@@ -94,11 +94,48 @@ def parse_primers(primer3_output):
 
 
 def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=-70, delta_man=0):
+def filter_by_size(filter_list, target_primers, best_size=160, margin_size=250):
+
+    for tar in filter_list:
+        tar_size = target_primers[tar]['RIGHT_START'][0] - target_primers[tar]['LEFT_START'][0]
+        if not best_size + margin_size >= tar_size >= best_size - margin_size:
+            filter_list.remove(tar)
+
+    return filter_list
+
+
+def filter_by_delta_g(filter_list, target_primers, target, relative_target_pos, chromosome, delta_min=-70, delta_max=0):
+    for tar in filter_list:
+        template_slice = DNASlice(chromosome=chromosome,
+                                  start_pos=target.slice.start_pos - (relative_target_pos -
+                                                                      target_primers[tar]['LEFT_START'][0]),
+                                  end_pos=target.slice.start_pos + (target_primers[tar]['RIGHT_START'][0] -
+                                                                    relative_target_pos)
+                                  )
+        ter = template_slice.sequence.seq.decode('utf-8')
+        dctpd = RNA.fold(ter)[1]
+
+        if not delta_min < dctpd <= delta_max:
+            filter_list.remove(tar)
+
+    return filter_list
+
+
+def sort_best_primers(primer3_output, **kwargs):
     """
     filtering primers based on different parameters that we choose
-    :param target_primers: primers dict for targets
+    :param primer3_output: primers dict for targets
+    :param size_filter: primers dict for targets
+    :param deltag_filter: primers dict for targets
+    :param best_size: primers dict for targets
+    :param margin_size: primers dict for targets
+    :param delta_min: primers dict for targets
+    :param delta_max: primers dict for targets
     :return: chosen_target_primers, discarded_targets
     """
+    size_filter = kwargs.get('size_filter', True)
+    deltag_filter = kwargs.get('deltag_filter', False)
+
     target_primers = parse_primers(primer3_output)
     discarded_targets = []
     chosen_target_primers = []
@@ -108,30 +145,22 @@ def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=
     relative_target_pos = target_primers['TARGET_START'][0]
     chromosome = target.slice.chromosome
 
-    for tar in target_primers.keys():
-        if tar == 'id' or tar == 'TARGET_START':
-            continue
+    filter_list = list(set(target_primers.keys())-{'id', 'TARGET_START'})
+    filter_list.sort()
 
-        tar_size = target_primers[tar]['RIGHT_START'][0] - target_primers[tar]['LEFT_START'][0]
+    if size_filter:
+        filter_list = filter_by_size(filter_list, target_primers,
+                                     best_size=kwargs.get('best_size', 150), margin_size=kwargs.get('margin_size', 250))
 
-        # checking deltaG for amplicons
+    # checking deltaG for amplicons
+    if deltag_filter:
+        filter_list = filter_by_delta_g(filter_list, target_primers, target, relative_target_pos, chromosome,
+                                        delta_min=kwargs.get('delta_min', -70), delta_max=kwargs.get('delta_max', 0))
 
-        # template_slice = DNASlice(chromosome=chromosome,
-        #                           start_pos=target.slice.start_pos - (relative_target_pos -
-        #                                                               target_primers[tar]['LEFT_START'][0]),
-        #                           end_pos=target.slice.start_pos + (target_primers[tar]['RIGHT_START'][0] -
-        #                                                             relative_target_pos -
-        #                                                             target_primers[tar]['RIGHT_START'][1] + 1))
-        # ter = template_slice.sequence.seq.decode('utf-8')
-        # dctpd = RNA.fold(ter)[1]
-        # print(dctpd)
-
-        if best_size + margin_size >= tar_size >= best_size - margin_size:
-        # if best_size + margin_size >= tar_size >= best_size - margin_size and delta_min < dctpd <= delta_man:
-            chosen_target_primers = target_primers[tar]
-            chosen_target_primers['id'] = target_primers['id']
-            chosen_target_primers['TARGET_START'] = target_primers['TARGET_START']
-            break
+    if filter_list:
+        chosen_target_primers = target_primers[filter_list[0]]
+        chosen_target_primers['id'] = target_primers['id']
+        chosen_target_primers['TARGET_START'] = target_primers['TARGET_START']
 
     if not chosen_target_primers:
         discarded_targets = target_primers['id']
