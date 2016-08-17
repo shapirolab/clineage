@@ -18,8 +18,8 @@ def test_create_amplicon_for_primer3(slice_28727_amplicon):
 def test_get_primer3_output(sample_target):
     target_primers = primer3_design(sample_target)
     assert target_primers['SEQUENCE_ID'] == sample_target.id
-    assert target_primers['PRIMER_LEFT_1_SEQUENCE'] == 'ACCACAGGTGATGAGCATTTACT'
-    assert target_primers['PRIMER_RIGHT_1_SEQUENCE'] == 'GGTTCAGATCAGGACTTGTGGAT'
+    assert 130 <= target_primers['PRIMER_PAIR_1_PRODUCT_SIZE'] <= 300
+
 
 
 @pytest.mark.django_db
@@ -29,9 +29,9 @@ def test_create_target_enrichment_in_db(target_enrichment_sample):
     assert target_enrichment_sample['RIGHT_START'][0] - \
                 target_enrichment_sample['LEFT_START'][0] == \
            (te_sample.right.slice.end_pos - te_sample.left.slice.start_pos)
-    assert te_sample.left.sequence.seq.decode('utf-8') == 'ACCACAGGTGATGAGCATTTACT'
-    assert te_sample.right.sequence.seq.decode('utf-8') == 'GGTTCAGATCAGGACTTGTGGAT'
-    assert ta_sample.slice.start_pos == 81316078
+    assert te_sample.left.sequence.seq.decode('utf-8') == target_enrichment_sample['LEFT']
+    assert te_sample.right.sequence.seq.decode('utf-8') == target_enrichment_sample['RIGHT']
+    assert ta_sample.slice.start_pos == 81315972
 
 
 @pytest.mark.django_db
@@ -41,8 +41,7 @@ def test_insertion_OM_to_db(tate_tuple_sample, illuminareadingadaptor1fortail, i
     sample_te = sample_mix.ters.get(te=te)
     sample_ta = sample_mix.ters.get(amplicon=ta)
     assert sample_mix.name == 'sample_panel'
-    assert sample_ta.amplicon.left_ugs.sequence.seq.decode('utf-8') == 'ACCACAGGTGATGAGCATTTACT'
-    assert sample_te.te.right.sequence.seq.decode('utf-8') == 'GGTTCAGATCAGGACTTGTGGAT'
+    assert sample_ta.amplicon.left_ugs.sequence.seq.decode('utf-8') == sample_te.te.left.sequence.seq.decode('utf-8')
 
 
 @pytest.mark.django_db

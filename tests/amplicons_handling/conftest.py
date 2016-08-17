@@ -33,7 +33,8 @@ def primer3_output(sample_target):
 
 @pytest.fixture()
 def target_enrichment_sample(primer3_output):
-    chosen_target_primers, discarded_targets = sort_best_primers(primer3_output, delta_min=-85)
+    chosen_target_primers, discarded_targets = sort_best_primers(primer3_output,
+                                                                 size_filter=True, deltag_filter=False, delta_min=-85)
 
     return chosen_target_primers
 
