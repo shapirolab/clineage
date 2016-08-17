@@ -44,11 +44,14 @@ def create_amplicon_for_primer3(slice, slice_margin):
     return template_slice
 
 
-def primer3_design(target, margins=0, slice_margin=1000, **kwargs):
+def primer3_design(target, **kwargs):
 
+    margins = kwargs.get('margins', 0)
+    slice_margin = kwargs.get('slice_margin', 1000)
     primer3_template_margins = create_amplicon_for_primer3(target.slice, slice_margin)
 
     GLOBAL_ARGS.update(kwargs)
+    GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'] = [[kwargs.get('min_size', 130), kwargs.get('max_size', 300)]]
 
     primer_details = dict()
     primer_details['SEQUENCE_ID'] = target.id

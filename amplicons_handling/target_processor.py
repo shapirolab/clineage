@@ -12,8 +12,8 @@ def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
     ira1ft = IlluminaReadingAdaptor1ForTail.objects.get(id=2)
     ira2ft = IlluminaReadingAdaptor2ForTail.objects.get(id=2)
     for target in target_list:
-        primer3_output = primer3_design(target, kwargs)
-        chosen_target_primers, discarded_targets = sort_best_primers(primer3_output, kwargs)
+        primer3_output = primer3_design(target, **kwargs)
+        chosen_target_primers, discarded_targets = sort_best_primers(primer3_output, **kwargs)
 
         if chosen_target_primers:
             # create TE
