@@ -1,6 +1,6 @@
 from collections import defaultdict, Counter
 from order.hist import Histogram
-from itertools import combinations, product
+from itertools import combinations, combinations_with_replacement, product
 import numpy as np
 from order.optimize_probs import dyn_mat_model, dyn_mat_fs_model
 from frogress import bar
