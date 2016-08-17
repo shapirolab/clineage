@@ -3,14 +3,9 @@ __author__ = 'veronika'
 import primer3
 import re
 import argparse
-import pysam
-from collections import defaultdict
-from collections import Counter
-from frogress import bar
-from plumbum import local
-# import sys
-# sys.path.append('/home/barakor/ViennaRNA/lib/python3.5/site-packages/')
-# import RNA
+import sys
+sys.path.append('/home/barakor/ViennaRNA/lib/python3.5/site-packages/')
+import RNA
 
 from genomes.models import DNASlice
 from targeted_enrichment.planning.models import Target
@@ -26,8 +21,8 @@ GLOBAL_ARGS = {
     'PRIMER_MIN_TM': 57.0,
     'PRIMER_MAX_TM': 63.0,
     'PRIMER_TM_FORMULA': 1,
-    'PRIMER_MIN_GC': 20.0,
-    'PRIMER_MAX_GC': 80.0,
+    'PRIMER_MIN_GC': 20,
+    'PRIMER_MAX_GC': 80,
     'PRIMER_MAX_POLY_X': 100,
     'PRIMER_INTERNAL_MAX_POLY_X': 100,
     'PRIMER_DNA_CONC': 50.0,
@@ -36,11 +31,11 @@ GLOBAL_ARGS = {
     'PRIMER_MAX_SELF_END': 8,
     'PRIMER_PAIR_MAX_COMPL_ANY': 12,
     'PRIMER_PAIR_MAX_COMPL_END': 8,
-    'PRIMER_PAIR_MAX_DIFF_TM': 3,
-    'PRIMER_NUM_RETURN': 1000,
+    'PRIMER_PAIR_MAX_DIFF_TM': 3.0,
+    'PRIMER_NUM_RETURN': 10000,
     'PRIMER_FILE_FLAG': 0,
     'P3_FILE_FLAG': 0,
-    'PRIMER_PRODUCT_SIZE_RANGE': [[130, 400]]
+    'PRIMER_PRODUCT_SIZE_RANGE': [[130, 300]],
 }
 
 
@@ -49,25 +44,24 @@ def create_amplicon_for_primer3(slice, slice_margin):
     return template_slice
 
 
-def primer3_design(target, min_size=130, max_size=400, primer_num_rerun=10000, opt_tm=60.0, max_tm=63.0,
-                   min_tm=57.0, delta_tm=3.0, margins=0, slice_margin=1000):
+def primer3_design(target, margins=0, slice_margin=1000, **kwargs):
+
     primer3_template_margins = create_amplicon_for_primer3(target.slice, slice_margin)
 
-    GLOBAL_ARGS['PRIMER_NUM_RETURN'] = primer_num_rerun
-    GLOBAL_ARGS['PRIMER_OPT_TM'] = opt_tm
-    GLOBAL_ARGS['PRIMER_MIN_TM'] = min_tm
-    GLOBAL_ARGS['PRIMER_MAX_TM'] = max_tm
-    GLOBAL_ARGS['PRIMER_PAIR_MAX_DIFF_TM'] = delta_tm
-    GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'] = [[min_size, max_size]]
+    GLOBAL_ARGS.update(kwargs)
 
     primer_details = dict()
     primer_details['SEQUENCE_ID'] = target.id
     primer_details['SEQUENCE_TEMPLATE'] = primer3_template_margins.sequence.seq.decode('utf-8')
     slice_len = len(primer_details['SEQUENCE_TEMPLATE'])-2*slice_margin
-    primer_details['SEQUENCE_PRIMER_PAIR_OK_REGION_LIST'] = [slice_margin-(max_size-(slice_len//2+margins)),
-                                                             max_size-(slice_len//2+margins),
+    primer_details['SEQUENCE_PRIMER_PAIR_OK_REGION_LIST'] = [slice_margin -
+                                                             (GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'][0][1] -
+                                                              (slice_len//2+margins)),
+                                                             GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'][0][1] -
+                                                             (slice_len//2+margins),
                                                              slice_margin+slice_len,
-                                                             max_size-(slice_len//2+margins)]
+                                                             GLOBAL_ARGS['PRIMER_PRODUCT_SIZE_RANGE'][0][1] -
+                                                             (slice_len//2+margins)]
 
     primer3_output = primer3.bindings.designPrimers(primer_details, GLOBAL_ARGS)
     primer3_output['SEQUENCE_ID'] = target.id
@@ -93,7 +87,6 @@ def parse_primers(primer3_output):
     return target_primers
 
 
-def sort_best_primers(primer3_output, best_size=150, margin_size=250, delta_min=-70, delta_man=0):
 def filter_by_size(filter_list, target_primers, best_size=160, margin_size=250):
 
     for tar in filter_list:
