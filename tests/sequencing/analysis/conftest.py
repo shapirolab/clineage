@@ -264,7 +264,7 @@ def adam_histogram_entry_reads_files_d(adam_reads_fd, temp_storage):
                         RM: get_unique_path("fastq"),
                         R1: get_unique_path("fastq"),
                         R2: get_unique_path("fastq"),
-                        "num": len(r_d[RM])
+                        READS: len(r_d[RM])
                     }
                     for r in [R1, R2, RM]:
                         SeqIO.write(r_d[r], f_d[r], "fastq")
@@ -280,7 +280,7 @@ def adam_histogram_entry_reads_files_d(adam_reads_fd, temp_storage):
                         RM: get_unique_path("fastq"),
                         R1: get_unique_path("fastq"),
                         R2: get_unique_path("fastq"),
-                        "num": len(s_d[ASSEMBLED, amp, msgs][RM]) + \
+                        READS: len(s_d[ASSEMBLED, amp, msgs][RM]) + \
                             len(s_d[UNASSEMBLED, amp, msgs][R1]),
                     }
                     for r in [R1, R2]:
@@ -370,7 +370,7 @@ def adam_histogram_entry_reads_d(adam_histogram_entry_reads_files_d, _chain_hist
                 histogram=h,
                 microsatellite_genotypes=ms_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
-                num_reads=f_d["num"],
+                num_reads=f_d[READS],
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2],
