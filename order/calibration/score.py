@@ -1,27 +1,29 @@
 from ..preprocessing import generate_mat_hist
 from ..hist_dist import pop_dist
 from order.optimize_probs import build_markovian_matrix
-from scipy import optimize
 import numpy
 from numpy.linalg import matrix_power
+
 
 class hashable_poly1d(numpy.poly1d):
     def __hash__(self):
         return hash((tuple(self.coeffs), self.order, self.variable))
 
 
-def distance_from_model(syn_len, syn_hist, model_mat, distance_measure='con'):
-    model_hist = generate_mat_hist(syn_len, model_mat)
+def distance_from_model(syn_len, syn_hist, model_mat, distance_measure='con', **kwargs):
+    model_hist = generate_mat_hist(syn_len, model_mat, **kwargs)
     return pop_dist(syn_hist, model_hist, method=distance_measure)
 
 
-def distance_from_model_across_lengths(steps, syn_hist_list, cycles_tup, distance_measure='con', **kwargs):
+def distance_from_model_across_lengths(steps, reference, distance_measure='con', **kwargs):
     """
     :param msmodel: (up, dw, method)
     :param syn_hist_list: [(ms_len, syn_hist_26, syn_hist_47), ...]
     :param cycles_pair: (11,38)
     :return:
     """
+    syn_hist_list = reference.syn_hist_list
+    cycles_tup = reference.cycles_tup
     if len(cycles_tup) == 2:
         cycles_26, cycles_47 = cycles_tup
         cycles_0 = 0
@@ -35,9 +37,9 @@ def distance_from_model_across_lengths(steps, syn_hist_list, cycles_tup, distanc
     mat_47 = matrix_power(base_mat, cycles_47)
     score = 0.0
     for syn_len, syn_hist_0, syn_hist_26, syn_hist_47 in syn_hist_list:
-        score += distance_from_model(syn_len, syn_hist_0, mat_0, distance_measure=distance_measure)
-        score += distance_from_model(syn_len, syn_hist_26, mat_26, distance_measure=distance_measure)
-        score += distance_from_model(syn_len, syn_hist_47, mat_47, distance_measure=distance_measure)
+        score += distance_from_model(syn_len, syn_hist_0, mat_0, distance_measure=distance_measure, **kwargs)
+        score += distance_from_model(syn_len, syn_hist_26, mat_26, distance_measure=distance_measure, **kwargs)
+        score += distance_from_model(syn_len, syn_hist_47, mat_47, distance_measure=distance_measure, **kwargs)
     return score
 
 
@@ -80,26 +82,3 @@ class Hashable_exp(object):
 
     def __call__(self, x):
         return self._a*(numpy.exp(self._b*x)-1)
-
-
-def get_nmes(sim, *args, **kwargs):
-    if sim == "mat":
-        def nmes(x):
-            steps = param_list_to_polynomes_mutation(x)
-            return distance_from_model_across_lengths(steps, *args, **kwargs)
-    # elif sim == "spawning":
-        # def nmes(x):
-            # ups, dws = param_list_to_polynomes_spawning(x)
-            # msmodel = (ups, dws, sim)
-            # return distance_from_model_across_lengths(msmodel, *args, **kwargs)
-    else:
-        raise ValueError("Unknown simulation model.")
-    return nmes
-
-
-def optimize_across_lengths(input_tuple):
-    alg, sim, optimizer_method, temprature, stepsize, length_hists, cycles_tup, bounds, initial_guess, iterations, optimizer_options = input_tuple
-    nmes = get_nmes(sim, length_hists, cycles_tup, distance_measure=alg)
-    minimizer_kwargs = dict(method=optimizer_method, bounds=bounds, options=optimizer_options)
-    res = optimize.basinhopping(nmes, initial_guess,  T=temprature, stepsize=stepsize, minimizer_kwargs=minimizer_kwargs, niter=iterations)
-    return alg, sim, optimizer_method, cycles_tup, [hp[0] for hp in length_hists], res
