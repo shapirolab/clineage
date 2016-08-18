@@ -21,11 +21,11 @@ class Optimizer(Struct):
         # "basinhopping_kwargs",
     ]
 
-    def optimize_across_lengths(self, params, steps_func, reference, **kwargs):
+    def optimize_across_lengths(self, params, model_params, reference):
         def nmes(x):
-            steps = steps_func(x)
-            return distance_from_model_across_lengths(steps, reference,
-                self.dist_metric, **kwargs)
+            model = model_params.get_for_x(x)
+            return distance_from_model_across_lengths(model, reference,
+                self.dist_metric)
         return optimize.basinhopping(
             func=nmes,
             x0=params.initial_guess,
