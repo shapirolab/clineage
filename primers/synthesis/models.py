@@ -157,6 +157,27 @@ class PCR2MinusPrimer(PCR2Mixin,BasePrimer,MinusStrandMixin):
     barcode = models.ForeignKey(DNABarcode2)
     ifca = models.ForeignKey(IlluminaFlowCellAdaptor2)
 
+
+class PadlockPrepCommonPrimers(models.Model):
+    """
+    Collection of generic adaptors on each end, for amplification from oligomix.
+    """
+    name = models.CharField(max_length=50)
+    left_amp_primer_part1 = models.ForeignKey(PadlockAmplificationPlusPrimerPart1)
+    left_amp_primer_part2 = models.ForeignKey(PadlockAmplificationPlusPrimerPart2)
+    right_amp_primer_part1 = models.ForeignKey(PadlockAmplificationMinusPrimerPart1)
+    right_amp_primer_part2 = models.ForeignKey(PadlockAmplificationMinusPrimerPart2)
+    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
+
+    class Meta:
+        unique_together = (
+            ('left_amp_primer_part1', 'left_amp_primer_part2', 'right_amp_primer_part1', 'right_amp_primer_part2', 'restriction_enzyme'),
+        )
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+
 class BasePadlockPrep(models.Model):
     """
     A piece of DNA that selectively binds to the template in two locations,
@@ -167,11 +188,7 @@ class BasePadlockPrep(models.Model):
     Contains generic adaptors on each end, for amplification from oligomix.
     """
     name = models.CharField(max_length=50)
-    left_amp_primer_part1 = models.ForeignKey(PadlockAmplificationPlusPrimerPart1)
-    left_amp_primer_part2 = models.ForeignKey(PadlockAmplificationPlusPrimerPart2)
-    right_amp_primer_part1 = models.ForeignKey(PadlockAmplificationMinusPrimerPart1)
-    right_amp_primer_part2 = models.ForeignKey(PadlockAmplificationMinusPrimerPart2)
-    restriction_enzyme = models.ForeignKey(RestrictionEnzyme)
+    primers = models.ForeignKey(PadlockPrepCommonPrimers)
     # padlock = models.ForeignKey(BasePadlock)
     physical_locations = fields.GenericRelation(SampleLocation,
                                              content_type_field='content_type',
