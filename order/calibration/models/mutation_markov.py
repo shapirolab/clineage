@@ -34,9 +34,8 @@ class MutationMarkov(FixedStepMarkovModel):
         dws = [hashable_poly1d([a, b]) for a, b in get_x_from_list(dw_params, 2)]
         # ups = [Hashable_exp(a, b) for a, b in get_x_from_list(up_params, 2)]
         # dws = [Hashable_exp(a, b) for a, b in get_x_from_list(dw_params, 2)]
-        
-        def fs(n):
-            return 1-sum([fu(n) for fu in ups])-sum([fd(n) for fd in dws])
+
+        fs = 1 - sum(ups) - sum(dws)
         
         d = {0: fs}
         d.update({i+1: fu for i, fu in enumerate(ups)})
