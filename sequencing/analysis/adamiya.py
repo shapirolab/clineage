@@ -249,13 +249,14 @@ def _build_ms_variations(amplicon, padding, mss):
         points.append(ms.slice.end_pos)
     points.append(amplicon.slice.end_pos)
     if points != sorted(points):
-        raise IntegrityError("Amplicon {} has interlocking MSs or MSs " \
+        raise IntegrityError("Amplicon {} has interlocking MSs or MSs "
             "outside its boundaries".format(amplicon.id))
     # FIXME: kill this +-1 when we move to 0-based.
-    segments = [(points[2*i]+1, points[2*i+1]) \
-        for i in range(len(points)//2) if points[2*i] < points[2*i+1]]
-    # FIXME: maybe store these slices?
-    fmt = "{}".join([amplicon.slice.chromosome.getdna(*a) for a in segments])
+    fmt = "{}".join([
+        amplicon.slice.chromosome.getdna(points[2*i]+1, points[2*i+1])
+            if points[2*i] < points[2*i+1] else b""
+        for i in range(len(points)//2)
+    ])
     full_fmt = "{pad}{left}{slice}{right}{pad}".format(
         pad="N"*padding,
         left=amplicon.left_margin,
