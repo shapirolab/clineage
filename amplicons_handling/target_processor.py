@@ -9,8 +9,9 @@ from primers.parts.models import IlluminaReadingAdaptor1ForTail, IlluminaReading
 def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
 
     tate_tuple = []
-    ira1ft = IlluminaReadingAdaptor1ForTail.objects.get(id=2)
-    ira2ft = IlluminaReadingAdaptor2ForTail.objects.get(id=2)
+    ira1ft = IlluminaReadingAdaptor1ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor1', tail_length=27)
+    ira2ft = IlluminaReadingAdaptor2ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor2', tail_length=27)
+
     for target in target_list:
         primer3_output = primer3_design(target, **kwargs)
         chosen_target_primers, discarded_targets = sort_best_primers(primer3_output, **kwargs)
