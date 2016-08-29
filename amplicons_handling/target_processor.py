@@ -11,6 +11,7 @@ def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
     tate_tuple = []
     ira1ft = IlluminaReadingAdaptor1ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor1', tail_length=27)
     ira2ft = IlluminaReadingAdaptor2ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor2', tail_length=27)
+    padlock_prep_common_primers = 'OM6 Standard Adaptors'
 
     for target in target_list:
         primer3_output = primer3_design(target, **kwargs)
@@ -21,5 +22,5 @@ def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
             ta, te = create_target_enrichment_in_db(chosen_target_primers)
             tate_tuple.append((ta, te))
     print('amount of TE created: {}, amount of all targets submitted: {}'.format(len(tate_tuple), len(target_list)))
-    om_mix = insertion_OM_to_db(tate_tuple, om_name, ira1ft, ira2ft)
+    om_mix = insertion_OM_to_db(tate_tuple, om_name, ira1ft, ira2ft, padlock_prep_common_primers)
     create_primer_order_file_xls(om_mix, xls_name)

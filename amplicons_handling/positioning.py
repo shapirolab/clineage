@@ -7,7 +7,7 @@ from targeted_enrichment.reagents.models import OM6PadlockTER
 from primers.synthesis.models import OM6Padlock, OM6Prep, PadlockPrepCommonPrimers
 
 
-def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft):
+def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft, padlock_prep_common_primers):
     """
     creating list of ters for OM6 panel
     :param tate_tuple: UMITargetedAmplicon, TargetEnrichment list of tuples
@@ -28,7 +28,7 @@ def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft):
             umi_length=3,
 
         )
-        om6_primers, c = PadlockPrepCommonPrimers.objects.get(name='OM6 Standard Adaptors')
+        om6_primers = PadlockPrepCommonPrimers.objects.get(name=padlock_prep_common_primers)
         om6_prep, c = OM6Prep.objects.get_or_create(
             name=te.id,
             padlock=om6_padlock,
