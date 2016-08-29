@@ -1,7 +1,7 @@
 import pytest
 
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
-    TargetEnrichment, Microsatellite
+    TargetEnrichment, Microsatellite, RestrictionEnzyme
 
 from tests.genomes.conftest import *
 
@@ -124,5 +124,20 @@ def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
 
 
 @pytest.fixture()
+def ttaa_restriction_site_sample():
+    r_site = RestrictionEnzyme.objects.create(
+        name='MseI',
+        sequence='TTAA',
+        cut_delta=2,
+        sticky_bases=2,
+        sequence_len=4,
+    )
+    # So our objects don't have "special" objects in fields
+    r_site = RestrictionEnzyme.objects.get(name=r_site.name)
+    return r_site
+
+
+@pytest.fixture()
 def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a):
     pass
+
