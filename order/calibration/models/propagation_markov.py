@@ -17,25 +17,29 @@ class PropagationMarkov(FixedStepMarkovModel):
 
     SQUEEZE = False
 
-    def _steps(self, x):
-        assert len(x) % 2 == 0
-        p = numpy.poly1d(x[:2]) 
-        x = x[2:]
-        # up_params = x[:len(x)//2]
-        # dw_params = x[len(x)//2:]
-        # ups = [hashable_poly1d([a, b, c]) for a, b, c in get_x_from_list(up_params, 3)]
-        # dws = [hashable_poly1d([a, b, c]) for a, b, c in get_x_from_list(dw_params, 3)]
-        up_params = x[:len(x)//4]
-        dw_params = x[len(x)//4:]
-        ups = [numpy.poly1d([a, b]) for a, b in get_x_from_list(up_params, 2)]
-        dws = [numpy.poly1d([a, b]) for a, b in get_x_from_list(dw_params, 2)]
-        # ups = [Hashable_exp(a, b) for a, b in get_x_from_list(up_params, 2)]
-        # dws = [Hashable_exp(a, b) for a, b in get_x_from_list(dw_params, 2)]
+    def __init__(self, p_degree, degrees_dict, *kwargs):
+        self.p_degree = p_degree
+        self.degrees_dict = degrees_dict
+        super().__init__(kwargs)
 
-        fs = 1 - sum(ups) - sum(dws)
-        
-        d = {0: 1+(p*fs)}
-        d.update({i+1: p*fu for i, fu in enumerate(ups)})
-        d.update({-i-1: p*fd for i, fd in enumerate(dws)})
-        
-        return d
+    def _calculate_polynomes(self, x):
+        assert len(x) % 2 == 0
+        p = numpy.poly1d(x[:self.p_degree])
+        d = dict()
+        for step in self.degrees_dict:
+            start, end = self.degrees_dict[step]
+            d[step] = numpy.poly1d(x[start:end])
+        return p, d
+
+    def _calculate_steps(self, p, d):
+        assert 0 not in d.keys()
+        fs = 1 - sum(d.values())
+        pd = {0: 1 + (p * fs)}
+        pd.update({k: p * f for k,f in d.items()})
+        return pd
+
+    def _steps(self, x):
+        p, d = self._calculate_polynomes(x)
+        pd = self._calculate_steps(p, d)
+        return pd
+
