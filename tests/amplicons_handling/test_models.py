@@ -35,13 +35,13 @@ def test_create_target_enrichment_in_db(target_enrichment_sample):
 
 
 @pytest.mark.django_db
-def test_insertion_OM_to_db(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail):
-    sample_mix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail)
+def test_insertion_OM_to_db(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, padlock_prep_sample):
+
+    sample_mix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, 'sample_padlock')
+    om6_prep = sample_mix[0]
     ta, te = tate_tuple_sample[0]
-    sample_te = sample_mix.ters.get(te=te)
-    sample_ta = sample_mix.ters.get(amplicon=ta)
-    assert sample_mix.name == 'sample_panel'
-    assert sample_ta.amplicon.left_ugs.sequence.seq.decode('utf-8') == sample_te.te.left.sequence.seq.decode('utf-8')
+    assert te.left == om6_prep.padlock.left_ugs
+    assert om6_prep.primers.restriction_enzyme.name == 'MseI'
 
 
 @pytest.mark.django_db
