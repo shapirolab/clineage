@@ -14,6 +14,7 @@ def populate_padlock_primers(apps, schema_editor):
     OM6Prep = apps.get_model("synthesis", "OM6Prep")
     OM6PrepDeprecated = apps.get_model("synthesis", "OM6PrepDeprecated")
     for OM in [OM6Prep, OM6PrepDeprecated]:
+        print()
         for om in bar(OM.objects.using(db_alias).all()):
             primers, c = PadlockPrepCommonPrimers.objects.using(db_alias).get_or_create(
                 left_amp_primer_part1=om.left_amp_primer_part1,
@@ -34,6 +35,7 @@ def unpopulate_padlock_primers(apps, schema_editor):
     OM6Prep = apps.get_model("synthesis", "OM6Prep")
     OM6PrepDeprecated = apps.get_model("synthesis", "OM6PrepDeprecated")
     for OM in [OM6Prep, OM6PrepDeprecated]:
+        print()
         for om in bar(OM.objects.using(db_alias).all()):
             primers = om.primers
             om.left_amp_primer_part1 = primers.left_amp_primer_part1
