@@ -17,10 +17,10 @@ class PropagationMarkov(FixedStepMarkovModel):
 
     SQUEEZE = False
 
-    def __init__(self, p_degree, degrees_dict, *kwargs):
+    def __init__(self, p_degree, degrees_dict, *args, **kwargs):
         self.p_degree = p_degree
         self.degrees_dict = degrees_dict
-        super().__init__(kwargs)
+        super().__init__(*args, **kwargs)
 
     def _calculate_polynomes(self, x):
         assert len(x) % 2 == 0
@@ -43,3 +43,16 @@ class PropagationMarkov(FixedStepMarkovModel):
         pd = self._calculate_steps(p, d)
         return pd
 
+
+class PropagationMarkovConstantP(PropagationMarkov):
+    def __init__(self, p, *args, **kwargs):
+        self.p = p
+        super().__init__(*args, **kwargs)
+
+    def _calculate_polynomes(self, x):
+        assert len(x) % 2 == 0
+        d = dict()
+        for step in self.degrees_dict:
+            start, end = self.degrees_dict[step]
+            d[step] = numpy.poly1d(x[start:end])
+        return self.p, d
