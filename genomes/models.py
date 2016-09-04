@@ -175,6 +175,7 @@ class DNASlice(models.Model):
         index_together = [
             ("chromosome", "start_pos", "end_pos"),
         ]
+        ordering = ["chromosome", "start_pos", "end_pos"]
 
 
 class DNASlice_Contains(models.Model):
