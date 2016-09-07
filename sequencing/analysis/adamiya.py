@@ -254,7 +254,7 @@ def _build_ms_variations(amplicon, padding, mss):
     # FIXME: kill this +-1 when we move to 0-based.
     fmt = "{}".join([
         amplicon.slice.chromosome.getdna(points[2*i]+1, points[2*i+1])
-            if points[2*i] < points[2*i+1] else b""
+            if points[2*i] < points[2*i+1] else ""
         for i in range(len(points)//2)
     ])
     full_fmt = "{pad}{left}{slice}{right}{pad}".format(
