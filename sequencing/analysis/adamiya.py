@@ -1,25 +1,20 @@
 
 import itertools
-import functools
 import contextlib
 from plumbum import local
-import os
-import uuid
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-import shutil
 
-from django.conf import settings
 from django.db import IntegrityError
 
-from misc.utils import get_unique_path, unique_file_cm, unique_dir_cm, unlink, \
-    raise_or_create, get_get_or_create
+from misc.utils import unique_file_cm, unique_dir_cm, unlink, \
+    get_get_or_create
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
     LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
     MicrosatelliteHistogramGenotypeSet, ms_genotypes_to_name, AdamHistogram, \
-    HistogramEntryReads, SampleReads, delete_files, name_to_ms_genotypes, \
+    HistogramEntryReads, name_to_ms_genotypes, \
     BowtieIndexMixin, PearOutputMixin, SNPHistogramGenotypeSet, SNPHistogramGenotype
 from targeted_enrichment.planning.models import Microsatellite
 
