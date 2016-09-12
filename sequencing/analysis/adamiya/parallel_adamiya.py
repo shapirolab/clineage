@@ -1,7 +1,7 @@
 
 import itertools
 import functools
-from distributed.executor import as_completed
+from distributed import as_completed
 
 from sequencing.analysis.adamiya.adamiya import merge, create_reads_index, \
     align_primers_to_reads, separate_reads_by_amplicons,\

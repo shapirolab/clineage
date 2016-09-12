@@ -10,8 +10,8 @@ from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
 from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
 
 from distributed.utils_test import cluster
-from distributed.executor import Future, as_completed, Executor
-
+from distributed import as_completed, Executor
+from distributed.client import Future
 from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
     AdamMarginAssignment, AdamAmpliconReads, AdamHistogram, AdamMSVariations, \
     HistogramEntryReads, MicrosatelliteHistogramGenotype
