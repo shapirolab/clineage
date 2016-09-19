@@ -3,7 +3,7 @@ import itertools
 import functools
 from distributed.executor import as_completed
 
-from sequencing.analysis.adamiya import merge, create_reads_index, \
+from sequencing.analysis.adamiya.adamiya import merge, create_reads_index, \
     align_primers_to_reads, separate_reads_by_amplicons,\
     align_reads_to_ms_variations, separate_reads_by_genotypes
 

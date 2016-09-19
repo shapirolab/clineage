@@ -4,8 +4,8 @@ import primer3
 import re
 import argparse
 import sys
-sys.path.append('/home/barakor/ViennaRNA/lib/python3.5/site-packages/')
-import RNA
+# sys.path.append('/home/barakor/ViennaRNA/lib/python3.5/site-packages/')
+# import RNA
 
 from genomes.models import DNASlice
 from targeted_enrichment.planning.models import Target

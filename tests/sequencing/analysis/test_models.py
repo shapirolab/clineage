@@ -2,11 +2,13 @@ import pytest
 import os
 from Bio import SeqIO
 
-from sequencing.analysis.adamiya import merge, create_reads_index, \
+from sequencing.analysis.adamiya.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, separate_reads_by_amplicons, \
     get_adam_ms_variations, separate_reads_by_genotypes, align_reads_to_ms_variations
 from sequencing.analysis.models import AdamMSVariations, \
-    MicrosatelliteHistogramGenotype, name_to_ms_genotypes, ms_genotypes_to_name
+    MicrosatelliteHistogramGenotype
+from sequencing.analysis.models_common import name_to_ms_genotypes, \
+    ms_genotypes_to_name
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups, strip_fasta_records

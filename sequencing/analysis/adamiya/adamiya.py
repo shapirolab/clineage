@@ -10,12 +10,14 @@ from django.db import IntegrityError
 
 from misc.utils import unique_file_cm, unique_dir_cm, unlink, \
     get_get_or_create
-from sequencing.analysis.models import AdamMergedReads, AdamReadsIndex, \
-    AdamMarginAssignment, AdamAmpliconReads, amplicon_margin_to_name, \
-    LEFT, RIGHT, AdamMSVariations, MicrosatelliteHistogramGenotype, \
-    MicrosatelliteHistogramGenotypeSet, ms_genotypes_to_name, AdamHistogram, \
-    HistogramEntryReads, name_to_ms_genotypes, \
-    BowtieIndexMixin, PearOutputMixin, SNPHistogramGenotypeSet, SNPHistogramGenotype
+from sequencing.analysis.adamiya.models import AdamMergedReads, \
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
+    amplicon_margin_to_name, LEFT, RIGHT, AdamMSVariations, AdamHistogram
+from sequencing.analysis.models import MicrosatelliteHistogramGenotype, \
+    MicrosatelliteHistogramGenotypeSet, HistogramEntryReads, \
+    SNPHistogramGenotypeSet, SNPHistogramGenotype
+from sequencing.analysis.models_common import BowtieIndexMixin, \
+    PearOutputMixin, ms_genotypes_to_name, name_to_ms_genotypes
 from targeted_enrichment.planning.models import Microsatellite
 
 

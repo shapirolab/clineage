@@ -1,17 +1,14 @@
 import pytest
 import os
-import uuid
-from django.conf import settings
 import itertools
 from Bio import SeqIO
 
 from sequencing.analysis.models import SampleReads, AdamMergedReads, \
-    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, PearOutputMixin, \
+    AdamReadsIndex, AdamMarginAssignment, AdamAmpliconReads, \
     SNPHistogramGenotype, MicrosatelliteHistogramGenotype, \
     MicrosatelliteHistogramGenotypeSet, AdamMSVariations, AdamHistogram, \
     Histogram, HistogramEntryReads, SNPHistogramGenotypeSet
-from targeted_enrichment.amplicons.models import Amplicon
-from sequencing.analysis.models import LEFT, RIGHT
+from sequencing.analysis.models_common import PearOutputMixin
 from misc.utils import get_unique_path
 
 from tests.sequencing.runs.conftest import *
