@@ -34,11 +34,16 @@ def bc2(sr1, sr2, srm=None):
 ms_28727_a_id = 1
 ms_28727_b_id = 2
 ms_28734_a_id = 3
+ms_adj_ms_1_a = 4
+ms_adj_ms_2_a = 5
+ms_adj_ms_2_b = 6
 magicalpcr1library_id = 1
 magicalpcr1barcodedcontent_id = 1
 magicalpcr1barcodedcontent_a_id = 2
 amplicon_28727_id = 1
 amplicon_28734_id = 2
+pu_adj_ms_1 = 3
+pu_adj_ms_2 = 4
 
 def repeat_number(i):  # Just to give the int some context
     return i
@@ -121,9 +126,26 @@ READS_DICT_ADAM = {
                         ),
                     ],
                 },
+
+                pu_adj_ms_1: {
+                    frozenset(((ms_adj_ms_1_a, repeat_number(30)),)): [
+                        bc1(
+                            sr1="AGTCCTCACTGATTCTCAGGCATACACACACACACACACACACACACACACACACACACACACACACACACACACACACACACAGAACTGAGCAAGTTTGGGTCATAGATACAGCTGGCCACTAGTGATACTTGTGGCTTTCTAGCCCTGTGAGAAAGAATAGAGCC",
+                            sr2="GGCTCTATTCTTTCTCACAGGGCTAGAAAGCCACAAGTCACACTAGTGGCCAGCTGTATCTATGACCCAAACTTGCTCAGGTCTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTATGCGTGAGAGTGAGTGAGGACT",
+                            srm="AGTCCTCACTGATTCTCAGGCATACACACACACACACACACACACACACACACACACACACACACACACACACACACACACACAGAACTGAGCAAGTTTGGGTCATAGATACAGCTGGCCACTAGTGATACTTGTGGCTTTCTAGCCCTGTGAGAAAGAATAGAGCC"
+                        ),
+                    ]
+                },
+                pu_adj_ms_2: {
+                    frozenset(((ms_adj_ms_2_a, repeat_number(14)), (ms_adj_ms_2_b, repeat_number(9)),)): [
+                        bc1(
+                            sr1="CCCTCCTTGTCCCGGCTGAGCGCACCCACCCCCGGCCTCGGCCGGGGCGAATTCGTGTGTGTGTGTGTGTGTGTGTGTGTGTGCGCGCGCGCGCGCGCGCTCGAGTGCCGGGAGGGCAGTTGCGAAACGGGCTCTTGGCTGCAGCGCGGCATAATGGAGGTGGCTGGAAC",
+                            sr2="GTTCCAGCCACCTCCATTATGCCGCGCTGCAGCCAAGAGCCCGTTTCGCAACTGCCCTCCCGGCACTCGAGCGCGCGCGCGCGCGCGCACACACACACACACACACACACACACACCAATTCGCCCCGGGCGAGGCCGGGGGTGGGTGCGCTCAGCCGGGCCCAGGCGGG",
+                            srm="CCCTCCTTGTCCCGGCTGAGCGCACCCACCCCCGGCCTCGGCCGGGGCGAATTCGTGTGTGTGTGTGTGTGTGTGTGTGTGTGCGCGCGCGCGCGCGCGCTCGAGTGCCGGGAGGGCAGTTGCGAAACGGGCTCTTGGCTGCAGCGCGGCATAATGGAGGTGGCTGGAAC"
+                        ),
+                    ]
+                },
             },
         },
     },
 }
-
-
