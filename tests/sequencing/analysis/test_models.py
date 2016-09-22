@@ -4,7 +4,8 @@ from Bio import SeqIO
 
 from sequencing.analysis.adamiya.adamiya import merge, create_reads_index, \
     align_primers_to_reads, _create_panel_fasta, separate_reads_by_amplicons, \
-    get_adam_ms_variations, separate_reads_by_genotypes, align_reads_to_ms_variations
+    get_adam_ms_variations, separate_reads_by_genotypes, \
+    align_reads_to_ms_variations, _build_ms_variations
 from sequencing.analysis.models import AdamMSVariations, \
     MicrosatelliteHistogramGenotype
 from sequencing.analysis.models_common import name_to_ms_genotypes, \
@@ -273,3 +274,15 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
     assert mhg4.repeat_number == 11
     for mhg in [mhg1,mhg2,mhg3,mhg4]:
         mhg.delete()
+
+
+def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations, ms_28727_a, ms_28727_b, pu_adj_ms_1, pu_adj_ms_1_adam_ms_variations, ms_adj_ms_1_a, pu_adj_ms_2, pu_adj_ms_2_adam_ms_variations, ms_adj_ms_2_a, ms_adj_ms_2_b):
+    for pu, mss, pu_amsv in [
+        (pu_28727, [ms_28727_a, ms_28727_b], pu_28727_adam_ms_variations),
+        (pu_adj_ms_1, [ms_adj_ms_1_a], pu_adj_ms_1_adam_ms_variations),
+        (pu_adj_ms_2, [ms_adj_ms_2_a, ms_adj_ms_2_b], pu_adj_ms_2_adam_ms_variations),
+    ]:
+        fasta = _build_ms_variations(pu, 50, mss)
+        variations = set(strip_fasta_records(SeqIO.parse(fasta, "fasta")))
+        assert variations == pu_amsv
+        os.unlink(fasta)

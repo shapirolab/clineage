@@ -13,6 +13,8 @@ from misc.utils import get_unique_path
 
 from tests.sequencing.runs.conftest import *
 from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
+from tests.sequencing.analysis.pu_adj_ms_1_adam_ms_variations import VARS_ADJ_MS_1
+from tests.sequencing.analysis.pu_adj_ms_2_adam_ms_variations import VARS_ADJ_MS_2
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, NUM_READS
@@ -383,3 +385,18 @@ def adam_histogram_entry_reads_d(adam_histogram_entry_reads_files_d, _chain_hist
         os.unlink(her.fastqm)
         os.unlink(her.fastq1)
         os.unlink(her.fastq2)
+
+
+@pytest.fixture()
+def pu_28727_adam_ms_variations():
+    return VARS_28727
+
+
+@pytest.fixture()
+def pu_adj_ms_1_adam_ms_variations():
+    return VARS_ADJ_MS_1
+
+
+@pytest.fixture()
+def pu_adj_ms_2_adam_ms_variations():
+    return VARS_ADJ_MS_2
