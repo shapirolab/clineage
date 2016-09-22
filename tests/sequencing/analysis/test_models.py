@@ -60,10 +60,10 @@ def test_create_panel_fasta(pu_28727, pu_28734):
     assert set(strip_fasta_records(
         SeqIO.parse(panel_fasta_name, "fasta")
     )) == {
-        ("amplicon_28727_left", "TTTACTATGCCATGCTGCTGCT",),
-        ("amplicon_28727_right", "TGTGCAAACAAGAACAGATGCC",),
-        ("amplicon_28734_left", "AAGGCTTCTCCCCATTCCAAAG",),
-        ("amplicon_28734_right", "AGTCCAAGCACACACTACTTCC",),
+        ("amplicon_1_left", "TTTACTATGCCATGCTGCTGCT",),
+        ("amplicon_1_right", "TGTGCAAACAAGAACAGATGCC",),
+        ("amplicon_2_left", "AAGGCTTCTCCCCATTCCAAAG",),
+        ("amplicon_2_right", "AGTCCAAGCACACACTACTTCC",),
     }
     os.unlink(panel_fasta_name)
 

@@ -10,9 +10,9 @@ from tests.genomes.conftest import *
 def pu_28727(ugs_28727_left, ugs_28727_right, slice_28727_amplicon):
     pu = PlainTargetedAmplicon.objects.create(
         slice=slice_28727_amplicon,
-        id=28727,
-        left_ugs = ugs_28727_left,
-        right_ugs = ugs_28727_right,
+        id=1,
+        left_ugs=ugs_28727_left,
+        right_ugs=ugs_28727_right,
     )
     # So our objects don't have "special" objects in fields
     pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)
@@ -23,9 +23,9 @@ def pu_28727(ugs_28727_left, ugs_28727_right, slice_28727_amplicon):
 def pu_28734(ugs_28734_left, ugs_28734_right, slice_28734_amplicon):
     pu = PlainTargetedAmplicon.objects.create(
         slice=slice_28734_amplicon,
-        id=28734,
-        left_ugs = ugs_28734_left,
-        right_ugs = ugs_28734_right,
+        id=2,
+        left_ugs=ugs_28734_left,
+        right_ugs=ugs_28734_right,
     )
     # So our objects don't have "special" objects in fields
     pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)

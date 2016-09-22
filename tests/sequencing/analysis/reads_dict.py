@@ -37,8 +37,8 @@ ms_28734_a_id = 3
 magicalpcr1library_id = 1
 magicalpcr1barcodedcontent_id = 1
 magicalpcr1barcodedcontent_a_id = 2
-amplicon_28727_id = 28727
-amplicon_28734_id = 28734
+amplicon_28727_id = 1
+amplicon_28734_id = 2
 
 def repeat_number(i):  # Just to give the int some context
     return i
