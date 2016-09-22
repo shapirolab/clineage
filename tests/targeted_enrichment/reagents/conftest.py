@@ -61,3 +61,7 @@ def ter_adj_ms_2(te_adj_ms_2, primer_adj_ms_2_left, primer_adj_ms_2_right, pu_ad
     # So our objects don't have "special" objects in fields
     ter = PCR1PrimerPairTER.objects.get(pk=ter.pk)
     return ter
+
+@pytest.fixture()
+def all_ters(ter_28727, ter_28734, ter_adj_ms_1, ter_adj_ms_2):
+    return [ter_28727, ter_28734, ter_adj_ms_1, ter_adj_ms_2]

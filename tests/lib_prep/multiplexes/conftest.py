@@ -7,11 +7,11 @@ from tests.targeted_enrichment.reagents.conftest import *
 
 
 @pytest.fixture()
-def pcr1multiplex(ter_28727, ter_28734):
+def pcr1multiplex(all_ters):
     pcr1m = PCR1Multiplex.objects.create(
         name='test PCR1Multiplex'
     )
-    pcr1m.ters = [ter_28727, ter_28734]
+    pcr1m.ters = all_ters
     # So our objects don't have "special" objects in fields
     pcr1m = PCR1Multiplex.objects.get(pk=pcr1m.pk)
     return pcr1m
