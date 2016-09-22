@@ -53,3 +53,50 @@ def primer_28734_right(ugs_28734_right, illuminareadingadaptor2fortail):
     p = PCR1MinusPrimer.objects.get(pk=p.pk)
     return p
 
+
+@pytest.fixture()
+def primer_adj_ms_1_left(ugs_adj_ms_1_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='Seq00044_fwd',
+        ugs=ugs_adj_ms_1_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_adj_ms_1_right(ugs_adj_ms_1_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='Seq00044_rev',
+        ugs=ugs_adj_ms_1_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_adj_ms_2_left(ugs_adj_ms_2_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='Seq01291_fwd',
+        ugs=ugs_adj_ms_2_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_adj_ms_2_right(ugs_adj_ms_2_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='Seq01291_rev',
+        ugs=ugs_adj_ms_2_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p
