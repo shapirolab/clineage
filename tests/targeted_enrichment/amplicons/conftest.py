@@ -33,5 +33,31 @@ def pu_28734(ugs_28734_left, ugs_28734_right, slice_28734_amplicon):
 
 
 @pytest.fixture()
-def requires_amplicons(pu_28727, pu_28734):
+def pu_adj_ms_1(ugs_adj_ms_1_left, ugs_adj_ms_1_right, slice_adj_ms_1_amplicon):
+    pu = PlainTargetedAmplicon.objects.create(
+        slice=slice_adj_ms_1_amplicon,
+        id=3,
+        left_ugs=ugs_adj_ms_1_left,
+        right_ugs=ugs_adj_ms_1_right,
+    )
+    # So our objects don't have "special" objects in fields
+    pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)
+    return pu
+
+
+@pytest.fixture()
+def pu_adj_ms_2(ugs_adj_ms_2_left, ugs_adj_ms_2_right, slice_adj_ms_2_amplicon):
+    pu = PlainTargetedAmplicon.objects.create(
+        slice=slice_adj_ms_2_amplicon,
+        id=4,
+        left_ugs=ugs_adj_ms_2_left,
+        right_ugs=ugs_adj_ms_2_right,
+    )
+    # So our objects don't have "special" objects in fields
+    pu = PlainTargetedAmplicon.objects.get(pk=pu.pk)
+    return pu
+
+
+@pytest.fixture()
+def requires_amplicons(pu_28727, pu_28734, pu_adj_ms_1, pu_adj_ms_2):
     pass

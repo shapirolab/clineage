@@ -94,6 +94,46 @@ def ugs_28734_right(slice_28734_right):
 
 
 @pytest.fixture()
+def ugs_adj_ms_1_left(slice_adj_ms_1_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_adj_ms_1_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_adj_ms_1_right(slice_adj_ms_1_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_adj_ms_1_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
+def ugs_adj_ms_2_left(slice_adj_ms_2_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_adj_ms_2_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_adj_ms_2_right(slice_adj_ms_2_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_adj_ms_2_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
 def ms_28734_a(slice_28734_target_a):
     ms = Microsatellite.objects.create(
         id=3,
@@ -138,6 +178,6 @@ def ttaa_restriction_site_sample():
 
 
 @pytest.fixture()
-def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a):
+def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a, ms_adj_ms_1_a, ms_adj_ms_2_a, ms_adj_ms_2_b):
     pass
 
