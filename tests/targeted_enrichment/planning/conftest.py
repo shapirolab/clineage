@@ -94,6 +94,36 @@ def ugs_28734_right(slice_28734_right):
 
 
 @pytest.fixture()
+def ms_28734_a(slice_28734_target_a):
+    ms = Microsatellite.objects.create(
+        id=3,
+        name='X_54384788_54384805',
+        slice=slice_28734_target_a,
+        repeat_unit_len=3,
+        repeat_unit_type='AAG',
+        repeat_number=6,
+        repeat_unit_ref_seq='AGA',
+        planning_version=0,
+    )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
+    return ms
+
+
+@pytest.fixture()
+def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome,
+        left=ugs_28734_left,
+        right=ugs_28734_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
+
+
+@pytest.fixture()
 def ugs_adj_ms_1_left(slice_adj_ms_1_left):
     ugsp = UGSPlus.objects.create(
         slice=slice_adj_ms_1_left,
@@ -111,6 +141,36 @@ def ugs_adj_ms_1_right(slice_adj_ms_1_right):
     # So our objects don't have "special" objects in fields
     ugsm = UGSMinus.objects.get(pk=ugsm.pk)
     return ugsm
+
+
+@pytest.fixture()
+def ms_adj_ms_1_a(slice_adj_ms_1_target_a):
+    ms = Microsatellite.objects.create(
+        id=4,
+        name='X_74123161_74123220',
+        slice=slice_adj_ms_1_target_a,
+        repeat_unit_len=2,
+        repeat_unit_type='AC',
+        repeat_number=30,
+        repeat_unit_ref_seq='AC',
+        planning_version=0,
+    )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
+    return ms
+
+
+@pytest.fixture()
+def te_adj_ms_1(hg19_chromosome, ugs_adj_ms_1_left, ugs_adj_ms_1_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome,
+        left=ugs_adj_ms_1_left,
+        right=ugs_adj_ms_1_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
 
 
 @pytest.fixture()
@@ -134,15 +194,15 @@ def ugs_adj_ms_2_right(slice_adj_ms_2_right):
 
 
 @pytest.fixture()
-def ms_28734_a(slice_28734_target_a):
+def ms_adj_ms_2_a(slice_adj_ms_2_target_a):
     ms = Microsatellite.objects.create(
-        id=3,
-        name='X_54384788_54384805',
-        slice=slice_28734_target_a,
-        repeat_unit_len=3,
-        repeat_unit_type='AAG',
-        repeat_number=6,
-        repeat_unit_ref_seq='AGA',
+        id=5,
+        name='X_39873639_39873678',
+        slice=slice_adj_ms_2_target_a,
+        repeat_unit_len=2,
+        repeat_unit_type='AC',
+        repeat_number=20,
+        repeat_unit_ref_seq='GT',
         planning_version=0,
     )
     # So our objects don't have "special" objects in fields
@@ -151,11 +211,28 @@ def ms_28734_a(slice_28734_target_a):
 
 
 @pytest.fixture()
-def te_28734(hg19_chromosome, ugs_28734_left, ugs_28734_right):
+def ms_adj_ms_2_b(slice_adj_ms_2_target_b):
+    ms = Microsatellite.objects.create(
+        id=6,
+        name='X_39873679_39873696',
+        slice=slice_adj_ms_2_target_b,
+        repeat_unit_len=2,
+        repeat_unit_type='CG',
+        repeat_number=9,
+        repeat_unit_ref_seq='GC',
+        planning_version=0,
+    )
+    # So our objects don't have "special" objects in fields
+    ms = Microsatellite.objects.get(pk=ms.pk)
+    return ms
+
+
+@pytest.fixture()
+def te_adj_ms_2(hg19_chromosome, ugs_adj_ms_2_left, ugs_adj_ms_2_right):
     te = TargetEnrichment.objects.create(
         chromosome=hg19_chromosome,
-        left=ugs_28734_left,
-        right=ugs_28734_right,
+        left=ugs_adj_ms_2_left,
+        right=ugs_adj_ms_2_right,
         planning_version=1,
     )
     # So our objects don't have "special" objects in fields
