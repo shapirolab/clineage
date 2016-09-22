@@ -202,8 +202,8 @@ def slice_adj_ms_1_amplicon(hg19_chromosome):
 def slice_adj_ms_2_left(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
-        start_pos=35580142,
-        end_pos=35580164,
+        start_pos=39873585,
+        end_pos=39873604,
     )
     # So our objects don't have "special" objects in fields
     dnas = DNASlice.objects.get(pk=dnas.pk)
@@ -214,8 +214,8 @@ def slice_adj_ms_2_left(hg19_chromosome):
 def slice_adj_ms_2_target_a(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
-        start_pos=35580220,
-        end_pos=35580271,
+        start_pos=39873639,
+        end_pos=39873678,
     )
     # So our objects don't have "special" objects in fields
     dnas = DNASlice.objects.get(pk=dnas.pk)
@@ -226,8 +226,8 @@ def slice_adj_ms_2_target_a(hg19_chromosome):
 def slice_adj_ms_2_target_b(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
-        start_pos=35580272,
-        end_pos=35580315,
+        start_pos=39873679,
+        end_pos=39873696,
     )
     # So our objects don't have "special" objects in fields
     dnas = DNASlice.objects.get(pk=dnas.pk)
@@ -238,8 +238,8 @@ def slice_adj_ms_2_target_b(hg19_chromosome):
 def slice_adj_ms_2_right(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
-        start_pos=35580342,
-        end_pos=35580364,
+        start_pos=39873745,
+        end_pos=39873766,
     )
     # So our objects don't have "special" objects in fields
     dnas = DNASlice.objects.get(pk=dnas.pk)
@@ -250,8 +250,8 @@ def slice_adj_ms_2_right(hg19_chromosome):
 def slice_adj_ms_2_amplicon(hg19_chromosome):
     dnas = DNASlice.objects.create(
         chromosome=hg19_chromosome,
-        start_pos=35580165,
-        end_pos=35580341,
+        start_pos=39873605,
+        end_pos=39873744,
     )
     # So our objects don't have "special" objects in fields
     dnas = DNASlice.objects.get(pk=dnas.pk)
