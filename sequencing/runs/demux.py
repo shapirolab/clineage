@@ -70,7 +70,7 @@ AdapterRead2,{rev_read_adaptor},,,,,,,,
 [Data],,,,,,,,,
 """
 
-def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme):
+def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme, rev_left_bc=False):
     read_length = kit.read_length
     fwd_read_adaptor = kit.fwd_read_adaptor
     rev_read_adaptor = kit.rev_read_adaptor
@@ -92,7 +92,7 @@ def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme):
             SAMPLE_ID: bc.id,
             SAMPLE_NAME: bc.id,
             LEFT_BARCODE_ID: bc.barcodes.left.name,
-            LEFT_BARCODE_SEQ: bc.barcodes.left.ref_sequence,
+            LEFT_BARCODE_SEQ: bc.barcodes.left.ref_sequence if not rev_left_bc else bc.barcodes.left.ref_sequence.rev_comp(),
             RIGHT_BARCODE_ID: bc.barcodes.right.name,
             RIGHT_BARCODE_SEQ: bc.barcodes.right.ref_sequence,
         })
@@ -130,6 +130,7 @@ def run_demux(ngs_run, demux_scheme):
         description=description,
         kit=ngs_run.kit,
         demux_scheme=demux_scheme,
+        rev_left_bc=ngs_run.machine.type.rev_left_bc,
     )
     with unique_dir_cm() as fastq_folder:
         with unlink(get_unique_path("csv")) as sample_sheet_path:

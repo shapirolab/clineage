@@ -14,6 +14,7 @@ def machinetype(transactional_db):
     mt = MachineType.objects.create(
         company="Illumina",
         model="NextSeq",
+        rev_left_bc=False
     )
     # So our objects don't have "special" objects in fields
     mt = MachineType.objects.get(pk=mt.pk)

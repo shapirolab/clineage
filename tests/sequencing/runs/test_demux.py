@@ -42,7 +42,46 @@ Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,ind
 1,1,,,D710,TCCGCGAA,D508,GTACTGAC,,
 2,2,,,D718,TGGGAGCC,D502,ATAGAGGC,,
 """.format(d)
-    
+
+
+@pytest.mark.django_db
+def test_get_samplesheet_nextseq(ngskit, demultiplexingscheme, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
+    d = datetime.date.today()
+    sample_sheet = generate_sample_sheets(
+        bcs=[magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a],
+        name="Ooga",
+        date=d,
+        description="Booga",
+        kit=ngskit,
+        demux_scheme=demultiplexingscheme,
+        rev_left_bc=True,
+    )
+    assert sample_sheet == \
+"""[Header],,,,,,,,,
+IEMFileVersion,4,,,,,,,,
+Experiment Name,Ooga,,,,,,,,
+Date,{},,,,,,,,
+Workflow,GenerateFASTQ,,,,,,,,
+Application,FASTQ Only,,,,,,,,
+Assay,TruSeq HT,,,,,,,,
+Description,Booga,,,,,,,,
+Chemistry,Amplicon,,,,,,,,
+,,,,,,,,,
+[Reads],,,,,,,,,
+151,,,,,,,,,
+151,,,,,,,,,
+,,,,,,,,,
+[Settings],,,,,,,,,
+ReverseComplement,0,,,,,,,,
+Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,,,,,,,,
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,
+,,,,,,,,,
+[Data],,,,,,,,,
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description
+1,1,,,D710,TCCGCGAA,D508,GTCAGTAC,,
+2,2,,,D718,TGGGAGCC,D502,GCCTCTAT,,
+""".format(d)
+
 
 def test_run_demux(ngsrun, demultiplexingscheme, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a, monkeypatch):
     def mock_run_bcl2fastq(bcl_folder, sample_sheet_path, fastq_folder):

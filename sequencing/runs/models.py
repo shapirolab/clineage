@@ -8,6 +8,7 @@ from primers.parts.models import IlluminaReadingAdaptor1, \
 class MachineType(models.Model):
     company = models.CharField(max_length=50)
     model = models.CharField(max_length=50)
+    rev_left_bc = models.BooleanField()
 
     def __str__(self):
         return "{}_{}".format(self.company, self.model)
