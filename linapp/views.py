@@ -376,7 +376,6 @@ def plate_input_with_names(request):
                         cell=new_cell,
                         name=cell_value,
                         protocol=cell_content_protocol,
-                        user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
                     try:
