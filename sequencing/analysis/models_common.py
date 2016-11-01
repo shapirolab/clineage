@@ -117,11 +117,19 @@ post_delete_files(SampleReads)
 
 
 def _read_sam(sam_path):
-    with pysam.AlignmentFile(sam_path, "rb") as samfile:
+    with pysam.AlignmentFile(sam_path, "r") as samfile:
         for r in samfile:
             if r.is_unmapped:
                 continue  # unmapped TODO: dump in appropriate bin
             yield samfile.getrname(r.reference_id), r.query_name
+
+
+def _read_bam(bam_path):
+    with pysam.AlignmentFile(bam_path, "rb") as bamfile:
+        for r in bamfile:
+            if r.is_unmapped:
+                continue  # unmapped TODO: dump in appropriate bin
+            yield bamfile.getrname(r.reference_id), r.query_name
 
 
 class Histogram(models.Model):
