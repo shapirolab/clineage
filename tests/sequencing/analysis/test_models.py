@@ -276,6 +276,7 @@ def test_ms_histogram_genotypes_names(ms_28727_a, ms_28734_a):
         mhg.delete()
 
 
+@pytest.mark.django_db
 def test_build_ms_variations(pu_28727, pu_28727_adam_ms_variations, ms_28727_a, ms_28727_b, pu_adj_ms_1, pu_adj_ms_1_adam_ms_variations, ms_adj_ms_1_a, pu_adj_ms_2, pu_adj_ms_2_adam_ms_variations, ms_adj_ms_2_a, ms_adj_ms_2_b):
     for pu, mss, pu_amsv in [
         (pu_28727, [ms_28727_a, ms_28727_b], pu_28727_adam_ms_variations),
