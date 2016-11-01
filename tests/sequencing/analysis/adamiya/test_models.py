@@ -13,7 +13,7 @@ from sequencing.analysis.models_common import name_to_ms_genotypes, \
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups, strip_fasta_records
-from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
+from tests.sequencing.analysis.adamiya.reads_dict import ASSEMBLED, UNASSEMBLED
 
 
 @pytest.mark.django_db

@@ -12,14 +12,14 @@ from sequencing.analysis.models_common import PearOutputMixin
 from misc.utils import get_unique_path
 
 from tests.sequencing.runs.conftest import *
-from tests.sequencing.analysis.pu_28727_adam_ms_variations import VARS_28727
-from tests.sequencing.analysis.pu_adj_ms_1_adam_ms_variations import VARS_ADJ_MS_1
-from tests.sequencing.analysis.pu_adj_ms_2_adam_ms_variations import VARS_ADJ_MS_2
+from tests.sequencing.analysis.adamiya.pu_28727_adam_ms_variations import VARS_28727
+from tests.sequencing.analysis.adamiya.pu_adj_ms_1_adam_ms_variations import VARS_ADJ_MS_1
+from tests.sequencing.analysis.adamiya.pu_adj_ms_2_adam_ms_variations import VARS_ADJ_MS_2
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, NUM_READS
 from tests.flat_dict import FlatDict
-from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
+from tests.sequencing.analysis.adamiya.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
 
 

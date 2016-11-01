@@ -7,7 +7,7 @@ from sequencing.analysis.adamiya.parallel_adamiya import run_parallel
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups
-from tests.sequencing.analysis.reads_dict import ASSEMBLED, UNASSEMBLED
+from tests.sequencing.analysis.adamiya.reads_dict import ASSEMBLED, UNASSEMBLED
 
 from distributed.utils_test import cluster
 from distributed import as_completed, Executor

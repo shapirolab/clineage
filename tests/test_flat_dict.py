@@ -1,9 +1,9 @@
 import pytest
 
 from tests.flat_dict import FlatDict
-from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM
+from tests.sequencing.analysis.adamiya.reads_dict import READS_DICT_ADAM
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM
-from tests.sequencing.analysis.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
+from tests.sequencing.analysis.adamiya.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
 
 BIG_D = {

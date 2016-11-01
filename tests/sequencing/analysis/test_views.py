@@ -4,6 +4,9 @@ import pytest
 import io
 import openpyxl
 
+from tests.sequencing.analysis.adamiya.conftest import *
+from tests.sequencing.analysis.adamiya.conftest import _chain_histogram_entry_reads, _chain_amplicon_reads
+
 def test_summary_table(adam_histogram_entry_reads_d, loggedin_client):
     resp = loggedin_client.get("/analysis/TestRun/summary.xlsx")
     assert resp.status_code == 200
