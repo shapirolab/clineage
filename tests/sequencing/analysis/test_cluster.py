@@ -21,7 +21,9 @@ import django
 @pytest.yield_fixture(scope="session")
 def executor(): 
     with cluster(4) as (d, workers):
-        yield Executor(("127.0.0.1", d["port"]))
+        e = Executor(("127.0.0.1", d["port"]))
+        yield e
+        e.shutdown()
 
 
 @pytest.mark.django_db(transaction=True)
