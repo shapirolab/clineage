@@ -91,24 +91,27 @@ class Chromosome(models.Model):
         return start - l + index, start - l + index + len(sequence) - 1
 
 
-class DNASlice(models.Model):
+class DNASliceBase(models.Model):
     chromosome = models.ForeignKey(Chromosome)
     # TODO: decide indexing method
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
-    _sequence = models.CharField(max_length=300,null=True,default=None)
+    _sequence = models.CharField(max_length=300, null=True, default=None)
     contains = models.ManyToManyField('genomes.DNASlice',
-        related_name='contained',
-        symmetrical=False,
-        through='genomes.DNASlice_Contains',
-        through_fields=('outer', 'inner')
-    )
+                                      related_name='contained',
+                                      symmetrical=False,
+                                      through='genomes.DNASlice_Contains',
+                                      through_fields=('outer', 'inner')
+                                      )
     overlaps = models.ManyToManyField('genomes.DNASlice',
-        related_name='+',
-        symmetrical=False,
-        through='genomes.DNASlice_Overlaps',
-        through_fields=('slice1', 'slice2')
-    )
+                                      related_name='+',
+                                      symmetrical=False,
+                                      through='genomes.DNASlice_Overlaps',
+                                      through_fields=('slice1', 'slice2')
+                                      )
+
+    class Meta:
+        abstract = True
 
     @property
     def sequence(self):
@@ -118,7 +121,7 @@ class DNASlice(models.Model):
             return DNA(self._get_seq())
 
     def __len__(self):
-        return self.end_pos-self.start_pos+1
+        return self.end_pos - self.start_pos + 1
 
     def __lt__(self, other):
         if self.chromosome_id != other.chromosome_id:
@@ -135,7 +138,7 @@ class DNASlice(models.Model):
         return self.end_pos > other.end_pos
 
     def _get_seq(self):
-        return self.chromosome.getdna(self.start_pos,self.end_pos)
+        return self.chromosome.getdna(self.start_pos, self.end_pos)
 
     def cache(self):
         self._sequence = self._get_seq()
@@ -143,7 +146,7 @@ class DNASlice(models.Model):
 
     def __str__(self):
         return "{}:{}-{}".format(self.chromosome.name, self.start_pos,
-            self.end_pos)
+                                 self.end_pos)
 
     def pretty(self, width=2):
         """
@@ -152,20 +155,24 @@ class DNASlice(models.Model):
         Width is the length of each line, in blocks of 10.
         """
         ret = ""
-        full_width = width*10
-        seq = ((" "*((self.start_pos-1)%full_width)) + "{}" \
-            + (" "*((width-1)-((self.end_pos-1)%full_width)))).format(
-                self.sequence)
-        sa = (self.start_pos-1)//full_width
-        ea = (self.end_pos-1)//full_width
-        ret += ("{pos!s:<12}: "+" ".join(["{ind}"]*width)+"\n").format(
+        full_width = width * 10
+        seq = ((" " * ((self.start_pos - 1) % full_width)) + "{}" \
+               + (" " * ((width - 1) - ((self.end_pos - 1) % full_width)))).format(
+            self.sequence)
+        sa = (self.start_pos - 1) // full_width
+        ea = (self.end_pos - 1) // full_width
+        ret += ("{pos!s:<12}: " + " ".join(["{ind}"] * width) + "\n").format(
             pos=self.chromosome, ind="1234567890")
-        for i in range(ea-sa+1):
-            ret += ("{pos:<12}: "+" ".join(["{}"]*width)+"\n").format(
-                *[seq[i*full_width+j*10:i*full_width+(j+1)*10] for \
-                    j in range(width)],
-                pos=(sa+i)*full_width)
+        for i in range(ea - sa + 1):
+            ret += ("{pos:<12}: " + " ".join(["{}"] * width) + "\n").format(
+                *[seq[i * full_width + j * 10:i * full_width + (j + 1) * 10] for \
+                  j in range(width)],
+                pos=(sa + i) * full_width)
         return ret
+
+
+class DNASlice(DNASliceBase):
+    pass
 
     class Meta:
         unique_together = [
