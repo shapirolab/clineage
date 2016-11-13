@@ -97,18 +97,6 @@ class DNASliceBase(models.Model):
     start_pos = models.IntegerField(db_index=True)
     end_pos = models.IntegerField(db_index=True)
     _sequence = models.CharField(max_length=300, null=True, default=None)
-    contains = models.ManyToManyField('genomes.DNASlice',
-                                      related_name='contained',
-                                      symmetrical=False,
-                                      through='genomes.DNASlice_Contains',
-                                      through_fields=('outer', 'inner')
-                                      )
-    overlaps = models.ManyToManyField('genomes.DNASlice',
-                                      related_name='+',
-                                      symmetrical=False,
-                                      through='genomes.DNASlice_Overlaps',
-                                      through_fields=('slice1', 'slice2')
-                                      )
 
     class Meta:
         abstract = True
@@ -172,7 +160,20 @@ class DNASliceBase(models.Model):
 
 
 class DNASlice(DNASliceBase):
-    pass
+    contains = models.ManyToManyField('genomes.DNASlice',
+                                      related_name='contained',
+                                      symmetrical=False,
+                                      through='genomes.DNASlice_Contains',
+                                      through_fields=('outer', 'inner')
+                                      )
+
+
+    overlaps = models.ManyToManyField('genomes.DNASlice',
+                                  related_name='+',
+                                  symmetrical=False,
+                                  through='genomes.DNASlice_Overlaps',
+                                  through_fields=('slice1', 'slice2')
+                                  )
 
     class Meta:
         unique_together = [
@@ -195,6 +196,48 @@ class DNASlice_Contains(models.Model):
 class DNASlice_Overlaps(models.Model):
     slice1 = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
     slice2 = models.ForeignKey(DNASlice, on_delete=models.DO_NOTHING, related_name='+')
+
+    class Meta:
+        managed = False
+
+
+class RestrictionSiteDNASlice(DNASliceBase):
+    contains = models.ManyToManyField('genomes.RestrictionSiteDNASlice',
+                                      related_name='contained',
+                                      symmetrical=False,
+                                      through='genomes.RestrictionSiteDNASlice_Contains',
+                                      through_fields=('outer', 'inner')
+                                      )
+
+
+    overlaps = models.ManyToManyField('genomes.RestrictionSiteDNASlice',
+                                  related_name='+',
+                                  symmetrical=False,
+                                  through='genomes.RestrictionSiteDNASlice_Overlaps',
+                                  through_fields=('slice1', 'slice2')
+                                  )
+
+    class Meta:
+        unique_together = [
+            ("chromosome", "start_pos", "end_pos"),
+        ]
+        index_together = [
+            ("chromosome", "start_pos", "end_pos"),
+        ]
+        ordering = ["chromosome", "start_pos", "end_pos"]
+
+
+class RestrictionSiteDNASlice_Contains(models.Model):
+    inner = models.ForeignKey(RestrictionSiteDNASlice, on_delete=models.DO_NOTHING, related_name='+')
+    outer = models.ForeignKey(RestrictionSiteDNASlice, on_delete=models.DO_NOTHING, related_name='+')
+
+    class Meta:
+        managed = False
+
+
+class RestrictionSiteDNASlice_Overlaps(models.Model):
+    slice1 = models.ForeignKey(RestrictionSiteDNASlice, on_delete=models.DO_NOTHING, related_name='+')
+    slice2 = models.ForeignKey(RestrictionSiteDNASlice, on_delete=models.DO_NOTHING, related_name='+')
 
     class Meta:
         managed = False
