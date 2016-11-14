@@ -80,7 +80,7 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
 
 
 class RestrictionSite(models.Model):
-    slice = models.ForeignKey(DNASlice)
+    slice = models.IntegerField(db_column='slice_id')
     enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
 
     @property
