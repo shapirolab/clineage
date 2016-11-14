@@ -29,7 +29,7 @@ class FixedStepMarkovModel(ModelParams):
     class Model(object):
 
         def __init__(self, step_funcs, n, squeeze, hist_kwargs):
-            mat = zeros((n, n))
+            mat = zeros((n, n), dtype='float128')
             for step, func in step_funcs.items():
                 for i in range(n):
                     val = func(i)
