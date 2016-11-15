@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 from model_utils.managers import InheritanceManager
 
-from genomes.models import DNASlice, Chromosome
+from genomes.models import DNASlice, Chromosome, RestrictionSiteDNASlice
 from misc.dna import DNA
 from primers.strand import BaseStrandMixin, MinusStrandMixin, PlusStrandMixin
 
@@ -80,7 +80,7 @@ class RestrictionEnzyme(models.Model):  # repopulate from scratch, no migration
 
 
 class RestrictionSite(models.Model):
-    slice = models.IntegerField(db_column='slice_id')
+    slice = models.ForeignKey(RestrictionSiteDNASlice, db_column='slice_id')
     enzyme = models.ForeignKey(RestrictionEnzyme, related_name="sites")
 
     @property
