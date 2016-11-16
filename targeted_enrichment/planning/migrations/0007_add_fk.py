@@ -20,3 +20,12 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(db_column='slice_id', on_delete=django.db.models.deletion.CASCADE, to='genomes.RestrictionSiteDNASlice'),
         ),
     ]
+
+# In case this fails with 1206, workaround was:
+#
+# SET foreign_key_checks = 0;
+# ALTER TABLE `planning_restrictionsite` ADD CONSTRAINT `planning_slice_id_b2bf5a66_fk_genomes_restrictionsitednaslice_id` FOREIGN KEY (`slice_id`) REFERENCES `genomes_restrictionsitednaslice` (`id`);
+# SET foreign_key_checks = 1;
+#
+# and follow with ./manage migrate --fake planning 0007
+
