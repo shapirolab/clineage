@@ -34,6 +34,10 @@ class Amplicon(models.Model):
         return "{}".format(self.slice)
 
 
+class AmpliconCollection(models.Model):
+    amplicons = models.ManyToManyField(Amplicon)
+
+
 class RawAmplicon(Amplicon):
 
     @property

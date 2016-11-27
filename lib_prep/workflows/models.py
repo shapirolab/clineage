@@ -67,7 +67,7 @@ class Library(models.Model):
         Return an iterator (favorably, a QuerySet) for amplicons which might
         match this cell.
         """
-        raise NotImplementedError()
+        return self.panel.amplicon_collection.amplicons.select_subclasses()
 
     objects = InheritanceManager()
 
@@ -124,13 +124,6 @@ class MagicalPCR1Library(Library):
     def barcoded_contents(self):
         return self.magicalpcr1barcodedcontent_set.all()
 
-    @property
-    def amplicons(self):
-        #TODO: make nice and queryful.
-        for mpx in self.panel.mpxs.all():
-            for ter in mpx.ters.select_subclasses():
-                yield ter.amplicon
-
 
 class MagicalPCR1BarcodedContent(BarcodedContent):
     content = models.ForeignKey(AmplifiedContent)
@@ -148,13 +141,6 @@ class MagicalOM6Library(Library):
     @property
     def barcoded_contents(self):
         return self.magicalom6barcodedcontent_set.all()
-
-    @property
-    def amplicons(self):
-        #TODO: make nice and queryful.
-        for mix in self.panel.mixs.all():
-            for ter in mix.ters.select_subclasses():
-                yield ter.amplicon
 
 
 class MagicalOM6BarcodedContent(BarcodedContent):

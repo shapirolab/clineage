@@ -18,9 +18,10 @@ def pcr1multiplex(all_ters):
 
 
 @pytest.fixture()
-def pcr1panel(pcr1multiplex):
+def pcr1panel(pcr1multiplex, amplicon_collection):
     pcr1mc = PCR1Panel.objects.create(
-        name='test PCR1Panel'
+        name='test PCR1Panel',
+        amplicon_collection=amplicon_collection,
     )
     pcr1mc.mpxs = [pcr1multiplex]
     # So our objects don't have "special" objects in fields

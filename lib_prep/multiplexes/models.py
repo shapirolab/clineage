@@ -1,6 +1,7 @@
 from django.contrib.contenttypes import fields
 from django.db import models
 from targeted_enrichment.planning.models import TargetEnrichment
+from targeted_enrichment.amplicons.models import AmpliconCollection
 from targeted_enrichment.reagents.models import PCR1PrimerPairTERBase, \
     OM6PadlockTERBase
 from wet_storage.models import SampleLocation
@@ -30,6 +31,7 @@ class TERMultiplex(models.Model): # TODO: move to primers, m2m to TER.
 class Panel(models.Model):  # PCR1MultiplexCollection
     name = models.CharField(max_length=20)
     # mpxs = models.ManyToManyField(TERMultiplex)
+    amplicon_collection = models.ForeignKey(AmpliconCollection)
 
     class Meta:
         abstract = True
