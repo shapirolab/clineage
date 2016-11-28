@@ -136,6 +136,7 @@ class Histogram(models.Model):
     sample_reads = models.ForeignKey(SampleReads)
     microsatellites_version = models.IntegerField()
     amplicon = models.ForeignKey(Amplicon)
+    num_reads = models.PositiveIntegerField(null=True)
 
     objects = InheritanceManager()
 
