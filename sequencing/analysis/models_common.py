@@ -151,11 +151,20 @@ def ms_genotypes_to_name(ms_genotypes, prefix):
     return ":".join([prefix] + names)
 
 
-def name_to_ms_genotypes(ms_genotypes_name):
+def split_ms_genotypes_name(ms_genotypes_name):
     genotypes_plus = ms_genotypes_name.split(":")
-    prefix = genotypes_plus[0]
-    ms_genotypes = tuple([MicrosatelliteHistogramGenotype.get_for_string(s) \
-        for s in genotypes_plus[1:]])
+    prefix = genotypes_plus[0]  # amplicon
+    return prefix, tuple(genotypes_plus[1:])
+
+
+def name_to_ms_genotypes(ms_genotypes_name):
+    prefix, msgs = split_ms_genotypes_name(ms_genotypes_name)
+    ms_genotypes = tuple(
+        [
+            MicrosatelliteHistogramGenotype.get_for_string(s) \
+            for s in msgs
+        ]
+    )
     return ms_genotypes, prefix
 
 

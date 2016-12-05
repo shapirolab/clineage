@@ -201,6 +201,13 @@ def align_reads_to_ms_variations(merged_reads, padding, mss_version):
     )
 
 
+def index_fastqs(fmsva):
+    reads1 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq1, "fastq")
+    reads2 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq2, "fastq")
+    readsm = SeqIO.index(fmsva.merged_reads.assembled_fastq, "fastq")
+    return reads1, reads2, readsm
+
+
 def separate_reads_by_genotypes(fmsva):
     if fmsva.separation_finished:
         for histogram in FullMSVHistogram.objects.filter(
@@ -211,9 +218,7 @@ def separate_reads_by_genotypes(fmsva):
             ):
                 yield her
     else:
-        reads1 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq1, "fastq")
-        reads2 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq2, "fastq")
-        readsm = SeqIO.index(fmsva.merged_reads.assembled_fastq, "fastq")
+        reads1, reads2, readsm = index_fastqs(fmsva)
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})

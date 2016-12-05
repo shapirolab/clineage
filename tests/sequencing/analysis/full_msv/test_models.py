@@ -114,11 +114,11 @@ def test_amplicons_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variation
                     ref_reads_d = fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp]
                 else:  # inc == "F"
                     ref_reads_d = {
-                        R1: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][R1] + \
+                        R1: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][R1] +
                             fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R1],
-                        R2: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][R2] + \
+                        R2: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][R2] +
                             fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R2],
-                        RM: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][RM] + \
+                        RM: fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp][RM] +
                             fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp][R1],
                     }
                 for r in [R1, R2, RM]:
