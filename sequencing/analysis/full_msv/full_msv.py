@@ -17,7 +17,8 @@ from sequencing.analysis.models import MicrosatelliteHistogramGenotype, \
     MicrosatelliteHistogramGenotypeSet, HistogramEntryReads, \
     SNPHistogramGenotypeSet, SNPHistogramGenotype
 from sequencing.analysis.models_common import BowtieIndexMixin, \
-    PearOutputMixin, ms_genotypes_to_name, name_to_ms_genotypes
+    PearOutputMixin, ms_genotypes_to_name, split_ms_genotypes_name, \
+    get_ms_genotypes_from_strings_tuple
 from targeted_enrichment.planning.models import Microsatellite
 
 
@@ -208,10 +209,30 @@ def index_fastqs(fmsva):
     return reads1, reads2, readsm
 
 
+def stream_group_alignemnts(fmsva):
+    histogram_reads = {}
+    genotyped_reads = set()
+    cur_amp_id = None
+    for read_id, ms_genotypes_name in fmsva.read_bam():
+        assert read_id not in genotyped_reads  # TODO: consider removal
+        prefix, ms_genotype_strings = split_ms_genotypes_name(ms_genotypes_name)
+        amp_id = int(prefix)
+        if amp_id != cur_amp_id:
+            if cur_amp_id is not None:
+                yield cur_amp_id, histogram_reads
+                histogram_reads = {}
+            cur_amp_id = amp_id
+        histogram_reads.setdefault(ms_genotype_strings, list()).append(read_id)
+        genotyped_reads.add(read_id)
+    else:
+        if cur_amp_id is not None:
+            yield cur_amp_id, histogram_reads
+
+
 def separate_reads_by_genotypes(fmsva):
     if fmsva.separation_finished:
         fmsva_hists = FullMSVHistogram.objects.filter(
-            assignment=fmsva,
+                assignment=fmsva,
         )
         for her in HistogramEntryReads.objects.filter(
                     histogram__in=fmsva_hists,
@@ -222,52 +243,41 @@ def separate_reads_by_genotypes(fmsva):
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
-        genotyped_reads = set()
-        cur_ms_genotypes_name = None
-        cur_amp_id = None
-        for read_id, ms_genotypes_name in fmsva.read_bam():
-            assert read_id not in genotyped_reads
-            if cur_ms_genotypes_name != ms_genotypes_name:
-                if cur_ms_genotypes_name is not None:
-                    def inner(raise_or_create_with_defaults):
-                        with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+        for amp_id, histogram_reads in stream_group_alignemnts(fmsva):
+            histogram, created = FullMSVHistogram.objects.get_or_create(
+                amplicon_id=amp_id,
+                amplicon_copy_id=amp_id,
+                assignment=fmsva,
+                defaults=dict(
+                    sample_reads_id=fmsva.merged_reads.sample_reads_id,
+                    microsatellites_version=fmsva.ms_variations.microsatellites_version,
+                )
+            )
+            for msg, read_ids in histogram_reads.items():
+                ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(
+                    get_ms_genotypes_from_strings_tuple(msg)
+                )
+                def inner(raise_or_create_with_defaults):
+                    with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
                             _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
                             _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
-                            return raise_or_create_with_defaults(
-                                num_reads=len(read_ids),
-                                fastq1=genotypes_reads1_fastq_name,
-                                fastq2=genotypes_reads2_fastq_name,
-                                fastqm=genotypes_readsm_fastq_name,
-                            )
-                    yield get_get_or_create(inner, HistogramEntryReads,
-                        histogram=histogram,
-                        microsatellite_genotypes=ms_histogram_genotypes,
-                        snp_genotypes=snp_histogram_genotypes,
-                    )
-                read_ids = set()
-                ms_genotypes, prefix = name_to_ms_genotypes(ms_genotypes_name)
-                amp_id = int(prefix)
-                if cur_amp_id != amp_id:
-                    cur_amp_id = amp_id
-                    histogram, created = FullMSVHistogram.objects.get_or_create(
-                        amplicon_id=amp_id,
-                        amplicon_copy_id=amp_id,
-                        assignment=fmsva,
-                        defaults=dict(
-                            sample_reads_id=fmsva.merged_reads.sample_reads_id,
-                            microsatellites_version=fmsva.ms_variations.microsatellites_version,
+                        return raise_or_create_with_defaults(  # *
+                            num_reads=len(read_ids),
+                            fastq1=genotypes_reads1_fastq_name,
+                            fastq2=genotypes_reads2_fastq_name,
+                            fastqm=genotypes_readsm_fastq_name,
                         )
-                    )
-                ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(ms_genotypes)
-            read_ids.add(read_id)
-            genotyped_reads.add(read_id)
-            cur_ms_genotypes_name = ms_genotypes_name
+                yield get_get_or_create(inner, HistogramEntryReads,
+                                        histogram=histogram,
+                                        microsatellite_genotypes=ms_histogram_genotypes,
+                                        snp_genotypes=snp_histogram_genotypes,
+                                        )
         else:  # when the loop terminates through exhaustion of the list
             yield get_get_or_create(inner, HistogramEntryReads,
-                        histogram=histogram,
-                        microsatellite_genotypes=ms_histogram_genotypes,
-                        snp_genotypes=snp_histogram_genotypes,
-                    )
+                                    histogram=histogram,
+                                    microsatellite_genotypes=ms_histogram_genotypes,
+                                    snp_genotypes=snp_histogram_genotypes,
+                                    )
             fmsva.separation_finished = True
             fmsva.save()
 

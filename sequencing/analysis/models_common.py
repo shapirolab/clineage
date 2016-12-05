@@ -157,6 +157,16 @@ def split_ms_genotypes_name(ms_genotypes_name):
     return prefix, tuple(genotypes_plus[1:])
 
 
+def get_ms_genotypes_from_strings_tuple(genotype_strings_tuple):
+    ms_genotypes = tuple(
+        [
+            MicrosatelliteHistogramGenotype.get_for_string(s) \
+            for s in genotype_strings_tuple
+            ]
+    )
+    return ms_genotypes
+
+
 def name_to_ms_genotypes(ms_genotypes_name):
     prefix, msgs = split_ms_genotypes_name(ms_genotypes_name)
     ms_genotypes = tuple(
