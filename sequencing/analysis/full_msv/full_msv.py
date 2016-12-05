@@ -210,13 +210,13 @@ def index_fastqs(fmsva):
 
 def separate_reads_by_genotypes(fmsva):
     if fmsva.separation_finished:
-        for histogram in FullMSVHistogram.objects.filter(
+        fmsva_hists = FullMSVHistogram.objects.filter(
             assignment=fmsva,
+        )
+        for her in HistogramEntryReads.objects.filter(
+                    histogram__in=fmsva_hists,
         ):
-            for her in HistogramEntryReads.objects.filter(
-                histogram=histogram,
-            ):
-                yield her
+            yield her
     else:
         reads1, reads2, readsm = index_fastqs(fmsva)
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
