@@ -243,7 +243,12 @@ def separate_reads_by_genotypes(fmsva):
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
-        for amp_id, histogram_reads in stream_group_alignemnts(fmsva):
+        group_alignments_generator = stream_group_alignemnts(fmsva)
+        try:
+            peek = next(group_alignments_generator)
+        except StopIteration:
+            raise  # Alignments file contains no valid alignments
+        for amp_id, histogram_reads in itertools.chain([peek], group_alignments_generator):
             histogram, created = FullMSVHistogram.objects.get_or_create(
                 amplicon_id=amp_id,
                 amplicon_copy_id=amp_id,

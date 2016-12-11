@@ -44,6 +44,9 @@ amplicon_28727_id = 1
 amplicon_28734_id = 2
 pu_adj_ms_1 = 3
 pu_adj_ms_2 = 4
+ms_unknown_id = None
+amplicon_unknown_id = None
+
 
 def repeat_number(i):  # Just to give the int some context
     return i
@@ -146,6 +149,21 @@ READS_DICT_FULL_MSV = {
                     ]
                 },
             },
+        },
+    },
+}
+
+UNKNOWN_READS_DICT_FULL_MSV = {
+    magicalpcr1library_id: {
+        magicalpcr1barcodedcontent_id: {
+            ASSEMBLED: 
+                    [
+                        bc1(
+                            sr1="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                            sr2="TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+                            srm="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                        ),
+                    ]
         },
     },
 }

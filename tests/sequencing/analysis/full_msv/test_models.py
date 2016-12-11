@@ -236,3 +236,75 @@ def test_genotype_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variations
         assert not os.path.exists(fmsva.sorted_assignment_bam)
         fmsvv.delete()
         assert not os.path.exists(fmsvv.index_dump_dir)
+
+
+@pytest.mark.django_db
+def test_separate_reads_by_genotypes_on_empty_fmsva(unknown_fmsv_merged_reads_d, unknown_fmsv_reads_fd, amplicon_collection, requires_none_genotypes):
+    padding = 50
+    mss_version = 0
+    for (l_id, bc_id), mr in unknown_fmsv_merged_reads_d.items():
+        # for inc in ["M", "F"]:
+        for inc in ["M"]:
+            # test_ms_variations_index
+            assert os.path.isfile(mr.assembled_fastq)
+            fmsva = align_reads_to_ms_variations(mr, padding, mss_version)  #included_reads=inc
+            assert fmsva.merged_reads == mr
+            assert set(os.path.join(fmsva.ms_variations.index_dump_dir, x) for x in \
+                       os.listdir(fmsva.ms_variations.index_dump_dir)) == set(fmsva.ms_variations.files)
+            amps = set()
+            gens = set()
+            # test_separate_reads_by_amplicons
+            for her in separate_reads_by_genotypes(fmsva):
+                # assert her.histogram_id == ah.id
+                amp = her.histogram.amplicon_id
+                amps.add(amp)
+                assert set(her.snp_genotypes.genotypes) == set()
+                gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
+                                msg in her.microsatellite_genotypes.genotypes)
+                gens.add(gen)
+                her_fnames_d = {
+                    R1: her.fastq1,
+                    R2: her.fastq2,
+                    RM: her.fastqm,
+                }
+                if inc == "M":
+                    ref_reads_d = unknown_fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp, gen]
+                else:  # inc == "F"
+                    ref_reads_d = {
+                        R1: unknown_fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp, gen][R1] + \
+                            unknown_fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp, gen][R1],
+                        R2: unknown_fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp, gen][R2] + \
+                            unknown_fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp, gen][R2],
+                        RM: unknown_fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp, gen][RM] + \
+                            unknown_fmsv_reads_fd[l_id, bc_id, UNASSEMBLED, amp, gen][R1],
+                    }
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                           set(srs_to_tups(
+                               ref_reads_d[r]
+                           ))
+                assert her.num_reads == \
+                       len(ref_reads_d[RM])
+                her.delete()
+                assert not os.path.exists(her.fastq1)
+                assert not os.path.exists(her.fastq2)
+                assert not os.path.exists(her.fastqm)
+        if inc == "F":
+            assert gens == set(unknown_fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED, amp)) \
+                           | set(unknown_fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED, amp))
+        else:
+            ref_gens = set()
+            for amp in unknown_fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED):
+                for s in unknown_fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED, amp):
+                    ref_gens.add(s)
+            assert gens == ref_gens
+            assert amps == set(unknown_fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
+                           (set(unknown_fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
+                                inc == "F" else set())
+        fmsvv = fmsva.ms_variations
+        fmsva.delete()
+        assert not os.path.exists(fmsva.sorted_assignment_bam)
+        fmsvv.delete()
+        assert not os.path.exists(fmsvv.index_dump_dir)
