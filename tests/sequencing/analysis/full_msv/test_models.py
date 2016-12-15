@@ -7,8 +7,14 @@ from Bio import SeqIO
 
 from sequencing.analysis.full_msv.full_msv import merge, \
     get_full_ms_variations, separate_reads_by_genotypes, \
-    align_reads_to_ms_variations, stream_group_alignemnts
-from sequencing.analysis.models import FullMSVHistogram, HistogramEntryReads
+    align_reads_to_ms_variations, stream_group_alignemnts, \
+    split_merged_reads, align_reads_to_ms_variations_part, \
+    merge_fmsva_parts, split_merged_reads_as_list, align_reads_to_ms_variations_part,\
+    merge_fmsva_parts
+from sequencing.analysis.models import HistogramEntryReads
+from sequencing.analysis.full_msv.models import FullMSVHistogram,  \
+        FullMSVariations, FullMSVAssignment, FullMSVAssignmentPart, FullMSVMergedReads, \
+        FullMSVMergedReadsPart
 
 from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups, strip_fasta_records
@@ -55,6 +61,56 @@ def test_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd):
 
 
 @pytest.mark.django_db
+def test_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd):
+    for (l_id, bc_id), mr in fmsv_merged_reads_d.items():
+        for mrp in split_merged_reads(mr, 1, included_reads='M'):
+            assert mrp.merged_reads == mr
+        joined_reads = []
+        for mrp in mr.fullmsvmergedreadspart_set.all():
+            joined_reads += list(SeqIO.parse(mrp.fastq_part, "fastq"))
+        assert set(srs_to_tups(mr.included_reads_generator('M'))) == set(srs_to_tups(joined_reads))
+        mr.fullmsvmergedreadspart_set.all().delete()
+
+
+@pytest.mark.django_db
+def test_align_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, requires_microsatellites):
+    padding = 50
+    mss_version = 0
+    for (l_id, bc_id), mr in fmsv_merged_reads_d.items():
+        amplicon_collection = mr.sample_reads.library.subclass.panel.amplicon_collection
+        fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+        for mrp in split_merged_reads(mr, 1, included_reads='M'):
+            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
+            assert fmsvap.merged_reads_part == mrp
+            assert os.path.isfile(fmsvap.assignment_bam)
+        mr.fullmsvmergedreadspart_set.all().delete()
+        fmsv.delete()
+
+
+@pytest.mark.django_db
+def test_merge_aligned_merged_reads_parts(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, requires_microsatellites):
+    padding = 50
+    mss_version = 0
+    amplicon_collection = ac_134
+    for (l_id, bc_id), mr in fmsv_merged_reads_d.items():
+        amplicon_collection = mr.sample_reads.library.subclass.panel.amplicon_collection
+        fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+        fmsva_parts = []
+        for mrp in split_merged_reads(mr, reads_chunk_size=1, included_reads='M'):
+            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
+            assert fmsvap.ms_variations.id == fmsv.id
+            assert fmsvap.merged_reads_part == mrp
+            assert os.path.isfile(fmsvap.assignment_bam)
+            fmsva_parts.append(fmsvap)
+        fmsva = merge_fmsva_parts(fmsva_parts, reads_chunk_size=1, included_reads='M')
+        assert fmsva.merged_reads == mr
+        assert os.path.isfile(fmsva.sorted_assignment_bam)
+        fmsva.delete()
+        mr.fullmsvmergedreadspart_set.all().delete()
+        fmsv.delete()
+
+
+@pytest.mark.django_db
 def test_build_ms_variations(amp_134_full_msv, ac_134, requires_microsatellites):
     padding = 50
     mss_version = 0
@@ -80,7 +136,6 @@ def test_stream_group_alignemnts(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_var
         for inc in ["M"]:
             # test_ms_variations_index
             assert os.path.isfile(mr.assembled_fastq)
-
             fmsva = align_reads_to_ms_variations(mr, padding, mss_version)  #included_reads=inc
             for amp_id, histogram_reads in stream_group_alignemnts(fmsva):
                 generator_read_ids = []
@@ -308,3 +363,82 @@ def test_separate_reads_by_genotypes_on_empty_fmsva(unknown_fmsv_merged_reads_d,
         assert not os.path.exists(fmsva.sorted_assignment_bam)
         fmsvv.delete()
         assert not os.path.exists(fmsvv.index_dump_dir)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_run_mono_split_alignments(demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+    mss_version = 0
+    ref_padding = 50
+    reads_chunk_size = 1
+    for sr in demultiplexing.samplereads_set.all():
+        amplicon_collection = sr.library.subclass.panel.amplicon_collection
+        msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
+    herss = {inc: set() for inc in ["M"]}  # TODO: "F"
+    for inc in herss.keys():
+        # FIXME?
+        merged_reads = [merge(sr) for sr in demultiplexing.samplereads_set.all()]
+        fmsv_merged_reads_parts_lists = [split_merged_reads_as_list(mr, reads_chunk_size, inc) for mr in merged_reads]
+        fmsva_parts_lists = [list(map(align_reads_to_ms_variations_part, fmsv_merged_reads_parts_list, itertools.repeat(ref_padding), itertools.repeat(mss_version))) for fmsv_merged_reads_parts_list in fmsv_merged_reads_parts_lists]        
+        fmsvas = [merge_fmsva_parts(fmsva_parts_list, reads_chunk_size, inc) for fmsva_parts_list in fmsva_parts_lists]
+        fhers_list = [list(separate_reads_by_genotypes(fmsva)) for fmsva in fmsvas]
+        for fhers in fhers_list:
+            hers_gen = fhers
+            for her in hers_gen:
+                herss[inc].add(her)
+    for inc, hers in herss.items():
+        parts = set()
+        for her in hers:
+            amp = her.histogram.amplicon_id
+            sr = her.histogram.sample_reads
+            bc = sr.barcoded_content_id
+            l_id = sr.library_id
+            gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
+                msg in her.microsatellite_genotypes.genotypes)
+            parts.add((l_id, bc, amp, gen))
+
+            her_fnames_d = {
+                R1: her.fastq1,
+                R2: her.fastq2,
+                RM: her.fastqm,
+            }
+
+            if inc == "M":
+                ref_reads_d = fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen]
+            else:  # inc == "F"
+                ref_reads_d = {
+                    R1: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R1] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                    R2: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R2] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R2],
+                    RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                }
+
+            for r in [R1, R2, RM]:
+                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                    SeqIO.parse(her_fnames_d[r], "fastq"))
+                ) == \
+                set(srs_to_tups(
+                    ref_reads_d[r]
+                ))
+            assert her.num_reads == \
+                len(ref_reads_d[RM])
+        ref_parts = set()
+        for key_tups in fmsv_reads_fd:
+            if len(key_tups) < 5:
+                continue
+            l_id2, bc2, t2, amp2, gen2 = key_tups
+            if t2 == ASSEMBLED or inc == "F":
+                ref_parts.add((l_id2, bc2, amp2, gen2))
+        assert ref_parts == parts
+
+    for Model in [
+        FullMSVHistogram,
+        FullMSVariations,  # FIXME: get these from outside.
+        FullMSVAssignment,
+        FullMSVAssignmentPart,
+        FullMSVMergedReads,
+        FullMSVMergedReadsPart,
+        HistogramEntryReads,  # FIXME: get these from outside.
+    ]:
+        Model.objects.all().delete()

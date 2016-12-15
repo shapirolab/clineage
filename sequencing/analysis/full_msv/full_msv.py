@@ -9,10 +9,12 @@ from Bio.SeqRecord import SeqRecord
 
 from django.db import IntegrityError
 
+from utils.groups import grouper
 from misc.utils import unique_file_cm, unique_dir_cm, unlink, \
     get_get_or_create
 from sequencing.analysis.full_msv.models import FullMSVariations, \
-    FullMSVHistogram, FullMSVMergedReads, FullMSVAssignment
+    FullMSVHistogram, FullMSVMergedReads, FullMSVAssignment, \
+    FullMSVMergedReadsPart, FullMSVAssignmentPart
 from sequencing.analysis.models import MicrosatelliteHistogramGenotype, \
     MicrosatelliteHistogramGenotypeSet, HistogramEntryReads, \
     SNPHistogramGenotypeSet, SNPHistogramGenotype
@@ -41,6 +43,7 @@ bowtie2_with_defaults2 = bowtie2_fixed_seed["-p", "1"]
 samtools = plumbum.local["samtools"]
 samtools_sort = samtools["sort"]
 samtools_view = samtools["view"]
+samtools_merge = samtools["merge"]
 
 
 def merge(sample_reads):
@@ -175,6 +178,36 @@ def get_full_ms_variations(amplicon_collection, padding, mss_version):
     )
 
 
+def split_merged_reads(merged_reads, reads_chunk_size=10**5, included_reads='M'):
+    reads_chunk_gen = grouper(
+        reads_chunk_size,
+        merged_reads.included_reads_generator(included_reads)
+    )
+    try:
+        peek = next(reads_chunk_gen)
+    except StopIteration:
+        peek = ([])  # No reads, continue on with empty fastq
+    for i, reads_chunk in enumerate(itertools.chain([peek], reads_chunk_gen)):
+        def inner(raise_or_create_with_defaults):
+            with unique_file_cm("fastq") as fastq_part:
+                SeqIO.write(reads_chunk, fastq_part, "fastq")
+                return raise_or_create_with_defaults(
+                    fastq_part=fastq_part,
+                    merged_reads=merged_reads,
+                    start_row=i * reads_chunk_size,
+                    rows=reads_chunk_size,
+                )
+        yield get_get_or_create(inner, FullMSVMergedReadsPart,
+                                merged_reads=merged_reads,
+                                start_row=i*reads_chunk_size,
+                                rows=reads_chunk_size,
+                                )
+
+
+def split_merged_reads_as_list(merged_reads, reads_chunk_size=10**5, included_reads='M'):
+    return list(split_merged_reads(merged_reads, reads_chunk_size, included_reads=included_reads))
+
+
 def align_reads_to_ms_variations(merged_reads, padding, mss_version):
     amplicon_collection = merged_reads.sample_reads.library.subclass.panel.amplicon_collection
     msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
@@ -200,6 +233,79 @@ def align_reads_to_ms_variations(merged_reads, padding, mss_version):
         merged_reads=merged_reads,
         ms_variations=msv,
     )
+
+
+def align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version):
+    assert isinstance(merged_reads_part, FullMSVMergedReadsPart)
+    amplicon_collection = merged_reads_part.merged_reads.sample_reads.library.subclass.panel.amplicon_collection
+    msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+    def inner(raise_or_create_with_defaults):
+        with unique_file_cm("bam") as assignment_bam:
+            bowtie_to_bam = bowtie2_with_defaults2[
+                '-x', msv.index_files_prefix,
+                '-U', merged_reads_part.fastq_part,  # TODO: reconsider 'F'/'M' reads collections
+            ] | samtools_view[
+                '-bS',
+                '-'
+            ] > assignment_bam
+            bowtie_to_bam & plumbum.FG
+            return raise_or_create_with_defaults(
+                assignment_bam=assignment_bam,
+                merged_reads_part=merged_reads_part,
+                ms_variations=msv,
+            )
+    return get_get_or_create(inner, FullMSVAssignmentPart,
+        merged_reads_part=merged_reads_part,
+        ms_variations=msv,
+    )
+
+
+def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
+    for fmsva_part in fmsva_parts:
+        assert isinstance(fmsva_part, FullMSVAssignmentPart)
+    merged_reads_set = set(fmsvap.merged_reads_part.merged_reads for fmsvap in fmsva_parts)
+    assert len(merged_reads_set) == 1
+    merged_reads = merged_reads_set.pop()
+    ms_variations_set = set(fmsvap.ms_variations for fmsvap in fmsva_parts)
+    assert len(ms_variations_set) == 1
+    msv = ms_variations_set.pop()
+    assert set(
+        (merged_reads.id, i * reads_chunk_size, reads_chunk_size) for i, reads_chunk in enumerate(grouper(
+            reads_chunk_size,
+            merged_reads.included_reads_generator(included_reads)
+        ))) == set(
+        (mrp.merged_reads_id, mrp.start_row, mrp.rows) for mrp in merged_reads.fullmsvmergedreadspart_set.filter(
+            rows=reads_chunk_size,
+        )
+    )
+    partial_bams = [fmsvap.assignment_bam for fmsvap in fmsva_parts]
+    def inner(raise_or_create_with_defaults):
+        with unique_file_cm("bam") as sorted_assignment_bam:
+            with unique_file_cm("bam") as temp_merged_bam:
+                if len(partial_bams) == 1:
+                    samtools_sort(
+                        partial_bams[0],
+                        sorted_assignment_bam[:-4]
+                    )
+                else:
+                    samtools_merge(
+                        temp_merged_bam,
+                        *partial_bams
+                    )
+                    samtools_sort(
+                        temp_merged_bam,
+                        sorted_assignment_bam[:-4]
+                    )
+                    os.unlink(temp_merged_bam)
+            return raise_or_create_with_defaults(
+                sorted_assignment_bam=sorted_assignment_bam,
+                merged_reads=merged_reads,
+                ms_variations=msv,
+            )
+    return get_get_or_create(inner, FullMSVAssignment,
+                             merged_reads=merged_reads,
+                             ms_variations=msv,
+                             )
 
 
 def index_fastqs(fmsva):

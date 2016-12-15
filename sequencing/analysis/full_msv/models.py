@@ -38,6 +38,26 @@ class FullMSVMergedReads(PearOutputMixin):
 post_delete_files(FullMSVMergedReads)
 
 
+class FullMSVMergedReadsPart(models.Model):
+    merged_reads = models.ForeignKey(FullMSVMergedReads)
+    fastq_part = models.FilePathField(max_length=200)
+    start_row = models.IntegerField()
+    rows = models.IntegerField()
+
+    @property
+    def files(self):
+        yield self.fastq_part
+
+    def __str__(self):
+        return "{} part {}+{}".format(self.merged_reads, self.start_row, self.rows)
+
+    class Meta:
+        unique_together = (
+            ("merged_reads", "start_row", "rows"),
+        )
+post_delete_files(FullMSVMergedReadsPart)
+
+
 class FullMSVariations(BowtieIndexMixin):
     amplicon_collection = models.ForeignKey(AmpliconCollection)
     padding = models.PositiveIntegerField()
@@ -55,6 +75,25 @@ class FullMSVariations(BowtieIndexMixin):
         return "{} v. {}".format(self.amplicon_collection, self.microsatellites_version)
 
 post_delete_files(FullMSVariations)
+
+
+class FullMSVAssignmentPart(models.Model):
+    merged_reads_part = models.ForeignKey(FullMSVMergedReadsPart, unique=True)
+    assignment_bam = models.FilePathField(max_length=200)
+    ms_variations = models.ForeignKey(FullMSVariations)
+
+    def read_bam(self):
+        for ms_genotypes_name, read_id in _read_bam(self.sorted_assignment_bam):
+            yield read_id, ms_genotypes_name
+
+    @property
+    def files(self):
+        yield self.assignment_bam
+
+    def __str__(self):
+        return "{}@{}".format(self.merged_reads_part, self.ms_variations.amplicon_collection)
+
+post_delete_files(FullMSVAssignmentPart)
 
 
 class FullMSVAssignment(models.Model):

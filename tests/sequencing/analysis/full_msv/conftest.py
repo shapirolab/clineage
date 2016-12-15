@@ -141,6 +141,37 @@ def fmsv_merged_reads_d(fmsv_merged_reads_files_d, sample_reads_d):
         os.rmdir(mr.pear_dump_dir)
 
 
+# @pytest.yield_fixture(scope="session")
+# def fmsv_merged_reads_parts_files_d(fmsv_merged_reads_files_d, temp_storage):
+#     d = {}
+#     for l_id, l_d in fmsv_reads_fd.items():
+#         for bc_id, s_d in l_d.items():
+#             for i, reads_chunk in enumerate(grouper(1, s_d[ASSEMBLED][RM])):
+#                 fastq_part = get_unique_path("fastq")
+#                 SeqIO.write(s_d[ASSEMBLED][RM][i], fastq_part, "fastq")
+#             d[l_id, bc_id] = {
+#                 ASSEMBLED: assembled_fastq,
+#                 (UNASSEMBLED, R1): unassembled_forward_fastq,
+#                 (UNASSEMBLED, R2): unassembled_reverse_fastq,
+#                 None: discarded_fastq
+#             }
+#     yield d
+#     for f_d in d.values():
+#         os.unlink(f_d[ASSEMBLED])
+#         os.unlink(f_d[UNASSEMBLED, R1])
+#         os.unlink(f_d[UNASSEMBLED, R2])
+#         os.unlink(f_d[None])
+#
+#
+# @pytest.yield_fixture()
+# def fmsv_merged_reads_parts_d(fmsv_merged_reads_d, sample_reads_d):
+#     d = {}
+#     for (l_id, bc_id), mr in fmsv_merged_reads_d.items():
+#         # for inc in ["M", "F"]:
+#         for inc in ["M"]:
+#             # test_ms_variations_index
+
+
 @pytest.yield_fixture(scope="session")
 def fmsv_amplicon_reads_files_d(fmsv_reads_fd, temp_storage):
     d = {}

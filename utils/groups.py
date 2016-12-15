@@ -3,12 +3,15 @@ __author__ = 'ofirr'
 import math
 from random import randint
 from functools import reduce
+import itertools
+
 
 def random_groups(groups, random_groups_keys, group_sizes_range=(10,24)):
     """create a dict representing groups with random sizes within range"""
     for group in random_groups_keys:
         groups[group]['size'] = randint(*group_sizes_range)
     return groups
+
 
 def normalize_random_groups_to_sum(groups, random_groups_keys, random_groups_sum, group_sizes_range=(10,24)):
     """normalize sizes of random groups so that sum is fixed"""
@@ -25,7 +28,17 @@ def normalize_random_groups_to_sum(groups, random_groups_keys, random_groups_sum
             diff -= sign
     return groups
 
+
 def random_groups_of_sum(groups, random_groups_keys, random_groups_sum, group_sizes_range=(10,24)):
     """get normalized dict of random sizes"""
     groups = random_groups(groups, random_groups_keys, group_sizes_range)
     return normalize_random_groups_to_sum(groups, random_groups_keys, random_groups_sum, group_sizes_range)
+
+
+def grouper(n, iterable):
+    it = iter(iterable)
+    while True:
+       chunk = tuple(itertools.islice(it, n))
+       if not chunk:
+           return
+       yield chunk
