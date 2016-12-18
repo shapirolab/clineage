@@ -3,6 +3,7 @@ import os
 import itertools
 import contextlib
 import plumbum
+import math
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -179,29 +180,36 @@ def get_full_ms_variations(amplicon_collection, padding, mss_version):
 
 
 def split_merged_reads(merged_reads, reads_chunk_size=10**5, included_reads='M'):
-    reads_chunk_gen = grouper(
-        reads_chunk_size,
-        merged_reads.included_reads_generator(included_reads)
-    )
-    try:
-        peek = next(reads_chunk_gen)
-    except StopIteration:
-        peek = ([])  # No reads, continue on with empty fastq
-    for i, reads_chunk in enumerate(itertools.chain([peek], reads_chunk_gen)):
-        def inner(raise_or_create_with_defaults):
-            with unique_file_cm("fastq") as fastq_part:
-                SeqIO.write(reads_chunk, fastq_part, "fastq")
-                return raise_or_create_with_defaults(
-                    fastq_part=fastq_part,
-                    merged_reads=merged_reads,
-                    start_row=i * reads_chunk_size,
-                    rows=reads_chunk_size,
-                )
-        yield get_get_or_create(inner, FullMSVMergedReadsPart,
-                                merged_reads=merged_reads,
-                                start_row=i*reads_chunk_size,
-                                rows=reads_chunk_size,
-                                )
+    num_reads = sum(1 for x in merged_reads.included_reads_generator(included_reads))
+    if merged_reads.fullmsvmergedreadspart_set.count() == math.ceil(num_reads/reads_chunk_size):
+        yield from merged_reads.fullmsvmergedreadspart_set.filter(rows=reads_chunk_size)
+    else:
+        reads_chunk_gen = grouper(
+            reads_chunk_size,
+            merged_reads.included_reads_generator(included_reads)
+        )
+        try:
+            peek = next(reads_chunk_gen)
+        except StopIteration:
+            peek = ([])  # No reads, continue on with empty fastq
+        for i, reads_chunk in enumerate(itertools.chain([peek], reads_chunk_gen)):
+            def inner(raise_or_create_with_defaults):
+                with unique_file_cm("fastq") as fastq_part:
+                    SeqIO.write(reads_chunk, fastq_part, "fastq")
+                    return raise_or_create_with_defaults(
+                        fastq_part=fastq_part,
+                        merged_reads=merged_reads,
+                        start_row=i * reads_chunk_size,
+                        rows=reads_chunk_size,
+                    )
+            yield get_get_or_create(inner, FullMSVMergedReadsPart,
+                                    merged_reads=merged_reads,
+                                    start_row=i*reads_chunk_size,
+                                    rows=reads_chunk_size,
+                                    )
+        else:
+            merged_reads.separation_finished = True
+            merged_reads.save()
 
 
 def split_merged_reads_as_list(merged_reads, reads_chunk_size=10**5, included_reads='M'):
