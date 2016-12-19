@@ -49,6 +49,5 @@ class PlateInputForm(forms.Form):
     notes = CharField(max_length=250, required=False)
 
     # logical fields
-    user = ModelChoiceField(User.objects.all())
     timestamp = DateField()
     protocol = ModelChoiceField(CellContentProtocol.objects.all(), required=False)

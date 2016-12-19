@@ -246,7 +246,6 @@ def plate_input(request):
         if plate_form.is_valid():
             individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
-            inserting_user = plate_form.cleaned_data['user']
             cell_content_protocol = plate_form.cleaned_data['protocol']
 
             existing_plate = plate_form.cleaned_data['existing_plate']
@@ -296,7 +295,6 @@ def plate_input(request):
                         cell=new_cell,
                         name=plate_form.cleaned_data['cells_name_prefix'] + index2str(index),
                         protocol=cell_content_protocol,
-                        user=inserting_user,
                         comment=plate_form.cleaned_data['comment']
                     )
                     try:
@@ -325,7 +323,6 @@ def plate_input_with_names(request):
         if plate_form.is_valid():
             individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
-            inserting_user = plate_form.cleaned_data['user']
             cell_content_protocol = plate_form.cleaned_data['protocol']
 
             existing_plate = plate_form.cleaned_data['existing_plate']
