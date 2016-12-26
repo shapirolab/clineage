@@ -88,6 +88,31 @@ def test_align_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, re
 
 
 @pytest.mark.django_db
+def test_colliding_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, requires_microsatellites):
+    padding = 50
+    mss_version = 0
+    for (l_id, bc_id), mr in fmsv_merged_reads_d.items():
+        amplicon_collection = mr.sample_reads.library.subclass.panel.amplicon_collection
+        fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+        for mrp in split_merged_reads(mr, 1, included_reads='M'):
+            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
+            assert fmsvap.merged_reads_part == mrp
+            assert os.path.isfile(fmsvap.assignment_bam)
+            assert mrp.rows == 1
+        for mrp in split_merged_reads(mr, 2, included_reads='M'):
+            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
+            assert fmsvap.merged_reads_part == mrp
+            assert os.path.isfile(fmsvap.assignment_bam)
+            assert mrp.rows == 2
+    assert FullMSVMergedReadsPart.objects.filter(rows=1).count()
+    assert FullMSVMergedReadsPart.objects.exclude(rows=1).count()
+    assert FullMSVMergedReadsPart.objects.filter(rows=2).count()
+    assert FullMSVMergedReadsPart.objects.exclude(rows=2).count()
+    FullMSVMergedReadsPart.objects.all().delete()
+    FullMSVariations.objects.all().delete()
+
+
+@pytest.mark.django_db
 def test_merge_aligned_merged_reads_parts(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, requires_microsatellites):
     padding = 50
     mss_version = 0
