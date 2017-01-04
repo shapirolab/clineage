@@ -396,4 +396,12 @@ class HistogramEntryReads(models.Model):
             ])
         )
 
+    class Meta:
+        unique_together = (
+            (
+                "histogram",
+                "microsatellite_genotypes",
+                "snp_genotypes",
+             ),
+        )
 post_delete_files(HistogramEntryReads)

@@ -29,27 +29,47 @@ def test_trigger_histogram_entry_reads_trg(adam_histogram_entry_reads_files_d, _
             for r in [R1, R2, RM]:
                 f_d2[r] = get_unique_path("fastq")
                 os.symlink(f_d[r], f_d2[r])
-            her = HistogramEntryReads.objects.create(
+            her, c = HistogramEntryReads.objects.get_or_create(
                 histogram=h,
                 microsatellite_genotypes=ms_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
-                num_reads=f_d[NUM_READS],
+                defaults=dict(num_reads=f_d[NUM_READS],
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2]
-            )
+            ))
+            assert c
             total_num_reads += f_d[NUM_READS]
             assert total_num_reads == Histogram.objects.get(id=hid).num_reads
 
-            her = HistogramEntryReads.objects.create(
+            # remove objects
+            os.unlink(her.fastqm)
+            os.unlink(her.fastq1)
+            os.unlink(her.fastq2)
+
+
+            msg_objs = set()
+            for (microsatellite_id, repeat_number) in msgs:
+                msg, c = MicrosatelliteHistogramGenotype.objects.get_or_create(
+                    microsatellite_id=microsatellite_id,
+                    repeat_number=repeat_number+3, #+3 to make sure a new ms is created
+                )
+                msg_objs.add(msg)
+            ms_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(msg_objs)
+            f_d2 = {}
+            for r in [R1, R2, RM]:
+                f_d2[r] = get_unique_path("fastq")
+                os.symlink(f_d[r], f_d2[r])
+            her, c = HistogramEntryReads.objects.get_or_create(
                 histogram=h,
                 microsatellite_genotypes=ms_genotypes,
                 snp_genotypes=snp_histogram_genotypes,
-                num_reads=second_num_read,
+                defaults=dict(num_reads=second_num_read,
                 fastqm=f_d2[RM],
                 fastq1=f_d2[R1],
                 fastq2=f_d2[R2]
-            )
+            ))
+            assert c
             total_num_reads += second_num_read
             assert total_num_reads == Histogram.objects.get(id=hid).num_reads
             
