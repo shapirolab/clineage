@@ -1,5 +1,6 @@
 
 import numpy
+from pandas.core.algorithms import isin
 
 from .markov import FixedStepMarkovModel
 
@@ -32,10 +33,17 @@ class PropagationMarkov(FixedStepMarkovModel):
         return p, d
 
     def _calculate_steps(self, p, d):
+        print(p, d)
         assert 0 not in d.keys()
-        fs = 1 - sum(d.values())
-        pd = {0: 1 + (p * fs)}
-        pd.update({k: p * f for k,f in d.items()})
+        fs = 1 - sum(list(d.values()))
+        if isinstance(p, numpy.poly1d):
+            pd = {0: 1 + (fs * p)}
+            pd.update({k: f * p for k, f in d.items()})
+            print([pd[s](15) for s in [1, 0, -1, -2, -3]])
+        elif isinstance(p, list):
+            pd = {0: p.__getitem__}
+            pd.update({k: lambda x: f(x) * p[x] for k, f in d.items()})
+            print([pd[s](15) for s in [1,0,-1,-2,-3]])
         return pd
 
     def _steps(self, x):
@@ -56,3 +64,25 @@ class PropagationMarkovConstantP(PropagationMarkov):
             start, end = self.degrees_dict[step]
             d[step] = numpy.poly1d(x[start:end])
         return self.p, d
+
+
+# class PropagationMarkovStepP(PropagationMarkov):
+#     def __init__(self, p, *args, **kwargs):
+#         self.p = p
+#         super().__init__(*args, **kwargs)
+#
+#     class Model(object):
+#
+#         def __init__(self, step_funcs, n, squeeze, hist_kwargs):
+#             p_x, pry = PropagationMarkovStepP.p
+#             mat = numpy.zeros((n, n), dtype='float128')
+#             for step, func in step_funcs.items():
+#                 for i in range(n):
+#                     val = func(i)
+#                     if 0 <= i + step < n:
+#                         mat[i, i + step] = val
+#                     elif squeeze:
+#                         ind = min(n-1, max(0, i+step))
+#                         mat[i, ind] += val
+#             self.mat = mat
+#             self.hist_kwargs = hist_kwargs
