@@ -68,6 +68,10 @@ class DemultiplexingScheme(models.Model):
 
 
 class Demultiplexing(models.Model):
+    """
+    A process that follows the conversion of BCL files to FASTQ by bcl2fastqe. The mulitplexed samples is identified
+    by a barcode and seperates (demultiplexing).
+    """
     ngs_run = models.ForeignKey(NGSRun)
     demux_scheme = models.ForeignKey(DemultiplexingScheme)
 

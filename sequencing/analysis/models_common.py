@@ -90,6 +90,9 @@ class BowtieIndexMixin(models.Model):
 
 
 class SampleReads(models.Model):
+    """
+    Sample reads are the output of Illumina sequencing and is identified by a barcoded_content and demultiplexing.
+    """
     demux = models.ForeignKey(Demultiplexing)
     barcoded_content = models.ForeignKey(BarcodedContent)
     library = models.ForeignKey(Library)
@@ -133,6 +136,10 @@ def _read_bam(bam_path):
 
 
 class Histogram(models.Model):
+    """
+    Identify each amplicon to the correct cell id and gives it a reference point. This reference point is used to
+    recover information in order to build a histogram
+    """
     sample_reads = models.ForeignKey(SampleReads)
     microsatellites_version = models.IntegerField()
     amplicon = models.ForeignKey(Amplicon)
@@ -373,6 +380,9 @@ class SNPHistogramGenotypeSet(models.Model):
 
 
 class HistogramEntryReads(models.Model):
+    """
+    Represents the collection of reads that contributed to a single genotype in a Histogram
+    """
     histogram = models.ForeignKey(Histogram)
     microsatellite_genotypes = models.ForeignKey(MicrosatelliteHistogramGenotypeSet)
     snp_genotypes = models.ForeignKey(SNPHistogramGenotypeSet)
