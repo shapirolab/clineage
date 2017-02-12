@@ -5,7 +5,7 @@ from lib_prep.workflows.models import BarcodePair, CellContentProtocol, Amplifie
 
 from tests.primers.parts.conftest import *
 from tests.sampling.conftest import *
-from tests.accounts.conftest import *
+from tests.accounts.conftest import user
 from tests.linapp.conftest import *
 from tests.lib_prep.multiplexes.conftest import *
 
@@ -56,6 +56,17 @@ def amplifiedcontent(human_cell_with_se, cellcontentprotocol):
     ac = AmplifiedContent.objects.get(pk=ac.pk)
     return ac
 
+@pytest.fixture()
+def amplifiedcontent_no_se(human_cell_no_se, cellcontentprotocol):
+    ac = AmplifiedContent.objects.create(
+        cell=human_cell_no_se,
+        name='human amplified content',
+        protocol=cellcontentprotocol,
+        comment='some comment about this cell',
+    )
+    # So our objects don't have "special" objects in fields
+    ac = AmplifiedContent.objects.get(pk=ac.pk)
+    return ac
 
 @pytest.fixture()
 def magicalpcr1library(pcr1panel):
@@ -98,4 +109,3 @@ def magicalpcr1barcodedcontent_a(barcodepair_a, amplifiedcontent, magicalpcr1lib
 @pytest.fixture()
 def require_magicals(magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a):
     pass
-

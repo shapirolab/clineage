@@ -1,4 +1,5 @@
 import json
+import os
 from functools import wraps
 from datetime import datetime
 import csv
@@ -19,7 +20,7 @@ from django.template import loader
 
 from clineage import settings
 from utils.wells import num2abc
-from utils.user_cells_report import user_cells_table_values, get_partner_report
+from utils.user_cells_report import user_cells_table_values, get_partner_report, user_cells_table_values_db
 from linapp.forms import PlateInputForm, MultipleCellForm
 from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
 from sampling.models import FACS, LaserCapture, SampleComposition
@@ -324,7 +325,7 @@ def plate_input_with_names(request):
             individual = plate_form.cleaned_data['individual']
             sampling_event = plate_form.cleaned_data['sampling']
             cell_content_protocol = plate_form.cleaned_data['protocol']
-
+            # TODO: fix case when plate is created from admin interface and does not have PlateStorage
             existing_plate = plate_form.cleaned_data['existing_plate']
             if existing_plate:
                 # todo:improve DRY
@@ -518,6 +519,8 @@ def partner_cells_table_view(request, partner_name,
                       ]
         writer = csv.DictWriter(response, fieldnames=fieldnames)
         writer.writeheader()
+        print("partner_cells_table_view dir:")
+        print(os.getcwd())
         for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder):
                 writer.writerow(cell_values)
     except User.DoesNotExist:
@@ -532,3 +535,47 @@ def partner_cells_html_view(request, partner_name, individual_name=None, palette
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)
 
+def partner_cells_table_view_db(request, partner_name=None,
+                                ngsrun='all',
+                                individual_name=None,
+                                palette_name='hls'):
+
+
+    response = HttpResponse(content_type='text/csv')
+    try:
+        if partner_name:
+            p = User.objects.get(username__contains=partner_name)
+        response['Content-Disposition'] = 'attachment; filename="{}_{}_cell_data.csv"'.format(ngsrun, partner_name)
+        fieldnames = ['Barcoded Content ID',
+                      'Sample Reads ID',
+                      'CellContent ID',
+                      'Cell ID',
+                      'Cell Name',
+                      'Cell Type',
+                      'Cell Group',
+                      'Plate',
+                      'Well',
+                      'Plate Location',
+                      'Group Color',
+                      'Sampling Event',
+                      'Sampling Comment',
+                      'FACS Marker',
+                      'Organ',
+                      'Tissue',
+                      'Sample Name',
+                      'Sample Comment',
+                      'Extraction Event',
+                      'Extraction Event Comment',
+                      'Individual Name',
+                      'Individual Comment',
+                      'Gender',
+                      ]
+        writer = csv.DictWriter(response, fieldnames=fieldnames)
+        writer.writeheader()
+        # for lib in ngsrun.libraries.all():
+
+        for cell_values in user_cells_table_values_db(partner_name=partner_name, individual_name=individual_name, ngsrun_name=ngsrun):
+            writer.writerow(cell_values)
+    except User.DoesNotExist:
+        raise Http404("No Partner names matches the given query.")
+    return response

@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 from linapp.models import UserReport
 from sampling.models import Cell, Individual, FACS
+from sequencing.runs.models import NGSRun
 
 
 def query_partner_individuals(partner_name, individual_name=None):
@@ -17,6 +18,13 @@ def query_partner_individuals(partner_name, individual_name=None):
     else:
         individuals = Individual.objects.filter(partner=partner)
     return partner, individuals
+
+
+def query_ngsrun(ngsrun):
+    if ngsrun == 'all':
+        return NGSRun.objects.all()
+    else:
+        return NGSRun.objects.filter(name=ngsrun)
 
 
 def to_hex(n):
@@ -117,6 +125,8 @@ def get_cell_files_from_folder(cell_folder):
 
 def get_cells_filenames_in_folder(cells, cell_folder):
     folder_cells = get_cell_files_from_folder(cell_folder) if cell_folder else None
+    print("get_cells_filenames_in_folder dir:")
+    print(os.getcwd())
     for cell in cells:
         if folder_cells and cell in folder_cells:
             yield cell, folder_cells[cell]
@@ -152,6 +162,27 @@ def sorted_cells(individual):
                         cell_list.append(cell)
     return cell_list
 
+def get_cells_grouping_multi_partner(partner_indvidiual_name_set, current_group=0):
+    cell_groups = {}
+    for partner, individual in list(partner_indvidiual_name_set):
+        if not individual.extractionevent_set.all() or \
+                not individual.extractionevent_set.all()[0].extraction_set.all() or \
+                not individual.extractionevent_set.all()[0].extraction_set.all()[0].samplingevent_set.all():
+            for cls in sorted_cell_classifications(individual.cell_set.all()):
+                for cell in individual.cell_set.filter(classification=cls):
+                    cell_groups[cell] = current_group
+                if individual.cell_set.filter(classification=cls):
+                    current_group += 1
+            continue
+        for ee in sorted(list(individual.extractionevent_set.all()), key=lambda ee: ee.name):
+            for e in sorted(list(ee.extraction_set.all()), key=lambda e: e.name):
+                for se in sorted(list(e.samplingevent_set.all()), key=lambda se: se.name):
+                    for cls in sorted_cell_classifications(se.cell_set.all()):
+                        for cell in se.cell_set.filter(classification=cls):
+                            cell_groups[cell] = current_group
+                        if se.cell_set.filter(classification=cls):
+                            current_group += 1
+    return cell_groups
 
 def get_cells_grouping(partner_name, individual_name=None, current_group=0):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
@@ -188,7 +219,8 @@ def get_cells_color_map(cell_groups, palette_name='hls'):
 def user_cells_table_values(partner_name, individual_name=None, cell_folder=None, palette_name='hls'):
     partner, individuals = query_partner_individuals(partner_name, individual_name)
     color_map = get_cells_color_map(get_cells_grouping(partner_name, individual_name), palette_name)
-    for individual in sorted(list(individuals), key=lambda i: i.name):
+    for individual in sorted(list(individuals), key=lambda i: i.name):#change line
+
         for cell, file_name in get_cells_filenames_in_folder(sorted_cells(individual), cell_folder):
             for cell_cont in cell.amplifiedcontent_set.all():
                 # assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
@@ -254,3 +286,71 @@ def print_cells_table(partner_name, individual_name=None, cell_folder=None, pale
         writer.writeheader()
         for cell_values in user_cells_table_values(partner_name, individual_name, cell_folder, palette_name=palette_name):
             writer.writerow(cell_values)
+
+
+def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_name='all', palette_name='hls', demux_id=None):
+    n = query_ngsrun(ngsrun_name)
+    partner_indvidiual_name_set=set()
+    individuals=set()
+    if partner_name:
+        partner, individuals = query_partner_individuals(partner_name, individual_name)
+        for individual in individuals:
+            partner_indvidiual_name_set.add((partner, individual))
+    else:
+        for ngsrun in n:
+            for lib in ngsrun.libraries.all():
+                srs = lib.samplereads_set.all()
+                for sr in srs:
+                    cell = sr.barcoded_content.subclass.amplified_content.cell
+                    partner_indvidiual_name_set.add((cell.individual.partner, cell.individual))
+
+    color_map = get_cells_color_map(get_cells_grouping_multi_partner(partner_indvidiual_name_set), palette_name)
+    for partner, individual in list(partner_indvidiual_name_set):  # change line
+
+        for ngsrun in n:
+            demux=None
+            if demux_id is not None:
+                demux = ngsrun.demultiplexing_set.get(pk=demux_id)
+            for lib in ngsrun.libraries.all():
+                for barcoded_cont in lib.subclass.barcoded_contents.filter():
+                    # for cell_cont in barcoded_cont.subclass.amplified_content.cell.amplifiedcontent_set.all():
+                    cell = barcoded_cont.subclass.amplified_content.cell
+                    if cell.individual_id == individual.id:
+                        sr = barcoded_cont.samplereads_set.get(library=lib, demux=demux) if demux is not None \
+                            else barcoded_cont.samplereads_set.get(library=lib)
+                        for cell_cont in cell.amplifiedcontent_set.all():
+                            # assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
+                            sampling = cell.sampling
+                            if sampling:
+                                try:
+                                    facs = sampling.facs
+                                except FACS.DoesNotExist:
+                                    facs = None
+                            else:
+                                facs = None
+                            for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
+                                yield {
+                                    'Barcoded Content ID': barcoded_cont.id,
+                                    'Sample Reads ID': sr.id,
+                                    'CellContent ID': smart_text(cell_cont.pk),
+                                    'Cell ID': smart_text(cell.pk),
+                                    'Cell Name': smart_text(cell.name),
+                                    'Cell Group': smart_text(cell.classification),
+                                    'Individual Name': smart_text(cell.individual.name),
+                                    'Individual Comment': smart_text(cell.individual.comment),
+                                    'Extraction Event': smart_text(cell.sampling.extraction.extraction_event.name if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
+                                    'Extraction Event Comment': smart_text(cell.sampling.extraction.extraction_event.comment if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
+                                    'Gender': smart_text(cell.individual.sex),
+                                    'Sample Name': smart_text(cell.sampling.extraction.name if cell.sampling else ''),
+                                    'Sample Comment': smart_text(cell.sampling.extraction.comment if cell.sampling else ''),
+                                    'Organ': smart_text(cell.sampling.extraction.organ.name if cell.sampling else ''),
+                                    'Tissue': smart_text(cell.sampling.extraction.tissue.name if cell.sampling else ''),
+                                    'Sampling Event': smart_text(cell.sampling.name if cell.sampling else ''),
+                                    'Group Color': str(color_map[cell]).replace('(', '[').replace(')', ']').replace(',', ''),
+                                    'Sampling Comment': smart_text(cell.sampling.comment if cell.sampling else ''),
+                                    'FACS Marker': smart_text(facs.marker.name if facs else ''),
+                                    'Cell Type': smart_text(cell.composition.name),
+                                    'Plate': smart_text(loc.plate.name),
+                                    'Well': smart_text(loc.well),
+                                    'Plate Location': smart_text(loc.plate.platestorage_set.all()[0] if loc.plate.platestorage_set.all() else '')
+                                }

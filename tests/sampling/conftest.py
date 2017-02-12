@@ -38,11 +38,12 @@ def composition(transactional_db):
 
 
 @pytest.fixture()
-def human_individual(human_taxa):
+def human_individual(human_taxa, user):
     i = Individual.objects.create(
         taxa=human_taxa,
         sex="M",
         name="Yossi",
+        partner=user,
     )
     # So our objects don't have "special" objects in fields
     i = Individual.objects.get(pk=i.pk)
@@ -110,5 +111,3 @@ def human_cell_with_se(human_individual, composition, human_samplingevent):
     # So our objects don't have "special" objects in fields
     c = Cell.objects.get(pk=c.pk)
     return c
-
-
