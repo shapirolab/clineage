@@ -33,17 +33,15 @@ class PropagationMarkov(FixedStepMarkovModel):
         return p, d
 
     def _calculate_steps(self, p, d):
-        print(p, d)
         assert 0 not in d.keys()
         fs = 1 - sum(list(d.values()))
         if isinstance(p, numpy.poly1d):
             pd = {0: 1 + (fs * p)}
             pd.update({k: f * p for k, f in d.items()})
-            print([pd[s](15) for s in [1, 0, -1, -2, -3]])
         elif isinstance(p, list):
-            pd = {0: p.__getitem__}
-            pd.update({k: lambda x: f(x) * p[x] for k, f in d.items()})
-            print([pd[s](15) for s in [1,0,-1,-2,-3]])
+            pd = {0: lambda x: 1 + (fs(x) * p[x])}
+            pd.update({k: lambda x, f=f: f(x) * p[x] for k, f in list(d.items())})
+            # We add f=f to avoid late binding
         return pd
 
     def _steps(self, x):
