@@ -12,6 +12,7 @@ from django.db.models.query import QuerySet
 
 from sequencing.runs.models import Demultiplexing
 from sequencing.analysis.models import SampleReads
+from plumbum import ProcessExecutionError
 
 
 def run_bcl2fastq(bcl_folder, sample_sheet_path, fastq_folder):
@@ -144,6 +145,7 @@ def run_demux(ngs_run, demux_scheme):
         files = []
         # TODO: nicer handling
         for read in [1, 2]:
+
             os.unlink(os.path.join(fastq_folder, SAMPLE_FASTQ_GZ_FORMAT.format(
                 id=UNDETERMINED,
                 idx=0,
@@ -156,7 +158,19 @@ def run_demux(ngs_run, demux_scheme):
                     idx=idx,
                     read=read,
                 )) for read in [1, 2]]:
-                local["gunzip"](fastqgz)
+                try:
+                    local["gunzip"](fastqgz)
+                except ProcessExecutionError as e:
+                    # TODO: assert 0 reads against demux reports
+                    if e.args[3].find('No such file or directory'):  # demux didn't output the file due to no reads
+                        for read in [1, 2]:  # Manually touch the files for downstream analysis
+                            with open(os.path.join(fastq_folder,
+                                      SAMPLE_FASTQ_FORMAT.format(
+                                          id=bc.id,
+                                          idx=idx,
+                                          read=read,
+                                      )), 'w'):
+                                pass  # Nothing to do here but touch the file
             fastq1, fastq2 = [os.path.join(fastq_folder, 
                 SAMPLE_FASTQ_FORMAT.format(
                     id=bc.id,
