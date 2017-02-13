@@ -1,6 +1,6 @@
 import pytest
 
-from lib_prep.multiplexes.models import PCR1Multiplex, PCR1Panel
+from lib_prep.multiplexes.models import PCR1Multiplex, PCR1Panel, OM6Panel, OM6Oligomix
 
 from tests.targeted_enrichment.planning.conftest import *
 from tests.targeted_enrichment.reagents.conftest import *
@@ -27,3 +27,25 @@ def pcr1panel(pcr1multiplex, amplicon_collection):
     # So our objects don't have "special" objects in fields
     pcr1mc = PCR1Panel.objects.get(pk=pcr1mc.pk)
     return pcr1mc
+
+@pytest.fixture()
+def padlockmix(all_ters_padlock):
+    pdmix = OM6Oligomix.objects.create(
+        name='test padlockmix'
+    )
+    pdmix.ters = all_ters_padlock
+    # So our objects don't have "special" objects in fields
+    pdmix = OM6Oligomix.objects.get(pk=pdmix.pk)
+    return pdmix
+
+
+@pytest.fixture()
+def padlockpanel(padlockmix, amplicon_collection):
+    pdpanel = OM6Panel.objects.create(
+        name='test_padlockpanel',
+        amplicon_collection=amplicon_collection,
+    )
+    pdpanel.mixs = [padlockmix]
+    # So our objects don't have "special" objects in fields
+    pdpanel = OM6Panel.objects.get(pk=pdpanel.pk)
+    return pdpanel

@@ -1,6 +1,6 @@
 import pytest
 
-from targeted_enrichment.reagents.models import PCR1PrimerPairTER
+from targeted_enrichment.reagents.models import PCR1PrimerPairTER, OM6PadlockTER
 
 from tests.targeted_enrichment.planning.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
@@ -120,5 +120,33 @@ def ter_snp_4(te_snp_4, primer_snp_4_left, primer_snp_4_right, pu_snp_example_4)
 
 
 @pytest.fixture()
+def ter_snp_umi_1(utm_snp_example_1,te_snp_4,padlock_snp_1):
+    ter = OM6PadlockTER.objects.create(
+        te=te_snp_4,
+        amplicon=utm_snp_example_1,
+        padlock=padlock_snp_1,
+        passed_validation=False,
+    )
+    ter = OM6PadlockTER.objects.get(pk=ter.pk)
+    return ter
+
+
+@pytest.fixture()
+def ter_ms_umi_1(utm_snp_example_1,te_28727):
+    ter = OM6PadlockTER.objects.create(
+        te=te_28727,
+        amplicon=utm_snp_example_1,
+        passed_validation=False,
+    )
+    ter = OM6PadlockTER.objects.get(pk=ter.pk)
+    return ter
+
+
+@pytest.fixture()
 def all_ters(ter_28727, ter_28734, ter_adj_ms_1, ter_adj_ms_2, ter_snp_1, ter_snp_2, ter_snp_3, ter_snp_4):
     return [ter_28727, ter_28734, ter_adj_ms_1, ter_adj_ms_2, ter_snp_1, ter_snp_2, ter_snp_3, ter_snp_4]
+
+
+@pytest.fixture()
+def all_ters_padlock(ter_snp_umi_1):
+    return[ter_snp_umi_1]

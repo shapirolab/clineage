@@ -21,6 +21,7 @@ from django.template import loader
 from clineage import settings
 from utils.wells import num2abc
 from utils.user_cells_report import user_cells_table_values, get_partner_report, user_cells_table_values_db, partner_individual_cells_data_db
+from utils.ms_data_report import panel_ms_cell_table_values_db
 from linapp.forms import PlateInputForm, MultipleCellForm
 from wet_storage.models import SampleLocation, Plate, PlateStorage, PlatePlastica
 from sampling.models import FACS, LaserCapture, SampleComposition
@@ -619,6 +620,57 @@ def cells_data_view_db(request, partner_name=None,
         for cell_values in partner_individual_cells_data_db(partner_name=partner_name, individual_name=individual_name,
                                                       ):
             writer.writerow(cell_values)
+    except User.DoesNotExist:
+        raise Http404("No Partner names matches the given query.")
+    return response
+
+def panel_ms_table_view_db (request, panel='all'):
+    response = HttpResponse(content_type='text/csv')
+    try:
+        #if panel:
+            #User.objects.get(username__contains=partner_name)
+            #p = #change to Panel object get
+        response['Content-Disposition'] = 'attachment; filename="{}_ms_data.csv"'.format(panel)
+        fieldnames = [
+            'MS ID',
+            'SNP ID',
+            'Target ID',
+            'Old Adam TEpk',
+            'TER ID',
+            'Amplicon ID',
+            'Basic Unit size',
+            'Expected Number of repeats',
+            'Basic Unit Type',
+            'SNP Sequence',
+            'SNP modified',
+            'Chromosome',
+            'Length MS',
+            'Target sequence',
+            'Primer sequence - Fw',
+            'Primer sequence -  Rev',
+            'Target location on Chromosome - start',
+            'Target location on Chromosome - end',
+            'Fw primer location on Chromosome - start',
+            'Fw primer location on Chromosome - end',
+            'Rev primer location on Chromosome - start',
+            'Rev primer location on Chromosome - end',
+            'Amplicon location on Chromosome - start',
+            'Amplicon location on Chromosome - end',
+            'Amplicon Sequence',
+            'MS location on Chromosome - start',
+            'MS location on Chromosome - end',
+            'SNP location on the Chromosome',
+            'Mpx groups names',
+            'Mpx group size',
+            'Mixs groups names',
+            'Mixs group size',
+                       ]
+        writer = csv.DictWriter(response, fieldnames=fieldnames)
+        writer.writeheader()
+
+
+        for ms_values in panel_ms_cell_table_values_db(panel):
+            writer.writerow(ms_values)
     except User.DoesNotExist:
         raise Http404("No Partner names matches the given query.")
     return response

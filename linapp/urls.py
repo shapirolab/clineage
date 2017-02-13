@@ -72,26 +72,24 @@ urlpatterns = [
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/ngsrun:(?P<ngsrun>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/individual_name:(?P<individual_name>\w+)/ngsrun:(?P<ngsrun>\w+)$', views.partner_cells_table_view_db),
-
     url(r'^csv_view/cell_data/ngsrun:(?P<ngsrun>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/individual_name:(?P<individual_name>\w+)$', views.partner_cells_table_view_db),
-
     url(r'^csv_view/cell_data/$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data$', views.partner_cells_table_view_db),
 
-    url(r'^csv_view/cells_db/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$', views.cells_data_view_db),
+    url(r'^csv_view/panel_data/panel:(?P<panel>\w+)$', views.panel_ms_table_view_db),
+    url(r'^csv_view/panel_data/panel:(?P<panel>\w+/)$', views.panel_ms_table_view_db),
+    url(r'^csv_view/panel_data/$', views.panel_ms_table_view_db),
+    url(r'^csv_view/panel_data$', views.panel_ms_table_view_db),
+
+    url(r'^csv_view/cells_db/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
+        views.cells_data_view_db),
     url(r'^csv_view/cells_db/partner_name:(?P<partner_name>\w+)/$', views.cells_data_view_db),
     url(r'^csv_view/cells_db/individual_name:(?P<individual_name>\w+)$', views.cells_data_view_db),
     url(r'^csv_view/cells_db/$', views.cells_data_view_db),
     url(r'^csv_view/cells_db$', views.cells_data_view_db),
 
-    # url(r'^csv_view/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
-    #     views.partner_cells_table_view),
-    # url(r'^csv_view/partner_name:(?P<partner_name>\w+)/palette_name:(?P<palette_name>\w+)$', views.partner_cells_table_view),
-    # url(r'^csv_view/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)/palette_name:(?P<palette_name>\w+)$',
-    #     views.partner_cells_table_view),
-    #url(r'^csv_view/partner_name:(?P<partner_name>\w+))
 
     url(r'^html_view/partner_name:(?P<partner_name>\w+)$', views.partner_cells_html_view),
     url(r'^html_view/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',

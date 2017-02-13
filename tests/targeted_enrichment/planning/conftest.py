@@ -428,6 +428,8 @@ def te_snp_4(hg19_chromosome21, ugs_snp_4_left, ugs_snp_4_right):
     return te
 
 
+
+
 @pytest.fixture()
 def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a, ms_adj_ms_1_a, ms_adj_ms_2_a, ms_adj_ms_2_b):
     pass
