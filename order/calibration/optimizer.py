@@ -60,5 +60,5 @@ class Reference(Struct):
 
     __slots__ = [
         "syn_hist_list",
-        "cycles_tup",
+        "cycles_dict",
     ]
