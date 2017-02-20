@@ -10,9 +10,9 @@ def get_lims(hist1, hist2):
     if not hist1.keys():
         if not hist2.keys():
             return 0, 0
-        return min(hist2.keys()), max(hist2.keys())
+        return min(hist2.keys()), max(hist2.keys())+1
     if not hist2.keys():
-        return min(hist1.keys()), max(hist1.keys())
+        return min(hist1.keys()), max(hist1.keys())+1
     li = min(min(hist1.keys()), min(hist2.keys()))
     ri = max(max(hist1.keys()), max(hist2.keys())) + 1
     if ri == li:
