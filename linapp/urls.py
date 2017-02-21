@@ -79,6 +79,13 @@ urlpatterns = [
 
     url(r'^csv_view/cell_data/$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data$', views.partner_cells_table_view_db),
+
+    url(r'^csv_view/cells_db/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$', views.cells_data_view_db),
+    url(r'^csv_view/cells_db/partner_name:(?P<partner_name>\w+)/$', views.cells_data_view_db),
+    url(r'^csv_view/cells_db/individual_name:(?P<individual_name>\w+)$', views.cells_data_view_db),
+    url(r'^csv_view/cells_db/$', views.cells_data_view_db),
+    url(r'^csv_view/cells_db$', views.cells_data_view_db),
+
     # url(r'^csv_view/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$',
     #     views.partner_cells_table_view),
     # url(r'^csv_view/partner_name:(?P<partner_name>\w+)/palette_name:(?P<palette_name>\w+)$', views.partner_cells_table_view),

@@ -354,3 +354,55 @@ def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_n
                                     'Well': smart_text(loc.well),
                                     'Plate Location': smart_text(loc.plate.platestorage_set.all()[0] if loc.plate.platestorage_set.all() else '')
                                 }
+
+def partner_individual_cells_data_db(partner_name=None, individual_name=None, palette_name='hls'):
+    partner_indvidiual_name_set=set()
+    individuals=set()
+    if partner_name:
+        partner, individuals = query_partner_individuals(partner_name, individual_name)
+        for individual in individuals:
+            partner_indvidiual_name_set.add((partner, individual))
+    else:
+        partners= User.objects.all()
+        for partner in partners:
+            individuals= Individual.objects.filter(parnter=partner).filter(name__contains=individual_name) if individual_name is not None else Individual.objects.filter(parnter=partner)
+            for individual in individuals:
+                partner_indvidiual_name_set.add((partner, individual))
+
+    color_map = get_cells_color_map(get_cells_grouping_multi_partner(partner_indvidiual_name_set), palette_name)
+    for partner, individual in list(partner_indvidiual_name_set):  # change line
+        for cell in individual.cell_set.all():
+            for cell_cont in cell.amplifiedcontent_set.all():
+                # assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
+                sampling = cell.sampling
+                if sampling:
+                    try:
+                        facs = sampling.facs
+                    except FACS.DoesNotExist:
+                        facs = None
+                else:
+                    facs = None
+                for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
+                    yield {
+                        'CellContent ID': smart_text(cell_cont.pk),
+                        'Cell ID': smart_text(cell.pk),
+                        'Cell Name': smart_text(cell.name),
+                        'Cell Group': smart_text(cell.classification),
+                        'Individual Name': smart_text(cell.individual.name),
+                        'Individual Comment': smart_text(cell.individual.comment),
+                        'Extraction Event': smart_text(cell.sampling.extraction.extraction_event.name if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
+                        'Extraction Event Comment': smart_text(cell.sampling.extraction.extraction_event.comment if cell.sampling and cell.sampling.extraction and cell.sampling.extraction.extraction_event else ''),
+                        'Gender': smart_text(cell.individual.sex),
+                        'Sample Name': smart_text(cell.sampling.extraction.name if cell.sampling else ''),
+                        'Sample Comment': smart_text(cell.sampling.extraction.comment if cell.sampling else ''),
+                        'Organ': smart_text(cell.sampling.extraction.organ.name if cell.sampling else ''),
+                        'Tissue': smart_text(cell.sampling.extraction.tissue.name if cell.sampling else ''),
+                        'Sampling Event': smart_text(cell.sampling.name if cell.sampling else ''),
+                        'Group Color': str(color_map[cell]).replace('(', '[').replace(')', ']').replace(',', ''),
+                        'Sampling Comment': smart_text(cell.sampling.comment if cell.sampling else ''),
+                        'FACS Marker': smart_text(facs.marker.name if facs else ''),
+                        'Cell Type': smart_text(cell.composition.name),
+                        'Plate': smart_text(loc.plate.name),
+                        'Well': smart_text(loc.well),
+                        'Plate Location': smart_text(loc.plate.platestorage_set.all()[0] if loc.plate.platestorage_set.all() else '')
+                    }
