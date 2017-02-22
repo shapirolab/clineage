@@ -1,6 +1,6 @@
-from sequencing.calling.models_common import CalledGenotype
+from sequencing.calling.models_common import CalledAlleles
 from django.db import models
 
 
-class HighestPeak(CalledGenotype):
+class HighestPeak(CalledAlleles):
     confidence = models.FloatField()
