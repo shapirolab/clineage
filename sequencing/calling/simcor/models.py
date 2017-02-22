@@ -5,8 +5,8 @@ import pickle
 
 
 class CyclesMixin(models.Model):
-    min_cycles = models.PositiveIntegerField()
-    max_cycles = models.PositiveIntegerField()
+    min_cycles = models.PositiveSmallIntegerField()
+    max_cycles = models.PositiveSmallIntegerField()
 
     class Meta:
         abstract = True
@@ -33,6 +33,10 @@ class SimultaionsByCycles(CyclesMixin):
 
 class SimCorScheme(CyclesMixin):
     simulations = models.ForeignKey(SimultaionsByCycles)
+
+
+class BiallelicSimCorScheme(SimCorScheme):
+    minimal_seeds_distance = models.PositiveSmallIntegerField()
 
 
 class BestCor(CalledAlleles):
