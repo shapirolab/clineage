@@ -1,23 +1,18 @@
 import pytest
-import os
-import itertools
-from Bio import SeqIO
-
 from sequencing.analysis.full_msv.models import SampleReads, FullMSVMergedReads, \
     FullMSVAssignment, FullMSVHistogram, FullMSVariations, Histogram
 from sequencing.analysis.models_common import PearOutputMixin, SNPHistogramGenotypeSet, \
     MicrosatelliteHistogramGenotypeSet, SNPHistogramGenotype, MicrosatelliteHistogramGenotype, \
     HistogramEntryReads
 from misc.utils import get_unique_path
-from sequencing.analysis.full_msv.full_msv import get_full_ms_variations
 
 from tests.sequencing.runs.conftest import *
-from tests.sequencing.analysis.full_msv.full_msv_amp1_3_4 import VARS_134
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
-from sequencing.calling.models import CallingScheme
-from tests.sequencing.calling.reads_dict import MS_HISTOGRAMS_DICT
+from tests.sequencing.calling.hists_dict import MS_HISTOGRAMS_DICT
+from tests.targeted_enrichment.planning.conftest import *
 from tests.flat_dict import FlatDict
+from tests.sequencing.analysis.conftest import *
 
 
 def touch(fp):
@@ -27,7 +22,7 @@ def touch(fp):
 
 @pytest.fixture(scope="session")
 def histograms_fd():
-    return FlatDict(MS_HISTOGRAMS_DICT)
+    return MS_HISTOGRAMS_DICT
 
 
 @pytest.fixture()
@@ -38,7 +33,7 @@ def requires_none_genotypes(request, transactional_db):
 
 
 @pytest.fixture()
-def dummy_samplereads(demultiplexing):
+def dummy_samplereads(demultiplexing, magicalpcr1barcodedcontent):
     """
     Generate dummy SampleReads objects with empty fastq files
     """
@@ -58,6 +53,7 @@ def dummy_samplereads(demultiplexing):
     sr.delete()
 
 
+@pytest.fixture()
 def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_microsatellites, requires_none_genotypes):
     none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
     snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
@@ -69,8 +65,8 @@ def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_
                 dbhist = Histogram.objects.create(
                     sample_reads=dummy_samplereads,
                     microsatellites_version=0,
-                    amplicon=amp_id,
-                    num_reads=sum(ms_dict.values())
+                    amplicon_id=amp_id,
+                    num_reads=sum(repeat_numbers_dict.values())
                 )
                 for repeat_number, reads_number in repeat_numbers_dict.items():
                     f1 = get_unique_path("fastq")
@@ -79,19 +75,18 @@ def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_
                     touch(f2)
                     fm = get_unique_path("fastq")
                     touch(fm)
+                    mhg, created = MicrosatelliteHistogramGenotype.objects.get_or_create(
+                        microsatellite=ms,
+                        repeat_number=repeat_number,
+                    )
                     her = HistogramEntryReads.objects.create(
                         histogram=dbhist,
-                        microsatellite_genotypes=MicrosatelliteHistogramGenotypeSet.get_for_msgs(
-                            [MicrosatelliteHistogramGenotype.objects.get_or_create(
-                                microsatellite=ms,
-                                repeat_number=repeat_number,
-                            )]
-                        ),
+                        microsatellite_genotypes=MicrosatelliteHistogramGenotypeSet.get_for_msgs([mhg]),
                         snp_genotypes=snp_histogram_genotypes,
                         num_reads=reads_number,
                         fastq1=f1,
                         fastq2=f2,
                         fastqm=fm,
                     )
-                yield called_alleles, dbhist, ms
+                yield ((called_alleles, dbhist, ms),)
                 dbhist.delete()
