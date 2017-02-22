@@ -1,34 +1,4 @@
-import itertools
 import decimal
-
-def get_far_apart_highest_peaks(hist, k, d):
-    #hist is the histogram
-    #k is the allele_number
-    #d is the minimum distance between the allele
-    hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
-    for allele_number in range(k):
-        if allele_number >= len(hs):
-            break
-        for g in range(1, d):
-            if [item for item in hs if item[0] == hs[allele_number][0]+g]:
-                hs.remove([item for item in hs if item[0] == hs[allele_number][0]+g][0])
-            if [item for item in hs if item[0] == hs[allele_number][0]-g]:
-                hs.remove([item for item in hs if item[0] == hs[allele_number][0]-g][0])
-    seeds = [x for x, y in hs[:k]]
-    return seeds
-
-
-def seeds_search_range( peaks, max_distance_between_peaks, max_ms_length ):
-    search_range= itertools.product(
-            *[
-                range(
-                    max(1, peak-max_distance_between_peaks),
-                    min(max_ms_length, peak+max_distance_between_peaks+1)
-                ) for peak in peaks
-            ])
-    yield from search_range
-
-
 
 """
 line of events:
@@ -38,13 +8,14 @@ line of events:
 """
 
 def get_sorted_seeds(seeds_and_proportions):
-    gs = zip (*seeds_and_proportions)
+    gs = zip(*seeds_and_proportions)
     return sorted(list(gs)[0])
 
 
 def get_proportions(seeds_and_proportions):
-    gs = zip (*seeds_and_proportions)
+    gs = zip(*seeds_and_proportions)
     return sorted(list(gs)[1])
+
 
 def get_guide(loc_seeds):
     guide=[]
@@ -63,6 +34,7 @@ def get_guide(loc_seeds):
                 guide=cell_seeds
     return guide
 
+
 def extract_seeds(loc_seeds):
     extracted_seeds={}
     for cell in loc_seeds:
@@ -73,8 +45,9 @@ def extract_seeds(loc_seeds):
             extracted_seeds[cell] = [seed for seed in cell_seeds]
     return extracted_seeds
 
+
 def separate_alleles(loc_seeds, guide_points, loc_name='loci'):
-    extracted_seed= extract_seeds(loc_seeds)
+    extracted_seeds= extract_seeds(loc_seeds)
     separated_loc={}
     guide_points_allels=[]
     for allele in guide_points:
@@ -86,7 +59,3 @@ def separate_alleles(loc_seeds, guide_points, loc_name='loci'):
             if (abs(seed-closest_to_guide_index)<=3):
                 separated_loc.setdefault(guide_points_allels[guide_points.index(closest_to_guide_index)],dict())[cell]=seed
     return separated_loc
-
-
-
-

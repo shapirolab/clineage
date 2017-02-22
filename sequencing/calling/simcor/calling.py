@@ -15,17 +15,6 @@ def get_ms_hist(dbhist, microsatellite):
     return Histogram(hist_dict)
 
 
-def sim_hists_space_generator(sim_by_cyc):  # brute force over all mono-allelic options
-    sim_hists = sim_by_cyc.get_simulations_dict()
-    for syn_len in sim_hists:
-        for sim_cyc in sim_hists[syn_len]:
-            yield {
-                'ms_len': syn_len,
-                'simulation_cycle': sim_cyc,
-                'simulated_hist': sim_hists[syn_len][sim_cyc]
-            }
-
-
 def get_closest(real_hist, sim_space, distance_function):
     min_dist = sys.maxsize
     best_sim_dict = dict()
