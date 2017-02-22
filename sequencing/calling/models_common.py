@@ -5,30 +5,28 @@ from django.db import models
 import itertools
 
 
-class CallingScheme(models.Model):
+class MSLengthBoundsMixin(models.Model):
+    min_ms_len = models.PositiveSmallIntegerField()
+    max_ms_len = models.PositiveSmallIntegerField()
+
+    @property
+    def ms_len_bounds(self):
+        return self.min_ms_len, self.max_ms_len
+
+    class Meta:
+        abstract = True
+
+
+class CallingScheme(MSLengthBoundsMixin):
     name = models.CharField(max_length=50)
     description = models.TextField()
 
     def __str__(self):
         return self.name
 
-
-class CalledAlleles(models.Model):
-    histogram = models.ForeignKey(Histogram)
-    microsatellite = models.ForeignKey(Microsatellite)
-    genotypes = models.ForeignKey(MicrosatelliteAlleleSet)
-    calling_scheme = models.ForeignKey(CallingScheme)
-
-    objects = InheritanceManager()
-
-    class Meta:
-        unique_together = (
-            (
-                "histogram",
-                "microsatellite",
-                "calling_scheme",
-            ),
-        )
+    @property
+    def sim_hists_space(self):
+        raise NotImplemented
 
 
 class MicrosatelliteAlleleSet(models.Model):
@@ -43,7 +41,7 @@ class MicrosatelliteAlleleSet(models.Model):
     @classmethod
     def allele_field_names(cls):
         for i in range(1, cls._num_of_allele_fields+1):
-            yield 'microsatellite_genotype{}'.format(i)
+            yield 'allele{}'.format(i)
 
     @classmethod
     def get_for_repeats(cls, alleles):
@@ -83,6 +81,24 @@ class MicrosatelliteAlleleSet(models.Model):
                 "allele2",
                 "allele3",
                 "allele4",
+            ),
+        )
+
+
+class CalledAlleles(models.Model):
+    histogram = models.ForeignKey(Histogram)
+    microsatellite = models.ForeignKey(Microsatellite)
+    genotypes = models.ForeignKey(MicrosatelliteAlleleSet)
+    calling_scheme = models.ForeignKey(CallingScheme)
+
+    objects = InheritanceManager()
+
+    class Meta:
+        unique_together = (
+            (
+                "histogram",
+                "microsatellite",
+                "calling_scheme",
             ),
         )
 

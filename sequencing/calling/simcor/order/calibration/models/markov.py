@@ -2,7 +2,7 @@ import numpy
 from numpy.linalg import matrix_power
 
 from .base import ModelParams
-from order.preprocessing import generate_mat_hist
+from ....order.preprocessing import generate_mat_hist
 
 
 class FixedStepMarkovModel(ModelParams):

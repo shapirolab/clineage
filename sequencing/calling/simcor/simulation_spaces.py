@@ -1,23 +1,67 @@
 import itertools
+from sequencing.calling.hist import Histogram
+from sequencing.calling.multi_hists import MonoSimulatedHistogram, MultiSimulatedHistogram, \
+    ProportionalMultiSimulatedHistogram
 
 
-def sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+def mono_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
     """
     Generates simulated histograms with reference MS length and simulation cycles
     Args:
         sim_by_cyc: SimultaionsByCycles class instance
-        seeds_and_cycles: a generator for the desired seeds and cycles that would be simulated
+        seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
+            [(syn_len, sim_cyc), (syn_len, sim_cyc), ...]
     """
     sim_hists = sim_by_cyc.get_simulations_dict()
     for syn_len, sim_cyc in seeds_and_cycles:
-        yield {
-            'ms_len': syn_len,
-            'simulation_cycle': sim_cyc,
-            'simulated_hist': sim_hists[syn_len][sim_cyc]
-        }
+        yield MonoSimulatedHistogram(
+            ms_len=syn_len,
+            simulation_cycle=sim_cyc,
+            simulated_hist=sim_hists[syn_len][sim_cyc]
+        )
 
 
-def get_far_apart_highest_peaks(hist, k, d):
+def bi_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+    """
+    Generates simulated histograms with reference MS length and simulation cycles
+    Args:
+        sim_by_cyc: SimultaionsByCycles class instance
+        seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
+            [(frozenset(syn_len, syn_len), sim_cyc), (frozenset(syn_len, syn_len), sim_cyc), ...]
+    """
+    sim_hists = sim_by_cyc.get_simulations_dict()
+    for syn_seeds, sim_cyc in seeds_and_cycles:
+        yield MultiSimulatedHistogram(
+            ms_lens=syn_seeds,
+            simulation_cycle=sim_cyc,
+            simulated_hist=sum(
+                Histogram(
+                    simulated_hist=sim_hists[syn_len][sim_cyc]
+                ) for syn_len in syn_seeds)
+        )
+
+
+def proportional_bi_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+    """
+    Generates simulated histograms with reference MS length and simulation cycles
+    Args:
+        sim_by_cyc: SimultaionsByCycles class instance
+        seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
+            [(frozenset((syn_len, p), (syn_len, p)), sim_cyc), ...]
+    """
+    sim_hists = sim_by_cyc.get_simulations_dict()
+    for ms_lens_and_proportions, sim_cyc in seeds_and_cycles:
+        model_hist = Histogram(dict())
+        for syn_len, p in ms_lens_and_proportions.items():
+            model_hist = model_hist.asym_add(sim_hists[syn_len][sim_cyc].ymul(p))
+        yield ProportionalMultiSimulatedHistogram(
+            ms_lens_and_proportions=ms_lens_and_proportions,
+            simulation_cycle=sim_cyc,
+            simulated_hist=model_hist,
+        )
+
+
+def get_far_apart_highest_peaks(hist, k=1, d=1):
     """
     Identify the k highest peaks that satisfy minimal distance
     Args:
