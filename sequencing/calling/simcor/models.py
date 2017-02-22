@@ -4,15 +4,21 @@ from django.db import models
 import pickle
 
 
-class SimultaionsByCycles(models.Model):
+class CyclesMixin(models.Model):
+    min_cycles = models.PositiveIntegerField()
+    max_cycles = models.PositiveIntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class SimultaionsByCycles(CyclesMixin):
     """
     A simulations pickle file
      A dictionary for a specific MS type, indexed like:
       d[ms_len][cycle]
     """
     name = models.CharField(max_length=50)
-    min_cycles = models.PositiveIntegerField()
-    max_cycles = models.PositiveIntegerField()
     sim_hists = models.FilePathField(max_length=200)
     description = models.TextField()
 
@@ -25,7 +31,10 @@ class SimultaionsByCycles(models.Model):
             return data
 
 
+class SimCorScheme(CyclesMixin):
+    simulations = models.ForeignKey(SimultaionsByCycles)
+
+
 class BestCor(CalledAlleles):
     confidence = models.FloatField()
     cycle = models.PositiveSmallIntegerField()
-    simulations = models.ForeignKey(SimultaionsByCycles)
