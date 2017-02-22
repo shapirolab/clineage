@@ -169,7 +169,7 @@ def generate_hist_calls(input_file,
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         for result in executor.map(helper,
-                                   izip(
+                                   zip(
                                        uncalled_inputs(input_file,
                                                        calling,
                                                        reads_threshold=reads_threshold),
