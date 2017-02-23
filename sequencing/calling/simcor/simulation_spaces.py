@@ -61,24 +61,37 @@ def proportional_bi_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
         )
 
 
-def get_far_apart_highest_peaks(hist, k=1, d=1):
+def remove_points_close_to_top(hs, number_of_points, distance=1):
+    """
+    Removes points on the histogram if they are withing the given range, and returns the histogram without them
+    Searches if there's a point in the given range, and removes it,
+    :param hs: sorted histogram
+    :param keep_point_position: the position point you wish to keep
+    :param distance: the distance to remove
+    :return: remaining list
+    """
+    for steps_from_point in range(1, distance):
+        if [item for item in hs if item[0] == hs[number_of_points][0] + steps_from_point]:
+            hs.remove([item for item in hs if item[0] == hs[number_of_points][0] + steps_from_point][0])
+        if [item for item in hs if item[0] == hs[number_of_points][0] - steps_from_point]:
+            hs.remove([item for item in hs if item[0] == hs[number_of_points][0] - steps_from_point][0])
+    return hs
+
+
+def get_far_apart_highest_peaks(hist, allele_number=1, d=1):
     """
     Identify the k highest peaks that satisfy minimal distance
     Args:
         hist: histogram
-        k: allele_number
+        allele_number: allele_number
         d: minimum distance between the allele
     """
     hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
-    for allele_number in range(k):
-        if allele_number >= len(hs):
+    for allele in range(allele_number):
+        if allele >= len(hs):
             break
-        for g in range(1, d):
-            if [item for item in hs if item[0] == hs[allele_number][0]+g]:
-                hs.remove([item for item in hs if item[0] == hs[allele_number][0]+g][0])
-            if [item for item in hs if item[0] == hs[allele_number][0]-g]:
-                hs.remove([item for item in hs if item[0] == hs[allele_number][0]-g][0])
-    seeds = [x for x, y in hs[:k]]
+        hs = remove_points_close_to_top(hs, allele, d)
+    seeds = [x for x, y in hs[:allele_number]]
     return seeds
 
 

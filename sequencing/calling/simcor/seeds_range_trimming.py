@@ -14,4 +14,4 @@ class TrimmedSeedsBiallelicSearchRangeMixin(models.Model, TrimmedSeedsSearchRang
         abstract = True
 
     def trim_seeds(self, hist):
-        get_far_apart_highest_peaks(hist=hist, k=2, d=self.minimal_seeds_distance)
+        get_far_apart_highest_peaks(hist=hist, allele_number=2, d=self.minimal_seeds_distance)
