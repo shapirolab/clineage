@@ -49,17 +49,22 @@ def dummy_samplereads(demultiplexing, magicalpcr1barcodedcontent):
         fastq1=fastq_r1,
         fastq2=fastq_r2,
     )
+    # So our objects don't have "special" objects in fields
+    sr = SampleReads.objects.get(pk=sr.pk)
     yield sr
     sr.delete()
 
 
 @pytest.fixture()
-def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_microsatellites, requires_none_genotypes):
+def histograms_and_calling_solutions_d(dummy_samplereads, histograms_fd, requires_microsatellites, requires_none_genotypes):
     none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
     snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
         **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
+    d = dict()
     for amp_id, ms_dict in histograms_fd.items():
+        d[amp_id] = dict()
         for ms_id, genotypes_dict in ms_dict.items():
+            d[amp_id][ms_id] = dict()
             ms = Microsatellite.objects.get(pk=ms_id)
             for called_alleles, repeat_numbers_dict in genotypes_dict.items():
                 dbhist = Histogram.objects.create(
@@ -68,6 +73,8 @@ def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_
                     amplicon_id=amp_id,
                     num_reads=sum(repeat_numbers_dict.values())
                 )
+                # So our objects don't have "special" objects in fields
+                dbhist = Histogram.objects.get(pk=dbhist.pk)
                 for repeat_number, reads_number in repeat_numbers_dict.items():
                     f1 = get_unique_path("fastq")
                     touch(f1)
@@ -88,5 +95,6 @@ def histograms_and_calling_solutions(dummy_samplereads, histograms_fd, requires_
                         fastq2=f2,
                         fastqm=fm,
                     )
-                yield ((called_alleles, dbhist, ms),)
-                dbhist.delete()
+                d[amp_id][ms_id][called_alleles] = dbhist
+    yield d
+    Histogram.objects.all().delete()

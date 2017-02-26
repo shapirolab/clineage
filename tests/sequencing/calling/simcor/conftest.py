@@ -1,9 +1,11 @@
 import os
 import pytest
 import pickle
+import decimal
 from sequencing.calling.models import CallingScheme
 from misc.utils import get_unique_path
-from sequencing.calling.models import SimulationsByCycles, SimCorScheme
+from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme, FullBiSimCorScheme, \
+    ProportionalSimCorScheme, BoundProportionalSimCorScheme
 from tests.sequencing.calling.conftest import *
 
 from sequencing.calling.simcor.order.calibration.models.mutation_markov import MutationMarkov
@@ -46,12 +48,63 @@ def simcor(ac_model_simulations):
     )
     # So our objects don't have "special" objects in fields
     cs = SimulationsByCycles.objects.get(pk=cs.pk)
+    yield cs
+    os.unlink(pickle_path)
+
+
+@pytest.fixture()
+def minimalsimcormonoschema(simcor):
+    cs = FullMonoSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=24,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = FullMonoSimCorScheme.objects.get(pk=cs.pk)
     return cs
 
 
 @pytest.fixture()
-def simcorschema(simcor):
-    cs = SimCorScheme.objects.create(
+def minimalsimcorbischema(simcor):
+    cs = FullBiSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=24,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = FullBiSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def minimalsimcorbipropschema(simcor):
+    cs = BoundProportionalSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        lower_prop_bound=decimal.Decimal(0.4),
+        upper_prop_bound=decimal.Decimal(0.6),
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=21,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def simcormonoschema(simcor):
+    cs = FullMonoSimCorScheme.objects.create(
         name='simcor',
         description='Simulations correlation calling algorithm',
         min_ms_len=3,
@@ -61,5 +114,39 @@ def simcorschema(simcor):
         simulations=simcor
     )
     # So our objects don't have "special" objects in fields
-    cs = SimCorScheme.objects.get(pk=cs.pk)
+    cs = FullMonoSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def simcorbinschema(simcor):
+    cs = FullBiSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = FullBiSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def simcorbipropschema(simcor):
+    cs = BoundProportionalSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        lower_prop_bound=decimal.Decimal(0.0),
+        upper_prop_bound=decimal.Decimal(1.0),
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
     return cs

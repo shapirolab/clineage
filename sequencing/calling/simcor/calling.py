@@ -1,11 +1,8 @@
-from sequencing.calling.simcor.models import BestCorrelationCalledAlleles
+from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles
 from sequencing.calling.hist import Histogram
 from sequencing.analysis.models import HistogramEntryReads
 import sys
-from sequencing.calling.hist_dist import pop_dist_corr_numpy
 from sequencing.calling.models import MicrosatelliteAlleleSet
-from sequencing.calling.simcor.simulation_spaces import mono_sim_hists_space_generator, bi_sim_hists_space_generator,\
-    proportional_bi_sim_hists_space_generator
 
 
 def get_ms_hist(dbhist, microsatellite):
@@ -38,52 +35,10 @@ def get_closest(real_hist, sim_space, distance_function):
     return best_sim_hist, min_dist
 
 
-def call_microsatellite_histogram(dbhist, microsatellite, calling_schema):
-    """
-    Mono
-    Args:
-        dbhist:
-        microsatellite:
-        calling_schema:
-
-    Returns:
-
-    """
+def call_microsatellite_histogram(calling_schema, dbhist, microsatellite):
     hist = get_ms_hist(dbhist, microsatellite)
-    sim_hists_space = mono_sim_hists_space_generator(
-        calling_schema.simulations,
-        calling_schema.seeds_and_cycles)
-    closest_sim_hist, min_dist = get_closest(hist, sim_hists_space, pop_dist_corr_numpy)
-    mas = MicrosatelliteAlleleSet.get_for_repeats([closest_sim_hist.ms_len])
-    bcca, created = BestCorrelationCalledAlleles.objects.get_or_create(
-        histogram=dbhist,
-        microsatellite=microsatellite,
-        calling_scheme=calling_schema,
-        defaults=dict(
-            genotypes=mas,
-            confidence=min_dist,
-            cycle=closest_sim_hist.simulation_cycle),
-    )
-    return bcca
-
-
-def call_microsatellite_histogram_symetric_bi(dbhist, microsatellite, calling_schema):
-    """
-    Bi without proportions
-    Args:
-        dbhist:
-        microsatellite:
-        calling_schema:
-
-    Returns:
-
-    """
-    hist = get_ms_hist(dbhist, microsatellite)
-    sim_hists_space = bi_sim_hists_space_generator(
-        calling_schema.simulations,
-        calling_schema.seeds_and_cycles)
-    closest_sim_hist, min_dist = get_closest(hist, sim_hists_space, pop_dist_corr_numpy)
-    mas = MicrosatelliteAlleleSet.get_for_repeats(closest_sim_hist.ms_lens)
+    closest_sim_hist, min_dist = get_closest(hist, calling_schema.sim_hists_space, calling_schema.distance_metric)
+    mas = MicrosatelliteAlleleSet.get_for_repeats(closest_sim_hist.allele_frozenset)
     bcca, created = BestCorrelationCalledAlleles.objects.get_or_create(
         histogram=dbhist,
         microsatellite=microsatellite,

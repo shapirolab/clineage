@@ -3,33 +3,24 @@ from sequencing.analysis.models import Histogram
 from targeted_enrichment.planning.models import Microsatellite
 from django.db import models
 import itertools
+from sequencing.calling.range import MultiAlleleMixin
 
 
-class MSLengthBoundsMixin(models.Model):
-    min_ms_len = models.PositiveSmallIntegerField()
-    max_ms_len = models.PositiveSmallIntegerField()
-
-    @property
-    def ms_len_bounds(self):
-        return self.min_ms_len, self.max_ms_len
-
-    class Meta:
-        abstract = True
-
-
-class CallingScheme(MSLengthBoundsMixin):
+class CallingScheme(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
+
+    objects = InheritanceManager()
 
     def __str__(self):
         return self.name
 
     @property
-    def sim_hists_space(self):
+    def call_ms_hist(self, dbhist, microsatellite):
         raise NotImplemented
 
 
-class MicrosatelliteAlleleSet(models.Model):
+class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
     allele1 = models.PositiveSmallIntegerField()
     allele2 = models.PositiveSmallIntegerField()
     allele3 = models.PositiveSmallIntegerField()
@@ -37,6 +28,10 @@ class MicrosatelliteAlleleSet(models.Model):
     _num_of_allele_fields = 4
 
     objects = InheritanceManager()
+
+    @property
+    def allele_number(self):
+        return self._num_of_allele_fields
 
     @classmethod
     def allele_field_names(cls):
@@ -85,39 +80,6 @@ class MicrosatelliteAlleleSet(models.Model):
         )
 
 
-class CalledAlleles(models.Model):
-    histogram = models.ForeignKey(Histogram)
-    microsatellite = models.ForeignKey(Microsatellite)
-    genotypes = models.ForeignKey(MicrosatelliteAlleleSet)
-    calling_scheme = models.ForeignKey(CallingScheme)
-
-    objects = InheritanceManager()
-
-    class Meta:
-        unique_together = (
-            (
-                "histogram",
-                "microsatellite",
-                "calling_scheme",
-            ),
-        )
-
-
-class SingleMicrosatelliteAlleleSet(MicrosatelliteAlleleSet):
-    _num_of_allele_fields = 1
-
-    @classmethod
-    def get_for_repeat(cls, allele):  # Optional, TODO: consider removal
-        assert len(allele) == SingleMicrosatelliteAlleleSet._num_of_allele_fields
-        return cls.get_for_repeats([allele])
-
-    @property
-    def allele_fields(self):
-        return [
-            self.allele1,
-        ]
-
-
 class ProportionalMSAlleleSet(MicrosatelliteAlleleSet):
     p1 = models.DecimalField(max_digits=3, decimal_places=2)
     p2 = models.DecimalField(max_digits=3, decimal_places=2)
@@ -139,20 +101,27 @@ class ProportionalMSAlleleSet(MicrosatelliteAlleleSet):
         return {
             zip(
                 [allele for allele
-                in self.allele_fields
-                if allele != 0],
+                 in self.allele_fields
+                 if allele != 0],
                 [p for p
                  in self.proportion_fields],
             )
         }
 
 
-class ProportionalBiAllelicMSAlleleSet(ProportionalMSAlleleSet):
-    _num_of_allele_fields = 2
+class CalledAlleles(models.Model):
+    histogram = models.ForeignKey(Histogram)
+    microsatellite = models.ForeignKey(Microsatellite)
+    genotypes = models.ForeignKey(MicrosatelliteAlleleSet)
+    calling_scheme = models.ForeignKey(CallingScheme)
 
-    @property
-    def proportion_fields(self):
-        return [
-            self.p1,
-            self.p2,
-        ]
+    objects = InheritanceManager()
+
+    class Meta:
+        unique_together = (
+            (
+                "histogram",
+                "microsatellite",
+                "calling_scheme",
+            ),
+        )

@@ -4,7 +4,7 @@ from sequencing.calling.multi_hists import MonoSimulatedHistogram, MultiSimulate
     ProportionalMultiSimulatedHistogram
 
 
-def mono_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+def mono_sim_hists_space_generator(sim_hists_dict, seeds_and_cycles):
     """
     Generates simulated histograms with reference MS length and simulation cycles
     Args:
@@ -12,48 +12,45 @@ def mono_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
         seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
             [(syn_len, sim_cyc), (syn_len, sim_cyc), ...]
     """
-    sim_hists = sim_by_cyc.get_simulations_dict()
     for syn_len, sim_cyc in seeds_and_cycles:
         yield MonoSimulatedHistogram(
             ms_len=syn_len,
             simulation_cycle=sim_cyc,
-            simulated_hist=sim_hists[syn_len][sim_cyc]
+            simulated_hist=sim_hists_dict[syn_len][sim_cyc]
         )
 
 
-def bi_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+def bi_sim_hists_space_generator(sim_hists_dict, seeds_and_cycles):
     """
     Generates simulated histograms with reference MS length and simulation cycles
     Args:
         sim_by_cyc: SimultaionsByCycles class instance
         seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
-            [(frozenset(syn_len, syn_len), sim_cyc), (frozenset(syn_len, syn_len), sim_cyc), ...]
+            [(frozenset({syn_len, syn_len}), sim_cyc), (frozenset({syn_len, syn_len}), sim_cyc), ...]
     """
-    sim_hists = sim_by_cyc.get_simulations_dict()
     for syn_seeds, sim_cyc in seeds_and_cycles:
         yield MultiSimulatedHistogram(
             ms_lens=syn_seeds,
             simulation_cycle=sim_cyc,
             simulated_hist=sum(
                 Histogram(
-                    simulated_hist=sim_hists[syn_len][sim_cyc]
+                    sim_hists_dict[syn_len][sim_cyc]
                 ) for syn_len in syn_seeds)
         )
 
 
-def proportional_bi_sim_hists_space_generator(sim_by_cyc, seeds_and_cycles):
+def proportional_bi_sim_hists_space_generator(sim_hists_dict, seeds_and_cycles):
     """
     Generates simulated histograms with reference MS length and simulation cycles
     Args:
         sim_by_cyc: SimultaionsByCycles class instance
         seeds_and_cycles: a generator for the desired seeds and cycles that will be simulated
-            [(frozenset((syn_len, p), (syn_len, p)), sim_cyc), ...]
+            [(frozenset({(syn_len, p), (syn_len, p)}), sim_cyc), ...]
     """
-    sim_hists = sim_by_cyc.get_simulations_dict()
     for ms_lens_and_proportions, sim_cyc in seeds_and_cycles:
         model_hist = Histogram(dict())
         for syn_len, p in ms_lens_and_proportions.items():
-            model_hist = model_hist.asym_add(sim_hists[syn_len][sim_cyc].ymul(p))
+            model_hist = model_hist.asym_add(sim_hists_dict[syn_len][sim_cyc].ymul(p))
         yield ProportionalMultiSimulatedHistogram(
             ms_lens_and_proportions=ms_lens_and_proportions,
             simulation_cycle=sim_cyc,
@@ -78,19 +75,19 @@ def remove_points_close_to_top(hs, number_of_points, distance=1):
     return hs
 
 
-def get_far_apart_highest_peaks(hist, allele_number=1, d=1):
+def get_far_apart_highest_peaks(hist, allele_number=1, minimal_distance_between_peaks=1):
     """
     Identify the k highest peaks that satisfy minimal distance
     Args:
         hist: histogram
         allele_number: allele_number
-        d: minimum distance between the allele
+        minimal_distance_between_peaks: minimum distance between the allele
     """
     hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
     for allele in range(allele_number):
         if allele >= len(hs):
             break
-        hs = remove_points_close_to_top(hs, allele, d)
+        hs = remove_points_close_to_top(hs, allele, minimal_distance_between_peaks)
     seeds = [x for x, y in hs[:allele_number]]
     return seeds
 
