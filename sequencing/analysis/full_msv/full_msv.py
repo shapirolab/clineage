@@ -228,8 +228,8 @@ def align_reads_to_ms_variations(merged_reads, padding, mss_version):
                 '-bS',
                 '-'
             ] | samtools_sort[
-                '-',
-                sorted_assignment_bam[:-4]
+                '-o',
+                sorted_assignment_bam
             ]
             bowtie_to_sorted_bam & plumbum.FG
             return raise_or_create_with_defaults(
@@ -292,8 +292,9 @@ def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
             with unique_file_cm("bam") as temp_merged_bam:
                 if len(partial_bams) == 1:
                     samtools_sort(
-                        partial_bams[0],
-                        sorted_assignment_bam[:-4]
+                        '-o',
+                        sorted_assignment_bam,
+                        partial_bams[0]
                     )
                 else:
                     samtools_merge(
@@ -301,8 +302,9 @@ def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
                         *partial_bams
                     )
                     samtools_sort(
-                        temp_merged_bam,
-                        sorted_assignment_bam[:-4]
+                        '-o',
+                        sorted_assignment_bam,
+                        temp_merged_bam
                     )
                     os.unlink(temp_merged_bam)
             return raise_or_create_with_defaults(
