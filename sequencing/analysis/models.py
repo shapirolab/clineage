@@ -7,3 +7,5 @@ from sequencing.analysis.adamiya.models import AdamMergedReads, \
     AdamMSVariations, AdamHistogram
 from sequencing.analysis.full_msv.models import FullMSVariations, \
     FullMSVHistogram, FullMSVMergedReads, FullMSVAssignment
+from sequencing.analysis.snps.models import AmpliconCollectionBWAIndex, \
+    ReadsAlignment, VCFReads
