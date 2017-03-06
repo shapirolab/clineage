@@ -167,13 +167,26 @@ class DNASlice(DNASliceBase):
                                       through_fields=('outer', 'inner')
                                       )
 
-
     overlaps = models.ManyToManyField('genomes.DNASlice',
-                                  related_name='+',
-                                  symmetrical=False,
-                                  through='genomes.DNASlice_Overlaps',
-                                  through_fields=('slice1', 'slice2')
-                                  )
+                                      related_name='+',
+                                      symmetrical=False,
+                                      through='genomes.DNASlice_Overlaps',
+                                      through_fields=('slice1', 'slice2')
+                                      )
+
+    def relative_pos(self, chromosome, position):
+        """
+        The function checks if nucleotide is in the slice and gives it's relative position in the slice
+        :param absolute_pos: tuple of chromosome object and start position of the slice
+        :return: relative position
+        """
+        if self.chromosome != chromosome:
+            raise ValueError("The nucleotide is not in same chromosome")
+        if position < self.start_pos or position > self.end_pos:
+            raise ValueError("The nucleotide is not in DNA slice")
+
+        relative_pos = position - self.start_pos
+        return relative_pos
 
     class Meta:
         unique_together = [
