@@ -89,6 +89,34 @@ class BowtieIndexMixin(models.Model):
         yield self.index_dump_dir
 
 
+class BWAIndexMixin(models.Model):
+    INDEX_PREFIX = "Index_Ext_0"
+    fasta_file = models.FilePathField(max_length=200, allow_files=True, allow_folders=True)
+    faidx_file = models.FilePathField(max_length=200, allow_files=True, allow_folders=True)
+    index_dump_dir = models.FilePathField(max_length=200, allow_files=False, allow_folders=True)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def index_files_prefix(self):
+        return os.path.join(self.index_dump_dir, self.INDEX_PREFIX)
+
+    @property
+    def files(self):
+        yield self.fasta_file
+        yield self.faidx_file
+        yield "{}.amb".format(self.index_files_prefix)
+        yield "{}.ann".format(self.index_files_prefix)
+        yield "{}.bwt".format(self.index_files_prefix)
+        yield "{}.pac".format(self.index_files_prefix)
+        yield "{}.sa".format(self.index_files_prefix)
+
+    @property
+    def dirs(self):
+        yield self.index_dump_dir
+
+
 class SampleReads(models.Model):
     """
     Sample reads are the output of Illumina sequencing and is identified by a barcoded_content and demultiplexing.
