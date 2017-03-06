@@ -100,3 +100,99 @@ def primer_adj_ms_2_right(ugs_adj_ms_2_right, illuminareadingadaptor2fortail):
     # So our objects don't have "special" objects in fields
     p = PCR1MinusPrimer.objects.get(pk=p.pk)
     return p
+
+
+@pytest.fixture()
+def primer_snp_1_left(ugs_snp_1_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='chr1_115256468_115256612_fwd',
+        ugs=ugs_snp_1_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_1_right(ugs_snp_1_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='chr1_115256468_115256612_rev',
+        ugs=ugs_snp_1_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_2_left(ugs_snp_2_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='chr1_115256468_115256487_fwd',
+        ugs=ugs_snp_2_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_2_right(ugs_snp_2_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='chr10_10341355_10341542_rev',
+        ugs=ugs_snp_2_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_3_left(ugs_snp_3_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='chr4_106155054_106155263_fwd',
+        ugs=ugs_snp_3_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_3_right(ugs_snp_3_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='chr4_106155054_106155263_rev',
+        ugs=ugs_snp_3_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_4_left(ugs_snp_4_left, illuminareadingadaptor1fortail):
+    p = PCR1PlusPrimer.objects.create(
+        name='chr21_36259181_36259442_fwd',
+        ugs=ugs_snp_4_left,
+        iraft=illuminareadingadaptor1fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1PlusPrimer.objects.get(pk=p.pk)
+    return p
+
+
+@pytest.fixture()
+def primer_snp_4_right(ugs_snp_4_right, illuminareadingadaptor2fortail):
+    p = PCR1MinusPrimer.objects.create(
+        name='chr21_36259181_36259442_rev',
+        ugs=ugs_snp_4_right,
+        iraft=illuminareadingadaptor2fortail,
+    )
+    # So our objects don't have "special" objects in fields
+    p = PCR1MinusPrimer.objects.get(pk=p.pk)
+    return p

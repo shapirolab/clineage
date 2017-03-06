@@ -1,7 +1,7 @@
 import pytest
 
 from targeted_enrichment.planning.models import UGSPlus, UGSMinus, \
-    TargetEnrichment, Microsatellite, RestrictionEnzyme
+    TargetEnrichment, Microsatellite, RestrictionEnzyme, SNP
 
 from tests.genomes.conftest import *
 
@@ -255,6 +255,185 @@ def ttaa_restriction_site_sample():
 
 
 @pytest.fixture()
+def ugs_snp_1_left(slice_snp_1_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_snp_1_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_snp_1_right(slice_snp_1_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_snp_1_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
+def snp_1_a(slice_snp_1_target_a):
+    snp = SNP.objects.create(
+        id=1,
+        name='1_115256524',
+        slice=slice_snp_1_target_a,
+        mutation='C>nan',
+        modified='nan',
+    )
+    # So our objects don't have "special" objects in fields
+    snp = SNP.objects.get(pk=snp.pk)
+    return snp
+
+
+@pytest.fixture()
+def snp_1_b(slice_snp_1_target_b):
+    snp = SNP.objects.create(
+        id=2,
+        name='1_115256529',
+        slice=slice_snp_1_target_b,
+        mutation='T>C',
+        modified='C',
+    )
+    # So our objects don't have "special" objects in fields
+    snp = SNP.objects.get(pk=snp.pk)
+    return snp
+
+
+@pytest.fixture()
+def te_snp_1(hg19_chromosome1, ugs_snp_1_left, ugs_snp_1_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome1,
+        left=ugs_snp_1_left,
+        right=ugs_snp_1_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
+
+
+@pytest.fixture()
+def ugs_snp_2_left(slice_snp_2_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_snp_2_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_snp_2_right(slice_snp_2_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_snp_2_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
+def snp_2_a(slice_snp_2_target_a):
+    snp = SNP.objects.create(
+        id=3,
+        name='10_10341467',
+        slice=slice_snp_2_target_a,
+        mutation='C>nan',
+        modified='nan',
+    )
+    # So our objects don't have "special" objects in fields
+    snp = SNP.objects.get(pk=snp.pk)
+    return snp
+
+
+@pytest.fixture()
+def te_snp_2(hg19_chromosome10, ugs_snp_2_left, ugs_snp_2_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome10,
+        left=ugs_snp_2_left,
+        right=ugs_snp_2_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
+
+
+@pytest.fixture()
+def ugs_snp_3_left(slice_snp_3_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_snp_3_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_snp_3_right(slice_snp_3_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_snp_3_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
+def te_snp_3(hg19_chromosome4, ugs_snp_3_left, ugs_snp_3_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome4,
+        left=ugs_snp_3_left,
+        right=ugs_snp_3_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
+
+
+@pytest.fixture()
+def ugs_snp_4_left(slice_snp_4_left):
+    ugsp = UGSPlus.objects.create(
+        slice=slice_snp_4_left,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsp = UGSPlus.objects.get(pk=ugsp.pk)
+    return ugsp
+
+
+@pytest.fixture()
+def ugs_snp_4_right(slice_snp_4_right):
+    ugsm = UGSMinus.objects.create(
+        slice=slice_snp_4_right,
+    )
+    # So our objects don't have "special" objects in fields
+    ugsm = UGSMinus.objects.get(pk=ugsm.pk)
+    return ugsm
+
+
+@pytest.fixture()
+def te_snp_4(hg19_chromosome21, ugs_snp_4_left, ugs_snp_4_right):
+    te = TargetEnrichment.objects.create(
+        chromosome=hg19_chromosome21,
+        left=ugs_snp_4_left,
+        right=ugs_snp_4_right,
+        planning_version=1,
+    )
+    # So our objects don't have "special" objects in fields
+    te = TargetEnrichment.objects.get(pk=te.pk)
+    return te
+
+
+@pytest.fixture()
 def requires_microsatellites(ms_28727_a, ms_28727_b, ms_28734_a, ms_adj_ms_1_a, ms_adj_ms_2_a, ms_adj_ms_2_b):
+    pass
+
+
+@pytest.fixture()
+def requires_snps(snp_1_a, snp_1_b, snp_2_a):
     pass
 

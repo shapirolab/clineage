@@ -1,5 +1,6 @@
 import pytest
 import xlrd
+from misc.utils import get_unique_path, unlink
 from amplicons_handling.primer_design import primer3_design, create_amplicon_for_primer3
 from amplicons_handling.primers_insertion import create_target_enrichment_in_db
 from amplicons_handling.positioning import insertion_OM_to_db, create_primer_order_file_xls
@@ -46,14 +47,15 @@ def test_insertion_OM_to_db(tate_tuple_sample, illuminareadingadaptor1fortail, i
 
 @pytest.mark.django_db
 def test_order_file_xls(OMmix_sample):
-    create_primer_order_file_xls(OMmix_sample, '/home/veronika/s/niki/tests/sample_sheet.xls')
 
-    workbook = xlrd.open_workbook('/home/veronika/s/niki/tests/sample_sheet.xls')
-    worksheet = workbook.sheet_by_name('OM7')
+    with unlink(get_unique_path(ext='xls')) as sample_sheet:
+        create_primer_order_file_xls(OMmix_sample, sample_sheet)
 
-    row_0 = worksheet.row(0)
-    row_1 = worksheet.row(1)
+        workbook = xlrd.open_workbook(sample_sheet)
+        worksheet = workbook.sheet_by_name('OM7')
+
+        row_0 = worksheet.row(0)
+        row_1 = worksheet.row(1)
 
     assert row_0[0].value == 'TEID'
-    assert row_1[0].value == 1
 

@@ -53,6 +53,28 @@ def dnabarcode2_a(transactional_db):
 
 
 @pytest.fixture()
+def dnabarcode1_b(transactional_db):
+    b5 = DNABarcode1.objects.create(
+        name='D508',
+        _sequence='ATAGAGGC'
+    )
+    # So our objects don't have "special" objects in fields
+    b5 = DNABarcode1.objects.get(pk=b5.pk)
+    return b5
+
+
+@pytest.fixture()
+def dnabarcode2_b(transactional_db):
+    b6 = DNABarcode2.objects.create(
+        name='D618',
+        _sequence='TGGGAGCC'
+    )
+    # So our objects don't have "special" objects in fields
+    b6 = DNABarcode2.objects.get(pk=b6.pk)
+    return b6
+
+
+@pytest.fixture()
 def illuminareadingadaptor1(transactional_db):
     ira1 = IlluminaReadingAdaptor1.objects.create(
         name='Illumina Standard Reading Adaptor1',
