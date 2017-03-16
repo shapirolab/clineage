@@ -9,6 +9,7 @@ from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme,
 from tests.sequencing.calling.conftest import *
 
 from sequencing.calling.simcor.order.calibration.models.mutation_markov import MutationMarkov
+from sequencing.calling.hist import Histogram as dHist
 
 
 @pytest.fixture()
@@ -152,3 +153,89 @@ def simcorbipropschema(simcor):
     # So our objects don't have "special" objects in fields
     cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
     return cs
+
+@pytest.fixture()
+def HP_HISTOGRAMS():
+    HP_HISTOGRAM_1 = (6,15),{
+    6:60,
+    7:59,
+    8:58,
+    9:57,
+    10:5,
+    11:4,
+    12:57,
+    13:58,
+    14:59,
+    15:60,
+        }
+
+    HP_HISTOGRAM_2 = (15,7), {
+        6:8,
+        7:59,
+        8:58,
+        9:57,
+        10:5,
+        11:4,
+        12:57,
+        13:58,
+        14:59,
+        15:60,
+    }
+
+    HP_HISTOGRAM_3 = (11,6), {
+        6:60,
+        7:59,
+        8:58,
+        9:57,
+        10:5,
+        11:150,
+        12:57,
+        13:58,
+        14:59,
+        15:59,
+    }
+
+    HP_HISTOGRAM_4 = (11,15), {
+        6:59,
+        7:59,
+        8:58,
+        9:57,
+        10:5,
+        11:150,
+        12:57,
+        13:58,
+        14:59,
+        15:60,
+    }
+
+    HP_HISTOGRAM_5 = (8,15), {
+        6:61,
+        7:59,
+        8:63,
+        9:57,
+        10:5,
+        11:4,
+        12:57,
+        13:58,
+        14:59,
+        15:60,
+    }
+    return HP_HISTOGRAM_1, HP_HISTOGRAM_2, HP_HISTOGRAM_3, HP_HISTOGRAM_4, HP_HISTOGRAM_5
+
+
+@pytest.fixture()
+def histogram_dicts(HP_HISTOGRAMS):
+    HP_HISTOGRAM_1, HP_HISTOGRAM_2, HP_HISTOGRAM_3, HP_HISTOGRAM_4, HP_HISTOGRAM_5 = HP_HISTOGRAMS
+    hp1 = HP_HISTOGRAM_1[0], dHist(HP_HISTOGRAM_1[1])
+    hp2 = HP_HISTOGRAM_2[0], dHist(HP_HISTOGRAM_2[1])
+    hp3 = HP_HISTOGRAM_3[0], dHist(HP_HISTOGRAM_3[1])
+    hp4 = HP_HISTOGRAM_4[0], dHist(HP_HISTOGRAM_4[1])
+    hp5 = HP_HISTOGRAM_5[0], dHist(HP_HISTOGRAM_5[1])
+    hists = {
+        1: {'result': hp1[0], 'histogram': hp1[1]},
+        2: {'result': hp2[0], 'histogram': hp2[1]},
+        3: {'result': hp3[0], 'histogram': hp3[1]},
+        4: {'result': hp4[0], 'histogram': hp4[1]},
+        5: {'result': hp5[0], 'histogram': hp5[1]},
+    }
+    return hists
