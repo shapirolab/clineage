@@ -6,6 +6,7 @@ from sequencing.analysis.models_common import PearOutputMixin, SNPHistogramGenot
     HistogramEntryReads
 from misc.utils import get_unique_path
 
+from tests.sequencing.conftest import *
 from tests.sequencing.runs.conftest import *
 from tests.lib_prep.workflows.conftest import *
 from tests.targeted_enrichment.amplicons.conftest import *
@@ -23,13 +24,6 @@ def touch(fp):
 @pytest.fixture(scope="session")
 def histograms_fd():
     return MS_HISTOGRAMS_DICT
-
-
-@pytest.fixture()
-def requires_none_genotypes(request, transactional_db):
-    MicrosatelliteHistogramGenotype.objects.get_or_create(microsatellite=None,
-        defaults=dict(repeat_number=1))
-    SNPHistogramGenotype.objects.get_or_create(snp=None, defaults=dict(base=""))
 
 
 @pytest.fixture()

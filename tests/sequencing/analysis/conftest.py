@@ -4,6 +4,8 @@ import django
 
 from distributed.utils_test import cluster
 from distributed.client import Client
+from tests.sequencing.conftest import *
+
 
 @pytest.yield_fixture(scope="session")
 def executor():
