@@ -1,3 +1,4 @@
+import itertools
 import pickle
 from django.db import models
 from sequencing.calling.range import MSLengthBoundsMixin, ProportionsBoundsMixin
@@ -62,9 +63,16 @@ class MSLengthBoundsModelMixin(models.Model, MSLengthBoundsMixin):
         abstract = True
 
 
+class ProportionStepModelMixin(models.Model):
+    proportion_step = models.DecimalField(max_digits=3, decimal_places=2)
+
+    class Meta:
+        abstract = True
+
+
 class ProportionsBoundsModelMixin(models.Model, ProportionsBoundsMixin):
-    lower_prop_bound = models.DecimalField(max_digits=2, decimal_places=2)
-    upper_prop_bound = models.DecimalField(max_digits=2, decimal_places=2)
+    lower_prop_bound = models.DecimalField(max_digits=3, decimal_places=2)
+    upper_prop_bound = models.DecimalField(max_digits=3, decimal_places=2)
 
     @property
     def proportion_bounds(self):
@@ -80,7 +88,7 @@ class SingleMicrosatelliteAlleleSet(MicrosatelliteAlleleSet):
     @classmethod
     def get_for_repeat(cls, allele):
         assert len(allele) == cls._num_of_allele_fields
-        return cls.get_for_repeats([allele])
+        return cls.get_for_alleles([allele])
 
     @property
     def allele_fields(self):
@@ -106,6 +114,62 @@ class BestCorrelationCalledAlleles(CalledAlleles):
     """
     confidence = models.FloatField()
     cycle = models.PositiveSmallIntegerField()
+
+
+class Proportions(models.Model):
+    p1 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    p2 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    p3 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    p4 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    _num_of_allele_fields = 4
+
+    @classmethod
+    def proportion_field_names(cls):
+        for i in range(1, cls._num_of_allele_fields + 1):
+            yield 'p{}'.format(i)
+
+    @classmethod
+    def get_for_proportions(cls, proportions):
+        assert len(list(proportions)) <= cls._num_of_allele_fields
+        names = list(cls.proportion_field_names())
+        assert len(names) >= len(proportions)
+        ordered_proportions = dict(itertools.zip_longest(
+            names,
+            proportions,
+            fillvalue=None,
+        ))
+        obj, c = cls.objects.get_or_create(**ordered_proportions)
+        return obj
+
+    @property
+    def proportion_fields(self):
+        return [
+            self.p1,
+            self.p2,
+            self.p3,
+            self.p4,
+        ]
+
+    @property
+    def proportions(self):
+        return [p for p in self.proportion_fields if p is not None]
+
+
+class ProportionalMicrosatelliteAlleleSet(MicrosatelliteAlleleSet):
+    proportions = models.ForeignKey(Proportions)
+
+    @classmethod
+    def get_for_proportional_alllels(cls, mas, proportions_dict):
+        pmas = cls(microsatellitealleleset_ptr_id=mas.pk)
+        pmas.__dict__.update(mas.__dict__)
+        ordered_proportions = [proportions_dict[a] for a in mas.alleles]
+        pmas.proportions = Proportions.get_for_proportions(ordered_proportions)
+        pmas.save()
+        return pmas
+
+    @property
+    def alleles(self):
+        return frozenset(zip([a for a in self.allele_fields if a is not None], self.proportions.proportions))
 
 
 class BestCorrelationProportionalCalledAlleles(BestCorrelationCalledAlleles):

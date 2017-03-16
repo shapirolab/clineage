@@ -1,4 +1,5 @@
-from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles
+from sequencing.calling.simcor.models_common import ProportionalMicrosatelliteAlleleSet, ProportionStepModelMixin, \
+    Proportions
 from sequencing.calling.hist import Histogram
 from sequencing.analysis.models import HistogramEntryReads
 import sys
@@ -38,8 +39,10 @@ def get_closest(real_hist, sim_space, distance_function):
 def call_microsatellite_histogram(calling_schema, dbhist, microsatellite):
     hist = get_ms_hist(dbhist, microsatellite)
     closest_sim_hist, min_dist = get_closest(hist, calling_schema.sim_hists_space, calling_schema.distance_metric)
-    mas = MicrosatelliteAlleleSet.get_for_repeats(closest_sim_hist.allele_frozenset)
-    bcca, created = BestCorrelationCalledAlleles.objects.get_or_create(
+    mas = MicrosatelliteAlleleSet.get_for_alleles(closest_sim_hist.allele_frozenset)
+    if isinstance(calling_schema, ProportionStepModelMixin):
+        mas = ProportionalMicrosatelliteAlleleSet.get_for_proportional_alllels(mas, closest_sim_hist.alleles_to_proportions)
+    bcca, created = calling_schema.called_allele_class.objects.get_or_create(
         histogram=dbhist,
         microsatellite=microsatellite,
         calling_scheme=calling_schema,

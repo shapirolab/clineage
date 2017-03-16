@@ -5,12 +5,25 @@ from sequencing.calling.simcor.simulation_spaces import mono_sim_hists_space_gen
 from sequencing.calling.hist_dist import pop_dist_corr_numpy
 from sequencing.calling.simcor.calling import call_microsatellite_histogram
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
-    ProportionsBoundsModelMixin
+    ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
+    BestCorrelationProportionalCalledAlleles
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin
 
 
-class BaseSimCallingScheme(CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
+class BestCorrelationCalledAlleleMixin(object):
+    @property
+    def called_allele_class(self):
+        return BestCorrelationCalledAlleles
+
+
+class BestCorrelationProportionalCalledAlleleMixin(object):
+    @property
+    def called_allele_class(self):
+        return BestCorrelationProportionalCalledAlleles
+
+
+class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
     """
     Base calling for calling against simulated histograms
     """
@@ -28,7 +41,7 @@ class BaseSimCallingScheme(CallingScheme, MSLengthBoundsModelMixin, CyclesModelM
         raise NotImplemented
 
     def call_ms_hist(self, dbhist, microsatellite):
-        raise NotImplemented
+        return call_microsatellite_histogram(self, dbhist, microsatellite)
 
 
 class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
@@ -42,17 +55,18 @@ class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
 
-    def call_ms_hist(self, dbhist, microsatellite):
-        return call_microsatellite_histogram(self, dbhist, microsatellite)
 
+class BaseBiAllelicMixin(object):
 
-class FullBiSimCorScheme(BaseSimCallingScheme, FullRangeBiMixin):
-    """
-    Calling schema for calling against combinations of two simulated histograms
-    """
     @property
     def allele_number(self):
         return 2
+
+
+class FullBiSimCorScheme(BaseSimCallingScheme, BaseBiAllelicMixin, FullRangeBiMixin):
+    """
+    Calling schema for calling against combinations of two simulated histograms
+    """
 
     @property
     def sim_hists_space(self):
@@ -60,12 +74,9 @@ class FullBiSimCorScheme(BaseSimCallingScheme, FullRangeBiMixin):
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
 
-    def call_ms_hist(self, dbhist, microsatellite):
-        return call_microsatellite_histogram(self, dbhist, microsatellite)
 
-
-class ProportionalSimCorScheme(BaseSimCallingScheme,
-                               ProportionalAllelesCyclesRangeMixin):
+class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
+                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
@@ -77,11 +88,9 @@ class ProportionalSimCorScheme(BaseSimCallingScheme,
             self.alleles_and_cycles
         )
 
-    def call_ms_hist(self, dbhist, microsatellite):
-        return call_microsatellite_histogram(dbhist, microsatellite, self)
 
-
-class BoundProportionalSimCorScheme(BaseSimCallingScheme, ProportionsBoundsModelMixin,
+class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
+                                    ProportionsBoundsModelMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
                                     BoundProportionalAllelesCyclesRangeMixin):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
@@ -93,9 +102,6 @@ class BoundProportionalSimCorScheme(BaseSimCallingScheme, ProportionsBoundsModel
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
-
-    def call_ms_hist(self, dbhist, microsatellite):
-        return call_microsatellite_histogram(dbhist, microsatellite, self)
 
 
 # class NaiveBiallelicSimCorScheme(BaseSimCorMixin, TrimmedSeedsBiallelicSearchRangeMixin):

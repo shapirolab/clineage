@@ -16,18 +16,30 @@ class CallingScheme(models.Model):
         return self.name
 
     @property
+    def called_allele_class(self):
+        raise NotImplemented
+
+    @property
+    def called_allele_class(self):
+        raise NotImplemented
+
+    @property
     def call_ms_hist(self, dbhist, microsatellite):
         raise NotImplemented
 
 
 class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
-    allele1 = models.PositiveSmallIntegerField()
-    allele2 = models.PositiveSmallIntegerField()
-    allele3 = models.PositiveSmallIntegerField()
-    allele4 = models.PositiveSmallIntegerField()
+    allele1 = models.PositiveSmallIntegerField(null=True)
+    allele2 = models.PositiveSmallIntegerField(null=True)
+    allele3 = models.PositiveSmallIntegerField(null=True)
+    allele4 = models.PositiveSmallIntegerField(null=True)
     _num_of_allele_fields = 4
 
     objects = InheritanceManager()
+
+    @staticmethod
+    def sort_alleles(alleles):
+        return sorted(list(alleles))
 
     @property
     def allele_number(self):
@@ -39,15 +51,15 @@ class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
             yield 'allele{}'.format(i)
 
     @classmethod
-    def get_for_repeats(cls, alleles):
+    def get_for_alleles(cls, alleles):
         assert len(alleles) <= cls._num_of_allele_fields
-        l = sorted(list(alleles))
+        l = cls.sort_alleles(alleles)
         names = list(cls.allele_field_names())
         assert len(names) >= len(l)
         ordered_genotypes = dict(itertools.zip_longest(
             names,
             l,
-            fillvalue=0,
+            fillvalue=None,
         ))
         obj, c = cls.objects.get_or_create(**ordered_genotypes)
         return obj
@@ -66,7 +78,7 @@ class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
         return {
             allele for allele
             in self.allele_fields
-            if allele != 0
+            if allele is not None
         }
 
     class Meta:
@@ -78,35 +90,6 @@ class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
                 "allele4",
             ),
         )
-
-
-class ProportionalMSAlleleSet(MicrosatelliteAlleleSet):
-    p1 = models.DecimalField(max_digits=3, decimal_places=2)
-    p2 = models.DecimalField(max_digits=3, decimal_places=2)
-    p3 = models.DecimalField(max_digits=3, decimal_places=2)
-    p4 = models.DecimalField(max_digits=3, decimal_places=2)
-    _num_of_allele_fields = 4
-
-    @property
-    def proportion_fields(self):
-        return [
-            self.p1,
-            self.p2,
-            self.p3,
-            self.p4,
-        ]
-
-    @property
-    def alleles(self):
-        return {
-            zip(
-                [allele for allele
-                 in self.allele_fields
-                 if allele != 0],
-                [p for p
-                 in self.proportion_fields],
-            )
-        }
 
 
 class CalledAlleles(models.Model):
