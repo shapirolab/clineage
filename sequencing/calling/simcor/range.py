@@ -1,7 +1,7 @@
 from django.db import models
 from sequencing.calling.simcor.simulation_spaces import get_far_apart_highest_peaks
 from sequencing.calling.range import MultiAlleleMixin, AllelesRangeMixin, ProportionalAllelesMixin, \
-    BoundProportionalAllelesMixin
+    ProportionsRangeMixin, BoundProportionsRangeMixin
 from sequencing.calling.simcor.models_common import CyclesRangeMixin
 import itertools
 
@@ -21,38 +21,40 @@ class BaseAllelesCyclesRange(object):
         yield from itertools.product(self.alleles, self.cycles)
 
 
-class AllelesCyclesRangeMixin(BaseAllelesCyclesRange, AllelesRangeMixin, CyclesRangeMixin):
+class AllelesCyclesRangeMixin(AllelesRangeMixin, CyclesRangeMixin, BaseAllelesCyclesRange):
     """
     Brute forcing over all monoallelic options at all cycles
     """
     pass
 
 
-class FullRangeBiMixin(BaseAllelesCyclesRange, MultiAlleleMixin, CyclesRangeMixin):
+class FullRangeBiMixin(MultiAlleleMixin, CyclesRangeMixin, BaseAllelesCyclesRange):
     """
     Brute forcing over all bi-allelic options at all cycles
     """
     pass
 
 
-class ProportionalAllelesCyclesRangeMixin(BaseAllelesCyclesRange, ProportionalAllelesMixin, CyclesRangeMixin):
+class ProportionalAllelesCyclesRangeMixin(ProportionsRangeMixin, ProportionalAllelesMixin,
+                                          CyclesRangeMixin, BaseAllelesCyclesRange):
     """
     Brute forcing over all biallelic options at all proportions and all cycles
     """
     pass
 
 
-class BoundProportionalAllelesCyclesRangeMixin(BaseAllelesCyclesRange, BoundProportionalAllelesMixin, CyclesRangeMixin):
+class BoundProportionalAllelesCyclesRangeMixin(BoundProportionsRangeMixin, ProportionalAllelesMixin,
+                                               CyclesRangeMixin, BaseAllelesCyclesRange):
     """
     Brute forcing over all biallelic options at all proportions and all cycles
     """
     pass
 
 
-class HighestPeakMixin(CyclesRangeMixin, MultiAlleleMixin):
+class HighestPeaksMixin(MultiAlleleMixin):
 
     @classmethod
-    def highest_peak(cls, hist):
+    def highest_peaks(cls, hist):
         return get_far_apart_highest_peaks(
             hist=hist,
             allele_number=cls.allele_number,
@@ -60,7 +62,24 @@ class HighestPeakMixin(CyclesRangeMixin, MultiAlleleMixin):
         )
 
 
-class PeaksMinimalDistanceModelMixin(models.Model, HighestPeakMixin):
+class AllelesRangeFromPointModelMixin(models.Model):
+    range_from_point = models.PositiveSmallIntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class HighestPeaksModelMixin(AllelesRangeFromPointModelMixin, HighestPeaksMixin):
+
+    def alleles_by_hist(self, hist):
+        points = self.highest_peaks(hist)
+        yield from itertools.chain(
+            range(point-self.range_from_point, point+self.range_from_point+1)
+            for point in points
+        )
+
+
+class PeaksMinimalDistanceModelMixin(models.Model, CyclesRangeMixin, HighestPeaksMixin):
     minimal_seeds_distance = models.PositiveSmallIntegerField()
 
     class Meta:

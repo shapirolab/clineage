@@ -49,7 +49,7 @@ def proportional_bi_sim_hists_space_generator(sim_hists_dict, seeds_and_cycles):
     """
     for ms_lens_and_proportions, sim_cyc in seeds_and_cycles:
         model_hist = Histogram(dict())
-        for syn_len, p in ms_lens_and_proportions.items():
+        for syn_len, p in ms_lens_and_proportions:
             model_hist = model_hist.asym_add(sim_hists_dict[syn_len][sim_cyc].ymul(p))
         yield ProportionalMultiSimulatedHistogram(
             ms_lens_and_proportions=ms_lens_and_proportions,
