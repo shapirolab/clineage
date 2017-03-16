@@ -89,6 +89,7 @@ def minimalsimcorbipropschema(simcor):
     cs = BoundProportionalSimCorScheme.objects.create(
         name='simcor',
         description='Simulations correlation calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
         lower_prop_bound=decimal.Decimal(0.4),
         upper_prop_bound=decimal.Decimal(0.6),
         min_ms_len=15,
@@ -139,7 +140,8 @@ def simcorbipropschema(simcor):
     cs = BoundProportionalSimCorScheme.objects.create(
         name='simcor',
         description='Simulations correlation calling algorithm',
-        lower_prop_bound=decimal.Decimal(0.0),
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.3),
         upper_prop_bound=decimal.Decimal(1.0),
         min_ms_len=3,
         max_ms_len=30,

@@ -1,3 +1,5 @@
+import decimal
+
 ms_28727_a_id = 1
 ms_28727_b_id = 2
 ms_28734_a_id = 3
@@ -14,10 +16,14 @@ def repeat_number(i):  # Just to give the int some context
     return i
 
 
+def proportion(d):  # Just to give the decimal string some context
+    return decimal.Decimal(d)
+
+
 MS_HISTOGRAMS_DICT = {
     amplicon_28734_id: {
         ms_28734_a_id: {
-            frozenset([(1., 17)]): {
+            frozenset([(repeat_number(17), proportion('1.0'))]): {
                 repeat_number(7): 1,
                 repeat_number(8): 6,
                 repeat_number(9): 8,
@@ -34,7 +40,7 @@ MS_HISTOGRAMS_DICT = {
                 repeat_number(20): 5,
                 repeat_number(21): 1,
             },
-            frozenset([(0.6, 17), (0.4, 27)]): {  # biallelic example
+            frozenset([(repeat_number(17), proportion('0.6')), (repeat_number(27), proportion('0.4'))]): {  # biallelic example
                 repeat_number(6): 1,
                 repeat_number(7): 1,
                 repeat_number(8): 3,
