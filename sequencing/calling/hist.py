@@ -2,6 +2,7 @@ import glob
 import os
 import math
 import sys
+import decimal
 import numpy as np
 from collections import Counter
 
@@ -181,6 +182,8 @@ class Histogram(object):
     def ymul(self, other):
         if isinstance(other, (int, float)):
             return Histogram({i: self[i] * other for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, decimal.Decimal):
+            return self.ymul(float(other))
         raise TypeError()
 
     def ydiv(self, other):

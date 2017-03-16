@@ -49,6 +49,8 @@ class ProportionalMultiSimulatedHistogram(Histogram):
         assert isinstance(simulation_cycle, int)
         self._ms_lens_and_proportions = ms_lens_and_proportions
         self._sim_cyc = simulation_cycle
+        self._alleles_to_proportions = {a: p for a, p in ms_lens_and_proportions if p > 0}
+        assert sum(self._alleles_to_proportions.values()) == 1
         super(ProportionalMultiSimulatedHistogram, self).__init__(simulated_hist)
 
     @property
@@ -56,9 +58,13 @@ class ProportionalMultiSimulatedHistogram(Histogram):
         return self._sim_cyc
 
     @property
+    def alleles_to_proportions(self):
+        return self._alleles_to_proportions
+
+    @property
     def ms_lens_and_proportions(self):
-        return self._ms_lens_and_proportions
+        return self._alleles_to_proportions.items()
 
     @property
     def allele_frozenset(self):
-        return frozenset([a for a, p in self.ms_lens_and_proportions])
+        return frozenset(self._alleles_to_proportions.keys())
