@@ -58,21 +58,21 @@ def proportional_bi_sim_hists_space_generator(sim_hists_dict, seeds_and_cycles):
         )
 
 
-def remove_points_close_to_top(hs, number_of_points, distance=1):
+def remove_points_close_to_top(hist, hs, number_of_points, distance=1):
     """
-    Removes points on the histogram if they are withing the given range, and returns the histogram without them
+    Removes points on the histogram if they are within the given range, and returns the histogram without them
     Searches if there's a point in the given range, and removes it,
+    :param hist: histogram
     :param hs: sorted histogram
-    :param keep_point_position: the position point you wish to keep
     :param distance: the distance to remove
-    :return: remaining list
+    :return: new histogram
     """
     for steps_from_point in range(1, distance):
-        if [item for item in hs if item[0] == hs[number_of_points][0] + steps_from_point]:
-            hs.remove([item for item in hs if item[0] == hs[number_of_points][0] + steps_from_point][0])
-        if [item for item in hs if item[0] == hs[number_of_points][0] - steps_from_point]:
-            hs.remove([item for item in hs if item[0] == hs[number_of_points][0] - steps_from_point][0])
-    return hs
+        if hist[hs[number_of_points][0] + steps_from_point] > 0:
+            hist._hist.pop(hs[number_of_points][0] + steps_from_point)
+        if hist[hs[number_of_points][0] - steps_from_point] > 0:
+            hist._hist.pop(hs[number_of_points][0] - steps_from_point)
+    return hist
 
 
 def get_far_apart_highest_peaks(hist, allele_number=1, minimal_distance_between_peaks=1):
@@ -83,11 +83,12 @@ def get_far_apart_highest_peaks(hist, allele_number=1, minimal_distance_between_
         allele_number: allele_number
         minimal_distance_between_peaks: minimum distance between the allele
     """
-    hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
     for allele in range(allele_number):
+        hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
         if allele >= len(hs):
             break
-        hs = remove_points_close_to_top(hs, allele, minimal_distance_between_peaks)
+        hist = remove_points_close_to_top(hist, hs, allele, minimal_distance_between_peaks)
+    hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
     seeds = [x for x, y in hs[:allele_number]]
     return seeds
 
