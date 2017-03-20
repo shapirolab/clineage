@@ -38,7 +38,7 @@ def get_closest(real_hist, sim_space, distance_function):
 
 def call_microsatellite_histogram(calling_schema, dbhist, microsatellite):
     hist = get_ms_hist(dbhist, microsatellite)
-    closest_sim_hist, min_dist = get_closest(hist, calling_schema.sim_hists_space, calling_schema.distance_metric)
+    closest_sim_hist, min_dist = calling_schema.find_best_in_space(hist)
     mas = MicrosatelliteAlleleSet.get_for_alleles(closest_sim_hist.allele_frozenset)
     if isinstance(calling_schema, ProportionStepModelMixin):
         mas = ProportionalMicrosatelliteAlleleSet.get_for_proportional_alllels(mas, closest_sim_hist.alleles_to_proportions)

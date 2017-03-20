@@ -3,12 +3,14 @@ from sequencing.calling.models import CallingScheme
 from sequencing.calling.simcor.simulation_spaces import mono_sim_hists_space_generator, bi_sim_hists_space_generator,\
     proportional_bi_sim_hists_space_generator
 from sequencing.calling.hist_dist import pop_dist_corr_numpy
-from sequencing.calling.simcor.calling import call_microsatellite_histogram
+from sequencing.calling.simcor.calling import call_microsatellite_histogram, get_closest
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
     ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
     BestCorrelationProportionalCalledAlleles
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
-    ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin
+    ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
+    HighestPeaksRangeMixin
+from itertools import filterfalse
 
 
 class BestCorrelationCalledAlleleMixin(object):
@@ -21,6 +23,18 @@ class BestCorrelationProportionalCalledAlleleMixin(object):
     @property
     def called_allele_class(self):
         return BestCorrelationProportionalCalledAlleles
+
+
+class DynamicFilteredHistSpaceMixin(object):
+    """
+    Filters sim_hists_space by a live histogram object
+    """
+
+    def filter_by_hist(self, hist):
+        raise NotImplemented
+
+    def find_best_in_space(self, hist):
+        return get_closest(hist, self.filter_by_hist(hist, self.sim_hists_space), self.distance_metric)
 
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
@@ -39,6 +53,9 @@ class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLe
     @property
     def sim_hists_space(self):
         raise NotImplemented
+
+    def find_best_in_space(self, hist):
+        return get_closest(hist, self.sim_hists_space, self.distance_metric)
 
     def call_ms_hist(self, dbhist, microsatellite):
         return call_microsatellite_histogram(self, dbhist, microsatellite)
@@ -102,6 +119,35 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
+
+
+class HighestPeaksBiSimCorScheme(DynamicFilteredHistSpaceMixin, HighestPeaksRangeMixin,
+                                 BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
+                                 ProportionsBoundsModelMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
+                                 BoundProportionalAllelesCyclesRangeMixin):
+
+    @property
+    def sim_hists_space(self):
+        yield from proportional_bi_sim_hists_space_generator(
+            self.simulations.get_simulations_dict(),
+            self.alleles_and_cycles
+        )
+
+
+    @property
+    def filter_by_hist(self, hist):
+        """cuts the simulations based on the hist"""
+        alleles_by_hist = self.alleles_by_hist(hist)
+        yield from filterfalse(lambda self: (allele for allele in self.sim_hists_space.allele_frozenset in alleles_by_hist),
+                   self.sim_hists_space)
+
+    # @property
+    # def sim_hists_space(self):
+    #     filterfalse(lambda x: x in self.alleles_by_hist, proportional_bi_sim_hists_space_generator(
+    #         self.simulations.get_simulations_dict(),
+    #         self.alleles_and_cycles
+    #     ))
+
 
 
 # class NaiveBiallelicSimCorScheme(BaseSimCorMixin, TrimmedSeedsBiallelicSearchRangeMixin):
