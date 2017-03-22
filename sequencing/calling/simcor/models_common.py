@@ -177,3 +177,10 @@ class BestCorrelationProportionalCalledAlleles(BestCorrelationCalledAlleles):
     Calling result with confidence (1-correlation) and simulated cycle.
     """
     pass
+
+
+class BestCorrelationProportionalHighestPeakCalledAlleles(BestCorrelationCalledAlleles):
+    """
+    Calling result with confidence (1-correlation) and simulated cycle.
+    """
+    pass

@@ -5,7 +5,7 @@ import decimal
 from sequencing.calling.models import CallingScheme
 from misc.utils import get_unique_path
 from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme, FullBiSimCorScheme, \
-    ProportionalSimCorScheme, BoundProportionalSimCorScheme
+    ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorScheme
 from tests.sequencing.calling.conftest import *
 
 from sequencing.calling.simcor.order.calibration.models.mutation_markov import MutationMarkov
@@ -153,6 +153,28 @@ def simcorbipropschema(simcor):
     # So our objects don't have "special" objects in fields
     cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
     return cs
+
+@pytest.fixture()
+def simcorbiprophighpeakschema(simcor):
+    cs = HighestPeaksBiSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation highest peaks calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.3),
+        upper_prop_bound=decimal.Decimal(1.0),
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = HighestPeaksBiSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+def filterbyhistmixin():
+    pass
 
 @pytest.fixture()
 def HP_HISTOGRAMS():

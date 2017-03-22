@@ -6,7 +6,8 @@ from sequencing.calling.hist_dist import pop_dist_corr_numpy
 from sequencing.calling.simcor.calling import call_microsatellite_histogram, get_closest
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
     ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
-    BestCorrelationProportionalCalledAlleles
+    BestCorrelationProportionalCalledAlleles, \
+    BestCorrelationProportionalHighestPeakCalledAlleles
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
     HighestPeaksRangeMixin
@@ -24,6 +25,10 @@ class BestCorrelationProportionalCalledAlleleMixin(object):
     def called_allele_class(self):
         return BestCorrelationProportionalCalledAlleles
 
+class BestCorrelationProportionalHighestPeakCalledAlleleMIxin(object):
+    @property
+    def called_allele_class(self):
+        return BestCorrelationProportionalHighestPeakCalledAlleles
 
 class DynamicFilteredHistSpaceMixin(object):
     """
@@ -35,6 +40,16 @@ class DynamicFilteredHistSpaceMixin(object):
 
     def find_best_in_space(self, hist):
         return get_closest(hist, self.filter_by_hist(hist, self.sim_hists_space), self.distance_metric)
+
+
+class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
+
+    @property
+    def filter_by_hist(self, hist):
+        """cuts the simulations based on the hist"""
+        alleles_by_hist = self.alleles_by_hist(hist)
+        yield from filterfalse(lambda self: (allele for allele in self.sim_hists_space.allele_frozenset in alleles_by_hist),
+                               self.sim_hists_space)
 
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
@@ -121,10 +136,16 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
         )
 
 
-class HighestPeaksBiSimCorScheme(DynamicFilteredHistSpaceMixin, HighestPeaksRangeMixin,
-                                 BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
-                                 ProportionsBoundsModelMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
-                                 BoundProportionalAllelesCyclesRangeMixin):
+class HighestPeaksBiSimCorScheme(
+                                 BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
+                                 ProportionStepModelMixin,
+                                 ProportionsBoundsModelMixin,
+                                 FilterByHistMixin,
+                                 BaseBiAllelicMixin,
+                                 BaseSimCallingScheme,
+                                 BoundProportionalAllelesCyclesRangeMixin,
+                                 HighestPeaksRangeMixin
+                                ):
 
     @property
     def sim_hists_space(self):
@@ -134,12 +155,7 @@ class HighestPeaksBiSimCorScheme(DynamicFilteredHistSpaceMixin, HighestPeaksRang
         )
 
 
-    @property
-    def filter_by_hist(self, hist):
-        """cuts the simulations based on the hist"""
-        alleles_by_hist = self.alleles_by_hist(hist)
-        yield from filterfalse(lambda self: (allele for allele in self.sim_hists_space.allele_frozenset in alleles_by_hist),
-                   self.sim_hists_space)
+
 
     # @property
     # def sim_hists_space(self):

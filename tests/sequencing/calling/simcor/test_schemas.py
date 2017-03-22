@@ -43,3 +43,10 @@ def test_mono_schema_called_allele_class(minimalsimcormonoschema):
 @pytest.mark.django_db
 def test_proportional_bi_schema_called_allele_class(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.called_allele_class == BestCorrelationProportionalCalledAlleles
+
+@pytest.mark.django_db
+def test_highest_peaks_bi_sim_cor_class():
+    pass
+
+def filter_by_hist_mixin():
+    pass

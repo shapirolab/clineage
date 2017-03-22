@@ -79,7 +79,7 @@ class HighestPeaksModelMixin(AllelesRangeFromPointModelMixin, HighestPeaksMixin)
         )
 
 
-class PeaksMinimalDistanceModelMixin(models.Model, CyclesRangeMixin, HighestPeaksMixin):
+class PeaksMinimalDistanceModelMixin(models.Model, HighestPeaksMixin):
     minimal_seeds_distance = models.PositiveSmallIntegerField()
 
     class Meta:
@@ -93,23 +93,6 @@ class PeaksMinimalDistanceModelMixin(models.Model, CyclesRangeMixin, HighestPeak
         )
 
 
-class HighestPeaksRangeMixin(AllelesRangeFromPointModelMixin, CyclesRangeMixin, HighestPeaksMixin):
-    minimal_seeds_distance = models.PositiveSmallIntegerField()
+class HighestPeaksRangeMixin(PeaksMinimalDistanceModelMixin, HighestPeaksModelMixin):
 
-    class Meta:
-        abstract = True
-
-    def highest_peak(self, hist):
-        return get_far_apart_highest_peaks(
-            hist=hist,
-            allele_number=self.allele_number,
-            minimal_distance_between_peaks=self.minimal_seeds_distance,
-        )
-
-    def alleles_by_hist(self, hist):
-        points = self.highest_peaks(hist)
-        yield from itertools.chain(
-            range(point - self.range_from_point, point + self.range_from_point + 1)
-            for point in points
-        )
-
+    pass
