@@ -190,7 +190,7 @@ def get_rel_pos(amplicon, snp):
     if amplicon.slice.start_pos == amplicon.left_ugs.slice.start_pos:
         rel_pos = amplicon.slice.relative_pos(snp.slice.chromosome, snp.slice.start_pos) + amplicon.umi_length + 1
     else:
-        rel_pos = amplicon.slice.relative_pos(snp.slice.chromosome, snp.slice.start_pos) + len(amplicon.left_margin)
+        rel_pos = amplicon.slice.relative_pos(snp.slice.chromosome, snp.slice.start_pos) + len(amplicon.left_margin) + 1
     return rel_pos
 
 
