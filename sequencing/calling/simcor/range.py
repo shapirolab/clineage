@@ -51,7 +51,7 @@ class BoundProportionalAllelesCyclesRangeMixin(BoundProportionsRangeMixin, Propo
     pass
 
 
-class HighestPeaksMixin(MultiAlleleMixin):
+class HighestPeaksMixin(ProportionalAllelesMixin):
 
     @classmethod
     def highest_peaks(cls, hist):

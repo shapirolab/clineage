@@ -1,7 +1,7 @@
 import pytest
 import decimal
 from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles, \
-    BestCorrelationProportionalCalledAlleles
+    BestCorrelationProportionalCalledAlleles, BestCorrelationProportionalHighestPeakCalledAlleles
 
 
 @pytest.mark.django_db
@@ -45,8 +45,9 @@ def test_proportional_bi_schema_called_allele_class(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.called_allele_class == BestCorrelationProportionalCalledAlleles
 
 @pytest.mark.django_db
-def test_highest_peaks_bi_sim_cor_class():
-    pass
+def test_highest_peaks_bi_sim_cor_class(simcorbiprophighpeakschema):
+    assert simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
 
+@pytest.mark.django_db
 def filter_by_hist_mixin():
     pass

@@ -166,6 +166,8 @@ def simcorbiprophighpeakschema(simcor):
         max_ms_len=30,
         min_cycles=20,
         max_cycles=60,
+        range_from_point=3,
+        minimal_seeds_distance=3,
         simulations=simcor
     )
     # So our objects don't have "special" objects in fields

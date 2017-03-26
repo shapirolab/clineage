@@ -39,17 +39,22 @@ class DynamicFilteredHistSpaceMixin(object):
         raise NotImplemented
 
     def find_best_in_space(self, hist):
-        return get_closest(hist, self.filter_by_hist(hist, self.sim_hists_space), self.distance_metric)
+        return get_closest(hist, self.filter_by_hist(hist), self.distance_metric)
 
 
 class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
 
-    @property
     def filter_by_hist(self, hist):
         """cuts the simulations based on the hist"""
+        def allele_in_hist_space(sim_hist, alleles_by_hist=self.alleles_by_hist(hist)):
+            for allele in sim_hist.allele_frozenset:
+                if allele not in alleles_by_hist:
+                    return True
+            return False
+
         alleles_by_hist = self.alleles_by_hist(hist)
-        yield from filterfalse(lambda self: (allele for allele in self.sim_hists_space.allele_frozenset in alleles_by_hist),
-                               self.sim_hists_space)
+        hist_space=self.sim_hists_space
+        yield from filterfalse(allele_in_hist_space, hist_space)
 
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
@@ -140,11 +145,11 @@ class HighestPeaksBiSimCorScheme(
                                  BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
                                  ProportionStepModelMixin,
                                  ProportionsBoundsModelMixin,
+                                 HighestPeaksRangeMixin,
                                  FilterByHistMixin,
                                  BaseBiAllelicMixin,
                                  BaseSimCallingScheme,
-                                 BoundProportionalAllelesCyclesRangeMixin,
-                                 HighestPeaksRangeMixin
+                                 BoundProportionalAllelesCyclesRangeMixin
                                 ):
 
     @property
