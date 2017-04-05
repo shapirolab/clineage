@@ -338,6 +338,7 @@ def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_n
                                     'Sample Reads ID': sr.id,
                                     'CellContent ID': smart_text(cell_cont.pk),
                                     'Cell ID': smart_text(cell.pk),
+                                    'Barcode ID': smart_text(barcoded_cont.barcodes.id),
                                     'Cell Name': smart_text(cell.name),
                                     'Cell Group': smart_text(cell.classification),
                                     'Individual Name': smart_text(cell.individual.name),
