@@ -308,16 +308,16 @@ def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_n
     for partner, individual in list(partner_indvidiual_name_set):  # change line
 
         for ngsrun in n:
-            demux=None
             if demux_id is not None:
                 demux = ngsrun.demultiplexing_set.get(pk=demux_id)
+            else:
+                demux = ngsrun.demultiplexing_set.all()[0]
             for lib in ngsrun.libraries.all():
                 for barcoded_cont in lib.subclass.barcoded_contents.filter():
                     # for cell_cont in barcoded_cont.subclass.amplified_content.cell.amplifiedcontent_set.all():
                     cell = barcoded_cont.subclass.amplified_content.cell
                     if cell.individual_id == individual.id:
-                        sr = barcoded_cont.samplereads_set.get(library=lib, demux=demux) if demux is not None \
-                            else barcoded_cont.samplereads_set.get(library=lib)
+                        sr = barcoded_cont.samplereads_set.get(library=lib, demux=demux)
                         for cell_cont in cell.amplifiedcontent_set.all():
                             # assert cell_cont.physical_locations.exclude(plate__name__contains='AAR').count() <= 1
                             sampling = cell.sampling
@@ -328,7 +328,11 @@ def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_n
                                     facs = None
                             else:
                                 facs = None
-                            for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
+                            if cell_cont.physical_locations.exclude(plate__name__contains='AAR'):
+                                locations = [(loc.plate, loc.well) for loc in cell_cont.physical_locations.exclude(plate__name__contains='AAR')]
+                            else:
+                                locations = [('', '')]
+                            for plate, well in locations:
                                 yield {
                                     'Barcoded Content ID': barcoded_cont.id,
                                     'Sample Reads ID': sr.id,
@@ -350,10 +354,11 @@ def user_cells_table_values_db(partner_name=None, individual_name=None, ngsrun_n
                                     'Sampling Comment': smart_text(cell.sampling.comment if cell.sampling else ''),
                                     'FACS Marker': smart_text(facs.marker.name if facs else ''),
                                     'Cell Type': smart_text(cell.composition.name),
-                                    'Plate': smart_text(loc.plate.name),
-                                    'Well': smart_text(loc.well),
-                                    'Plate Location': smart_text(loc.plate.platestorage_set.all()[0] if loc.plate.platestorage_set.all() else '')
+                                    'Plate': smart_text(plate.name if plate is not '' else ''),
+                                    'Well': smart_text(well),
+                                    'Plate Location': smart_text(plate.platestorage_set.all()[0] if plate != '' and plate.platestorage_set.all() else '')
                                 }
+
 
 def partner_individual_cells_data_db(partner_name=None, individual_name=None, palette_name='hls'):
     partner_indvidiual_name_set=set()
