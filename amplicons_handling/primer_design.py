@@ -48,6 +48,7 @@ def primer3_design(target, **kwargs):
 
     margins = kwargs.get('margins', 0)
     slice_margin = kwargs.get('slice_margin', 1000)
+    GLOBAL_ARGS['PRIMER_NUM_RETURN'] = kwargs.get('primer_num_rerun', 1000)
     primer3_template_margins = create_amplicon_for_primer3(target.slice, slice_margin)
 
     GLOBAL_ARGS.update(kwargs)
@@ -75,9 +76,8 @@ def primer3_design(target, **kwargs):
 
 def parse_primers(primer3_output):
     target_primers = dict()
-
-    number_of_primers = len(primer3_output) // 30
-    for i in range(1, number_of_primers):
+    number_of_primers = primer3_output['PRIMER_PAIR_NUM_RETURNED']
+    for i in range(number_of_primers):
         target_primers[i] = {}
         target_primers[i]['LEFT'] = primer3_output['PRIMER_LEFT_{}_SEQUENCE'.format(i)]
         target_primers[i]['RIGHT'] = primer3_output['PRIMER_RIGHT_{}_SEQUENCE'.format(i)]

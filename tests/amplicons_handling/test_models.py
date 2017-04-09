@@ -32,7 +32,7 @@ def test_create_target_enrichment_in_db(target_enrichment_sample):
            (te_sample.right.slice.end_pos - te_sample.left.slice.start_pos)
     assert te_sample.left.sequence.seq.decode('utf-8') == target_enrichment_sample['LEFT']
     assert te_sample.right.sequence.seq.decode('utf-8') == target_enrichment_sample['RIGHT']
-    assert ta_sample.slice.start_pos == 81315972
+    assert ta_sample.slice.start_pos == 81316078  # TODO: revise
 
 
 @pytest.mark.django_db
