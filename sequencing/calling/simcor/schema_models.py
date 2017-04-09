@@ -112,11 +112,7 @@ class FullBiSimCorScheme(BaseSimCallingScheme, BaseBiAllelicMixin, FullRangeBiMi
             self.alleles_and_cycles)
 
 
-class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
-                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin):
-    """
-    Calling schema for calling against multi-allelic simulated histograms at differential proportions
-    """
+class ProportionalSimCorSchemeMixin(object):
 
     @property
     def sim_hists_space(self):
@@ -124,21 +120,26 @@ class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, Bas
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
+
+
+class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
+                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin):
+    """
+    Calling schema for calling against multi-allelic simulated histograms at differential proportions
+    """
+
+    pass # the code is implemented in ProportionalSimCorSchemeMixin
 
 
 class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
                                     ProportionsBoundsModelMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
-                                    BoundProportionalAllelesCyclesRangeMixin):
+                                    BoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
 
-    @property
-    def sim_hists_space(self):
-        yield from proportional_bi_sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles
-        )
+    pass # the code is implemented in ProportionalSimCorSchemeMixin
+
 
 
 class HighestPeaksBiSimCorScheme(

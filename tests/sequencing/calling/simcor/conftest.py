@@ -34,7 +34,7 @@ def ac_model_simulations():
     return sim_hists
 
 
-@pytest.fixture()
+@pytest.yield_fixture()
 def simcor(ac_model_simulations):
     pickle_path = get_unique_path("pickle")
     with open(pickle_path, 'wb') as f:

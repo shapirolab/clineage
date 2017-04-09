@@ -26,7 +26,7 @@ def histograms_fd():
     return MS_HISTOGRAMS_DICT
 
 
-@pytest.fixture()
+@pytest.yield_fixture()
 def dummy_samplereads(demultiplexing, magicalpcr1barcodedcontent):
     """
     Generate dummy SampleReads objects with empty fastq files
@@ -49,7 +49,7 @@ def dummy_samplereads(demultiplexing, magicalpcr1barcodedcontent):
     sr.delete()
 
 
-@pytest.fixture()
+@pytest.yield_fixture()
 def histograms_and_calling_solutions_d(dummy_samplereads, histograms_fd, requires_microsatellites, requires_none_genotypes):
     none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
     snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
