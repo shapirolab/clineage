@@ -6,7 +6,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 
 from misc.utils import unique_file_cm, unique_dir_cm, unlink, \
     get_get_or_create
@@ -296,6 +296,7 @@ def align_reads_to_ms_variations(amplicon_reads, padding, mss_version):
             bowtie2_with_defaults2('-x', msv.index_files_prefix,
                                    '-U', amplicon_reads.fastqm,
                                    '-S', assignment_sam)
+            connection.close() #hopefully fix for MySQL Gone Away
             return raise_or_create_with_defaults(
                 assignment_sam=assignment_sam,
                 sample_reads_id=amplicon_reads.margin_assignment \
