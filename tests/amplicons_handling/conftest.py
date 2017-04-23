@@ -50,14 +50,14 @@ def tate_tuple_sample(target_enrichment_sample):
 
 
 @pytest.fixture()
-def padlock_prep_sample(padlockamplificationplusprimerpart1, padlockamplificationplusprimerpart2, padlockamplificationminusprimerpart1, padlockamplificationminusprimerpart2, ttaa_restriction_site_sample):
+def padlock_prep_primers(padlockamplificationplusprimerpart1, padlockamplificationplusprimerpart2, padlockamplificationminusprimerpart1, padlockamplificationminusprimerpart2, mly1_restriction_site_sample):
     padlock_prep_primers = PadlockPrepCommonPrimers.objects.create(
         name='sample_padlock',
         left_amp_primer_part1=padlockamplificationplusprimerpart1,
         left_amp_primer_part2=padlockamplificationplusprimerpart2,
         right_amp_primer_part1=padlockamplificationminusprimerpart1,
         right_amp_primer_part2=padlockamplificationminusprimerpart2,
-        restriction_enzyme=ttaa_restriction_site_sample,
+        restriction_enzyme=mly1_restriction_site_sample,
     )
     # So our objects don't have "special" objects in fields
     padlock_prep_primers = PadlockPrepCommonPrimers.objects.get(name=padlock_prep_primers.name)
@@ -65,7 +65,7 @@ def padlock_prep_sample(padlockamplificationplusprimerpart1, padlockamplificatio
 
 
 @pytest.fixture()
-def OMmix_sample(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, padlock_prep_sample):
+def OMmix_sample(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, padlock_prep_primers):
     OMmix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, 'sample_padlock')
 
     return OMmix

@@ -1,9 +1,11 @@
 import pytest
 
-from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, OM6Padlock, TargetedPadlock
+from primers.synthesis.models import PCR1PlusPrimer, PCR1MinusPrimer, OM6Padlock
+from primers.synthesis.models import OM6Padlock, OM6Prep
 
 from tests.targeted_enrichment.planning.conftest import *
 from tests.primers.parts.conftest import *
+from tests.amplicons_handling.conftest import *
 
 
 @pytest.fixture()
@@ -207,6 +209,17 @@ def padlock_snp_1(ugs_snp_4_left,ugs_snp_4_right,illuminareadingadaptor1fortail,
         ira2ft=illuminareadingadaptor2fortail,
         umi_length=3,
     )
-    p=OM6Padlock.objects.get(pk=p.pk)
+    # So our objects don't have "special" objects in fields
+    p = OM6Padlock.objects.get(pk=p.pk)
     return p
 
+
+@pytest.fixture()
+def padlock_prep(padlock_snp_1, padlock_prep_primers):
+    om6p = OM6Prep.objects.create(
+        padlock=padlock_snp_1,
+        primers=padlock_prep_primers
+    )
+    # So our objects don't have "special" objects in fields
+    om6p = OM6Prep.objects.get(pk=om6p.pk)
+    return om6p

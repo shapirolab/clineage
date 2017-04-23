@@ -244,10 +244,24 @@ def te_adj_ms_2(hg19_chromosome, ugs_adj_ms_2_left, ugs_adj_ms_2_right):
 def ttaa_restriction_site_sample():
     r_site = RestrictionEnzyme.objects.create(
         name='MseI',
-        sequence='TTAA',
+        _sequence='TTAA',
         cut_delta=2,
         sticky_bases=2,
         sequence_len=4,
+    )
+    # So our objects don't have "special" objects in fields
+    r_site = RestrictionEnzyme.objects.get(name=r_site.name)
+    return r_site
+
+
+@pytest.fixture()
+def mly1_restriction_site_sample():
+    r_site = RestrictionEnzyme.objects.create(
+        name='Mly1',
+        _sequence='GAGTC',
+        cut_delta=5,
+        sticky_bases=0,
+        sequence_len=5,
     )
     # So our objects don't have "special" objects in fields
     r_site = RestrictionEnzyme.objects.get(name=r_site.name)

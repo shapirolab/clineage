@@ -194,16 +194,15 @@ class BasePadlockPrep(models.Model):
                                              content_type_field='content_type',
                                              object_id_field='object_id')
 
-
     @property
     def sequence(self):
-        return self.left_amp_primer_part1.sequence + \
-            self.restriction_enzyme.sequence + \
-            self.left_amp_primer_part2.sequence + \
+        return self.primers.left_amp_primer_part1.sequence + \
+            self.primers.restriction_enzyme.sequence + \
+            self.primers.left_amp_primer_part2.sequence + \
             self.padlock.sequence + \
-            self.right_amp_primer_part2.sequence + \
-            self.restriction_enzyme.sequence.rev_comp() + \
-            self.right_amp_primer_part1.sequence
+            self.primers.right_amp_primer_part2.sequence + \
+            self.primers.restriction_enzyme.sequence.rev_comp() + \
+            self.primers.right_amp_primer_part1.sequence
 
     def __str__(self):
         return "{}".format(self.padlock)

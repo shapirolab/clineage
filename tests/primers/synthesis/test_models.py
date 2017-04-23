@@ -1,5 +1,5 @@
 import pytest
-
+from misc.dna import DNA
 
 @pytest.mark.django_db
 def test_primer_28727_left_head(primer_28727_left):
@@ -39,3 +39,10 @@ def test_primer_28734_left(primer_28734_left):
 @pytest.mark.django_db
 def test_primer_28734_right(primer_28734_right):
     assert primer_28734_right.sequence.seq == b"CAGACGTGTGCTCTTCCGATCTGGAAGTAGTGTGTGCTTGGACTT"
+
+
+@pytest.mark.django_db
+def test_padlock_prep(padlock_prep):
+    assert padlock_prep.sequence == DNA('TATGAGTGTGGAGTCGTTGC') + \
+                                    padlock_prep.padlock.sequence + \
+                                    DNA('GCTTCCTGATGAGTCCGATG').rev_comp()
