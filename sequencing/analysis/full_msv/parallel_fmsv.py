@@ -54,7 +54,7 @@ def run_parallel_split_alignments(executor, sample_reads, included_reads="M", re
     merged_reads = executor.map(merge, sample_reads, pure=False)
     yield merged_reads
     fmsv_merged_reads_parts_lists = executor.map(
-        split_merged_reads_as_list,
+        close_connection_and(split_merged_reads_as_list),
         merged_reads,
         itertools.repeat(reads_chunk_size),
         itertools.repeat(included_reads),
@@ -65,7 +65,7 @@ def run_parallel_split_alignments(executor, sample_reads, included_reads="M", re
                                  fmsv_merged_reads_parts_lists, ref_padding, mss_version)
     yield fmsva_parts_lists
     merged_fmsvas = executor.map(
-        merge_fmsva_parts,
+        close_connection_and(merge_fmsva_parts),
         fmsva_parts_lists,
         itertools.repeat(reads_chunk_size),
         itertools.repeat(included_reads)
