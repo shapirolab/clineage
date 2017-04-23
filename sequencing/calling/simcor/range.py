@@ -71,6 +71,9 @@ class AllelesRangeFromPointModelMixin(models.Model):
 
 class HighestPeaksModelMixin(AllelesRangeFromPointModelMixin, HighestPeaksMixin):
 
+    class Meta:
+        abstract = True
+
     def alleles_by_hist(self, hist):
         points = self.highest_peaks(hist)
         yield from itertools.chain(
@@ -93,6 +96,7 @@ class PeaksMinimalDistanceModelMixin(models.Model, HighestPeaksMixin):
         )
 
 
-class HighestPeaksRangeMixin(PeaksMinimalDistanceModelMixin, HighestPeaksModelMixin):
+class HighestPeaksRangeModelMixin(PeaksMinimalDistanceModelMixin, HighestPeaksModelMixin):
 
-    pass
+    class Meta:
+        abstract = True

@@ -75,7 +75,7 @@ def remove_points_close_to_top(hist, hs, number_of_points, distance=1):
     return hist
 
 
-def get_far_apart_highest_peaks(self, hist, allele_number=1, minimal_distance_between_peaks=1):
+def get_far_apart_highest_peaks(hist, allele_number=1, minimal_distance_between_peaks=1):
     """
     Identify the k highest peaks that satisfy minimal distance
     Args:
@@ -84,11 +84,11 @@ def get_far_apart_highest_peaks(self, hist, allele_number=1, minimal_distance_be
         minimal_distance_between_peaks: minimum distance between the allele
     """
     for allele in range(allele_number):
-        hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
+        hs = sorted(hist.items(), key=lambda hkey: hkey[1], reverse=True)
         if allele >= len(hs):
             break
         hist = remove_points_close_to_top(hist, hs, allele, minimal_distance_between_peaks)
-    hs = sorted(hist._hist.items(), key=lambda hkey: hkey[1], reverse=True)
+    hs = sorted(hist.items(), key=lambda hkey: hkey[1], reverse=True)
     seeds = [x for x, y in hs[:allele_number]]
     return seeds
 

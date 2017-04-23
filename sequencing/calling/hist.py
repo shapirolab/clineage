@@ -107,6 +107,9 @@ class Histogram(object):
     def values(self):
         return [self._hist[k] for k in self.keys()]
 
+    def items(self):
+        return self._hist.items()
+
     def __getitem__(self, item):
         return self._hist[item]
 

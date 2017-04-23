@@ -10,7 +10,7 @@ from sequencing.calling.simcor.models_common import CyclesModelMixin, Simulation
     BestCorrelationProportionalHighestPeakCalledAlleles
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
-    HighestPeaksRangeMixin
+    HighestPeaksRangeModelMixin
 from itertools import filterfalse
 
 
@@ -25,10 +25,12 @@ class BestCorrelationProportionalCalledAlleleMixin(object):
     def called_allele_class(self):
         return BestCorrelationProportionalCalledAlleles
 
+
 class BestCorrelationProportionalHighestPeakCalledAlleleMIxin(object):
     @property
     def called_allele_class(self):
         return BestCorrelationProportionalHighestPeakCalledAlleles
+
 
 class DynamicFilteredHistSpaceMixin(object):
     """
@@ -142,11 +144,11 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
 
 
 
-class HighestPeaksBiSimCorScheme(
+class HighestPeaksBiSimCorSchemeModel(
                                  BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
                                  ProportionStepModelMixin,
                                  ProportionsBoundsModelMixin,
-                                 HighestPeaksRangeMixin,
+                                 HighestPeaksRangeModelMixin,
                                  FilterByHistMixin,
                                  BaseBiAllelicMixin,
                                  BaseSimCallingScheme,

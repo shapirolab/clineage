@@ -47,6 +47,7 @@ def test_proportional_bi_schema_called_allele_class(minimalsimcorbipropschema):
 @pytest.mark.django_db
 def test_highest_peaks_bi_sim_cor_class(simcorbiprophighpeakschema):
     assert simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
+    assert simcorbiprophighpeakschema.allele_number == 2
 
 @pytest.mark.django_db
 def filter_by_hist_mixin():
