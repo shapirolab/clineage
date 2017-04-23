@@ -37,7 +37,6 @@ def test_create_target_enrichment_in_db(target_enrichment_sample):
 
 @pytest.mark.django_db
 def test_insertion_OM_to_db(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, padlock_prep_primers):
-
     sample_mix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, 'sample_padlock')
     om6_prep = sample_mix[0]
     ta, te = tate_tuple_sample[0]

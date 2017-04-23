@@ -50,7 +50,9 @@ def tate_tuple_sample(target_enrichment_sample):
 
 
 @pytest.fixture()
-def padlock_prep_primers(padlockamplificationplusprimerpart1, padlockamplificationplusprimerpart2, padlockamplificationminusprimerpart1, padlockamplificationminusprimerpart2, mly1_restriction_site_sample):
+def padlock_prep_primers(padlockamplificationplusprimerpart1, padlockamplificationplusprimerpart2,
+                        padlockamplificationminusprimerpart1, padlockamplificationminusprimerpart2,
+                         mly1_restriction_site_sample):
     padlock_prep_primers = PadlockPrepCommonPrimers.objects.create(
         name='sample_padlock',
         left_amp_primer_part1=padlockamplificationplusprimerpart1,
@@ -60,7 +62,7 @@ def padlock_prep_primers(padlockamplificationplusprimerpart1, padlockamplificati
         restriction_enzyme=mly1_restriction_site_sample,
     )
     # So our objects don't have "special" objects in fields
-    padlock_prep_primers = PadlockPrepCommonPrimers.objects.get(name=padlock_prep_primers.name)
+    padlock_prep_primers = PadlockPrepCommonPrimers.objects.get(pk=padlock_prep_primers.pk)
     return padlock_prep_primers
 
 
