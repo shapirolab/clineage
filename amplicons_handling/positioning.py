@@ -1,4 +1,3 @@
-__author__ = 'ofirr'
 import xlwt
 import xlrd
 from wet_storage.models import SampleLocation
@@ -7,9 +6,11 @@ from targeted_enrichment.reagents.models import OM6PadlockTER
 from primers.synthesis.models import OM6Padlock, OM6Prep, PadlockPrepCommonPrimers
 
 
-def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft, padlock_prep_common_primers):
+def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft, om6_primers):
     """
     creating list of ters for OM6 panel
+    While there is only a single PadlockPrepCommonPrimers we can use:
+        om6_primers = PadlockPrepCommonPrimers.objects.get()
     :param tate_tuple: UMITargetedAmplicon, TargetEnrichment list of tuples
     :panel_name: name for the panel
     :return:
@@ -23,12 +24,13 @@ def insertion_OM_to_db(tate_tuple, panel_name, ira1ft, ira2ft, padlock_prep_comm
         om6_padlock, c = OM6Padlock.objects.get_or_create(
             left_ugs=te.left,
             right_ugs=te.right,
-            ira1ft=ira1ft,
-            ira2ft=ira2ft,
-            umi_length=3,
-
+            defaults=dict(
+                ira1ft=ira1ft,
+                ira2ft=ira2ft,
+                umi_length=3,
+            )
         )
-        om6_primers = PadlockPrepCommonPrimers.objects.get(name=padlock_prep_common_primers)
+
         om6_prep, c = OM6Prep.objects.get_or_create(
             name=te.id,
             padlock=om6_padlock,

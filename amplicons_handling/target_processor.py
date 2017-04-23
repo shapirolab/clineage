@@ -4,14 +4,25 @@ from .primer_design import primer3_design, sort_best_primers
 from .primers_insertion import create_target_enrichment_in_db
 from .positioning import insertion_OM_to_db, create_primer_order_file_xls
 from primers.parts.models import IlluminaReadingAdaptor1ForTail, IlluminaReadingAdaptor2ForTail
-
+from primers.synthesis.models import PadlockPrepCommonPrimers
 
 def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
+    """
+    While there is only a single PadlockPrepCommonPrimers we can use:
+        om6_primers = PadlockPrepCommonPrimers.objects.get()
+    Args:
+        target_list:
+        om_name:
+        xls_name:
+        **kwargs:
 
+    Returns:
+
+    """
+    om6_primers = PadlockPrepCommonPrimers.objects.get()
     tate_tuple = []
     ira1ft = IlluminaReadingAdaptor1ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor1', tail_length=27)
     ira2ft = IlluminaReadingAdaptor2ForTail.objects.get(ira__name='Illumina Standard Reading Adaptor2', tail_length=27)
-    padlock_prep_common_primers = 'OM6 Standard Adaptors'
 
     for target in target_list:
         primer3_output = primer3_design(target, **kwargs)
@@ -22,5 +33,5 @@ def create_target_in_db(target_list, om_name, xls_name,  **kwargs):
             ta, te = create_target_enrichment_in_db(chosen_target_primers)
             tate_tuple.append((ta, te))
     print('amount of TE created: {}, amount of all targets submitted: {}'.format(len(tate_tuple), len(target_list)))
-    om_mix = insertion_OM_to_db(tate_tuple, om_name, ira1ft, ira2ft, padlock_prep_common_primers)
+    om_mix = insertion_OM_to_db(tate_tuple, om_name, ira1ft, ira2ft, om6_primers)
     create_primer_order_file_xls(om_mix, xls_name)

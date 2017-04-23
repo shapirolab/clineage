@@ -68,6 +68,10 @@ def padlock_prep_primers(padlockamplificationplusprimerpart1, padlockamplificati
 
 @pytest.fixture()
 def OMmix_sample(tate_tuple_sample, illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, padlock_prep_primers):
-    OMmix = insertion_OM_to_db(tate_tuple_sample, 'sample_panel', illuminareadingadaptor1fortail, illuminareadingadaptor2fortail, 'sample_padlock')
-
+    OMmix = insertion_OM_to_db(
+        tate_tuple_sample,
+        'sample_panel',
+        illuminareadingadaptor1fortail,
+        illuminareadingadaptor2fortail,
+        padlock_prep_primers)
     return OMmix
