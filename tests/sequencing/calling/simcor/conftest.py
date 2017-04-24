@@ -87,6 +87,23 @@ def minimalsimcorbischema(simcor):
 
 @pytest.fixture()
 def minimalsimcorbipropschema(simcor):
+    cs = ProportionalSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=21,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = ProportionalSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def minimalsimcorbiboundpropschema(simcor):
     cs = BoundProportionalSimCorScheme.objects.create(
         name='simcor',
         description='Simulations correlation calling algorithm',
@@ -102,7 +119,6 @@ def minimalsimcorbipropschema(simcor):
     # So our objects don't have "special" objects in fields
     cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
     return cs
-
 
 @pytest.fixture()
 def simcormonoschema(simcor):

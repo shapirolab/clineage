@@ -1,5 +1,6 @@
 import pytest
 import decimal
+from sequencing.calling.hist import Histogram
 from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles, \
     BestCorrelationProportionalCalledAlleles, BestCorrelationProportionalHighestPeakCalledAlleles
 
@@ -27,12 +28,32 @@ def test_bi_schema(minimalsimcorbischema):
 def test_proportional_bi_schema(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.allele_number == 2
     assert set(minimalsimcorbipropschema.alleles_and_cycles) == set([
+        (frozenset([(15, decimal.Decimal('0.1')), (16, decimal.Decimal('0.9'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.2')), (16, decimal.Decimal('0.8'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.3')), (16, decimal.Decimal('0.7'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.4')), (16, decimal.Decimal('0.6'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.5')), (16, decimal.Decimal('0.5'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.6')), (16, decimal.Decimal('0.4'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.7')), (16, decimal.Decimal('0.3'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.8')), (16, decimal.Decimal('0.2'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.9')), (16, decimal.Decimal('0.1'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.0')), (16, decimal.Decimal('1.0'))]), 20),
+        (frozenset([(15, decimal.Decimal('1.0')), (16, decimal.Decimal('0.0'))]), 20),
+    ])
+    assert len(set(minimalsimcorbipropschema.sim_hists_space)) > 1  # TODO: expand this
+
+
+@pytest.mark.django_db
+def test_bound_proportional_bi_schema(minimalsimcorbiboundpropschema):
+    assert minimalsimcorbiboundpropschema.allele_number == 2
+    assert set(minimalsimcorbiboundpropschema.alleles_and_cycles) == set([
         (frozenset([(15, decimal.Decimal('0.4')), (16, decimal.Decimal('0.6'))]), 20),
         (frozenset([(15, decimal.Decimal('0.5')), (16, decimal.Decimal('0.5'))]), 20),
         (frozenset([(15, decimal.Decimal('0.6')), (16, decimal.Decimal('0.4'))]), 20),
         (frozenset([(15, decimal.Decimal('0.0')), (16, decimal.Decimal('1.0'))]), 20),
         (frozenset([(15, decimal.Decimal('1.0')), (16, decimal.Decimal('0.0'))]), 20),
     ])
+    assert len(set(minimalsimcorbiboundpropschema.sim_hists_space)) > 1  # TODO: expand this
 
 
 @pytest.mark.django_db
@@ -44,11 +65,18 @@ def test_mono_schema_called_allele_class(minimalsimcormonoschema):
 def test_proportional_bi_schema_called_allele_class(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.called_allele_class == BestCorrelationProportionalCalledAlleles
 
+
 @pytest.mark.django_db
 def test_highest_peaks_bi_sim_cor_class(simcorbiprophighpeakschema):
     assert simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
     assert simcorbiprophighpeakschema.allele_number == 2
-
-@pytest.mark.django_db
-def filter_by_hist_mixin():
-    pass
+    assert len(set(simcorbiprophighpeakschema.sim_hists_space)) > 1  # TODO: expand this
+    sample_hist = Histogram(
+            {5: 10,
+             6: 1,
+             7: 1,
+             8: 1,
+             9: 1,
+             10: 11})
+    assert set(simcorbiprophighpeakschema.alleles_by_hist(sample_hist)) == {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+    assert len(set(simcorbiprophighpeakschema.filtered_sim_hists_space(sample_hist))) > 1  # TODO: expand this
