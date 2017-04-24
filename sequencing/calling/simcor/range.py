@@ -1,5 +1,5 @@
 from django.db import models
-from sequencing.calling.simcor.simulation_spaces import get_far_apart_highest_peaks
+from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 from sequencing.calling.range import MultiAlleleMixin, AllelesRangeMixin, ProportionalAllelesMixin, \
     ProportionsRangeMixin, BoundProportionsRangeMixin
 from sequencing.calling.simcor.models_common import CyclesRangeMixin

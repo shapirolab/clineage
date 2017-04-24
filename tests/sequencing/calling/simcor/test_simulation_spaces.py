@@ -2,7 +2,7 @@ import pytest
 
 from sequencing.calling.hist import Histogram as dHist
 from tests.sequencing.calling.simcor.conftest import histogram_dicts
-from sequencing.calling.simcor.simulation_spaces import get_far_apart_highest_peaks
+from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 
 
 def test_highest_peaks(histogram_dicts):

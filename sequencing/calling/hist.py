@@ -110,6 +110,9 @@ class Histogram(object):
     def items(self):
         return self._hist.items()
 
+    def pop(self, item):
+        return self._hist.pop(item)
+
     def __getitem__(self, item):
         return self._hist[item]
 
