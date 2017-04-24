@@ -48,15 +48,13 @@ class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
 
     def filter_by_hist(self, hist):
         """cuts the simulations based on the hist"""
-        def allele_in_hist_space(sim_hist, alleles_by_hist=self.alleles_by_hist(hist)):
+        def allele_in_hist_space(sim_hist):
+            alleles_by_hist = self.alleles_by_hist(hist)
             for allele in sim_hist.allele_frozenset:
                 if allele not in alleles_by_hist:
                     return True
             return False
-
-        alleles_by_hist = self.alleles_by_hist(hist)
-        hist_space=self.sim_hists_space
-        yield from filterfalse(allele_in_hist_space, hist_space)
+        yield from filterfalse(allele_in_hist_space, self.sim_hists_space)
 
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
@@ -130,7 +128,7 @@ class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, Bas
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
 
-    pass # the code is implemented in ProportionalSimCorSchemeMixin
+    pass  # the code is implemented in ProportionalSimCorSchemeMixin
 
 
 class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
@@ -140,8 +138,7 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
 
-    pass # the code is implemented in ProportionalSimCorSchemeMixin
-
+    pass  # the code is implemented in ProportionalSimCorSchemeMixin
 
 
 class HighestPeaksBiSimCorSchemeModel(
