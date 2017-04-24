@@ -37,16 +37,16 @@ class DynamicFilteredHistSpaceMixin(object):
     Filters sim_hists_space by a live histogram object
     """
 
-    def filter_by_hist(self, hist):
+    def filtered_sim_hists_space(self, hist):
         raise NotImplemented
 
     def find_best_in_space(self, hist):
-        return get_closest(hist, self.filter_by_hist(hist), self.distance_metric)
+        return get_closest(hist, self.filtered_sim_hists_space(hist), self.distance_metric)
 
 
 class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
 
-    def filter_by_hist(self, hist):
+    def filtered_sim_hists_space(self, hist):
         """cuts the simulations based on the hist"""
         def allele_in_hist_space(sim_hist):
             alleles_by_hist = self.alleles_by_hist(hist)
@@ -122,8 +122,9 @@ class ProportionalSimCorSchemeMixin(object):
         )
 
 
-class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
-                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin):
+class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin,
+                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin,
+                               BaseSimCallingScheme):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
@@ -132,8 +133,9 @@ class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, Bas
 
 
 class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
-                                    ProportionsBoundsModelMixin, BaseBiAllelicMixin, BaseSimCallingScheme,
-                                    BoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin):
+                                    ProportionsBoundsModelMixin, BaseBiAllelicMixin,
+                                    BoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin,
+                                    BaseSimCallingScheme):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
@@ -141,16 +143,10 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
     pass  # the code is implemented in ProportionalSimCorSchemeMixin
 
 
-class HighestPeaksBiSimCorSchemeModel(
-                                 BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
-                                 ProportionStepModelMixin,
-                                 ProportionsBoundsModelMixin,
-                                 HighestPeaksRangeModelMixin,
-                                 FilterByHistMixin,
-                                 BaseBiAllelicMixin,
-                                 BaseSimCallingScheme,
-                                 BoundProportionalAllelesCyclesRangeMixin
-                                ):
+class HighestPeaksBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCalledAlleleMIxin, ProportionStepModelMixin,
+                                      ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin, BaseBiAllelicMixin,
+                                      BaseSimCallingScheme, FilterByHistMixin,
+                                      BoundProportionalAllelesCyclesRangeMixin):
 
     @property
     def sim_hists_space(self):
@@ -158,27 +154,3 @@ class HighestPeaksBiSimCorSchemeModel(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
-
-
-
-
-    # @property
-    # def sim_hists_space(self):
-    #     filterfalse(lambda x: x in self.alleles_by_hist, proportional_bi_sim_hists_space_generator(
-    #         self.simulations.get_simulations_dict(),
-    #         self.alleles_and_cycles
-    #     ))
-
-
-
-# class NaiveBiallelicSimCorScheme(BaseSimCorMixin, TrimmedSeedsBiallelicSearchRangeMixin):
-#     """
-#     Biallelic calling schema
-#      Taking into account a trimmed simulation space based on highest peaks
-#     """
-#
-#     @property
-#     def sim_hists_space(self):
-#         yield from bi_sim_hists_space_generator(
-#             self.simulations.get_simulations_dict(),
-#             self.seeds_and_cycles)
