@@ -82,6 +82,18 @@ class ProportionsBoundsModelMixin(models.Model, ProportionsBoundsMixin):
         abstract = True
 
 
+class AlleleDistanceProportionBoundsModelMixin(models.Model):
+    """
+    Model Mixin for the exclusion function parameter fields
+    """
+    length_sensitivity = models.DecimalField(max_digits=3, decimal_places=2)
+    diff_sensetivity = models.DecimalField(max_digits=3, decimal_places=2)
+    cycle_sensetivity = models.DecimalField(max_digits=3, decimal_places=2)
+
+    class Meta:
+        abstract = True
+
+
 class SingleMicrosatelliteAlleleSet(MicrosatelliteAlleleSet):
     _num_of_allele_fields = 1
 
