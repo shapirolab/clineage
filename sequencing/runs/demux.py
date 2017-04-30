@@ -16,6 +16,7 @@ from plumbum import ProcessExecutionError
 
 
 def run_bcl2fastq(bcl_folder, sample_sheet_path, fastq_folder):
+    assert resource.getrlimit(resource.RLIMIT_OFILE)[0] >= 4096
     assert resource.getrlimit(resource.RLIMIT_OFILE)[1] >= 4096
     # resource.setrlimit(resource.RLIMIT_OFILE, (4096, 4096))
     bcl2fastq = local["bcl2fastq"]
