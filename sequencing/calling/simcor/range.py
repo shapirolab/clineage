@@ -6,7 +6,10 @@ from sequencing.calling.simcor.models_common import CyclesRangeMixin
 import itertools
 
 
-class BaseAllelesCyclesRange(object):
+class BaseAllelesCyclesRangeMixin(object):
+    """
+    Base Mixin for keeping alleles and cycles for current calling schema
+    """
 
     @property
     def alleles(self):
@@ -21,14 +24,14 @@ class BaseAllelesCyclesRange(object):
         yield from itertools.product(self.alleles, self.cycles)
 
 
-class AllelesCyclesRangeMixin(AllelesRangeMixin, CyclesRangeMixin, BaseAllelesCyclesRange):
+class AllelesCyclesRangeMixin(AllelesRangeMixin, CyclesRangeMixin, BaseAllelesCyclesRangeMixin):
     """
     Brute forcing over all monoallelic options at all cycles
     """
     pass
 
 
-class FullRangeBiMixin(MultiAlleleMixin, CyclesRangeMixin, BaseAllelesCyclesRange):
+class FullRangeBiMixin(MultiAlleleMixin, CyclesRangeMixin, BaseAllelesCyclesRangeMixin):
     """
     Brute forcing over all bi-allelic options at all cycles
     """
@@ -36,7 +39,7 @@ class FullRangeBiMixin(MultiAlleleMixin, CyclesRangeMixin, BaseAllelesCyclesRang
 
 
 class ProportionalAllelesCyclesRangeMixin(ProportionsRangeMixin, ProportionalAllelesMixin,
-                                          CyclesRangeMixin, BaseAllelesCyclesRange):
+                                          CyclesRangeMixin, BaseAllelesCyclesRangeMixin):
     """
     Brute forcing over all biallelic options at all proportions and all cycles
     """
@@ -44,7 +47,7 @@ class ProportionalAllelesCyclesRangeMixin(ProportionsRangeMixin, ProportionalAll
 
 
 class BoundProportionalAllelesCyclesRangeMixin(BoundProportionsRangeMixin, ProportionalAllelesMixin,
-                                               CyclesRangeMixin, BaseAllelesCyclesRange):
+                                               CyclesRangeMixin, BaseAllelesCyclesRangeMixin):
     """
     Brute forcing over all biallelic options at all proportions and all cycles
     """
