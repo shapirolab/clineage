@@ -7,10 +7,12 @@ from sequencing.calling.simcor.calling import call_microsatellite_histogram, get
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
     ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
     BestCorrelationProportionalCalledAlleles, \
-    BestCorrelationProportionalHighestPeakCalledAlleles
+    BestCorrelationProportionalHighestPeakCalledAlleles, \
+    AlleleDistanceProportionBoundsModelMixin
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
-    HighestPeaksRangeModelMixin
+    HighestPeaksRangeModelMixin, ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, \
+    ProximityRatioFilteredProportionalAllelesCyclesRangeMixin
 from itertools import filterfalse
 
 
@@ -123,13 +125,22 @@ class ProportionalSimCorSchemeMixin(object):
 
 
 class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin,
-                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin,
-                               BaseSimCallingScheme):
+                               ProportionStepModelMixin, ProportionalAllelesCyclesRangeMixin,
+                               ProportionalSimCorSchemeMixin, BaseSimCallingScheme):
     """
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
+    pass
 
-    pass  # the code is implemented in ProportionalSimCorSchemeMixin
+
+class ProximityRatioFilteredProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin,
+                               ProportionStepModelMixin, AlleleDistanceProportionBoundsModelMixin,
+                               ProximityRatioFilteredProportionalAllelesCyclesRangeMixin,
+                               ProportionalSimCorSchemeMixin, BaseSimCallingScheme):
+    """
+    Calling schema for calling against multi-allelic simulated histograms at differential proportions
+    """
+    pass
 
 
 class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
@@ -140,7 +151,17 @@ class BoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin
     Calling schema for calling against multi-allelic simulated histograms at differential proportions
     """
 
-    pass  # the code is implemented in ProportionalSimCorSchemeMixin
+    pass
+
+
+class ProximityRatioFilteredBoundProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, ProportionStepModelMixin,
+                                    ProportionsBoundsModelMixin, AlleleDistanceProportionBoundsModelMixin, BaseBiAllelicMixin,
+                                    ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin,
+                                    BaseSimCallingScheme):
+    """
+    Calling schema for calling against multi-allelic simulated histograms at differential proportions
+    """
+    pass
 
 
 class HighestPeaksBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCalledAlleleMIxin, ProportionStepModelMixin,
@@ -148,6 +169,19 @@ class HighestPeaksBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCall
                                       BaseSimCallingScheme, FilterByHistMixin,
                                       BoundProportionalAllelesCyclesRangeMixin):
 
+    @property
+    def sim_hists_space(self):
+        yield from proportional_bi_sim_hists_space_generator(
+            self.simulations.get_simulations_dict(),
+            self.alleles_and_cycles
+        )
+
+
+class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
+                                      ProportionStepModelMixin, ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin,
+                                      AlleleDistanceProportionBoundsModelMixin, BaseBiAllelicMixin,
+                                      BaseSimCallingScheme, FilterByHistMixin,
+                                      ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin):
     @property
     def sim_hists_space(self):
         yield from proportional_bi_sim_hists_space_generator(

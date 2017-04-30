@@ -51,12 +51,48 @@ def test_bi_proportional_calling(histograms_and_calling_solutions_d, simcorbipro
 
 
 @pytest.mark.django_db
+def test_prf_bi_proportional_calling(histograms_and_calling_solutions_d, prf_simcorbipropschema):
+    for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
+        for ms_id, histograms_dict in ms_dict.items():
+            ms = Microsatellite.objects.get(pk=ms_id)
+            for proportional_solution_alleles, dbhist in histograms_dict.items():
+                bcca = prf_simcorbipropschema.call_ms_hist(dbhist, ms)
+                assert isinstance(bcca, BestCorrelationProportionalCalledAlleles)
+                bcca = BestCorrelationProportionalCalledAlleles.objects.get(pk=bcca.pk)  # get rid of possible overriden field
+                pmas = bcca.genotypes.proportionalmicrosatellitealleleset
+                assert isinstance(pmas, ProportionalMicrosatelliteAlleleSet)
+                proportional_alleles = pmas.alleles
+                result_allels = set(a for a, p in proportional_alleles)
+                solution_alleles = set(a for a, p in proportional_solution_alleles)
+                assert result_allels == solution_alleles  # assert called alleles against solution alleles
+                assert proportional_alleles == proportional_solution_alleles
+
+
+@pytest.mark.django_db
 def test_bi_proportional_highest_peak_calling(histograms_and_calling_solutions_d, simcorbiprophighpeakschema):
     for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
         for ms_id, histograms_dict in ms_dict.items():
             ms = Microsatellite.objects.get(pk=ms_id)
             for proportional_solution_alleles, dbhist in histograms_dict.items():
                 bcca = simcorbiprophighpeakschema.call_ms_hist(dbhist, ms)
+                assert isinstance(bcca, BestCorrelationProportionalHighestPeakCalledAlleles)
+                bcca = BestCorrelationProportionalHighestPeakCalledAlleles.objects.get(pk=bcca.pk)  # get rid of possible overriden field
+                pmas = bcca.genotypes.proportionalmicrosatellitealleleset
+                assert isinstance(pmas, ProportionalMicrosatelliteAlleleSet)
+                proportional_alleles = pmas.alleles
+                result_allels = set(a for a, p in proportional_alleles)
+                solution_alleles = set(a for a, p in proportional_solution_alleles)
+                assert result_allels == solution_alleles  # assert called alleles against solution alleles
+                assert proportional_alleles == proportional_solution_alleles
+
+
+@pytest.mark.django_db
+def test_prf_bi_proportional_highest_peak_calling(histograms_and_calling_solutions_d, prf_simcorbiprophighpeakschema):
+    for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
+        for ms_id, histograms_dict in ms_dict.items():
+            ms = Microsatellite.objects.get(pk=ms_id)
+            for proportional_solution_alleles, dbhist in histograms_dict.items():
+                bcca = prf_simcorbiprophighpeakschema.call_ms_hist(dbhist, ms)
                 assert isinstance(bcca, BestCorrelationProportionalHighestPeakCalledAlleles)
                 bcca = BestCorrelationProportionalHighestPeakCalledAlleles.objects.get(pk=bcca.pk)  # get rid of possible overriden field
                 pmas = bcca.genotypes.proportionalmicrosatellitealleleset

@@ -5,7 +5,8 @@ import decimal
 from sequencing.calling.models import CallingScheme
 from misc.utils import get_unique_path
 from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme, FullBiSimCorScheme, \
-    ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorSchemeModel
+    ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorSchemeModel, \
+    ProximityRatioFilteredBoundProportionalSimCorScheme, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
 from tests.sequencing.calling.conftest import *
 
 from sequencing.calling.simcor.order.calibration.models.mutation_markov import MutationMarkov
@@ -102,6 +103,7 @@ def minimalsimcorbipropschema(simcor):
     return cs
 
 
+
 @pytest.fixture()
 def minimalsimcorbiboundpropschema(simcor):
     cs = BoundProportionalSimCorScheme.objects.create(
@@ -170,6 +172,51 @@ def simcorbipropschema(simcor):
     cs = BoundProportionalSimCorScheme.objects.get(pk=cs.pk)
     return cs
 
+
+@pytest.fixture()
+def minimal_prf_simcorbiboundpropschema(simcor):
+    cs = ProximityRatioFilteredBoundProportionalSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.4),
+        upper_prop_bound=decimal.Decimal(0.6),
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=21,
+        length_sensitivity=decimal.Decimal(0.11),  # Correction following exclusion function revision (removing steps)
+        diff_sensetivity=decimal.Decimal(0.75),  # Correction following exclusion function revision (removing steps)
+        cycle_sensetivity=decimal.Decimal(1.0),
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = ProximityRatioFilteredBoundProportionalSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def prf_simcorbipropschema(simcor):
+    cs = ProximityRatioFilteredBoundProportionalSimCorScheme.objects.create(
+        name='simcor',
+        description='Simulations correlation calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.3),
+        upper_prop_bound=decimal.Decimal(1.0),
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        length_sensitivity=decimal.Decimal(0.11),  # Correction following exclusion function revision (removing steps)
+        diff_sensetivity=decimal.Decimal(0.75),  # Correction following exclusion function revision (removing steps)
+        cycle_sensetivity=decimal.Decimal(1.0),
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = ProximityRatioFilteredBoundProportionalSimCorScheme.objects.get(pk=cs.pk)
+    return cs
+
+
 @pytest.fixture()
 def simcorbiprophighpeakschema(simcor):
     cs = HighestPeaksBiSimCorSchemeModel.objects.create(
@@ -188,6 +235,30 @@ def simcorbiprophighpeakschema(simcor):
     )
     # So our objects don't have "special" objects in fields
     cs = HighestPeaksBiSimCorSchemeModel.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
+def prf_simcorbiprophighpeakschema(simcor):
+    cs = HighestPeaksProximityRatioFilteredBiSimCorSchemeModel.objects.create(
+        name='simcor',
+        description='Simulations correlation highest peaks calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.3),
+        upper_prop_bound=decimal.Decimal(1.0),
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        range_from_point=3,
+        minimal_seeds_distance=3,
+        length_sensitivity=decimal.Decimal(0.21),
+        diff_sensetivity=decimal.Decimal(0.65),
+        cycle_sensetivity=decimal.Decimal(1.0),
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = HighestPeaksProximityRatioFilteredBiSimCorSchemeModel.objects.get(pk=cs.pk)
     return cs
 
 
