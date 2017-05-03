@@ -114,7 +114,7 @@ def illuminareadingadaptor1forhead(illuminareadingadaptor1):
         head_length=29,
     )
     # So our objects don't have "special" objects in fields
-    irac1 = IlluminaReadingAdaptor1Cuts.objects.get(pk=irac1.pk)
+    irac1 = IlluminaReadingAdaptor1ForHead.objects.get(pk=irac1.pk)
     return irac1
 
 
@@ -136,7 +136,7 @@ def illuminareadingadaptor2forhead(illuminareadingadaptor2):
         head_length=30,
     )
     # So our objects don't have "special" objects in fields
-    irac2 = IlluminaReadingAdaptor2Cuts.objects.get(pk=irac2.pk)
+    irac2 = IlluminaReadingAdaptor2ForHead.objects.get(pk=irac2.pk)
     return irac2
 
 
