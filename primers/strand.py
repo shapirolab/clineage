@@ -1,6 +1,8 @@
 __author__ = 'ofirr'
 
+
 class BaseStrandMixin(object):
+
     @property
     def ref_sequence(self):
         raise NotImplementedError()
@@ -12,6 +14,7 @@ class BaseStrandMixin(object):
     @property
     def strand(self):
         raise NotImplementedError()
+
 
 class PlusStrandMixin(BaseStrandMixin):
 
@@ -27,7 +30,9 @@ class PlusStrandMixin(BaseStrandMixin):
     def strand(self):
         return "+"
 
+
 class MinusStrandMixin(BaseStrandMixin):
+
     @property
     def ref_sequence(self):
         return self.sequence.rev_comp()

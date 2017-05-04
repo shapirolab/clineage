@@ -9,22 +9,13 @@ from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, \
     srs_to_tups, rc_srs_to_tups
 from tests.sequencing.analysis.full_msv.reads_dict import ASSEMBLED, UNASSEMBLED
 
-from distributed.utils_test import cluster
-from distributed import as_completed, Executor
+
+from distributed import as_completed
 from distributed.client import Future
 from sequencing.analysis.full_msv.models import FullMSVMergedReads,\
     FullMSVariations, FullMSVHistogram, FullMSVAssignment
 from sequencing.analysis.models import HistogramEntryReads, MicrosatelliteHistogramGenotype
 from sequencing.analysis.full_msv.full_msv import get_full_ms_variations
-
-import django
-
-@pytest.yield_fixture(scope="session")
-def executor(): 
-    with cluster(4) as (d, workers):
-        e = Executor(("127.0.0.1", d["port"]))
-        yield e
-        e.shutdown()
 
 
 @pytest.mark.django_db(transaction=True)

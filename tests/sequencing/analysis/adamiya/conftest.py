@@ -21,13 +21,7 @@ from tests.sequencing.analysis.reads_dict_tools import R1, R2, RM, NUM_READS
 from tests.flat_dict import FlatDict
 from tests.sequencing.analysis.adamiya.reads_dict import READS_DICT_ADAM, ASSEMBLED, \
     UNASSEMBLED
-
-
-@pytest.fixture()
-def requires_none_genotypes(request, transactional_db):
-    MicrosatelliteHistogramGenotype.objects.get_or_create(microsatellite=None,
-        defaults=dict(repeat_number=1))
-    SNPHistogramGenotype.objects.get_or_create(snp=None, defaults=dict(base=""))
+from tests.sequencing.analysis.conftest import *
 
 
 @pytest.fixture(scope="session")
