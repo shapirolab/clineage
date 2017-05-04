@@ -4,6 +4,7 @@ from sequencing.calling.hist import Histogram
 from sequencing.analysis.models import HistogramEntryReads
 import sys
 from sequencing.calling.models import MicrosatelliteAlleleSet
+from misc.utils import get_get_or_create
 
 
 def get_ms_hist(dbhist, microsatellite):
@@ -37,18 +38,19 @@ def get_closest(real_hist, sim_space, distance_function):
 
 
 def call_microsatellite_histogram(calling_schema, dbhist, microsatellite):
-    hist = get_ms_hist(dbhist, microsatellite)
-    closest_sim_hist, min_dist = calling_schema.find_best_in_space(hist)
-    mas = MicrosatelliteAlleleSet.get_for_alleles(closest_sim_hist.allele_frozenset)
-    if isinstance(calling_schema, ProportionStepModelMixin):
-        mas = ProportionalMicrosatelliteAlleleSet.get_for_proportional_alllels(mas, closest_sim_hist.alleles_to_proportions)
-    bcca, created = calling_schema.called_allele_class.objects.get_or_create(
-        histogram=dbhist,
-        microsatellite=microsatellite,
-        calling_scheme=calling_schema,
-        defaults=dict(
+    def inner(raise_or_create_with_defaults):
+        hist = get_ms_hist(dbhist, microsatellite)
+        closest_sim_hist, min_dist = calling_schema.find_best_in_space(hist)
+        mas = MicrosatelliteAlleleSet.get_for_alleles(closest_sim_hist.allele_frozenset)
+        if isinstance(calling_schema, ProportionStepModelMixin):
+            mas = ProportionalMicrosatelliteAlleleSet.get_for_proportional_alllels(mas, closest_sim_hist.alleles_to_proportions)
+        return raise_or_create_with_defaults(
             genotypes=mas,
             confidence=min_dist,
-            cycle=closest_sim_hist.simulation_cycle),
+            cycle=closest_sim_hist.simulation_cycle,
+        )
+    return get_get_or_create(inner, calling_schema.called_allele_class,
+         histogram=dbhist,
+         microsatellite=microsatellite,
+         calling_scheme=calling_schema,
     )
-    return bcca
