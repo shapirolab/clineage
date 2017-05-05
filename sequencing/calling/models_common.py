@@ -29,10 +29,10 @@ class CallingScheme(models.Model):
 
 
 class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
-    allele1 = models.PositiveSmallIntegerField(null=True)
-    allele2 = models.PositiveSmallIntegerField(null=True)
-    allele3 = models.PositiveSmallIntegerField(null=True)
-    allele4 = models.PositiveSmallIntegerField(null=True)
+    allele1 = models.PositiveSmallIntegerField(default=0)  # use 0 instead of null to allow unique enforcement by MySQL
+    allele2 = models.PositiveSmallIntegerField(default=0)  # use 0 instead of null to allow unique enforcement by MySQL
+    allele3 = models.PositiveSmallIntegerField(default=0)  # use 0 instead of null to allow unique enforcement by MySQL
+    allele4 = models.PositiveSmallIntegerField(default=0)  # use 0 instead of null to allow unique enforcement by MySQL
     _num_of_allele_fields = 4
 
     objects = InheritanceManager()
@@ -59,7 +59,7 @@ class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
         ordered_genotypes = dict(itertools.zip_longest(
             names,
             l,
-            fillvalue=None,
+            fillvalue=0,
         ))
         obj, c = cls.objects.get_or_create(**ordered_genotypes)
         return obj
@@ -78,7 +78,7 @@ class MicrosatelliteAlleleSet(models.Model, MultiAlleleMixin):
         return {
             allele for allele
             in self.allele_fields
-            if allele is not None
+            if allele != 0
         }
 
     class Meta:
