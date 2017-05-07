@@ -174,7 +174,7 @@ class ProportionalMicrosatelliteAlleleSet(MicrosatelliteAlleleSet):
     def get_for_proportional_alllels(cls, mas, proportions_dict):
         pmas = cls(microsatellitealleleset_ptr_id=mas.pk)
         pmas.__dict__.update(mas.__dict__)
-        ordered_proportions = [proportions_dict[a] for a in mas.alleles]
+        ordered_proportions = [proportions_dict[a] for a in mas.sort_alleles(mas.alleles)]  # list the proportions in the same order as the alleles in mas
         pmas.proportions = Proportions.get_for_proportions(ordered_proportions)
         pmas.save()
         return pmas

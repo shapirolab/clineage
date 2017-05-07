@@ -1,4 +1,5 @@
 import pytest
+import decimal
 from targeted_enrichment.planning.models import Microsatellite
 from sequencing.calling.simcor.models_common import BestCorrelationProportionalCalledAlleles, \
     ProportionalMicrosatelliteAlleleSet, BestCorrelationProportionalHighestPeakCalledAlleles
@@ -44,7 +45,7 @@ def test_bi_calling(histograms_and_calling_solutions_d, simcorbinschema):
             for proportional_solution_alleles, dbhist in histograms_dict.items():
                 bcca = simcorbinschema.call_ms_hist(dbhist, ms)
                 alleles = bcca.genotypes.alleles
-                solution_alleles = set(a for a, p in proportional_solution_alleles)
+                solution_alleles = set(a for a, p in proportional_solution_alleles if p > decimal.Decimal('0.3'))  # small prop cases will be disregarded in non-proportional calling
                 assert alleles == solution_alleles  # assert called alleles against solution alleles
 
 
@@ -117,4 +118,15 @@ def test_prf_bi_proportional_highest_peak_calling(histograms_and_calling_solutio
                 result_allels = set(a for a, p in proportional_alleles)
                 solution_alleles = set(a for a, p in proportional_solution_alleles)
                 assert result_allels == solution_alleles  # assert called alleles against solution alleles
-                assert proportional_alleles == proportional_solution_alleles
+                allowed_genotypes = set(frozenset([(a, p) for a, p in aap if p > 0]) for aap, c in prf_simcorbiprophighpeakschema.alleles_and_cycles)
+                if proportional_solution_alleles in allowed_genotypes:
+                    assert proportional_alleles == proportional_solution_alleles  # calling should be identical to solution
+                else:
+                    small_prop_allele, large_prop_allele = sorted(proportional_alleles, key=lambda t: t[1])
+                    small_prop_solution_allele, large_prop_solution_allele = sorted(proportional_solution_alleles, key=lambda t: t[1])
+                    allele, prop = small_prop_solution_allele
+                    small_prop_solution_allele = allele, prop + decimal.Decimal('0.1')
+                    assert small_prop_allele == small_prop_solution_allele
+                    allele, prop = large_prop_solution_allele
+                    large_prop_solution_allele = allele, prop - decimal.Decimal('0.1')
+                    assert large_prop_allele == large_prop_solution_allele

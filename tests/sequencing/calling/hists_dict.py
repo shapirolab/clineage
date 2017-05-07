@@ -66,6 +66,11 @@ MS_HISTOGRAMS_DICT = {
                 repeat_number(28): 47,
                 repeat_number(29): 5,
             },
+            frozenset([(repeat_number(8), proportion('0.7')), (repeat_number(9), proportion('0.3'))]): {  # biallelic example
+                repeat_number(7): 1,
+                repeat_number(8): 30,
+                repeat_number(9): 8,
+            }
         },
     },
 }
