@@ -125,7 +125,7 @@ class Histogram(object):
                 for i in range(int(self.nsamples * self[k]))]
 
     def random_sample(self, k):
-        return Histogram(Counter(np.random.choice(self._hist.keys(), k, p=self._hist.values())))
+        return Histogram(Counter(np.random.choice(self.keys(), k, p=self.values())))
 
     # Operators
     def normalize(self):
