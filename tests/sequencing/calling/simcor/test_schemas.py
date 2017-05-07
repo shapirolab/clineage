@@ -113,6 +113,11 @@ def test_mono_schema_called_allele_class(minimalsimcormonoschema):
 
 
 @pytest.mark.django_db
+def test_mono_highest_peak_schema_called_allele_class(simcormonoprophighpeakschema):
+    assert simcormonoprophighpeakschema.called_allele_class == BestCorrelationCalledAlleles
+
+
+@pytest.mark.django_db
 def test_proportional_bi_schema_called_allele_class(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.called_allele_class == BestCorrelationProportionalCalledAlleles
 

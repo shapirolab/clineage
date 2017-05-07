@@ -12,7 +12,7 @@ from sequencing.calling.simcor.models_common import CyclesModelMixin, Simulation
 from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBiMixin, \
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
     HighestPeaksRangeModelMixin, ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, \
-    ProximityRatioFilteredProportionalAllelesCyclesRangeMixin
+    ProximityRatioFilteredProportionalAllelesCyclesRangeMixin, HighestPeaksModelMixin
 from itertools import filterfalse
 
 
@@ -93,6 +93,13 @@ class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
         yield from mono_sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
+
+
+class BaseMonoAllelicMixin(object):
+
+    @property
+    def allele_number(self):
+        return 1
 
 
 class BaseBiAllelicMixin(object):
@@ -188,3 +195,14 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(BestCorrelationPropo
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
+
+
+class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicMixin,
+                                        BaseSimCallingScheme, FilterByHistMixin,
+                                        AllelesCyclesRangeMixin):
+
+    @property
+    def sim_hists_space(self):
+        yield from mono_sim_hists_space_generator(
+            self.simulations.get_simulations_dict(),
+            self.alleles_and_cycles)

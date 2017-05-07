@@ -5,4 +5,4 @@ from sequencing.calling.simcor.models_common import MicrosatelliteAlleleSet, Sin
 from sequencing.calling.simcor.schema_models import BaseSimCallingScheme, FullMonoSimCorScheme, FullBiSimCorScheme, \
     ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorSchemeModel, \
     ProximityRatioFilteredBoundProportionalSimCorScheme, ProximityRatioFilteredProportionalSimCorScheme, \
-    HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
+    HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, HighestPeaksMonoSimCorSchemeModel

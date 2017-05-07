@@ -6,7 +6,8 @@ from sequencing.calling.models import CallingScheme
 from misc.utils import get_unique_path
 from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme, FullBiSimCorScheme, \
     ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorSchemeModel, \
-    ProximityRatioFilteredBoundProportionalSimCorScheme, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
+    ProximityRatioFilteredBoundProportionalSimCorScheme, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel,\
+    HighestPeaksMonoSimCorSchemeModel
 from tests.sequencing.calling.conftest import *
 
 from sequencing.calling.simcor.order.calibration.models.mutation_markov import MutationMarkov
@@ -262,8 +263,22 @@ def prf_simcorbiprophighpeakschema(simcor):
     return cs
 
 
-def filterbyhistmixin():
-    pass
+@pytest.fixture()
+def simcormonoprophighpeakschema(simcor):
+    cs = HighestPeaksMonoSimCorSchemeModel.objects.create(
+        name='simcor',
+        description='Simulations correlation highest peaks calling algorithm',
+        min_ms_len=3,
+        max_ms_len=30,
+        min_cycles=20,
+        max_cycles=60,
+        range_from_point=3,
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = HighestPeaksMonoSimCorSchemeModel.objects.get(pk=cs.pk)
+    return cs
+
 
 @pytest.fixture()
 def HP_HISTOGRAMS():

@@ -1,7 +1,7 @@
 from django.db import models
 from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 from sequencing.calling.range import MultiAlleleMixin, AllelesRangeMixin, ProportionalAllelesMixin, \
-    ProportionsRangeMixin, BoundProportionsRangeMixin
+    ProportionsRangeMixin, BoundProportionsRangeMixin, BaseAlleleNumber
 from sequencing.calling.simcor.models_common import CyclesRangeMixin
 import itertools
 import functools
@@ -135,7 +135,7 @@ class ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin(BoundPropor
     pass
 
 
-class HighestPeaksMixin(ProportionalAllelesMixin):
+class HighestPeaksMixin(BaseAlleleNumber):
 
     @classmethod
     def highest_peaks(cls, hist):

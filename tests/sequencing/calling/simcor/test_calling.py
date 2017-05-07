@@ -21,6 +21,22 @@ def test_mono_calling(histograms_and_calling_solutions_d, simcormonoschema):
 
 
 @pytest.mark.django_db
+def test_mono_calling_highest_peak(histograms_and_calling_solutions_d, simcormonoprophighpeakschema):
+    for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
+        for ms_id, histograms_dict in ms_dict.items():
+            ms = Microsatellite.objects.get(pk=ms_id)
+            for proportional_solution_alleles, dbhist in histograms_dict.items():
+                bcca = simcormonoprophighpeakschema.call_ms_hist(dbhist, ms)
+                alleles = bcca.genotypes.alleles
+                solution_alleles = set(a for a, p in proportional_solution_alleles)
+                assert len(alleles) == 1  # Assert mono solution
+                if len(solution_alleles) == 1:  # Monoallele test
+                    assert alleles == solution_alleles  # assert called alleles against solution alleles
+                else:  # Multiallele test
+                    assert alleles & solution_alleles  # assert called alleles against solution alleles
+
+
+@pytest.mark.django_db
 def test_bi_calling(histograms_and_calling_solutions_d, simcorbinschema):
     for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
         for ms_id, histograms_dict in ms_dict.items():
