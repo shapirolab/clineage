@@ -12,7 +12,10 @@ def get_ms_hist(dbhist, microsatellite):
     for her in HistogramEntryReads.objects.filter(histogram=dbhist):
         for msg in her.microsatellite_genotypes.genotypes:
             if msg.microsatellite == microsatellite:
-                hist_dict[msg.repeat_number] = her.num_reads
+                if msg.repeat_number in hist_dict:
+                    hist_dict[msg.repeat_number] += her.num_reads
+                else:
+                    hist_dict[msg.repeat_number] = her.num_reads
     return Histogram(hist_dict)
 
 

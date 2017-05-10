@@ -3,6 +3,17 @@ import decimal
 from targeted_enrichment.planning.models import Microsatellite
 from sequencing.calling.simcor.models_common import BestCorrelationProportionalCalledAlleles, \
     ProportionalMicrosatelliteAlleleSet, BestCorrelationProportionalHighestPeakCalledAlleles
+from sequencing.calling.simcor.calling import get_ms_hist
+
+@pytest.mark.django_db
+def test_get_ms_hist(histograms_and_calling_solutions_d):
+    for amp_id, ms_dict in histograms_and_calling_solutions_d.items():
+        for ms_id, histograms_dict in ms_dict.items():
+            ms = Microsatellite.objects.get(pk=ms_id)
+            for proportional_solution_alleles, dbhist in histograms_dict.items():
+                qhist = get_ms_hist(dbhist, ms)
+                assert qhist.nsamples == dbhist.num_reads
+                # TODO: Compare histograms dicts?
 
 
 @pytest.mark.django_db
