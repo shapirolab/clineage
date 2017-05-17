@@ -173,7 +173,7 @@ class ProximityRatioFilteredBoundProportionalSimCorScheme(BestCorrelationProport
 
 class HighestPeaksBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCalledAlleleMIxin, ProportionStepModelMixin,
                                       ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin, BaseBiAllelicMixin,
-                                      BaseSimCallingScheme, FilterByHistMixin,
+                                      FilterByHistMixin, BaseSimCallingScheme,
                                       BoundProportionalAllelesCyclesRangeMixin):
 
     @property
@@ -184,10 +184,11 @@ class HighestPeaksBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCall
         )
 
 
-class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
-                                      ProportionStepModelMixin, ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin,
+class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeModelMixin, FilterByHistMixin,
+                                                            BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
+                                                            ProportionStepModelMixin, ProportionsBoundsModelMixin,
                                       AlleleDistanceProportionBoundsModelMixin, BaseBiAllelicMixin,
-                                      BaseSimCallingScheme, FilterByHistMixin,
+                                      BaseSimCallingScheme,
                                       ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin):
     @property
     def sim_hists_space(self):
