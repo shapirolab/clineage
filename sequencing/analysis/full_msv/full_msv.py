@@ -375,9 +375,13 @@ def separate_reads_by_genotypes(fmsva):
                 )
             )
             for msg, read_ids in histogram_reads.items():
-                ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(
-                    get_ms_genotypes_from_strings_tuple(msg)
-                )
+                try:
+                    ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(
+                        get_ms_genotypes_from_strings_tuple(msg)
+                    )
+                except Microsatellite.DoesNotExist:
+                    continue  # This happens when the database has changed but the indexed panel has not
+
                 def inner(raise_or_create_with_defaults):
                     with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
                             _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \

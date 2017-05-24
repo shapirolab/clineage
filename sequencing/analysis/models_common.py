@@ -237,8 +237,9 @@ class MicrosatelliteHistogramGenotype(models.Model):
         msid, rn = m.groups()
         # NOTE: we save a query by not getting the actual MS.
         # This is OK as long as we use a db with FK enforcement.
+        ms = Microsatellite.objects.get(pk=int(msid))
         obj, c = cls.objects.get_or_create(
-            microsatellite_id=int(msid),
+            microsatellite=ms,
             repeat_number=int(rn),
         )
         return obj
