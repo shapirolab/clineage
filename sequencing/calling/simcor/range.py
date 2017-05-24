@@ -15,11 +15,11 @@ class BaseAllelesCyclesRangeMixin(object):
 
     @property
     def alleles(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def cycles(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @property
     def alleles_and_cycles(self):
@@ -106,14 +106,20 @@ class ProximityRatioFilteredAllelesCyclesRangeMixin(BaseAllelesCyclesRangeMixin)
     Mixin that sieves alleles_and_cycles using the function contains_excluded_proportions_wrapper.
     These proportions will be used later on as bi-allelic options.
     """
-    @property
-    def alleles_and_cycles(self):
+
+    def prf_filtered(self, alleles_and_cycles_generator):
         yield from itertools.filterfalse(
             functools.partial(
                 contains_excluded_proportions_wrapper,
                 length_sensitivity=self.length_sensitivity,
                 diff_sensetivity=self.diff_sensetivity
             ),
+            alleles_and_cycles_generator,
+        )
+
+    @property
+    def alleles_and_cycles(self):
+        yield from self.prf_filtered(
             super().alleles_and_cycles,
         )
 
