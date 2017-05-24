@@ -9,6 +9,9 @@ class MonoSimulatedHistogram(Histogram):
         self._sim_cyc = simulation_cycle
         super(MonoSimulatedHistogram, self).__init__(simulated_hist)
 
+    def __repr__(self):
+        return '{}\n{}'.format(self.allele_frozenset, super().__repr__())
+
     @property
     def simulation_cycle(self):
         return self._sim_cyc
@@ -29,6 +32,9 @@ class MultiSimulatedHistogram(Histogram):
         self._ms_lens = ms_lens
         self._sim_cyc = simulation_cycle
         super(MultiSimulatedHistogram, self).__init__(simulated_hist)
+
+    def __repr__(self):
+        return '{}\n{}'.format(self.allele_frozenset, super().__repr__())
 
     @property
     def simulation_cycle(self):
@@ -52,6 +58,9 @@ class ProportionalMultiSimulatedHistogram(Histogram):
         self._alleles_to_proportions = {a: p for a, p in ms_lens_and_proportions if p > 0}
         assert sum(self._alleles_to_proportions.values()) == 1
         super(ProportionalMultiSimulatedHistogram, self).__init__(simulated_hist)
+
+    def __repr__(self):
+        return '{}\n{}'.format(self.alleles_to_proportions, super().__repr__())
 
     @property
     def simulation_cycle(self):
