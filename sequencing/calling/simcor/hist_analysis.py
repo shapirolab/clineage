@@ -23,11 +23,12 @@ def get_far_apart_highest_peaks(hist, allele_number=1, minimal_distance_between_
         allele_number: allele_number
         minimal_distance_between_peaks: minimum distance between the allele
     """
+    histogram = hist.copy()
     for allele in range(allele_number):
-        hs = sorted(hist.items(), key=lambda hkey: hkey[1], reverse=True)
+        hs = sorted(histogram.items(), key=lambda hkey: hkey[1], reverse=True)
         if allele >= len(hs):
             break
-        hist = remove_points_close_to_top(hist, hs, allele, minimal_distance_between_peaks)
-    hs = sorted(hist.items(), key=lambda hkey: hkey[1], reverse=True)
+        histogram = remove_points_close_to_top(histogram, hs, allele, minimal_distance_between_peaks)
+    hs = sorted(histogram.items(), key=lambda hkey: hkey[1], reverse=True)
     seeds = [x for x, y in hs[:allele_number]]
     return seeds
