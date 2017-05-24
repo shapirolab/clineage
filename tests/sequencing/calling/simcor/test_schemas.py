@@ -7,12 +7,14 @@ from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles
     BestCorrelationProportionalCalledAlleles, BestCorrelationProportionalHighestPeakCalledAlleles
 from sequencing.calling.simcor.schema_models import DynamicFilteredHistSpaceMixin, FullMonoSimCorScheme, \
     FullBiSimCorScheme, ProportionalSimCorSchemeMixin, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, \
-    HighestPeaksBiSimCorSchemeModel
+    HighestPeaksBiSimCorSchemeModel, ProximityRatioFilteredBoundProportionalSimCorScheme, FilterByHistMixin, \
+    BaseSimCallingScheme
 from sequencing.calling.range import BoundProportionsRangeMixin
 from sequencing.calling.simcor.range import contains_excluded_proportions_wrapper, BaseAllelesCyclesRangeMixin,\
     ProximityRatioFilteredAllelesCyclesRangeMixin
 import inspect
 import types
+from frogress import bar
 
 
 def get_class_that_defined_method(cls, meth_name):
@@ -20,6 +22,7 @@ def get_class_that_defined_method(cls, meth_name):
         if attr.name == meth_name:
             return attr.defining_class
     return None
+
 
 @pytest.mark.django_db
 def test_mono_schema(minimalsimcormonoschema):
@@ -83,7 +86,7 @@ def test_prf_exclusion_function(minimal_prf_simcorbiboundpropschema):
     diff_sensetivity = minimal_prf_simcorbiboundpropschema.diff_sensetivity
     assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'sim_hists_space') == ProportionalSimCorSchemeMixin
     assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'proportions') == BoundProportionsRangeMixin
-    assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'alleles_and_cycles') == ProximityRatioFilteredAllelesCyclesRangeMixin
+    assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'alleles_and_cycles') == ProximityRatioFilteredBoundProportionalSimCorScheme
     pre_filter_alleles_and_cycles = {
         (frozenset([(15, decimal.Decimal('0.3')), (16, decimal.Decimal('0.7'))]), 20),
         (frozenset([(15, decimal.Decimal('0.4')), (16, decimal.Decimal('0.6'))]), 20),
@@ -155,6 +158,7 @@ def test_highest_peaks_bi_sim_cor_class(simcorbiprophighpeakschema):
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'proportions') == BoundProportionsRangeMixin
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'alleles_and_cycles') == BaseAllelesCyclesRangeMixin
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'find_best_in_space') == DynamicFilteredHistSpaceMixin
+    assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'filtered_sim_hists_space') == FilterByHistMixin
     assert simcorbiprophighpeakschema.allele_number == 2
     assert len(set(simcorbiprophighpeakschema.sim_hists_space)) > 1  # TODO: expand this
     sample_hist = Histogram(
@@ -173,9 +177,10 @@ def test_prf_highest_peaks_bi_sim_cor_class(prf_simcorbiprophighpeakschema):
     assert prf_simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
     assert prf_simcorbiprophighpeakschema.allele_number == 2
     assert prf_simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
+    assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'distance_metric') == BaseSimCallingScheme
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'sim_hists_space') == HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'proportions') == BoundProportionsRangeMixin
-    assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'alleles_and_cycles') == ProximityRatioFilteredAllelesCyclesRangeMixin
+    assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'alleles_and_cycles') == HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'find_best_in_space') == DynamicFilteredHistSpaceMixin
     assert len(set(prf_simcorbiprophighpeakschema.sim_hists_space)) > 1  # TODO: expand this
     sample_hist = Histogram(
@@ -187,3 +192,42 @@ def test_prf_highest_peaks_bi_sim_cor_class(prf_simcorbiprophighpeakschema):
              10: 11})
     assert set(prf_simcorbiprophighpeakschema.alleles_by_hist(sample_hist)) == {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
     assert len(set(prf_simcorbiprophighpeakschema.filtered_sim_hists_space(sample_hist))) > 1  # TODO: expand this
+
+
+@pytest.mark.django_db
+def test_compare_minimal_sim_space(minimal_prf_simcorbiprophighpeakschema, minimal_prf_simcorbiboundpropschema):
+    space_full = set(bar(minimal_prf_simcorbiboundpropschema.sim_hists_space))
+    space_hp_prf = set(bar(minimal_prf_simcorbiprophighpeakschema.sim_hists_space))
+    assert {str(h) for h in space_hp_prf} == {str(h) for h in space_full}
+
+
+@pytest.mark.django_db
+def test_compare_sim_space_contained(simcorbipropschema, simcorbiprophighpeakschema):
+    assert get_class_that_defined_method(simcorbipropschema.__class__,
+                                         'call_ms_hist') == BaseSimCallingScheme
+    assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__,
+                                         'call_ms_hist') == BaseSimCallingScheme
+
+    space_full = set(bar(simcorbipropschema.sim_hists_space))
+    space_hp = set(bar(simcorbiprophighpeakschema.sim_hists_space))
+    assert {str(h) for h in space_hp} == {str(h) for h in space_full}
+
+
+
+@pytest.mark.django_db
+def test_prf_bound_proportional_bi_schema(minimal_prf_simcorbiprophighpeakschema):
+    assert minimal_prf_simcorbiprophighpeakschema.allele_number == 2
+    ac_set = set(minimal_prf_simcorbiprophighpeakschema.alleles_and_cycles)
+    assert len(ac_set) == 5
+    assert ac_set == {
+        (frozenset([(15, decimal.Decimal('0.4')), (16, decimal.Decimal('0.6'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.5')), (16, decimal.Decimal('0.5'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.6')), (16, decimal.Decimal('0.4'))]), 20),
+        (frozenset([(15, decimal.Decimal('0.0')), (16, decimal.Decimal('1.0'))]), 20),
+        (frozenset([(15, decimal.Decimal('1.0')), (16, decimal.Decimal('0.0'))]), 20),
+    }
+
+    # {(frozenset({(16, Decimal('1.00')), (15, Decimal('0.00'))}), 20),
+    #  (frozenset({(16, Decimal('0.00')), (15, Decimal('1.00'))}), 20),
+    #  (frozenset({(16, Decimal('0.50')), (15, Decimal('0.50'))}), 20)}
+    assert len(set(minimal_prf_simcorbiprophighpeakschema.sim_hists_space)) > 1  # TODO: expand this

@@ -264,6 +264,30 @@ def prf_simcorbiprophighpeakschema(simcor):
 
 
 @pytest.fixture()
+def minimal_prf_simcorbiprophighpeakschema(simcor):
+    cs = HighestPeaksProximityRatioFilteredBiSimCorSchemeModel.objects.create(
+        name='simcor',
+        description='Simulations correlation highest peaks calling algorithm',
+        proportion_step=decimal.Decimal(0.1),
+        lower_prop_bound=decimal.Decimal(0.4),
+        upper_prop_bound=decimal.Decimal(0.6),
+        min_ms_len=15,
+        max_ms_len=17,
+        min_cycles=20,
+        max_cycles=21,
+        range_from_point=3,
+        minimal_seeds_distance=3,
+        length_sensitivity=decimal.Decimal(0.11),  # Correction following exclusion function revision (removing steps)
+        diff_sensetivity=decimal.Decimal(0.75),  # Correction following exclusion function revision (removing steps)
+        cycle_sensetivity=decimal.Decimal(1.0),
+        simulations=simcor
+    )
+    # So our objects don't have "special" objects in fields
+    cs = HighestPeaksProximityRatioFilteredBiSimCorSchemeModel.objects.get(pk=cs.pk)
+    return cs
+
+
+@pytest.fixture()
 def simcormonoprophighpeakschema(simcor):
     cs = HighestPeaksMonoSimCorSchemeModel.objects.create(
         name='simcor',
