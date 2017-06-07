@@ -135,17 +135,24 @@ def _validate_amplicon_mapping(reads_matches):
     # and the right primer to the right of the amplicon using ".pos" property
     # of pysam.calignmentfile.AlignedSegment objects
     for read_id, matches in reads_matches.items():
-        if len(matches) != 2:
+        if len(matches) < 2:
             # place proper bin
             continue
         amplicons, directions = list(zip(*matches))
-        u1, u2 = amplicons
-        if u1 != u2:
-            # place proper bin
+        both_directions = set()
+        for amp in set(amplicons):
+            if (amp, LEFT) in matches and (amp, RIGHT) in matches:
+                both_directions.add(amp)
+        if len(both_directions) != 1:
             continue
+        amp = both_directions.pop()
+        # u1, u2 = amplicons
+        # if u1 != u2:
+        #     # place proper bin
+        #     continue
         if set(directions) != {LEFT, RIGHT}:
             raise RuntimeError("What else is here? {}".format(directions))
-        yield read_id, u1
+        yield read_id, amp
 
 
 def _aggregate_read_ids_by_amplicon(validated_reads_amplicons):
