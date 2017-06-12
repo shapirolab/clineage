@@ -15,14 +15,6 @@ from targeted_enrichment.amplicons.models import AmpliconCollection
 import django
 
 
-@pytest.yield_fixture(scope="session")
-def executor():
-    with cluster(4) as (d, workers):
-        e = Executor(("127.0.0.1", d["port"]))
-        yield e
-        e.shutdown()
-
-
 @pytest.mark.django_db
 def test_run_parallel(executor,
                       demultiplexing,
