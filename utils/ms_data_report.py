@@ -18,9 +18,9 @@ def query_panel(panel_name='all'):
         for om6panel in OM6Panel.objects.all():
             panel_list.append(om6panel)
     else:
-        for pcr1panel in PCR1Panel.objects.filter(name__contains=panel_name):
+        for pcr1panel in PCR1Panel.objects.filter(name=panel_name):
             panel_list.append(pcr1panel)
-        for om6panel in OM6Panel.objects.filter(name__contains=panel_name):
+        for om6panel in OM6Panel.objects.filter(name=panel_name):
             panel_list.append(om6panel)
         return panel_list
     return panel_list
