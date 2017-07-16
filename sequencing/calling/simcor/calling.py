@@ -32,11 +32,15 @@ def get_closest(real_hist, sim_space, distance_function):
     """
     min_dist = sys.maxsize
     best_sim_hist = None
+    examined = set()
     for sim_hist in sim_space:
+        if sim_hist.identity in examined:
+            continue
         distance = distance_function(real_hist, sim_hist)
         if distance < min_dist:
             min_dist = distance
             best_sim_hist = sim_hist
+        examined.add(sim_hist.identity)
     return best_sim_hist, min_dist
 
 

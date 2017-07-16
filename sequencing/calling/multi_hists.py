@@ -24,6 +24,10 @@ class MonoSimulatedHistogram(Histogram):
     def allele_frozenset(self):
         return frozenset([self.ms_len])
 
+    @property
+    def identity(self):
+        return self.allele_frozenset, self._sim_cyc
+
 
 class MultiSimulatedHistogram(Histogram):
     def __init__(self, ms_lens, simulation_cycle, simulated_hist):
@@ -47,6 +51,10 @@ class MultiSimulatedHistogram(Histogram):
     @property
     def allele_frozenset(self):
         return self.ms_lens
+
+    @property
+    def identity(self):
+        return self.allele_frozenset, self._sim_cyc
 
 
 class ProportionalMultiSimulatedHistogram(Histogram):
@@ -77,3 +85,7 @@ class ProportionalMultiSimulatedHistogram(Histogram):
     @property
     def allele_frozenset(self):
         return frozenset(self._alleles_to_proportions.keys())
+
+    @property
+    def identity(self):
+        return frozenset(self.ms_lens_and_proportions), self._sim_cyc
