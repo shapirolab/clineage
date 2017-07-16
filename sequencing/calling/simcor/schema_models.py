@@ -13,7 +13,7 @@ from sequencing.calling.simcor.range import AllelesCyclesRangeMixin, FullRangeBi
     ProportionalAllelesCyclesRangeMixin, BoundProportionalAllelesCyclesRangeMixin, \
     HighestPeaksRangeModelMixin, ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, \
     ProximityRatioFilteredProportionalAllelesCyclesRangeMixin, HighestPeaksModelMixin
-from itertools import filterfalse
+from itertools import filterfalse, repeat
 
 
 class BestCorrelationCalledAlleleMixin(object):
@@ -48,15 +48,34 @@ class DynamicFilteredHistSpaceMixin(object):
 
 class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
 
-    def filtered_sim_hists_space(self, hist):
+    def filtered_sim_hists_seeds(self, hist):
         """cuts the simulations based on the hist"""
         alleles_by_hist = set(self.alleles_by_hist(hist))
-        def allele_in_hist_space(sim_hist):
-            for allele in sim_hist.allele_frozenset:
+        def allele_in_seed_space(alleles_and_cycles):
+            alleles, cycles = alleles_and_cycles
+            if not isinstance(self, ProportionStepModelMixin):
+                alleles = zip(alleles, repeat(None))  # make it look like proportional
+            for allele, p in alleles:
                 if allele not in alleles_by_hist:
                     return True
             return False
-        yield from filterfalse(allele_in_hist_space, self.sim_hists_space)
+        yield from filterfalse(allele_in_seed_space, self.alleles_and_cycles)
+
+    def filtered_sim_hists_space(self, hist):
+        """cuts the simulations based on the hist"""
+        yield from self.sim_hists_space_generator(
+            self.simulations.get_simulations_dict(),
+            self.filtered_sim_hists_seeds(hist))
+
+    # def filtered_sim_hists_space(self, hist):
+    #     """cuts the simulations based on the hist"""
+    #     def allele_in_hist_space(sim_hist):
+    #         alleles_by_hist = self.alleles_by_hist(hist)
+    #         for allele in sim_hist.allele_frozenset:
+    #             if allele not in alleles_by_hist:
+    #                 return True
+    #         return False
+    #     yield from filterfalse(allele_in_hist_space, self.sim_hists_space)
 
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
@@ -73,8 +92,13 @@ class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLe
         return pop_dist_corr_numpy
 
     @property
+    def sim_hists_space_generator(self):
+        raise NotImplemented
+
+    @property
     def sim_hists_space(self):
         raise NotImplemented
+        # yield from self.sim_hists_space_generator(self.alleles_and_cycles)
 
     def find_best_in_space(self, hist):
         return get_closest(hist, self.sim_hists_space, self.distance_metric)
@@ -89,8 +113,12 @@ class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
     """
 
     @property
+    def sim_hists_space_generator(self):
+        return mono_sim_hists_space_generator
+
+    @property
     def sim_hists_space(self):
-        yield from mono_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
 
@@ -115,17 +143,24 @@ class FullBiSimCorScheme(BaseSimCallingScheme, BaseBiAllelicMixin, FullRangeBiMi
     """
 
     @property
+    def sim_hists_space_generator(self):
+        return bi_sim_hists_space_generator
+
+    @property
     def sim_hists_space(self):
-        yield from bi_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
 
 
 class ProportionalSimCorSchemeMixin(object):
+    @property
+    def sim_hists_space_generator(self):
+        return proportional_bi_sim_hists_space_generator
 
     @property
     def sim_hists_space(self):
-        yield from proportional_bi_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
@@ -187,8 +222,12 @@ class HighestPeaksBiSimCorSchemeModel(BoundProportionalAllelesCyclesRangeMixin, 
                                       BaseSimCallingScheme):
 
     @property
+    def sim_hists_space_generator(self):
+        return proportional_bi_sim_hists_space_generator
+
+    @property
     def sim_hists_space(self):
-        yield from proportional_bi_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
@@ -207,8 +246,12 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeMod
         )
 
     @property
+    def sim_hists_space_generator(self):
+        return proportional_bi_sim_hists_space_generator
+
+    @property
     def sim_hists_space(self):
-        yield from proportional_bi_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles
         )
@@ -217,9 +260,12 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeMod
 class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicMixin,
                                         BaseSimCallingScheme, FilterByHistMixin,
                                         AllelesCyclesRangeMixin):
+    @property
+    def sim_hists_space_generator(self):
+        return mono_sim_hists_space_generator
 
     @property
     def sim_hists_space(self):
-        yield from mono_sim_hists_space_generator(
+        yield from self.sim_hists_space_generator(
             self.simulations.get_simulations_dict(),
             self.alleles_and_cycles)
