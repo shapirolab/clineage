@@ -54,7 +54,7 @@ class Histogram(object):
             self.cut_peak()
         if normalize:
             self.normalize()
-        self.clean_zero_entries()
+        # self.clean_zero_entries()  # apparantly production runs faster without this
 
     # Cleaning
     def clean_zero_entries(self):
