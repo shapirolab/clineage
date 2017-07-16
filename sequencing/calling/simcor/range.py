@@ -66,6 +66,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 
+@functools.lru_cache(maxsize=1024)  # apparantly this can be heavy
 def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=decimal.Decimal(0.21), diff_sensetivity=decimal.Decimal(0.65)):
     """
     This function calculates the valid proportion bounds according to the difference between the alleles and length of the longer allele
