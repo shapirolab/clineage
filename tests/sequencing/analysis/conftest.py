@@ -10,7 +10,7 @@ from tests.sequencing.conftest import *
 @pytest.yield_fixture(scope="session")
 def executor():
     with cluster(4) as (d, workers):
-        with Client(('127.0.0.1', d['port'])) as c:
+        with Client(d['address']) as c:
             def load_django():
                 from django.conf import settings
                 if not settings.configured:
