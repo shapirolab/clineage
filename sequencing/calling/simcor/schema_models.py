@@ -50,8 +50,8 @@ class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
 
     def filtered_sim_hists_space(self, hist):
         """cuts the simulations based on the hist"""
+        alleles_by_hist = set(self.alleles_by_hist(hist))
         def allele_in_hist_space(sim_hist):
-            alleles_by_hist = self.alleles_by_hist(hist)
             for allele in sim_hist.allele_frozenset:
                 if allele not in alleles_by_hist:
                     return True
