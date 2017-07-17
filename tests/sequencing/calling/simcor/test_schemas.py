@@ -26,7 +26,7 @@ def get_class_that_defined_method(cls, meth_name):
 
 @pytest.mark.django_db
 def test_mono_schema(minimalsimcormonoschema):
-    assert get_class_that_defined_method(minimalsimcormonoschema.__class__, 'sim_hists_space') == FullMonoSimCorScheme
+    assert get_class_that_defined_method(minimalsimcormonoschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert set(minimalsimcormonoschema.alleles_and_cycles) == {
         (15, 20), (16, 20), (15, 21), (16, 21),
         (15, 22), (16, 22), (15, 23), (16, 23)
@@ -36,7 +36,7 @@ def test_mono_schema(minimalsimcormonoschema):
 @pytest.mark.django_db
 def test_bi_schema(minimalsimcorbischema):
     assert minimalsimcorbischema.allele_number == 2
-    assert get_class_that_defined_method(minimalsimcorbischema.__class__, 'sim_hists_space') == FullBiSimCorScheme
+    assert get_class_that_defined_method(minimalsimcorbischema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert set(minimalsimcorbischema.alleles_and_cycles) == {
         (frozenset([15, 16]), 20), (frozenset([15, ]), 20), (frozenset([16, ]), 20),
         (frozenset([15, 16]), 21), (frozenset([15, ]), 21), (frozenset([16, ]), 21),
@@ -48,7 +48,7 @@ def test_bi_schema(minimalsimcorbischema):
 @pytest.mark.django_db
 def test_proportional_bi_schema(minimalsimcorbipropschema):
     assert minimalsimcorbipropschema.allele_number == 2
-    assert get_class_that_defined_method(minimalsimcorbipropschema.__class__, 'sim_hists_space') == ProportionalSimCorSchemeMixin
+    assert get_class_that_defined_method(minimalsimcorbipropschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert set(minimalsimcorbipropschema.alleles_and_cycles) == {
         (frozenset([(15, decimal.Decimal('0.1')), (16, decimal.Decimal('0.9'))]), 20),
         (frozenset([(15, decimal.Decimal('0.2')), (16, decimal.Decimal('0.8'))]), 20),
@@ -68,7 +68,7 @@ def test_proportional_bi_schema(minimalsimcorbipropschema):
 @pytest.mark.django_db
 def test_bound_proportional_bi_schema(minimalsimcorbiboundpropschema):
     assert minimalsimcorbiboundpropschema.allele_number == 2
-    assert get_class_that_defined_method(minimalsimcorbiboundpropschema.__class__, 'sim_hists_space') == ProportionalSimCorSchemeMixin
+    assert get_class_that_defined_method(minimalsimcorbiboundpropschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert get_class_that_defined_method(minimalsimcorbiboundpropschema.__class__, 'proportions') == BoundProportionsRangeMixin
     assert set(minimalsimcorbiboundpropschema.alleles_and_cycles) == {
         (frozenset([(15, decimal.Decimal('0.4')), (16, decimal.Decimal('0.6'))]), 20),
@@ -84,7 +84,7 @@ def test_bound_proportional_bi_schema(minimalsimcorbiboundpropschema):
 def test_prf_exclusion_function(minimal_prf_simcorbiboundpropschema):
     length_sensitivity = minimal_prf_simcorbiboundpropschema.length_sensitivity
     diff_sensetivity = minimal_prf_simcorbiboundpropschema.diff_sensetivity
-    assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'sim_hists_space') == ProportionalSimCorSchemeMixin
+    assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'proportions') == BoundProportionsRangeMixin
     assert get_class_that_defined_method(minimal_prf_simcorbiboundpropschema.__class__, 'alleles_and_cycles') == ProximityRatioFilteredBoundProportionalSimCorScheme
     pre_filter_alleles_and_cycles = {
@@ -154,7 +154,7 @@ def test_prf_proportional_bi_schema_called_allele_class(prf_simcorbipropschema):
 @pytest.mark.django_db
 def test_highest_peaks_bi_sim_cor_class(simcorbiprophighpeakschema):
     assert simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
-    assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'sim_hists_space') == HighestPeaksBiSimCorSchemeModel
+    assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'proportions') == BoundProportionsRangeMixin
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'alleles_and_cycles') == BaseAllelesCyclesRangeMixin
     assert get_class_that_defined_method(simcorbiprophighpeakschema.__class__, 'find_best_in_space') == DynamicFilteredHistSpaceMixin
@@ -178,7 +178,7 @@ def test_prf_highest_peaks_bi_sim_cor_class(prf_simcorbiprophighpeakschema):
     assert prf_simcorbiprophighpeakschema.allele_number == 2
     assert prf_simcorbiprophighpeakschema.called_allele_class == BestCorrelationProportionalHighestPeakCalledAlleles
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'distance_metric') == BaseSimCallingScheme
-    assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'sim_hists_space') == HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
+    assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'sim_hists_space') == BaseSimCallingScheme
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'proportions') == BoundProportionsRangeMixin
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'alleles_and_cycles') == HighestPeaksProximityRatioFilteredBiSimCorSchemeModel
     assert get_class_that_defined_method(prf_simcorbiprophighpeakschema.__class__, 'find_best_in_space') == DynamicFilteredHistSpaceMixin

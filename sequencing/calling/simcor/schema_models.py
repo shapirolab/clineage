@@ -67,16 +67,6 @@ class FilterByHistMixin(DynamicFilteredHistSpaceMixin):
             self.simulations.get_simulations_dict(),
             self.filtered_sim_hists_seeds(hist))
 
-    # def filtered_sim_hists_space(self, hist):
-    #     """cuts the simulations based on the hist"""
-    #     def allele_in_hist_space(sim_hist):
-    #         alleles_by_hist = self.alleles_by_hist(hist)
-    #         for allele in sim_hist.allele_frozenset:
-    #             if allele not in alleles_by_hist:
-    #                 return True
-    #         return False
-    #     yield from filterfalse(allele_in_hist_space, self.sim_hists_space)
-
 
 class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLengthBoundsModelMixin, CyclesModelMixin):
     """
@@ -97,8 +87,9 @@ class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLe
 
     @property
     def sim_hists_space(self):
-        raise NotImplemented
-        # yield from self.sim_hists_space_generator(self.alleles_and_cycles)
+        yield from self.sim_hists_space_generator(
+            self.simulations.get_simulations_dict(),
+            self.alleles_and_cycles)
 
     def find_best_in_space(self, hist):
         return get_closest(hist, self.sim_hists_space, self.distance_metric)
@@ -115,12 +106,6 @@ class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
     @property
     def sim_hists_space_generator(self):
         return mono_sim_hists_space_generator
-
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles)
 
 
 class BaseMonoAllelicMixin(object):
@@ -146,24 +131,11 @@ class FullBiSimCorScheme(BaseSimCallingScheme, BaseBiAllelicMixin, FullRangeBiMi
     def sim_hists_space_generator(self):
         return bi_sim_hists_space_generator
 
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles)
-
 
 class ProportionalSimCorSchemeMixin(object):
     @property
     def sim_hists_space_generator(self):
         return proportional_bi_sim_hists_space_generator
-
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles
-        )
 
 
 class ProportionalSimCorScheme(BestCorrelationProportionalCalledAlleleMixin, BaseBiAllelicMixin,
@@ -225,13 +197,6 @@ class HighestPeaksBiSimCorSchemeModel(BoundProportionalAllelesCyclesRangeMixin, 
     def sim_hists_space_generator(self):
         return proportional_bi_sim_hists_space_generator
 
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles
-        )
-
 
 class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeModelMixin, FilterByHistMixin,
                                                             BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
@@ -249,13 +214,6 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeMod
     def sim_hists_space_generator(self):
         return proportional_bi_sim_hists_space_generator
 
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles
-        )
-
 
 class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicMixin,
                                         BaseSimCallingScheme, FilterByHistMixin,
@@ -263,9 +221,3 @@ class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicM
     @property
     def sim_hists_space_generator(self):
         return mono_sim_hists_space_generator
-
-    @property
-    def sim_hists_space(self):
-        yield from self.sim_hists_space_generator(
-            self.simulations.get_simulations_dict(),
-            self.alleles_and_cycles)
