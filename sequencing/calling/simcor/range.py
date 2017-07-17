@@ -66,7 +66,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-@functools.lru_cache(maxsize=1024)  # apparantly this can be heavy
+@functools.lru_cache(maxsize=4096)  # apparantly this can be heavy
 def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=decimal.Decimal(0.21), diff_sensetivity=decimal.Decimal(0.65)):
     """
     This function calculates the valid proportion bounds according to the difference between the alleles and length of the longer allele
@@ -79,6 +79,7 @@ def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=deci
     return equilibrium-distance_from_equilibrium, equilibrium+distance_from_equilibrium
 
 
+@functools.lru_cache(maxsize=16384)
 def contains_excluded_proportions(alleles_and_proportions, cycle=20, length_sensitivity=decimal.Decimal(0.21), diff_sensetivity=decimal.Decimal(0.65)):
     """
     This function checks for each allele and proportion whether it's in calculated bounds
@@ -97,7 +98,7 @@ def contains_excluded_proportions_wrapper(alleles_and_cycles, length_sensitivity
     alleles_and_proportions, cycle = alleles_and_cycles
     return contains_excluded_proportions(
         alleles_and_proportions,
-        cycle=cycle,
+        # cycle=cycle,  # cycle is not yet implemented in the exclusion function. we drop it to improve caching
         length_sensitivity=length_sensitivity,
         diff_sensetivity=diff_sensetivity)
 
