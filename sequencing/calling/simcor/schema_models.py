@@ -98,21 +98,15 @@ class BaseSimCallingScheme(BestCorrelationCalledAlleleMixin, CallingScheme, MSLe
         return call_microsatellite_histogram(self, dbhist, microsatellite)
 
 
-class FullMonoSimCorScheme(BaseSimCallingScheme, AllelesCyclesRangeMixin):
-    """
-    Calling schema for calling against simulated histograms
-    """
-
-    @property
-    def sim_hists_space_generator(self):
-        return mono_sim_hists_space_generator
-
-
 class BaseMonoAllelicMixin(object):
 
     @property
     def allele_number(self):
         return 1
+
+    @property
+    def sim_hists_space_generator(self):
+        return mono_sim_hists_space_generator
 
 
 class BaseBiAllelicMixin(object):
@@ -120,6 +114,13 @@ class BaseBiAllelicMixin(object):
     @property
     def allele_number(self):
         return 2
+
+
+class FullMonoSimCorScheme(BaseMonoAllelicMixin, BaseSimCallingScheme, AllelesCyclesRangeMixin):
+    """
+    Calling schema for calling against simulated histograms
+    """
+    pass
 
 
 class FullBiSimCorScheme(BaseSimCallingScheme, BaseBiAllelicMixin, FullRangeBiMixin):
@@ -218,6 +219,4 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModel(HighestPeaksRangeMod
 class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicMixin,
                                         BaseSimCallingScheme, FilterByHistMixin,
                                         AllelesCyclesRangeMixin):
-    @property
-    def sim_hists_space_generator(self):
-        return mono_sim_hists_space_generator
+    pass
