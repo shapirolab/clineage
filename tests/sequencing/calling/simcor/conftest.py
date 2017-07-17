@@ -5,7 +5,7 @@ import decimal
 from sequencing.calling.models import CallingScheme
 from misc.utils import get_unique_path
 from sequencing.calling.models import SimulationsByCycles, FullMonoSimCorScheme, FullBiSimCorScheme, \
-    ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksBiSimCorSchemeModel, \
+    ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksProportionalBiSimCorSchemeModel, \
     ProximityRatioFilteredBoundProportionalSimCorScheme, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel,\
     HighestPeaksMonoSimCorSchemeModel
 from tests.sequencing.calling.conftest import *
@@ -220,7 +220,7 @@ def prf_simcorbipropschema(simcor):
 
 @pytest.fixture()
 def simcorbiprophighpeakschema(simcor):
-    cs = HighestPeaksBiSimCorSchemeModel.objects.create(
+    cs = HighestPeaksProportionalBiSimCorSchemeModel.objects.create(
         name='simcor',
         description='Simulations correlation highest peaks calling algorithm',
         proportion_step=decimal.Decimal(0.1),
@@ -235,7 +235,7 @@ def simcorbiprophighpeakschema(simcor):
         simulations=simcor
     )
     # So our objects don't have "special" objects in fields
-    cs = HighestPeaksBiSimCorSchemeModel.objects.get(pk=cs.pk)
+    cs = HighestPeaksProportionalBiSimCorSchemeModel.objects.get(pk=cs.pk)
     return cs
 
 

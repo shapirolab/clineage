@@ -7,7 +7,7 @@ from sequencing.calling.simcor.models_common import BestCorrelationCalledAlleles
     BestCorrelationProportionalCalledAlleles, BestCorrelationProportionalHighestPeakCalledAlleles
 from sequencing.calling.simcor.schema_models import DynamicFilteredHistSpaceMixin, FullMonoSimCorScheme, \
     FullBiSimCorScheme, ProportionalSimCorSchemeMixin, HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, \
-    HighestPeaksBiSimCorSchemeModel, ProximityRatioFilteredBoundProportionalSimCorScheme, FilterByHistMixin, \
+    HighestPeaksProportionalBiSimCorSchemeModel, ProximityRatioFilteredBoundProportionalSimCorScheme, FilterByHistMixin, \
     BaseSimCallingScheme
 from sequencing.calling.range import BoundProportionsRangeMixin
 from sequencing.calling.simcor.range import contains_excluded_proportions_wrapper, BaseAllelesCyclesRangeMixin,\

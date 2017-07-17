@@ -189,10 +189,10 @@ class ProximityRatioFilteredBoundProportionalSimCorScheme(BestCorrelationProport
         )
 
 
-class HighestPeaksBiSimCorSchemeModel(BoundProportionalAllelesCyclesRangeMixin, FilterByHistMixin,
-                                      BestCorrelationProportionalHighestPeakCalledAlleleMIxin, ProportionStepModelMixin,
-                                      ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin, BaseBiAllelicMixin,
-                                      BaseSimCallingScheme):
+class HighestPeaksProportionalBiSimCorSchemeModel(BoundProportionalAllelesCyclesRangeMixin, FilterByHistMixin,
+                                                  BestCorrelationProportionalHighestPeakCalledAlleleMIxin, ProportionStepModelMixin,
+                                                  ProportionsBoundsModelMixin, HighestPeaksRangeModelMixin, BaseBiAllelicMixin,
+                                                  BaseSimCallingScheme):
 
     @property
     def sim_hists_space_generator(self):

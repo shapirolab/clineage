@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
             bases=(sequencing.calling.simcor.schema_models.BestCorrelationCalledAlleleMixin, 'calling.callingscheme', models.Model, sequencing.calling.simcor.range.AllelesCyclesRangeMixin, sequencing.calling.range.MSLengthBoundsMixin, sequencing.calling.simcor.models_common.CycleBoundsMixin),
         ),
         migrations.CreateModel(
-            name='HighestPeaksBiSimCorSchemeModel',
+            name='HighestPeaksProportionalBiSimCorSchemeModel',
             fields=[
                 ('callingscheme_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='calling.CallingScheme')),
                 ('min_cycles', models.PositiveSmallIntegerField()),
@@ -197,7 +197,7 @@ class Migration(migrations.Migration):
             unique_together=set([('allele1', 'allele2', 'allele3', 'allele4')]),
         ),
         migrations.AddField(
-            model_name='highestpeaksbisimcorschememodel',
+            model_name='highestpeaksproportionalbisimcorschememodel',
             name='simulations',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='calling.SimulationsByCycles'),
         ),
