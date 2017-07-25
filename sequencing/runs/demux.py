@@ -217,7 +217,7 @@ def merge_srs(srs_lst, bc):
     return merged_sr
 
 
-def merge_demuxes(ngs_runs, demux_scheme):
+def merge_demuxes(ngs_runs, merged_demux_scheme):
     """
     This method gets list of runs and merges its demultiplexing.
     Meaning, it concatenates the fastq files into one
@@ -228,14 +228,18 @@ def merge_demuxes(ngs_runs, demux_scheme):
 
     root_demux = MergedDemultiplexing.objects.create(
         ngs_run=ngs_runs[0],
-        demux_scheme=demux_scheme,
-        ngs_runs=ngs_runs[1:]
+        demux_scheme=merged_demux_scheme,
     )
+    # workaround to bypass voodoo of unknown field
+    root_demux.ngs_runs = ngs_runs[1:]
+    root_demux.save()
 
     srs_by_bc_dict = dict()
     #populate a dictionary with barcoded content id as key and list of its Sample Reads as value
     for ngs_run in ngs_runs:
-        demux = ngs_run.demultiplexing_set.get()
+        demux = list(ngs_run.demultiplexing_set.all().exclude(demux_scheme=merged_demux_scheme))
+        assert len(demux) == 1
+        demux = demux[0]
         for sr in demux.samplereads_set.all():
             srs_by_bc_dict.setdefault(sr.barcoded_content, list()).append(sr)
 
@@ -251,11 +255,4 @@ def merge_demuxes(ngs_runs, demux_scheme):
             fastq1=merged_sr["fastq1"],
             fastq2=merged_sr["fastq2"],
         )
-
-
-
-
-
-
-
 
