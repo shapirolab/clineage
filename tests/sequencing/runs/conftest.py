@@ -2,7 +2,8 @@ import pytest
 import datetime
 import os
 
-from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun, DemultiplexingScheme, Demultiplexing
+from sequencing.runs.models import MachineType, Machine, NGSKit, NGSRun, DemultiplexingScheme, \
+    Demultiplexing, MergedDemultiplexing
 
 from tests.primers.parts.conftest import *
 from tests.lib_prep.workflows.conftest import *
@@ -61,6 +62,22 @@ def ngsrun(machine, ngskit, magicalpcr1library, magicalpcr1barcodedcontent, magi
     yield n
     os.rmdir(d)
 
+@pytest.yield_fixture()
+def ngsrun2(machine, ngskit, magicalpcr1library, magicalpcr1barcodedcontent, magicalpcr1barcodedcontent_a, temp_storage):
+    d = get_unique_path()
+    os.mkdir(d)
+    n = NGSRun.objects.create(
+        name="Second TestRun",
+        machine=machine,
+        kit=ngskit,
+        date=datetime.date.today(),
+        bcl_directory=d
+    )
+    n.libraries = [magicalpcr1library]
+    # So our objects don't have "special" objects in fields
+    n = NGSRun.objects.get(pk=n.pk)
+    yield n
+    os.rmdir(d)
 
 @pytest.fixture()
 def demultiplexingscheme(transactional_db):
@@ -79,6 +96,19 @@ def demultiplexing(demultiplexingscheme, ngsrun):
         ngs_run=ngsrun,
         demux_scheme=demultiplexingscheme
     )
+    # So our objects don't have "special" objects in fields
+    dm = Demultiplexing.objects.get(pk=dm.pk)
+    return dm
+
+
+@pytest.fixture()
+def mergeddemultiplexing(demultiplexingscheme, ngsrun, ngsrun2):
+    dm = MergedDemultiplexing.objects.create(
+        ngs_run=ngsrun,
+        demux_scheme=demultiplexingscheme,
+    )
+    dm.ngs_runs = [ngsrun2]
+    dm.save()
     # So our objects don't have "special" objects in fields
     dm = Demultiplexing.objects.get(pk=dm.pk)
     return dm

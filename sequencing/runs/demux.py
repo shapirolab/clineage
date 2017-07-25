@@ -4,13 +4,14 @@ import csv
 import io
 import os
 import resource
+import shutil
 from Bio import SeqIO
 
-from misc.utils import get_unique_path, unique_dir_cm, unlink
+from misc.utils import get_unique_path, unique_dir_cm, unlink, unique_file_cm
 
 from django.db.models.query import QuerySet
 
-from sequencing.runs.models import Demultiplexing
+from sequencing.runs.models import Demultiplexing, MergedDemultiplexing
 from sequencing.analysis.models import SampleReads
 from plumbum import ProcessExecutionError
 
@@ -71,6 +72,7 @@ AdapterRead2,{rev_read_adaptor},,,,,,,,
 ,,,,,,,,,
 [Data],,,,,,,,,
 """
+
 
 def generate_sample_sheets(bcs, name, date, description, kit, demux_scheme, rev_left_bc=False):
     read_length = kit.read_length
@@ -191,3 +193,69 @@ def run_demux(ngs_run, demux_scheme):
                 fastq1=fastq1,
                 fastq2=fastq2,
             )
+
+def merge_srs(srs_lst, bc):
+    """ This method gets list of SampleReads from same Barcoded Content and merges them into one Sample Read"""
+    merged_sr = dict()
+    merged_sr["num_reads"] = 0
+    with unique_file_cm("fastq") as fastq1_merged:
+        fd1 = open(fastq1_merged, 'w')
+        with unique_file_cm("fastq") as fastq2_merged:
+            fd2 = open(fastq2_merged, 'w')
+            for sr in srs_lst:
+                assert sr.barcoded_content == bc
+                merged_sr["num_reads"] += sr.num_reads
+                with open(sr.fastq1, 'r') as fastq1_in:
+                    shutil.copyfileobj(fastq1_in, fd1)
+                with open(sr.fastq2, 'r') as fastq2_in:
+                    shutil.copyfileobj(fastq2_in, fd2)
+            merged_sr["fastq1"] = fastq1_merged
+            merged_sr["fastq2"] = fastq2_merged
+            merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
+    fd1.close()
+    fd2.close()
+    return merged_sr
+
+
+def merge_demuxes(ngs_runs, demux_scheme):
+    """
+    This method gets list of runs and merges its demultiplexing.
+    Meaning, it concatenates the fastq files into one
+    Each run must have its demux ready!!
+    """
+
+    assert len(ngs_runs) > 1# cannot merge one run
+
+    root_demux = MergedDemultiplexing.objects.create(
+        ngs_run=ngs_runs[0],
+        demux_scheme=demux_scheme,
+        ngs_runs=ngs_runs[1:]
+    )
+
+    srs_by_bc_dict = dict()
+    #populate a dictionary with barcoded content id as key and list of its Sample Reads as value
+    for ngs_run in ngs_runs:
+        demux = ngs_run.demultiplexing_set.get()
+        for sr in demux.samplereads_set.all():
+            srs_by_bc_dict.setdefault(sr.barcoded_content, list()).append(sr)
+
+    #create merged file for each fastq1,fastq2 of each Sample Read
+    for bc in srs_by_bc_dict:
+        srs = srs_by_bc_dict[bc]
+        merged_sr = merge_srs(srs, bc)
+        yield SampleReads.objects.create(
+            demux=root_demux,
+            barcoded_content=bc,
+            library=merged_sr["library"],
+            num_reads=merged_sr["num_reads"],
+            fastq1=merged_sr["fastq1"],
+            fastq2=merged_sr["fastq2"],
+        )
+
+
+
+
+
+
+
+

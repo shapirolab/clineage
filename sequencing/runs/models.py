@@ -77,3 +77,10 @@ class Demultiplexing(models.Model):
 
     def __str__(self):
         return "{}|{}".format(self.ngs_run, self.pk)
+
+
+class MergedDemultiplexing(Demultiplexing):
+    """
+    A merge of few Runs to one, in order to overcome lose of data
+    """
+    ngs_runs = models.ManyToManyField(NGSRun)
