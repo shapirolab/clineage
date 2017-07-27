@@ -23,6 +23,7 @@ from sequencing.analysis.models_common import BowtieIndexMixin, \
     PearOutputMixin, ms_genotypes_to_name, split_ms_genotypes_name, \
     get_ms_genotypes_from_strings_tuple
 from targeted_enrichment.planning.models import Microsatellite
+from targeted_enrichment.amplicons.models import AmpliconCollection
 
 
 pear = plumbum.local["pear"]
@@ -163,12 +164,42 @@ def _build_ms_variations(amplicon_collection, padding, mss_version):
         return fasta
 
 
-def get_full_ms_variations(amplicon_collection, padding, mss_version):
+def get_full_ms_variations_original(amplicon_collection, padding, mss_version):
     def inner(raise_or_create_with_defaults):
         with unique_dir_cm() as index_dir:
             bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
             with unlink(_build_ms_variations(amplicon_collection, padding, mss_version)) as fasta:
                 bowtie2build(fasta, bowtie_index.index_files_prefix)
+            return raise_or_create_with_defaults(
+                index_dump_dir=index_dir,
+            )
+    return get_get_or_create(inner, FullMSVariations,
+        amplicon_collection=amplicon_collection,
+        padding=padding,
+        microsatellites_version=mss_version,
+    )
+
+
+def get_full_ms_variations(amplicon_collection, padding, mss_version, chunk_size=15000):
+    """
+    This method is the same as get_full_ms_variations except now it runs on amplicon_collection in
+    chunks, this is done in order to enable running on new big panels
+    """
+    def inner(raise_or_create_with_defaults):
+        all_amplicons = amplicon_collection.amplicons.all()
+        amplicons_splitted = grouper(chunk_size, all_amplicons)  # split the amplicons to create smaller amplicon collections
+        with unique_dir_cm() as index_dir:
+            for idx, amplicon_subgroup in enumerate(amplicons_splitted):
+                partial_amplicon_collection = AmpliconCollection.objects.create()
+                partial_amplicon_collection.amplicons = amplicon_subgroup
+                partial_amplicon_collection.save()
+                #create subdirectory for each part
+                index_subdir = index_dir+'/'+str(idx)
+                os.mkdir(index_subdir)
+                bowtie_index = BowtieIndexMixin(index_dump_dir=index_subdir)
+                with unlink(_build_ms_variations(partial_amplicon_collection, padding, mss_version)) as fasta:
+                    bowtie2build(fasta, bowtie_index.index_files_prefix)
+                partial_amplicon_collection.delete() #prevent garbage on DB
             return raise_or_create_with_defaults(
                 index_dump_dir=index_dir,
             )
