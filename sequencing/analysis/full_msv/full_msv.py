@@ -164,7 +164,7 @@ def _build_ms_variations(amplicon_collection, padding, mss_version):
         return fasta
 
 
-def get_full_ms_variations_original(amplicon_collection, padding, mss_version):
+def get_full_ms_variations(amplicon_collection, padding, mss_version):
     def inner(raise_or_create_with_defaults):
         with unique_dir_cm() as index_dir:
             bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
@@ -180,7 +180,7 @@ def get_full_ms_variations_original(amplicon_collection, padding, mss_version):
     )
 
 
-def get_full_ms_variations(amplicon_collection, padding, mss_version, chunk_size=15000):
+def get_full_ms_variations_new_and_fucked(amplicon_collection, padding, mss_version, chunk_size=15000):
     """
     This method is the same as get_full_ms_variations except now it runs on amplicon_collection in
     chunks, this is done in order to enable running on new big panels
@@ -247,7 +247,7 @@ def split_merged_reads_as_list(merged_reads, reads_chunk_size=10**5, included_re
     return list(split_merged_reads(merged_reads, reads_chunk_size, included_reads=included_reads))
 
 
-def align_reads_to_ms_variations(merged_reads, padding, mss_version):
+def align_reads_to_ms_variations_original(merged_reads, padding, mss_version):
     amplicon_collection = merged_reads.sample_reads.library.subclass.panel.amplicon_collection
     msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
     def inner(raise_or_create_with_defaults):
@@ -272,6 +272,38 @@ def align_reads_to_ms_variations(merged_reads, padding, mss_version):
         merged_reads=merged_reads,
         ms_variations=msv,
     )
+
+def align_reads_to_ms_variations(merged_reads, padding, mss_version, chunk_size=15000):
+    total_amplicon_collection = merged_reads.sample_reads.library.subclass.panel.amplicon_collection
+    all_amplicons = total_amplicon_collection.amplicons.all()
+    amplicons_splitted = grouper(chunk_size,all_amplicons)  # split the amplicons to create smaller amplicon collections
+    for amplicon_subgroup in amplicons_splitted:
+        amplicon_collection = AmpliconCollection.objects.create()
+        amplicon_collection.amplicons = amplicon_subgroup
+        amplicon_collection.save()
+        msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+        def inner(raise_or_create_with_defaults):
+            with unique_file_cm("bam") as sorted_assignment_bam:
+                bowtie_to_sorted_bam = bowtie2_with_defaults2[
+                    '-x', msv.index_files_prefix,
+                    '-U', merged_reads.assembled_fastq,  # TODO: reconsider 'F'/'M' reads collections
+                ] | samtools_view[
+                    '-bS',
+                    '-'
+                ] | samtools_sort[
+                    '-o',
+                    sorted_assignment_bam
+                ]
+                bowtie_to_sorted_bam & plumbum.FG
+                return raise_or_create_with_defaults(
+                    sorted_assignment_bam=sorted_assignment_bam,
+                    merged_reads=merged_reads,
+                    ms_variations=msv,
+                )
+        return get_get_or_create(inner, FullMSVAssignment,
+            merged_reads=merged_reads,
+            ms_variations=msv,
+        )
 
 
 def align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version):
