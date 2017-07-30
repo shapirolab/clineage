@@ -409,6 +409,8 @@ def stream_group_alignemnts(fmsva):
 
 
 def separate_reads_by_genotypes(fmsva):
+    if type(fmsva) != FullMSVAssignment:
+        fmsva = next(fmsva)
     if fmsva.separation_finished:
         fmsva_hists = FullMSVHistogram.objects.filter(
                 assignment=fmsva,

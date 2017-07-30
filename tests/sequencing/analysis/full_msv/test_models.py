@@ -238,15 +238,21 @@ def test_amplicons_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variation
                         assert not os.path.exists(her.fastq1)
                         assert not os.path.exists(her.fastq2)
                         assert not os.path.exists(her.fastqm)
-            assert amps == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
-                           (set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
-                                inc == "F" else set())
-            for fmsva in fmsvas:
+                #delete data
                 fmsvv = fmsva.ms_variations
                 fmsva.delete()
                 assert not os.path.exists(fmsva.sorted_assignment_bam)
                 fmsvv.delete()
                 assert not os.path.exists(fmsvv.index_dump_dir)
+            assert amps == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
+                           (set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
+                                inc == "F" else set())
+            # for fmsva in fmsvas:
+            #     fmsvv = fmsva.ms_variations
+            #     fmsva.delete()
+            #     assert not os.path.exists(fmsva.sorted_assignment_bam)
+            #     fmsvv.delete()
+            #     assert not os.path.exists(fmsvv.index_dump_dir)
 
 
 @pytest.mark.django_db
@@ -303,6 +309,12 @@ def test_genotype_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variations
                     assert not os.path.exists(her.fastq1)
                     assert not os.path.exists(her.fastq2)
                     assert not os.path.exists(her.fastqm)
+                #delete data
+                fmsvv = fmsva.ms_variations
+                fmsva.delete()
+                assert not os.path.exists(fmsva.sorted_assignment_bam)
+                fmsvv.delete()
+                assert not os.path.exists(fmsvv.index_dump_dir)
         if inc == "F":
             assert gens == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED, amp)) \
                            | set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED, amp))
@@ -315,12 +327,12 @@ def test_genotype_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variations
             assert amps == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
                            (set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
                                 inc == "F" else set())
-        for fmsva in fmsvas:
-            fmsvv = fmsva.ms_variations
-            fmsva.delete()
-            assert not os.path.exists(fmsva.sorted_assignment_bam)
-            fmsvv.delete()
-            assert not os.path.exists(fmsvv.index_dump_dir)
+        # for fmsva in fmsvas:
+        #     fmsvv = fmsva.ms_variations
+        #     fmsva.delete()
+        #     assert not os.path.exists(fmsva.sorted_assignment_bam)
+        #     fmsvv.delete()
+        #     assert not os.path.exists(fmsvv.index_dump_dir)
 
 
 @pytest.mark.django_db
