@@ -2,7 +2,7 @@ import matlab.engine
 eng = matlab.engine.start_matlab()
 eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/')
 eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/')
-eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/jsonlab-1.2/jsonlab/');
+eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/jsonlab-1.2/jsonlab/')
 
 
 def distance_calculation(
@@ -32,6 +32,40 @@ def distance_calculation(
         'UseDataToReconstructTree', data_for_reconstruction,  # 'MS' / 'SNP' / 'MS_SNP'
         'CellsToBeAnalysed', filter_cells_by,  # Filter cells with data in 'MS' / 'SNP' / 'MS_SNP'  !!!Use Only MS until understanding this
         'MSweight', ms_snp_weight  # Relevant only when UseDataToReconstructTree='MS_SNP'
+    )
+
+
+def add_calculated_root_to_mutation_matrix(
+    mutation_table_path,
+    cell_data_path,
+    added_root_mutation_table_path,
+    cells_to_be_used_as_root=['Ave'],
+    SNP_TAB_FILE='',
+    SNP_tab_output_file_with_Root='',
+    JSON_duplicates_file_name='/dev/null',
+):
+    """
+    MATLAB wrapper for calculate_root
+    Args:
+        mutation_table_path: 
+        cell_data_path: 
+        added_root_mutation_table_path: 
+        cells_to_be_used_as_root: 
+        SNP_TAB_FILE: 
+        SNP_tab_output_file_with_Root: 
+        JSON_duplicates_file_name: 
+
+    Returns:
+
+    """
+    eng.calculate_root(
+        cell_data_path,
+        mutation_table_path,
+        SNP_TAB_FILE,
+        added_root_mutation_table_path,
+        SNP_tab_output_file_with_Root,
+        cells_to_be_used_as_root,
+        JSON_duplicates_file_name
     )
 
 
