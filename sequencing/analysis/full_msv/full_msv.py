@@ -180,36 +180,6 @@ def get_full_ms_variations(amplicon_collection, padding, mss_version):
     )
 
 
-def get_full_ms_variations_new_and_fucked(amplicon_collection, padding, mss_version, chunk_size=15000):
-    """
-    This method is the same as get_full_ms_variations except now it runs on amplicon_collection in
-    chunks, this is done in order to enable running on new big panels
-    """
-    def inner(raise_or_create_with_defaults):
-        all_amplicons = amplicon_collection.amplicons.all()
-        amplicons_splitted = grouper(chunk_size, all_amplicons)  # split the amplicons to create smaller amplicon collections
-        for amplicon_subgroup in amplicons_splitted:
-            partial_amplicon_collection = AmpliconCollection.objects.create()
-            partial_amplicon_collection.amplicons = amplicon_subgroup
-            partial_amplicon_collection.save()
-            with unique_dir_cm() as index_dir:
-                #run the process for each subgroup
-                bowtie_index = BowtieIndexMixin(index_dump_dir=index_dir)
-                print("###########index_dir", index_dir)
-                print("###########bowtie_index ", bowtie_index)
-                with unlink(_build_ms_variations(partial_amplicon_collection, padding, mss_version)) as fasta:
-                    bowtie2build(fasta, bowtie_index.index_files_prefix)
-                partial_amplicon_collection.delete() #prevent garbage on DB
-                yield raise_or_create_with_defaults(
-                    index_dump_dir=index_dir,
-                )
-        return get_get_or_create(inner, FullMSVariations,
-            amplicon_collection=amplicon_collection,
-            padding=padding,
-            microsatellites_version=mss_version,
-        )
-
-
 def split_merged_reads(merged_reads, reads_chunk_size=10**5, included_reads='M'):
     num_reads = sum(1 for x in merged_reads.included_reads_generator(included_reads))
     if merged_reads.fullmsvmergedreadspart_set.count() == math.ceil(num_reads/reads_chunk_size):
