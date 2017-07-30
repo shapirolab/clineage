@@ -300,7 +300,7 @@ def align_reads_to_ms_variations(merged_reads, padding, mss_version, chunk_size=
                     merged_reads=merged_reads,
                     ms_variations=msv,
                 )
-        return get_get_or_create(inner, FullMSVAssignment,
+        yield get_get_or_create(inner, FullMSVAssignment,
             merged_reads=merged_reads,
             ms_variations=msv,
         )
