@@ -157,8 +157,8 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(ms, srs, schema, max_distance_from_peak=2, histogram_class=Histogram):
-    cas = list(ms_genotypes_population_query(ms, srs, schema, histogram_class=histogram_class))
+def split_genotypes(ms, srs, schema, max_distance_from_peak=2, confidence=0.01, histogram_class=Histogram):
+    cas = list(ms_genotypes_population_query(ms, srs, schema, confidence=confidence, histogram_class=histogram_class))
     peaks = get_population_kernels(cas)
     if len(peaks) == 1:
         return
