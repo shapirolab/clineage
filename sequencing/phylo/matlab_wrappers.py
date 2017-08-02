@@ -8,7 +8,7 @@ eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/jsonlab-1.2/
 def distance_calculation(
         mutation_table_path,
         distance_matrix_output_path,
-        distance_metric=1,
+        distance_metric='MU_COUNT',
         data_for_reconstruction='MS',
         filter_cells_by='MS',
         ms_snp_weight=0,
@@ -18,17 +18,26 @@ def distance_calculation(
     Args:
         mutation_table_path: Input file (mutations table)
         distance_matrix_output_path: Output file (Distance table)
-        distance_metric: METRIC_DICT = struct('ABS',0,'NORM_ABS',1,'EUC',2,'SQUARED',3,'MU_COUNT',4,'ML',5,'IGOR',6)
+        distance_metric: METRIC_DICT = ['ABS','NORM_ABS','EUC','SQUARED','MU_COUNT','ML','IGOR']
         data_for_reconstruction: 'MS' / 'SNP' / 'MS_SNP'
         filter_cells_by: Filter cells with data in 'MS' / 'SNP' / 'MS_SNP'
         ms_snp_weight: Relevant only when UseDataToReconstructTree='MS_SNP'
     """
     assert data_for_reconstruction in ['MS', 'SNP', 'MS_SNP']
     assert filter_cells_by in ['MS', 'SNP', 'MS_SNP']
+    distance_metric_map = {
+        'ABS': 0,
+        'NORM_ABS': 1,
+        'EUC': 2,
+        'SQUARED': 3,
+        'MU_COUNT': 4,
+        'ML': 5,
+        'IGOR': 6}
+    assert distance_metric in distance_metric_map.keys()
     eng.Distance_Calculation(
         'MStableInputFile', mutation_table_path,  # Input file (mutations table)
         'DistanceMatOutputFile', distance_matrix_output_path,  # Output file (Distance table)
-        'DistMetric', distance_metric,  # METRIC_DICT = struct('ABS',0,'NORM_ABS',1,'EUC',2,'SQUARED',3,'MU_COUNT',4,'ML',5,'IGOR',6);
+        'DistMetric', distance_metric_map[distance_metric],  # METRIC_DICT = struct('ABS',0,'NORM_ABS',1,'EUC',2,'SQUARED',3,'MU_COUNT',4,'ML',5,'IGOR',6);
         'UseDataToReconstructTree', data_for_reconstruction,  # 'MS' / 'SNP' / 'MS_SNP'
         'CellsToBeAnalysed', filter_cells_by,  # Filter cells with data in 'MS' / 'SNP' / 'MS_SNP'  !!!Use Only MS until understanding this
         'MSweight', ms_snp_weight  # Relevant only when UseDataToReconstructTree='MS_SNP'
