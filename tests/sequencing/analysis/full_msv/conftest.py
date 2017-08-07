@@ -216,12 +216,13 @@ def amp_134_full_msv():
     return VARS_134
 
 
-@pytest.fixture()
+@pytest.yield_fixture()
 def full_ms_variations(amp_134_full_msv, amplicon_collection, requires_microsatellites):
     padding = 50
     mss_version = 0
     fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
-    return fmsv
+    yield fmsv
+    fmsv.delete()
 
 
 @pytest.fixture(scope="session")

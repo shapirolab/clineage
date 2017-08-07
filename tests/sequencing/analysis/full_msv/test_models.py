@@ -171,6 +171,7 @@ def test_stream_group_alignemnts(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_var
                         ref_reads_d = [seq.id for seq in fmsv_reads_fd[l_id, bc_id, ASSEMBLED, amp_id][RM]]
                     # TODO: inc == "F"
                     assert set(generator_read_ids) == set(ref_reads_d)
+                fmsva.ms_variations.delete()
                 fmsva.delete()
     msv.delete()
 
@@ -247,12 +248,6 @@ def test_amplicons_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variation
             assert amps == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
                            (set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
                                 inc == "F" else set())
-            # for fmsva in fmsvas:
-            #     fmsvv = fmsva.ms_variations
-            #     fmsva.delete()
-            #     assert not os.path.exists(fmsva.sorted_assignment_bam)
-            #     fmsvv.delete()
-            #     assert not os.path.exists(fmsvv.index_dump_dir)
 
 
 @pytest.mark.django_db
@@ -327,12 +322,6 @@ def test_genotype_mapping(fmsv_merged_reads_d, fmsv_reads_fd, full_ms_variations
             assert amps == set(fmsv_reads_fd.keys(l_id, bc_id, ASSEMBLED)) | \
                            (set(fmsv_reads_fd.keys(l_id, bc_id, UNASSEMBLED)) if \
                                 inc == "F" else set())
-        # for fmsva in fmsvas:
-        #     fmsvv = fmsva.ms_variations
-        #     fmsva.delete()
-        #     assert not os.path.exists(fmsva.sorted_assignment_bam)
-        #     fmsvv.delete()
-        #     assert not os.path.exists(fmsvv.index_dump_dir)
 
 
 @pytest.mark.django_db
