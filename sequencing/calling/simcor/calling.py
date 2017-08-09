@@ -78,25 +78,24 @@ def get_amplicons_by_sr(sr):
     return set(amp.id for amp in sr.library.subclass.amplicons)
 
 
-def get_ms_amplicon(ms, sr):
+def get_ms_amplicon(ms, sr_amps):
     amplicons = get_amplicon_by_ms(ms)
-    sr_amps = get_amplicons_by_sr(sr)
     actual_amp = set(amp.id for amp in amplicons) & sr_amps
     ampid = actual_amp.pop()
     return Amplicon.objects.select_subclasses().get(id=ampid)
 
 
-def ms_genotypes_population_query_with_amplicon(ms, amplicon, srs, schema, confidence=0.01, histogram_class=Histogram):
-    for sr in srs:
-        for h in histogram_class.objects.filter(amplicon=amplicon, sample_reads=sr):
-            try:
-                ca = CalledAlleles.objects.select_subclasses().get(calling_scheme=schema, histogram=h,
-                                                                   microsatellite=ms)
-            except CalledAlleles.DoesNotExist:
-                continue  # No calling attempt
-            if ca.confidence > confidence:
-                continue
-            yield ca
+# def ms_genotypes_population_query_with_amplicon(ms, amplicon, srs, schema, confidence=0.01, histogram_class=Histogram):
+#     for sr in srs:
+#         for h in histogram_class.objects.filter(amplicon=amplicon, sample_reads=sr):
+#             try:
+#                 ca = CalledAlleles.objects.select_subclasses().get(calling_scheme=schema, histogram=h,
+#                                                                    microsatellite=ms)
+#             except CalledAlleles.DoesNotExist:
+#                 continue  # No calling attempt
+#             if ca.confidence > confidence:
+#                 continue
+#             yield ca
 
 
 def ms_genotypes_population_query_with_amplicon_all(ms, amplicon, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
@@ -111,13 +110,6 @@ def ms_genotypes_population_query_with_amplicon_all(ms, amplicon, srs, schema, c
         if ca.confidence > confidence:
             continue
         yield ca
-
-
-def ms_genotypes_population_query(ms, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
-    amp = get_ms_amplicon(ms, list(srs)[0])  # TODO: consider iterating over all srs and asserting they all have the same panel
-    yield from ms_genotypes_population_query_with_amplicon_all(
-        ms, amp, srs, schema,
-        confidence=confidence, reads_threshold=reads_threshold, histogram_class=histogram_class)
 
 
 def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3):
@@ -160,8 +152,11 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(ms, srs, schema, max_distance_from_peak=2, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
-    cas = list(ms_genotypes_population_query(ms, srs, schema, confidence=confidence, reads_threshold=reads_threshold, histogram_class=histogram_class))
+def split_genotypes(ms, srs, amplicon, schema, max_distance_from_peak=2, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
+    cas = list(ms_genotypes_population_query_with_amplicon_all(ms, amplicon, srs, schema,
+                                                               confidence=confidence,
+                                                               reads_threshold=reads_threshold,
+                                                               histogram_class=histogram_class))
     peaks = get_population_kernels(cas)
     if len(peaks) == 1:
         return
