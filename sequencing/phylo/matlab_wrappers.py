@@ -7,6 +7,14 @@ eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/')
 eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/jsonlab-1.2/jsonlab/')
 
 
+def sr_label_func(sr):
+    return 'ID{}'.format(sr)
+
+
+def ms_label_func(ms):
+    return 'LOC_{}'.format(ms)
+
+
 def distance_calculation(
         mutation_table_path,
         distance_matrix_output_path,
