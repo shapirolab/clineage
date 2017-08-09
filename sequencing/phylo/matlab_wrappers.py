@@ -1,3 +1,5 @@
+import csv
+from misc.utils import unlink, get_unique_path
 import matlab.engine
 eng = matlab.engine.start_matlab()
 eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/')
@@ -103,6 +105,15 @@ def distance_based_reconstruction(
     )
 
 
+def read_statistics_file(path):
+    with open(path) as f:
+        rdr = csv.DictReader(f, dialect='excel-tab')
+        rows = list(rdr)
+        assert len(rows) == 1
+        row = rows[0]
+        return row
+
+
 def tree_enrichment_and_plotting(
         tree_newick,
         cell_data_path,
@@ -127,3 +138,30 @@ def tree_enrichment_and_plotting(
         JSON_leaf_color_file_name,
         JSON_legend_file_name,
     )
+
+
+def basic_tree_enrichment_and_plotting(
+        tree_newick,
+        cell_data_path,
+        mutation_table_path,
+):
+    with unlink(get_unique_path('json')) as json1:
+        with unlink(get_unique_path('json')) as json2:
+            with unlink(get_unique_path('json')) as json3:
+                with unlink(get_unique_path('json')) as json4:
+                    with unlink(get_unique_path('json')) as json5:
+                        with unlink(get_unique_path('tab')) as clustering_metrics_file:
+                            tree_enrichment_and_plotting(
+                                tree_newick,
+                                cell_data_path,
+                                mutation_table_path,
+                                snp_table_path='',
+                                Lineage_Output_File=clustering_metrics_file,
+                                JSON_duplicates_file_name=json1,
+                                JSON_cluster_width_file_name=json2,
+                                JSON_cluster_color_file_name=json3,
+                                JSON_leaf_color_file_name=json4,
+                                JSON_legend_file_name=json5,
+                            )
+                            clustering_scores = read_statistics_file(clustering_metrics_file)
+    return clustering_scores
