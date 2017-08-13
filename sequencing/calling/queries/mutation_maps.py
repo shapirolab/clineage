@@ -26,11 +26,11 @@ def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
 
 
 def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30,
-                            ms_repaet_unit='AC', histogram_class=Histogram):
+                            ms_repeat_unit='AC', histogram_class=Histogram):
     amp_by_ms = map_amplicons_to_ms(srs)
     d = dict()
     for ms, amp in bar(amp_by_ms.items()):
-        if ms.repeat_unit_type != ms_repaet_unit:
+        if ms.repeat_unit_type != ms_repeat_unit:
             continue
         for ca in ms_genotypes_population_query_with_amplicon_all(ms, amp, srs, calling_scheme,
                                                         confidence=confidence_threshold,
