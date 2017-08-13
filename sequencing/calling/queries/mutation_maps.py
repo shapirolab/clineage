@@ -67,3 +67,70 @@ def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_
                                                        reads_threshold=reads_threshold,
                                                        histogram_class=histogram_class)
     return ms_split_calling_results
+
+
+def invert_biallelic_results(ms_split_calling_results):
+    """
+    Inverting a nested dictionary from:
+        d[sr][ms][bin][allele]
+     to:
+        d[ms][sr][allele][bin]
+    Args:
+        ms_split_calling_results: 
+
+    Returns:
+
+    """
+    tran_h1 = dict()
+    for ms in ms_split_calling_results:
+        if ms_split_calling_results[ms] is None:
+            tran_h1[ms.id] = None
+            continue
+        tran_h1[ms] = dict()
+        for ca in ms_split_calling_results[ms]:
+            inverted_dict = dict()
+            for allele, slot in ms_split_calling_results[ms][ca].items():
+                inverted_dict.setdefault(slot, []).append(allele)
+            tran_h1[ms][ca.histogram.sample_reads] = {k: v[0] for k, v in inverted_dict.items() if len(v) == 1}
+    return tran_h1
+
+
+def add_mono_calling_to_hemizygous_loci(biallelic_dict, mono_dict, hemizygous_chromosomes=frozenset({'X', 'Y'})):
+    tran_ms_mono_and_bi = invert_biallelic_results(biallelic_dict)
+    #add for each ms,sr the mono allelic calling
+    for sr in mono_dict:
+        for ms in mono_dict[sr]:
+            if ms.slice.chromosome.name not in hemizygous_chromosomes:
+                continue
+            if ms not in tran_ms_mono_and_bi or tran_ms_mono_and_bi[ms] is None:
+                tran_ms_mono_and_bi[ms] = dict()
+            tran_ms_mono_and_bi.setdefault(ms, dict()).setdefault(sr, dict())['mono'] = mono_dict[sr][ms]
+    return tran_ms_mono_and_bi
+
+
+def flatten_bi_allelic_binning(tran_ms_mono_and_bi):
+    """
+    Deobjectify SampleReads and Microsatellite objects and leave their ids
+    Flatten biallelic bins to ms-like identities MSID_BINI
+    Args:
+        tran_ms_mono_and_bi: 
+
+    Returns:
+
+    """
+    print_ready = dict()
+    for ms in tran_ms_mono_and_bi:
+        if tran_ms_mono_and_bi[ms] is None:
+            continue
+        bins = {k for sr in tran_ms_mono_and_bi[ms] for k in tran_ms_mono_and_bi[ms][sr].keys()}
+        if 'mono' in bins:  # override biallic calling with mono allelic calling results across all sample reads
+            for sr in tran_ms_mono_and_bi[ms]:
+                if 'mono' not in tran_ms_mono_and_bi[ms][sr]:
+                    continue
+                print_ready.setdefault(sr.id, dict())[ms.id] = tran_ms_mono_and_bi[ms][sr]['mono']
+        else:
+            bins_to_ms_labels = {bin_key: '{}_{}'.format(ms.id, label_i) for label_i, bin_key in enumerate(sorted(list(bins)))}
+            for sr in tran_ms_mono_and_bi[ms]:
+                for bin_key in tran_ms_mono_and_bi[ms][sr]:
+                    print_ready.setdefault(sr.id, dict())[bins_to_ms_labels[bin_key]] = tran_ms_mono_and_bi[ms][sr][bin_key]
+    return print_ready
