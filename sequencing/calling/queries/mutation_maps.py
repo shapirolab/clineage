@@ -4,7 +4,7 @@ from sequencing.calling.simcor.calling import split_genotypes
 from sequencing.calling.simcor.calling import ms_genotypes_population_query_with_amplicon_all
 from sequencing.analysis.models import Histogram
 import numpy as np
-
+import copy
 
 def transpose_dict(d):
     td = dict()
@@ -40,6 +40,27 @@ def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, read
                 continue
             d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca.genotypes.allele1
     return d
+
+
+def merge_mono_mutations_dicts(d1, d2):
+    """
+    Merge two mono allelic mutation dictionaries
+    asserts no overlap between the mss
+    Args:
+        d1: 
+        d2: 
+
+    Returns:
+
+    """
+    merged = copy.deepcopy(d1)
+    d2c = copy.deepcopy(d2)
+    for sr in d2.keys() - d1.keys():
+        merged[sr].update(d2c[sr])
+    for sr in d1.keys() & d2.keys():
+        assert d1[sr].keys() & d1[sr].keys() == set()
+        merged[sr].update(d2c[sr])
+    return merged
 
 
 def map_amplicons_to_ms(srs):
