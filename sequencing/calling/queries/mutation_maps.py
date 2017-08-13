@@ -1,7 +1,7 @@
 from targeted_enrichment.planning.models import Microsatellite
 from frogress import bar
 from sequencing.calling.simcor.calling import split_genotypes
-from sequencing.calling.models import CalledAlleles
+from sequencing.calling.simcor.calling import ms_genotypes_population_query_with_amplicon_all
 from sequencing.analysis.models import Histogram
 import numpy as np
 
@@ -25,17 +25,20 @@ def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
     return filtered_by_l1_l2
 
 
-def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30):
+def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30,
+                            ms_repaet_unit='AC', histogram_class=Histogram):
+    amp_by_ms = map_amplicons_to_ms(srs)
     d = dict()
-    for sr in srs:
-        d[sr] = dict()
-        for ca in CalledAlleles.objects.filter(
-                calling_scheme=calling_scheme,
-                histogram__sample_reads=sr,
-                histogram__num_reads__gte=reads_threshold).select_subclasses():
+    for ms, amp in bar(amp_by_ms.items()):
+        if ms.repeat_unit_type != ms_repaet_unit:
+            continue
+        for ca in ms_genotypes_population_query_with_amplicon_all(ms, amp, srs, calling_scheme,
+                                                        confidence=confidence_threshold,
+                                                        reads_threshold=reads_threshold,
+                                                        histogram_class=histogram_class):
             if ca.confidence > confidence_threshold:
                 continue
-            d[sr][ca.microsatellite] = ca.genotypes.allele1
+            d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca.genotypes.allele1
     return d
 
 
