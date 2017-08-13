@@ -3,19 +3,30 @@ from sequencing.phylo.tree_assessment.utils import memory_expensive_random_choos
 from dendropy import SeedNodeDeletionException
 from frogress import bar
 
+
 def challenge_triplets_generator(ref_tree, n=1000, min_d=3):
     nodes = [n.taxon for n in ref_tree.leaf_nodes()]
     ndm = ref_tree.node_distance_matrix()
     pdm = ref_tree.phylogenetic_distance_matrix()
     for nodes_triplet in memory_expensive_random_choose(nodes, 3, n=n):
         pairs_in_triplet = list(itertools.combinations(nodes_triplet, 2))
-        ref_close_pair = set(sorted(pairs_in_triplet, key=lambda x: pdm.path_edge_count(x[0],x[1]))[0])
+        # ref_close_pair = set(sorted(pairs_in_triplet, key=lambda x: pdm.path_edge_count(x[0],x[1]))[0])
+        ref_close_pair = set(sorted(pairs_in_triplet, key=lambda x: ndm.distance(
+            ref_tree.find_node_for_taxon(x[0]),
+            ref_tree.find_node_for_taxon(x[1]),
+            is_weighted_edge_distances=False))[0])
         d = ndm.distance(ref_tree.mrca(taxa=nodes_triplet), ref_tree.mrca(taxa=ref_close_pair))
         if d < min_d:
             continue
         taxon_a, taxon_b = ref_close_pair
-        distance_a_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_a), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)  # path_edge_count
-        distance_b_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_b), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)
+        distance_a_to_ab_mrca = ndm.distance(
+            ref_tree.find_node_for_taxon(taxon_a),
+            ref_tree.mrca(taxa=ref_close_pair),
+            is_weighted_edge_distances=False)  # path_edge_count
+        distance_b_to_ab_mrca = ndm.distance(
+            ref_tree.find_node_for_taxon(taxon_b),
+            ref_tree.mrca(taxa=ref_close_pair),
+            is_weighted_edge_distances=False)  # path_edge_count
         if min(distance_a_to_ab_mrca, distance_b_to_ab_mrca) < 2:
             continue
         yield d, nodes_triplet, ref_close_pair
