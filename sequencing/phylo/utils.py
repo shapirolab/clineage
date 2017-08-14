@@ -19,3 +19,4 @@ def normalize_newick(newick_path, normalized_newick_path):
     for e in tree.edges():
         e.length = None
     tree.write_to_path(normalized_newick_path, 'newick', suppress_rooting=True)
+
