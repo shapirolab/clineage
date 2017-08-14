@@ -1,8 +1,8 @@
 import sys
-sys.path.append('/home/dcsoft/s/Ofir/igor_tree_reconstruction_20170731/')
+sys.path.append('/home/dcsoft/s/Ofir/igor_tree_reconstruction_20170808/')
 from importalg import importalg
 from backgraund import backgraund7
-from read_data import parse_mutations_table, get_cells_and_root, parse_distance_matrix, write_distance_matrix
+from read_data import parse_mutations_table, get_cells_and_root
 
 
 def calculate_igors_tree(mutation_table_path, output_path, dist="ig1", eps=0.001):
