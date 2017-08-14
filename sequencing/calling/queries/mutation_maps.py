@@ -27,12 +27,12 @@ def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
 
 def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30,
                             ms_repeat_unit='AC', histogram_class=Histogram):
-    amp_by_ms = map_amplicons_to_ms(srs)
+    amps_by_ms = map_amplicons_to_ms(srs)
     d = dict()
-    for ms, amp in bar(amp_by_ms.items()):
+    for ms, amps in bar(amps_by_ms.items()):
         if ms.repeat_unit_type != ms_repeat_unit:
             continue
-        for ca in ms_genotypes_population_query_with_amplicon_all(ms, amp, srs, calling_scheme,
+        for ca in ms_genotypes_population_query_with_amplicon_all(ms, amps, srs, calling_scheme,
                                                         confidence=confidence_threshold,
                                                         reads_threshold=reads_threshold,
                                                         histogram_class=histogram_class):
@@ -68,21 +68,21 @@ def map_amplicons_to_ms(srs):
     panels = set(sr.library.subclass.panel for sr in srs)
     assert len(panels) == 1
     panel = panels.pop()
-    amp_by_ms = dict()
+    amps_by_ms = dict()
     for amp in panel.amplicon_collection.amplicons.all():
         for ms in Microsatellite.objects.filter(slice__contained=amp.slice):
-            amp_by_ms[ms] = amp
-    return amp_by_ms
+            amps_by_ms.setdefault(ms, list()).append(amp)
+    return amps_by_ms
 
 
 def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, max_distance_from_peak=3,
                           ms_repaet_unit='AC', histogram_class=Histogram):
-    amp_by_ms = map_amplicons_to_ms(srs)
+    amps_by_ms = map_amplicons_to_ms(srs)
     ms_split_calling_results = dict()
-    for ms, amp in bar(amp_by_ms.items()):
+    for ms, amps in bar(amps_by_ms.items()):
         if ms.repeat_unit_type != ms_repaet_unit:
             continue
-        ms_split_calling_results[ms] = split_genotypes(ms, srs, amp, calling_scheme,
+        ms_split_calling_results[ms] = split_genotypes(ms, srs, amps, calling_scheme,
                                                        max_distance_from_peak=max_distance_from_peak,
                                                        confidence=confidence_threshold,
                                                        reads_threshold=reads_threshold,

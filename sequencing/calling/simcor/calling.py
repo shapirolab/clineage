@@ -98,9 +98,9 @@ def get_ms_amplicon(ms, sr_amps):
 #             yield ca
 
 
-def ms_genotypes_population_query_with_amplicon_all(ms, amplicon, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
+def ms_genotypes_population_query_with_amplicon_all(ms, amplicons, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
     for h in histogram_class.objects.filter(
-            amplicon=amplicon,
+            amplicon__in=amplicons,
             num_reads=reads_threshold,
             sample_reads__in=srs):
         try:
