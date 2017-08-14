@@ -76,11 +76,11 @@ def map_amplicons_to_ms(srs):
 
 
 def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, max_distance_from_peak=3,
-                          ms_repaet_unit='AC', histogram_class=Histogram):
+                          ms_repeat_unit='AC', histogram_class=Histogram):
     amps_by_ms = map_amplicons_to_ms(srs)
     ms_split_calling_results = dict()
     for ms, amps in bar(amps_by_ms.items()):
-        if ms.repeat_unit_type != ms_repaet_unit:
+        if ms.repeat_unit_type != ms_repeat_unit:
             continue
         ms_split_calling_results[ms] = split_genotypes(ms, srs, amps, calling_scheme,
                                                        max_distance_from_peak=max_distance_from_peak,
