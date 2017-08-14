@@ -2,9 +2,13 @@ from targeted_enrichment.planning.models import Microsatellite
 from frogress import bar
 from sequencing.calling.simcor.calling import split_genotypes
 from sequencing.calling.simcor.calling import ms_genotypes_population_query_with_amplicon_all
+from sequencing.calling.hist import Histogram as dHistogram
+from collections import Counter
+from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 from sequencing.analysis.models import Histogram
 import numpy as np
 import copy
+
 
 def transpose_dict(d):
     td = dict()
@@ -155,3 +159,22 @@ def flatten_bi_allelic_binning(tran_ms_mono_and_bi):
                 for bin_key in tran_ms_mono_and_bi[ms][sr]:
                     print_ready.setdefault(sr.id, dict())[bins_to_ms_labels[bin_key]] = tran_ms_mono_and_bi[ms][sr][bin_key]
     return print_ready
+
+
+def is_population_mono_allelic(alleles, minimal_distance_between_peaks=2, min_prop=0.05):
+    h = dHistogram(Counter(alleles))
+    return len(get_far_apart_highest_peaks(
+            h,
+            allele_number=2,
+            minimal_distance_between_peaks=minimal_distance_between_peaks,
+            min_prop=min_prop)) == 1
+
+
+def filter_bipartition_loci(full_td):
+    btd = dict()
+    tbtd = transpose_dict(full_td)
+    for loc in bar(tbtd):
+        if is_population_mono_allelic(tbtd[loc].values()):
+            for c in tbtd[loc]:
+                btd.setdefault(c, dict())[loc] = full_td[c][loc]
+    return btd
