@@ -57,13 +57,15 @@ def merge_mono_mutations_dicts(d1, d2):
     Returns:
 
     """
-    merged = copy.deepcopy(d1)
-    d2c = copy.deepcopy(d2)
+    merged = dict()
     for sr in d2.keys() - d1.keys():
-        merged[sr].update(d2c[sr])
+        merged[sr].update(d2[sr])
+    for sr in d1.keys() - d2.keys():
+        merged[sr].update(d1[sr])
     for sr in d1.keys() & d2.keys():
         assert d1[sr].keys() & d1[sr].keys() == set()
-        merged[sr].update(d2c[sr])
+        merged[sr].update(d1[sr])
+        merged[sr].update(d2[sr])
     return merged
 
 
