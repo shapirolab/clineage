@@ -23,4 +23,4 @@ def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=l
                 cell_data_path=cell_data_path,
                 mutation_table_path=mutation_table_path,
                 )
-            yield mutation_table_path, plot
+            yield mutation_table_path, cell_data_path, plot
