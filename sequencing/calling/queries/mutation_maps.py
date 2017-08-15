@@ -7,7 +7,6 @@ from collections import Counter
 from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 from sequencing.analysis.models import Histogram
 import numpy as np
-import copy
 
 
 def transpose_dict(d):
@@ -40,8 +39,6 @@ def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, read
                                                         confidence=confidence_threshold,
                                                         reads_threshold=reads_threshold,
                                                         histogram_class=histogram_class):
-            if ca.confidence > confidence_threshold:
-                continue
             d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca.genotypes.allele1
     return d
 
