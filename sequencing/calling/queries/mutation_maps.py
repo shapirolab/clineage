@@ -1,7 +1,7 @@
 from targeted_enrichment.planning.models import Microsatellite
 from frogress import bar
 from sequencing.calling.simcor.calling import split_genotypes
-from sequencing.calling.simcor.calling import ms_genotypes_population_query_with_amplicon_all
+from sequencing.calling.models import BestCorrelationCalledAlleles
 from sequencing.calling.hist import Histogram as dHistogram
 from collections import Counter
 from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
@@ -17,6 +17,18 @@ def transpose_dict(d):
     return td
 
 
+def get_cas_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, histogram_class=Histogram):
+    d = dict()
+    for ca in BestCorrelationCalledAlleles.objects.filter(
+        calling_scheme=calling_scheme,
+        histogram__in=histogram_class.objects.filter(
+            num_reads__gte=reads_threshold,
+            sample_reads__in=srs),
+        confidence__lte=confidence_threshold).select_related('histogram__sample_reads', 'microsatellite', 'genotypes'):
+        d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca
+    return d
+
+
 def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
     l1_counts = {kl1: len(mutations_dict[kl1]) for kl1 in mutations_dict}
     trans_mutations_dict = transpose_dict(mutations_dict)
@@ -29,16 +41,12 @@ def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
 
 
 def get_mono_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30,
-                            ms_repeat_unit='AC', histogram_class=Histogram):
-    amps_by_ms = map_amplicons_to_ms(srs)
+                            histogram_class=Histogram):
+    cas_d = get_cas_dict(srs, calling_scheme, confidence_threshold=confidence_threshold,
+                 reads_threshold=reads_threshold, histogram_class=histogram_class)
     d = dict()
-    for ms, amps in bar(amps_by_ms.items()):
-        if ms.repeat_unit_type != ms_repeat_unit:
-            continue
-        for ca in ms_genotypes_population_query_with_amplicon_all(ms, amps, srs, calling_scheme,
-                                                        confidence=confidence_threshold,
-                                                        reads_threshold=reads_threshold,
-                                                        histogram_class=histogram_class):
+    for sr in cas_d:
+        for ms, ca in cas_d[sr].items():
             d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca.genotypes.allele1
     return d
 
@@ -79,17 +87,14 @@ def map_amplicons_to_ms(srs):
 
 
 def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, max_distance_from_peak=3,
-                          ms_repeat_unit='AC', histogram_class=Histogram):
-    amps_by_ms = map_amplicons_to_ms(srs)
+                          histogram_class=Histogram):
+    cas_d = get_cas_dict(srs, calling_scheme, confidence_threshold=confidence_threshold,
+                         reads_threshold=reads_threshold, histogram_class=histogram_class)
+    cas_d_by_ms = transpose_dict(cas_d)
     ms_split_calling_results = dict()
-    for ms, amps in bar(amps_by_ms.items()):
-        if ms.repeat_unit_type != ms_repeat_unit:
-            continue
-        ms_split_calling_results[ms] = split_genotypes(ms, srs, amps, calling_scheme,
-                                                       max_distance_from_peak=max_distance_from_peak,
-                                                       confidence=confidence_threshold,
-                                                       reads_threshold=reads_threshold,
-                                                       histogram_class=histogram_class)
+    for ms in bar(cas_d_by_ms):
+        ms_split_calling_results[ms] = split_genotypes(cas_d_by_ms[ms].values(),
+                                                       max_distance_from_peak=max_distance_from_peak)
     return ms_split_calling_results
 
 

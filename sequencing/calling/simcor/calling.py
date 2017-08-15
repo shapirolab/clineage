@@ -1,5 +1,4 @@
 from sequencing.calling.simcor.models_common import ProportionalMicrosatelliteAlleleSet, ProportionStepModelMixin
-from sequencing.calling.hist import Histogram
 import sys
 from sequencing.calling.models import MicrosatelliteAlleleSet
 from misc.utils import get_get_or_create
@@ -7,7 +6,7 @@ from collections import Counter
 from sequencing.analysis.models import HistogramEntryReads, Histogram
 from targeted_enrichment.amplicons.models import Amplicon
 from itertools import tee
-from sequencing.calling.models import BestCorrelationCalledAlleles
+
 from sequencing.calling.hist import Histogram as dHistogram
 from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 
@@ -84,31 +83,6 @@ def get_ms_amplicon(ms, sr_amps):
     return Amplicon.objects.select_subclasses().get(id=ampid)
 
 
-# def ms_genotypes_population_query_with_amplicon(ms, amplicon, srs, schema, confidence=0.01, histogram_class=Histogram):
-#     for sr in srs:
-#         for h in histogram_class.objects.filter(amplicon=amplicon, sample_reads=sr):
-#             try:
-#                 ca = CalledAlleles.objects.select_subclasses().get(calling_scheme=schema, histogram=h,
-#                                                                    microsatellite=ms)
-#             except CalledAlleles.DoesNotExist:
-#                 continue  # No calling attempt
-#             if ca.confidence > confidence:
-#                 continue
-#             yield ca
-
-
-def ms_genotypes_population_query_with_amplicon_all(ms, amplicons, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
-    for ca in BestCorrelationCalledAlleles.objects.filter(
-        microsatellite=ms,
-        calling_scheme=schema,
-        histogram__in=histogram_class.objects.filter(
-            num_reads__gte=reads_threshold,
-            amplicon__in=amplicons,
-            sample_reads__in=srs),
-        confidence__lte=confidence).select_related('histogram__sample_reads', 'microsatellite'):
-        yield ca
-
-
 def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3):
     h = dHistogram(Counter([a for ca in genotypes for a in ca.genotypes.alleles]))
     return get_far_apart_highest_peaks(
@@ -149,11 +123,7 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(ms, srs, amplicon, schema, max_distance_from_peak=2, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
-    cas = list(ms_genotypes_population_query_with_amplicon_all(ms, amplicon, srs, schema,
-                                                               confidence=confidence,
-                                                               reads_threshold=reads_threshold,
-                                                               histogram_class=histogram_class))
+def split_genotypes(cas, max_distance_from_peak=2):
     peaks = get_population_kernels(cas)
     if len(peaks) == 1:
         return
