@@ -3,12 +3,11 @@ from sequencing.calling.hist import Histogram
 import sys
 from sequencing.calling.models import MicrosatelliteAlleleSet
 from misc.utils import get_get_or_create
-import functools
 from collections import Counter
 from sequencing.analysis.models import HistogramEntryReads, Histogram
 from targeted_enrichment.amplicons.models import Amplicon
 from itertools import tee
-from sequencing.calling.models import CalledAlleles
+from sequencing.calling.models import BestCorrelationCalledAlleles
 from sequencing.calling.hist import Histogram as dHistogram
 from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
 
@@ -99,16 +98,14 @@ def get_ms_amplicon(ms, sr_amps):
 
 
 def ms_genotypes_population_query_with_amplicon_all(ms, amplicons, srs, schema, confidence=0.01, reads_threshold=30, histogram_class=Histogram):
-    for h in histogram_class.objects.filter(
-            amplicon__in=amplicons,
+    for ca in BestCorrelationCalledAlleles.objects.filter(
+        microsatellite=ms,
+        calling_scheme=schema,
+        histogram__in=histogram_class.objects.filter(
             num_reads__gte=reads_threshold,
-            sample_reads__in=srs):
-        try:
-            ca = CalledAlleles.objects.select_subclasses().get(calling_scheme=schema, histogram=h, microsatellite=ms)
-        except CalledAlleles.DoesNotExist:
-            continue  # No calling attempt
-        if ca.confidence > confidence:
-            continue
+            amplicon__in=amplicons,
+            sample_reads__in=srs),
+        confidence__lte=confidence).select_related('histogram__sample_reads', 'microsatellite'):
         yield ca
 
 
