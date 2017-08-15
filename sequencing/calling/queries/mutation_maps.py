@@ -24,7 +24,8 @@ def get_cas_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold
         histogram__in=histogram_class.objects.filter(
             num_reads__gte=reads_threshold,
             sample_reads__in=srs),
-        confidence__lte=confidence_threshold).select_related('histogram__sample_reads', 'microsatellite', 'genotypes'):
+        confidence__lte=confidence_threshold).select_related(
+            'histogram__sample_reads', 'microsatellite__slice__chromosome', 'genotypes'):
         d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca
     return d
 
@@ -94,7 +95,7 @@ def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_
                          reads_threshold=reads_threshold, histogram_class=histogram_class)
     cas_d_by_ms = transpose_dict(cas_d)
     ms_split_calling_results = dict()
-    for ms in bar(cas_d_by_ms):
+    for ms in cas_d_by_ms:
         ms_split_calling_results[ms] = split_genotypes(cas_d_by_ms[ms].values(),
                                                        max_distance_from_peak=max_distance_from_peak)
     return ms_split_calling_results
@@ -179,7 +180,7 @@ def is_population_mono_allelic(alleles, minimal_distance_between_peaks=2, min_pr
 def filter_bipartition_loci(full_td):
     btd = dict()
     tbtd = transpose_dict(full_td)
-    for loc in bar(tbtd):
+    for loc in tbtd:
         if is_population_mono_allelic(tbtd[loc].values()):
             for c in tbtd[loc]:
                 btd.setdefault(c, dict())[loc] = full_td[c][loc]
