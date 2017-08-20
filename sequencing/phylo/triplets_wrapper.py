@@ -1,6 +1,6 @@
 from sequencing.phylo.matlab_wrappers import add_calculated_root_to_mutation_matrix
 from sequencing.phylo.csv_writers import print_mutation_dict_to_file
-from misc.utils import unlink, get_unique_path
+from misc.utils import unlink, relaxed_unlink, get_unique_path
 import os
 import csv
 import networkx as nx
@@ -20,10 +20,10 @@ def add_root_to_dict(
         SNP_tab_output_file_with_Root='',
 ):
     new_d = dict()
-    with unlink(get_unique_path('tab')) as temp_input_file_path:
+    with relaxed_unlink(get_unique_path('tab')) as temp_input_file_path:
         print_mutation_dict_to_file(textual_mutation_dict, temp_input_file_path)
-        with unlink(get_unique_path('json')) as JSON_duplicates_file_name:
-            with unlink(get_unique_path('tab')) as temp_output_file_path:
+        with relaxed_unlink(get_unique_path('json')) as JSON_duplicates_file_name:
+            with relaxed_unlink(get_unique_path('tab')) as temp_output_file_path:
                 add_calculated_root_to_mutation_matrix(
                     mutation_table_path=temp_input_file_path,
                     cell_data_path=cell_data_path,
@@ -88,7 +88,7 @@ def calculate_triplets_tree(
         cell_data_path=cell_data_path,
         cells_to_be_used_as_root=cells_to_be_used_as_root)
     rtd_for_sagi, cell_id_map_for_sagi = map_cell_ids_for_sagi(rtd)
-    with unlink(get_unique_path("tab")) as mutation_table_path_for_triplets:
+    with relaxed_unlink(get_unique_path("tab")) as mutation_table_path_for_triplets:
         print_mutation_dict_to_file(rtd_for_sagi, mutation_table_path_for_triplets)  # This file operation is redundent
         root, cells = get_cells_and_root(mutation_table_path_for_triplets)
     G = nx.Graph()
@@ -150,7 +150,7 @@ def run_sagis_triplets(
     sabc=0,
     tripletsnumber=5000,
 ):
-    with unlink(get_unique_path('triplets')) as triplets_list_path:
+    with relaxed_unlink(get_unique_path('triplets')) as triplets_list_path:
         cell_id_map_for_sagi = calculate_triplets_tree(
             textual_mutation_dict,
             cell_data_path,
@@ -164,6 +164,6 @@ def run_sagis_triplets(
             sabc=sabc,
             tripletsnumber=tripletsnumber,
         )
-        with unlink(get_unique_path('newick')) as index_labeled_output_newick:
+        with relaxed_unlink(get_unique_path('newick')) as index_labeled_output_newick:
             ret_code = run_sagis_triplets_binary(triplets_list_path, index_labeled_output_newick)
             convert_names_in_sagis_newick(index_labeled_output_newick, newick_tree_path, cell_id_map_for_sagi)

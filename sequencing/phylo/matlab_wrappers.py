@@ -1,5 +1,5 @@
 import csv
-from misc.utils import unlink, get_unique_path
+from misc.utils import unlink, relaxed_unlink, get_unique_path
 import matlab.engine
 eng = matlab.engine.start_matlab()
 eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/')
@@ -153,12 +153,12 @@ def basic_tree_enrichment_and_plotting(
         cell_data_path,
         mutation_table_path,
 ):
-    with unlink(get_unique_path('json')) as json1:
-        with unlink(get_unique_path('json')) as json2:
-            with unlink(get_unique_path('json')) as json3:
-                with unlink(get_unique_path('json')) as json4:
-                    with unlink(get_unique_path('json')) as json5:
-                        with unlink(get_unique_path('tab')) as clustering_metrics_file:
+    with relaxed_unlink(get_unique_path('json')) as json1:
+        with relaxed_unlink(get_unique_path('json')) as json2:
+            with relaxed_unlink(get_unique_path('json')) as json3:
+                with relaxed_unlink(get_unique_path('json')) as json4:
+                    with relaxed_unlink(get_unique_path('json')) as json5:
+                        with relaxed_unlink(get_unique_path('tab')) as clustering_metrics_file:
                             tree_enrichment_and_plotting(
                                 tree_newick,
                                 cell_data_path,

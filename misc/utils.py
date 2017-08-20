@@ -61,6 +61,17 @@ def unlink(fname):
         os.unlink(fname)
 
 
+@contextlib.contextmanager
+def relaxed_unlink(fname):
+    try:
+        yield fname
+    finally:
+        try:
+            os.unlink(fname)
+        except FileNotFoundError as e:
+            pass
+
+
 class NotCreated(Exception):
     pass
 
