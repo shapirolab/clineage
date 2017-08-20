@@ -1,5 +1,4 @@
 from targeted_enrichment.planning.models import Microsatellite
-from frogress import bar
 from sequencing.calling.simcor.calling import split_genotypes
 from sequencing.calling.models import BestCorrelationCalledAlleles
 from sequencing.calling.hist import Histogram as dHistogram
@@ -129,10 +128,11 @@ def invert_biallelic_results(ms_split_calling_results):
 
 def add_mono_calling_to_hemizygous_loci(biallelic_dict, mono_dict, hemizygous_chromosomes=frozenset({'X', 'Y'})):
     tran_ms_mono_and_bi = invert_biallelic_results(biallelic_dict)
+    hemizygous_mss = set(Microsatellite.objects.filter(slice__chromosome__name__in=hemizygous_chromosomes))
     #add for each ms,sr the mono allelic calling
     for sr in mono_dict:
         for ms in mono_dict[sr]:
-            if ms.slice.chromosome.name not in hemizygous_chromosomes:
+            if ms not in hemizygous_mss:
                 continue
             if ms not in tran_ms_mono_and_bi or tran_ms_mono_and_bi[ms] is None:
                 tran_ms_mono_and_bi[ms] = dict()
