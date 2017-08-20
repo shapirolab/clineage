@@ -2,6 +2,8 @@ import itertools
 from sequencing.phylo.tree_assessment.utils import memory_expensive_random_choose
 from dendropy import SeedNodeDeletionException
 from frogress import bar
+import dendropy
+
 
 def challenge_triplets_generator(ref_tree, n=1000, min_d=3):
     nodes = [n.taxon for n in ref_tree.leaf_nodes()]
@@ -42,3 +44,15 @@ def triplets_score(tree_in_question, reference_tree, n=1000, min_d=3):
             results_by_difficulty[d] = {True: 0, False: 0, None: 0}
         results_by_difficulty[d][check_status] += 1
     return results_by_difficulty
+
+
+def triplets_scores_wrapper(rec_tree_path, reference_tree_with_ids, tns_id_labels):
+    rec_tree = dendropy.Tree.get_from_path(
+        rec_tree_path,
+        "newick",
+        taxon_namespace=tns_id_labels)
+    res = rec_tree.encode_bipartitions()
+    return {
+        k: v[True]/(v[True]+v[False]) if v[True]+v[False]>0 else None for k, v in triplets_score(
+        rec_tree, reference_tree_with_ids, n=10000, min_d=3).items()
+    }
