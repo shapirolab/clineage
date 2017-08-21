@@ -13,6 +13,7 @@ def triplets_stats(srs, td, cells_group_map, pl1=50, pl2=50,
                    loci_filter='ncnr',
                    cells_to_be_used_as_root=tuple(['Ave']),
                    reference_tree_with_ids=None, tns_id_labels=None,
+                   n=10000, min_d=3,
                   ):
     with prep_plot_mutation_map_and_cell_data(
         srs, td, pl1, pl2, group_of_cell=lambda cell: cells_group_map[cell.id]
@@ -35,14 +36,15 @@ def triplets_stats(srs, td, cells_group_map, pl1=50, pl2=50,
             triplets_tree.encode_bipartitions()
             clustering_dict = plot(triplets_tree_path)
             if reference_tree_with_ids is not None:
-                triplets_dict = triplets_scores_wrapper(triplets_tree_path, reference_tree_with_ids, tns_id_labels)
+                triplets_dict = triplets_scores_wrapper(
+                    triplets_tree_path, reference_tree_with_ids, tns_id_labels, n=n, min_d=min_d)
                 return clustering_dict, triplets_dict
             return clustering_dict
 
 
 def igor_stats(srs, td, cells_group_map, pl1=50, pl2=50,
                reference_tree_with_ids=None, tns_id_labels=None,
-               ):
+               n=10000, min_d=3):
     with prep_plot_mutation_map_and_cell_data(
             srs, td, pl1, pl2,
             group_of_cell=lambda cell: cells_group_map[cell.id]) as (td, mutation_table_path, cell_data_path, plot):
@@ -56,13 +58,14 @@ def igor_stats(srs, td, cells_group_map, pl1=50, pl2=50,
             res = igor_tree.encode_bipartitions()
             clustering_dict = plot(igor_tree_path)
             if reference_tree_with_ids is not None:
-                triplets_dict = triplets_scores_wrapper(igor_tree_path, reference_tree_with_ids, tns_id_labels)
+                triplets_dict = triplets_scores_wrapper(
+                    igor_tree_path, reference_tree_with_ids, tns_id_labels, n=n, min_d=min_d)
                 return clustering_dict, triplets_dict
             return clustering_dict
 
 
 def nj_stats(srs, td, cells_group_map, pl1=50, pl2=50, distance_metric='ABS',
-             reference_tree_with_ids=None, tns_id_labels=None,):
+             reference_tree_with_ids=None, tns_id_labels=None, n=10000, min_d=3):
     with prep_plot_mutation_map_and_cell_data(
         srs, td, pl1, pl2, group_of_cell=lambda cell: cells_group_map[cell.id]) as (td, mutation_table_path, cell_data_path, plot):
         with relaxed_unlink(get_unique_path('tab')) as distance_matrix_path:
@@ -78,6 +81,7 @@ def nj_stats(srs, td, cells_group_map, pl1=50, pl2=50, distance_metric='ABS',
                     res = nj_tree.encode_bipartitions()
                     clustering_dict = plot(nj_tree_path)
                     if reference_tree_with_ids is not None:
-                        triplets_dict = triplets_scores_wrapper(nj_tree_path, reference_tree_with_ids, tns_id_labels)
+                        triplets_dict = triplets_scores_wrapper(
+                            nj_tree_path, reference_tree_with_ids, tns_id_labels, n=n, min_d=min_d)
                         return clustering_dict, triplets_dict
                     return clustering_dict

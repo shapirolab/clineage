@@ -37,7 +37,7 @@ def check_triplet(tree, nodes_triplet, ref_close_pair):
 
 
 def triplets_score(tree_in_question, reference_tree, n=1000, min_d=3):
-    results_by_difficulty=dict()
+    results_by_difficulty = dict()
     for d, nodes_triplet, ref_close_pair in bar(challenge_triplets_generator(reference_tree, n=n, min_d=min_d)):
         check_status = check_triplet(tree_in_question, nodes_triplet, ref_close_pair)
         if d not in results_by_difficulty:
@@ -46,7 +46,7 @@ def triplets_score(tree_in_question, reference_tree, n=1000, min_d=3):
     return results_by_difficulty
 
 
-def triplets_scores_wrapper(rec_tree_path, reference_tree_with_ids, tns_id_labels):
+def triplets_scores_wrapper(rec_tree_path, reference_tree_with_ids, tns_id_labels, n=10000, min_d=3):
     rec_tree = dendropy.Tree.get_from_path(
         rec_tree_path,
         "newick",
@@ -54,5 +54,5 @@ def triplets_scores_wrapper(rec_tree_path, reference_tree_with_ids, tns_id_label
     res = rec_tree.encode_bipartitions()
     return {
         k: v[True]/(v[True]+v[False]) if v[True]+v[False]>0 else None for k, v in triplets_score(
-        rec_tree, reference_tree_with_ids, n=10000, min_d=3).items()
+        rec_tree, reference_tree_with_ids, n=n, min_d=min_d).items()
     }
