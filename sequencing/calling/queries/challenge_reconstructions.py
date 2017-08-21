@@ -82,6 +82,8 @@ def filter_chromosomes(mutations_dict, chromosome_biallelic_map):
     fmd = dict()
     by_loc = transpose_dict(mutations_dict)
     for loc in by_loc:
+        assert type(loc) == str
+        assert loc.split('_')[0] == 'LOC'
         ms = Microsatellite.objects.get(id=int(loc.split('_')[1]))
         if not chromosome_biallelic_map[ms.slice.chromosome.name]:
             continue
