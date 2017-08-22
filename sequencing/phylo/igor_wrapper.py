@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/home/dcsoft/s/Ofir/igor_tree_reconstruction_20170808/')
+from clineage.settings import IGORS_CODE
+sys.path.append(IGORS_CODE)
 from importalg import importalg
 from backgraund import backgraund7
 from read_data import parse_mutations_table, get_cells_and_root

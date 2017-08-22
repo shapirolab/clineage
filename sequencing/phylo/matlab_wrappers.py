@@ -1,10 +1,15 @@
+import os
 import csv
 from misc.utils import unlink, relaxed_unlink, get_unique_path
+from clineage.settings import NOA_MATLAB
+
 import matlab.engine
 eng = matlab.engine.start_matlab()
-eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/')
-eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/')
-eng.addpath(r'/home/dcsoft/s/Ofir/noa_matlab/Code/General_Functions/jsonlab-1.2/jsonlab/')
+matlab_general_functions = os.path.join(NOA_MATLAB, r'General_Functions/')
+matlab_json = os.path.join(matlab_general_functions, r'jsonlab-1.2/jsonlab/')
+eng.addpath(NOA_MATLAB)
+eng.addpath(matlab_general_functions)
+eng.addpath(matlab_json)
 
 
 def sr_label_func(sr):
