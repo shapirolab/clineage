@@ -42,14 +42,14 @@ def triplets_stats(srs, td, cells_group_map, pl1=50, pl2=50,
             return clustering_dict
 
 
-def igor_stats(srs, td, cells_group_map, pl1=50, pl2=50,
+def igor_stats(srs, td, cells_group_map, pl1=50, pl2=50, eps=0.001,
                reference_tree_with_ids=None, tns_id_labels=None,
                n=10000, min_d=3):
     with prep_plot_mutation_map_and_cell_data(
             srs, td, pl1, pl2,
             group_of_cell=lambda cell: cells_group_map[cell.id]) as (td, mutation_table_path, cell_data_path, plot):
         with relaxed_unlink(get_unique_path('newick')) as igor_tree_path:
-            calculate_igors_tree(mutation_table_path, igor_tree_path, dist="ig1")
+            calculate_igors_tree(mutation_table_path, igor_tree_path, dist="ig1", eps=eps)
             normalize_newick(igor_tree_path, igor_tree_path)
             igor_tree = dendropy.Tree.get_from_path(
                 igor_tree_path,
