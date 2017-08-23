@@ -61,21 +61,20 @@ def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
 
 
 def combine_cases(mono_a, mono_g, mono_ac, bi_ac):
+    base = dict()
     if mono_a is not None:
-        mono_ac_a = merge_mono_mutations_dicts(mono_ac, mono_a)
-    else:
-        mono_ac_a = mono_ac
+        base = merge_mono_mutations_dicts(base, mono_a)
     if mono_g is not None:
-        full_mono = merge_mono_mutations_dicts(mono_ac_a, mono_g)
-    else:
-        full_mono = mono_ac_a
+        base = merge_mono_mutations_dicts(base, mono_g)
+    if mono_ac is not None:
+        base = merge_mono_mutations_dicts(base, mono_ac)
     if bi_ac is not None:
-        mono_and_bi_dict = add_mono_calling_to_hemizygous_loci(bi_ac, full_mono)
+        mono_and_bi_dict = add_mono_calling_to_hemizygous_loci(bi_ac, base)
         print_ready = flatten_bi_allelic_binning(mono_and_bi_dict)
-        ftd = textify_keys_in_mutations_dict(print_ready, sr_label_func, ms_label_func)
-    else:
-        print_ready = full_mono
-        ftd = textify_keys_in_mutations_dict(print_ready, sr_labeler, ms_labeler)
+        ftd = textify_keys_in_mutations_dict(print_ready, sr_label_func, ms_label_func)  # keys are already text
+    else:  # note different key labeling functions in ftd above and below
+        print_ready = base
+        ftd = textify_keys_in_mutations_dict(print_ready, sr_labeler, ms_labeler)  # keys are django objects
     td = filter_bipartition_loci(ftd)
     return td
 
