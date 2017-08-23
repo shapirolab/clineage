@@ -7,6 +7,7 @@ from sequencing.calling.queries.mutation_maps import merge_mono_mutations_dicts,
 from targeted_enrichment.planning.models import Microsatellite
 from sequencing.calling.queries.formatters import textify_keys_in_mutations_dict
 from sequencing.phylo.matlab_wrappers import sr_label_func, ms_label_func
+from sequencing.calling.queries.formatters import sr_labeler, ms_labeler
 
 
 def get_mutation_maps_a_mono(srs, reads_threshold=30, confidence=0.01,
@@ -71,9 +72,10 @@ def combine_cases(mono_a, mono_g, mono_ac, bi_ac):
     if bi_ac is not None:
         mono_and_bi_dict = add_mono_calling_to_hemizygous_loci(bi_ac, full_mono)
         print_ready = flatten_bi_allelic_binning(mono_and_bi_dict)
+        ftd = textify_keys_in_mutations_dict(print_ready, sr_label_func, ms_label_func)
     else:
         print_ready = full_mono
-    ftd = textify_keys_in_mutations_dict(print_ready, sr_label_func, ms_label_func)
+        ftd = textify_keys_in_mutations_dict(print_ready, sr_labeler, ms_labeler)
     td = filter_bipartition_loci(ftd)
     return td
 
