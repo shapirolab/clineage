@@ -82,11 +82,17 @@ def combine_cases(mono_a, mono_g, mono_ac, bi_ac):
 def filter_chromosomes(mutations_dict, chromosome_biallelic_map):
     fmd = dict()
     by_loc = transpose_dict(mutations_dict)
+    id_by_loc = dict()
     for loc in by_loc:
         assert type(loc) == str
         assert loc.split('_')[0] == 'LOC'
-        ms = Microsatellite.objects.get(id=int(loc.split('_')[1]))
-        if not chromosome_biallelic_map[ms.slice.chromosome.name]:
+        id_by_loc[loc] = int(loc.split('_')[1])
+    allowed_chromosome_names = [chr_name for chr_name, allowed in chromosome_biallelic_map.items() if allowed]
+    mss = Microsatellite.objects.filter(id__in=list(id_by_loc.values()))\
+        .filter(slice__chromosome__name__in=allowed_chromosome_names)
+    allowed_ms_ids = {ms.id for ms in mss}
+    for loc in by_loc:
+        if id_by_loc[loc] not in allowed_ms_ids:
             continue
         fmd[loc] = by_loc[loc]
     return transpose_dict(fmd)
