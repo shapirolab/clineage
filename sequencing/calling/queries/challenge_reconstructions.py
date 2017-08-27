@@ -48,7 +48,8 @@ def get_mutation_maps_ac_mono(srs, reads_threshold=30, confidence=0.01,
 
 def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
                             schema_class=HighestPeaksProximityRatioFilteredBiSimCorSchemeModel,
-                            histogram_class=FullMSVHistogram):
+                            histogram_class=FullMSVHistogram,
+                            case=1):
     ac_schema_bi_strict_extended_fast = schema_class.objects.get(name='AC markov HP-PRF strinct extended fast',)
     biallelic_ac_dict = get_bi_mutations_dict(
         srs,
@@ -56,11 +57,12 @@ def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
         confidence_threshold=confidence,
         reads_threshold=reads_threshold,
         max_distance_from_peak=3,
-        histogram_class=histogram_class)
+        histogram_class=histogram_class,
+        case=case)
     return biallelic_ac_dict
 
 
-def combine_cases(mono_a, mono_g, mono_ac, bi_ac):
+def combine_cases(mono_a, mono_g, mono_ac, bi_ac, bi_filter_case=1):
     base = dict()
     if mono_a is not None:
         base = merge_mono_mutations_dicts(base, mono_a)
@@ -75,7 +77,7 @@ def combine_cases(mono_a, mono_g, mono_ac, bi_ac):
     else:  # note different key labeling functions in ftd above and below
         print_ready = base
         ftd = textify_keys_in_mutations_dict(print_ready, sr_labeler, ms_labeler)  # keys are django objects
-    td = filter_bipartition_loci(ftd)
+    td = filter_bipartition_loci(ftd, case=bi_filter_case)
     return td
 
 

@@ -20,3 +20,4 @@ sqlparse==0.2.0
 XlsxWriter==0.9.3
 PyVCF==0.6.8
 DendroPy==4.3.0
+PeakUtils==1.1.0

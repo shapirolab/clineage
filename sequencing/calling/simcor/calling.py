@@ -8,7 +8,8 @@ from targeted_enrichment.amplicons.models import Amplicon
 from itertools import tee
 
 from sequencing.calling.hist import Histogram as dHistogram
-from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
+from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks, better_get_far_apart_highest_peaks,\
+    better_get_far_apart_highest_peaks_that_doesnt_hang
 
 
 def get_ms_hist(dbhist, microsatellite):
@@ -83,13 +84,23 @@ def get_ms_amplicon(ms, sr_amps):
     return Amplicon.objects.select_subclasses().get(id=ampid)
 
 
-def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3):
+def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3, case=1):
     h = dHistogram(Counter([a for ca in genotypes for a in ca.genotypes.alleles]))
-    return get_far_apart_highest_peaks(
-        h,
-        allele_number=allele_number,
-        minimal_distance_between_peaks=minimal_distance_between_peaks,
-        min_prop=0.2)
+    if case == 1:
+        return get_far_apart_highest_peaks(
+            h,
+            allele_number=allele_number,
+            minimal_distance_between_peaks=minimal_distance_between_peaks,
+            min_prop=0.2)
+    elif case == 2:
+        return better_get_far_apart_highest_peaks(
+            h,
+            minimal_distance_between_peaks=minimal_distance_between_peaks,
+            min_prop=0.2)
+    elif case == 3:
+        return better_get_far_apart_highest_peaks_that_doesnt_hang(
+            h,
+            minimal_distance_between_peaks=minimal_distance_between_peaks)
 
 
 def pairwise_overlap(iterable):
@@ -123,9 +134,10 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(cas, max_distance_from_peak=2):
-    peaks = get_population_kernels(cas)
-    if len(peaks) == 1:
+def split_genotypes(cas, max_distance_from_peak=2, case=1):
+    peaks = get_population_kernels(
+        cas, allele_number=2, minimal_distance_between_peaks=3, case=case)
+    if len(peaks) != 2:
         return
     peaks.sort()
     peaks_by_range = {p: prange for p, prange in zip(peaks, get_peaks_ranges(peaks, max_distance_from_peak))}

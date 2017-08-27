@@ -3,7 +3,7 @@ from sequencing.calling.simcor.calling import split_genotypes
 from sequencing.calling.models import BestCorrelationCalledAlleles
 from sequencing.calling.hist import Histogram as dHistogram
 from collections import Counter
-from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks
+from sequencing.calling.simcor.hist_analysis import get_far_apart_highest_peaks, better_get_far_apart_highest_peaks
 from sequencing.analysis.models import Histogram
 import numpy as np
 
@@ -89,14 +89,14 @@ def map_amplicons_to_ms(srs):
 
 
 def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, max_distance_from_peak=3,
-                          histogram_class=Histogram):
+                          histogram_class=Histogram, case=1):
     cas_d = get_cas_dict(srs, calling_scheme, confidence_threshold=confidence_threshold,
                          reads_threshold=reads_threshold, histogram_class=histogram_class)
     cas_d_by_ms = transpose_dict(cas_d)
     ms_split_calling_results = dict()
     for ms in cas_d_by_ms:
         ms_split_calling_results[ms] = split_genotypes(cas_d_by_ms[ms].values(),
-                                                       max_distance_from_peak=max_distance_from_peak)
+                                                       max_distance_from_peak=max_distance_from_peak, case=case)
     return ms_split_calling_results
 
 
@@ -168,20 +168,26 @@ def flatten_bi_allelic_binning(tran_ms_mono_and_bi):
     return print_ready
 
 
-def is_population_mono_allelic(alleles, minimal_distance_between_peaks=2, min_prop=0.05):
+def is_population_mono_allelic(alleles, minimal_distance_between_peaks=2, min_prop=0.05, case=1):
     h = dHistogram(Counter(alleles))
-    return len(get_far_apart_highest_peaks(
+    if case == 1:
+        return len(get_far_apart_highest_peaks(
+                h,
+                allele_number=2,
+                minimal_distance_between_peaks=minimal_distance_between_peaks,
+                min_prop=min_prop)) == 1
+    elif case == 2:
+        return len(better_get_far_apart_highest_peaks(
             h,
-            allele_number=2,
-            minimal_distance_between_peaks=minimal_distance_between_peaks,
+            minimal_distance_between_peaks=1,  # override with strict value
             min_prop=min_prop)) == 1
 
 
-def filter_bipartition_loci(full_td):
+def filter_bipartition_loci(full_td, case=1):
     btd = dict()
     tbtd = transpose_dict(full_td)
     for loc in tbtd:
-        if is_population_mono_allelic(tbtd[loc].values()):
+        if is_population_mono_allelic(tbtd[loc].values(), case=case):
             for c in tbtd[loc]:
                 btd.setdefault(c, dict())[loc] = full_td[c][loc]
     return btd
