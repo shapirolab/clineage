@@ -89,14 +89,15 @@ def map_amplicons_to_ms(srs):
 
 
 def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_threshold=30, max_distance_from_peak=3,
-                          histogram_class=Histogram, case=1):
+                          histogram_class=Histogram, case=1, filter_ones=False):
     cas_d = get_cas_dict(srs, calling_scheme, confidence_threshold=confidence_threshold,
                          reads_threshold=reads_threshold, histogram_class=histogram_class)
     cas_d_by_ms = transpose_dict(cas_d)
     ms_split_calling_results = dict()
     for ms in cas_d_by_ms:
         ms_split_calling_results[ms] = split_genotypes(cas_d_by_ms[ms].values(),
-                                                       max_distance_from_peak=max_distance_from_peak, case=case)
+                                                       max_distance_from_peak=max_distance_from_peak, case=case,
+                                                       filter_ones=filter_ones)
     return ms_split_calling_results
 
 

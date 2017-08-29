@@ -49,7 +49,8 @@ def get_mutation_maps_ac_mono(srs, reads_threshold=30, confidence=0.01,
 def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
                             schema_class=HighestPeaksProximityRatioFilteredBiSimCorSchemeModel,
                             histogram_class=FullMSVHistogram,
-                            case=1):
+                            case=1,
+                            filter_ones=False):
     ac_schema_bi_strict_extended_fast = schema_class.objects.get(name='AC markov HP-PRF strinct extended fast',)
     biallelic_ac_dict = get_bi_mutations_dict(
         srs,
@@ -58,7 +59,8 @@ def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
         reads_threshold=reads_threshold,
         max_distance_from_peak=3,
         histogram_class=histogram_class,
-        case=case)
+        case=case,
+        filter_ones=filter_ones)
     return biallelic_ac_dict
 
 

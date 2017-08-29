@@ -84,8 +84,17 @@ def get_ms_amplicon(ms, sr_amps):
     return Amplicon.objects.select_subclasses().get(id=ampid)
 
 
-def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3, case=1):
-    h = dHistogram(Counter([a for ca in genotypes for a in ca.genotypes.alleles]))
+def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3, case=1, filter_ones=False):
+    if filter_ones:
+        # Ignore single occurances
+        h = dHistogram(
+            {k: v for k, v in Counter([a for ca in genotypes for a in ca.genotypes.alleles]).items() if v > 1}
+        )
+        if len(h.keys()) == 0:
+            return None
+    else:
+        h = dHistogram(Counter([a for ca in genotypes for a in ca.genotypes.alleles]))
+
     if case == 1:
         return get_far_apart_highest_peaks(
             h,
@@ -134,10 +143,10 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(cas, max_distance_from_peak=2, case=1):
+def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False):
     peaks = get_population_kernels(
-        cas, allele_number=2, minimal_distance_between_peaks=3, case=case)
-    if len(peaks) != 2:
+        cas, allele_number=2, minimal_distance_between_peaks=3, case=case, filter_ones=filter_ones)
+    if peaks is None or len(peaks) != 2:
         return
     peaks.sort()
     peaks_by_range = {p: prange for p, prange in zip(peaks, get_peaks_ranges(peaks, max_distance_from_peak))}
