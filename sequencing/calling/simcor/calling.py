@@ -84,7 +84,8 @@ def get_ms_amplicon(ms, sr_amps):
     return Amplicon.objects.select_subclasses().get(id=ampid)
 
 
-def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3, case=1, filter_ones=False):
+def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_peaks=3, case=1, filter_ones=False,
+                           min_prop=0.2):
     if filter_ones:
         # Ignore single occurances
         h = dHistogram(
@@ -100,12 +101,12 @@ def get_population_kernels(genotypes, allele_number=2, minimal_distance_between_
             h,
             allele_number=allele_number,
             minimal_distance_between_peaks=minimal_distance_between_peaks,
-            min_prop=0.2)
+            min_prop=min_prop)
     elif case == 2:
         return better_get_far_apart_highest_peaks(
             h,
             minimal_distance_between_peaks=minimal_distance_between_peaks,
-            min_prop=0.2)
+            min_prop=min_prop)
     elif case == 3:
         return better_get_far_apart_highest_peaks_that_doesnt_hang(
             h,
@@ -143,9 +144,9 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False):
+def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False, min_prop=0.2):
     peaks = get_population_kernels(
-        cas, allele_number=2, minimal_distance_between_peaks=3, case=case, filter_ones=filter_ones)
+        cas, allele_number=2, minimal_distance_between_peaks=3, case=case, filter_ones=filter_ones, min_prop=min_prop)
     if peaks is None or len(peaks) != 2:
         return
     peaks.sort()
