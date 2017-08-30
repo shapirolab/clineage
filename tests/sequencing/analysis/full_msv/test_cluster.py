@@ -98,7 +98,10 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, r
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
     for inc in herss.keys():
         # FIXME?
-        merged_reads, fmsvas, fhers_list = next(run_parallel(executor, demultiplexing.samplereads_set.all(), inc))
+        res = run_parallel(executor, demultiplexing.samplereads_set.all(), inc)
+        merged_reads = next(res)
+        fmsvas = next(res)
+        fhers_list = next(res)
         for fhers in as_completed(fhers_list):
             hers_gen = fhers.result()
             for her in hers_gen:
@@ -170,7 +173,10 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
     for inc in herss.keys():
         # FIXME?
-        merged_reads, fmsvas, fhers_list = next(run_parallel(executor, demultiplexing.samplereads_set.all(), inc, amp_col_size=1))
+        res = run_parallel(executor, demultiplexing.samplereads_set.all(), inc, amp_col_size=1)
+        merged_reads = next(res)
+        fmsvas = next(res)
+        fhers_list = next(res)
         for fhers in as_completed(fhers_list):
             hers_gen = fhers.result()
             for her in hers_gen:

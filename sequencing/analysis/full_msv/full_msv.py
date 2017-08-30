@@ -383,6 +383,9 @@ def stream_group_alignemnts(fmsva):
 
 
 def separate_reads_by_genotypes(fmsva):
+    if type(fmsva) == list:
+        assert len(fmsva) == 1
+        fmsva = fmsva[0]
     if type(fmsva) != FullMSVAssignment:
         fmsva = next(fmsva)
     if fmsva.separation_finished:

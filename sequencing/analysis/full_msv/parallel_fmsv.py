@@ -39,13 +39,16 @@ def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
     merged_reads = executor.map(merge, sample_reads, pure=False)
+    yield merged_reads
+
     fmsvas = executor.map(
         close_connection_and(align_reads_to_ms_variations_as_list), merged_reads,
         itertools.repeat(ref_padding), itertools.repeat(mss_version), itertools.repeat(amp_col_size), pure=False
     )
+    yield fmsvas
 
     fhers_list = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fmsvas, pure=False)
-    yield merged_reads, fmsvas, fhers_list
+    yield fhers_list
 
 
 def run_parallel_split_alignments(executor, sample_reads, included_reads="M", reads_chunk_size=10**5, mss_version=0, ref_padding=50):
