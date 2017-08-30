@@ -5,7 +5,7 @@ from distributed import as_completed
 
 from sequencing.analysis.full_msv.full_msv import merge,\
     align_reads_to_ms_variations, separate_reads_by_genotypes, \
-    split_merged_reads_as_list, align_reads_to_ms_variations_part,\
+    split_merged_reads_as_list, align_reads_to_ms_variations_part, align_reads_to_ms_variations_as_list, \
     merge_fmsva_parts
 
 
@@ -40,7 +40,7 @@ def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_
     # *currently in dworker.q
     merged_reads = executor.map(merge, sample_reads, pure=False)
     fmsvas = executor.map(
-        close_connection_and(align_reads_to_ms_variations), merged_reads,
+        close_connection_and(align_reads_to_ms_variations_as_list), merged_reads,
         itertools.repeat(ref_padding), itertools.repeat(mss_version), itertools.repeat(amp_col_size), pure=False
     )
 
