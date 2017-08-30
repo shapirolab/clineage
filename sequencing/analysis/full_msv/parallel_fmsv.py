@@ -35,13 +35,13 @@ def close_connection_and(f):
     return inner
 
 
-def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_padding=50):
+def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_padding=50, amp_col_size=15000):
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
     merged_reads = executor.map(merge, sample_reads, pure=False)
     fmsvas = executor.map(
         close_connection_and(align_reads_to_ms_variations), merged_reads,
-        itertools.repeat(ref_padding), itertools.repeat(mss_version), pure=False
+        itertools.repeat(ref_padding), itertools.repeat(mss_version), itertools.repeat(amp_col_size), pure=False
     )
 
     fhers_list = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fmsvas, pure=False)

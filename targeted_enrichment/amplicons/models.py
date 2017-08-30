@@ -1,6 +1,6 @@
 
 from django.db import models, IntegrityError
-
+from django.db.models import Count
 from model_utils.managers import InheritanceManager
 
 from genomes.models import DNASlice
@@ -34,8 +34,25 @@ class Amplicon(models.Model):
         return "{}".format(self.slice)
 
 
+def get_ampliconcollection_by_amplicons(amps):
+    for ac in AmpliconCollection.objects.annotate(amp_num=Count('amplicons')).filter(amp_num=len(amps)):
+        if set(amp.id for amp in ac.amplicons.all()) == set(amp.id for amp in amps):
+            return ac
+    raise AmpliconCollection.DoesNotExist()
+
+
 class AmpliconCollection(models.Model):
     amplicons = models.ManyToManyField(Amplicon)
+
+    @classmethod
+    def custom_get_or_create(cls, amplicons):
+        try:
+            ac = get_ampliconcollection_by_amplicons(amplicons)
+        except cls.DoesNotExist:
+            ac = cls.objects.create()
+            ac.amplicons = amplicons
+            ac.save()
+        return ac
 
 
 class RawAmplicon(Amplicon):

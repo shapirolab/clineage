@@ -161,6 +161,78 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, r
 
 
 @pytest.mark.django_db(transaction=True)
+def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+    mss_version = 0
+    ref_padding = 50
+    for sr in demultiplexing.samplereads_set.all():
+        amplicon_collection = sr.library.subclass.panel.amplicon_collection
+        msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
+    herss = {inc: set() for inc in ["M"]}  # TODO: "F"
+    for inc in herss.keys():
+        # FIXME?
+        merged_reads, fmsvas, fhers_list = next(run_parallel(executor, demultiplexing.samplereads_set.all(), inc, amp_col_size=1))
+        for fhers in as_completed(fhers_list):
+            hers_gen = fhers.result()
+            for her in hers_gen:
+                herss[inc].add(her)
+    for inc, hers in herss.items():
+        parts = set()
+        for her in hers:
+            amp = her.histogram.amplicon_id
+            sr = her.histogram.sample_reads
+            bc = sr.barcoded_content_id
+            l_id = sr.library_id
+            gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
+                msg in her.microsatellite_genotypes.genotypes)
+            parts.add((l_id, bc, amp, gen))
+
+            her_fnames_d = {
+                R1: her.fastq1,
+                R2: her.fastq2,
+                RM: her.fastqm,
+            }
+
+            if inc == "M":
+                ref_reads_d = fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen]
+            else:  # inc == "F"
+                ref_reads_d = {
+                    R1: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R1] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                    R2: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R2] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R2],
+                    RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                }
+
+            for r in [R1, R2, RM]:
+                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                    SeqIO.parse(her_fnames_d[r], "fastq"))
+                ) == \
+                set(srs_to_tups(
+                    ref_reads_d[r]
+                ))
+            assert her.num_reads == \
+                len(ref_reads_d[RM])
+        ref_parts = set()
+        for key_tups in fmsv_reads_fd:
+            if len(key_tups) < 5:
+                continue
+            l_id2, bc2, t2, amp2, gen2 = key_tups
+            if t2 == ASSEMBLED or inc == "F":
+                ref_parts.add((l_id2, bc2, amp2, gen2))
+        assert ref_parts == parts
+
+    for Model in [
+        FullMSVHistogram,
+        FullMSVariations,  # FIXME: get these from outside.
+        FullMSVAssignment,
+        FullMSVMergedReads,
+        HistogramEntryReads,  # FIXME: get these from outside.
+    ]:
+        Model.objects.all().delete()
+
+
+@pytest.mark.django_db(transaction=True)
 def test_run_parallel_split_alignments(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
     mss_version = 0
     ref_padding = 50
