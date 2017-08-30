@@ -51,7 +51,7 @@ def better_get_far_apart_highest_peaks(hist, minimal_distance_between_peaks=1, m
     """
     histogram = hist.copy()
     histogram.normalize()
-    x = list(range(min(histogram.keys())-5, max(histogram.keys()) + 6))  # add zero padding so that peakutils won't get stuck
+    x = list(range(int(min(histogram.keys()))-5, int(max(histogram.keys())) + 6))  # add zero padding so that peakutils won't get stuck
     v = np.array([histogram[i] for i in x])
     indexes = peakutils.indexes(v, thres=min_prop/max(v), min_dist=minimal_distance_between_peaks)
     return [x[i] for i in indexes]

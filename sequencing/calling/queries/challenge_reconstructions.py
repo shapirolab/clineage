@@ -64,7 +64,7 @@ def get_mutation_maps_ac_bi(srs, reads_threshold=30, confidence=0.01,
     return biallelic_ac_dict
 
 
-def combine_cases(mono_a, mono_g, mono_ac, bi_ac, bi_filter_case=1):
+def combine_cases(mono_a, mono_g, mono_ac, bi_ac, bi_filter_case=1, strict_alleles=True):
     base = dict()
     if mono_a is not None:
         base = merge_mono_mutations_dicts(base, mono_a)
@@ -73,7 +73,7 @@ def combine_cases(mono_a, mono_g, mono_ac, bi_ac, bi_filter_case=1):
     if mono_ac is not None:
         base = merge_mono_mutations_dicts(base, mono_ac)
     if bi_ac is not None:
-        mono_and_bi_dict = add_mono_calling_to_hemizygous_loci(bi_ac, base)
+        mono_and_bi_dict = add_mono_calling_to_hemizygous_loci(bi_ac, base, strict_alleles=strict_alleles)
         print_ready = flatten_bi_allelic_binning(mono_and_bi_dict)
         ftd = textify_keys_in_mutations_dict(print_ready, sr_label_func, ms_label_func)  # keys are already text
     else:  # note different key labeling functions in ftd above and below

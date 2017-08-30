@@ -95,13 +95,16 @@ def get_bi_mutations_dict(srs, calling_scheme, confidence_threshold=0.01, reads_
     cas_d_by_ms = transpose_dict(cas_d)
     ms_split_calling_results = dict()
     for ms in cas_d_by_ms:
-        ms_split_calling_results[ms] = split_genotypes(cas_d_by_ms[ms].values(),
-                                                       max_distance_from_peak=max_distance_from_peak, case=case,
-                                                       filter_ones=filter_ones)
+        calling_assignments = split_genotypes(cas_d_by_ms[ms].values(),
+                        max_distance_from_peak=max_distance_from_peak, case=case,
+                        filter_ones=filter_ones)
+        if calling_assignments is None:
+            continue
+        ms_split_calling_results[ms] = calling_assignments
     return ms_split_calling_results
 
 
-def invert_biallelic_results(ms_split_calling_results):
+def invert_biallelic_results(ms_split_calling_results, strict=True):
     """
     Inverting a nested dictionary from:
         d[sr][ms][bin][allele]
@@ -109,6 +112,8 @@ def invert_biallelic_results(ms_split_calling_results):
         d[ms][sr][allele][bin]
     Args:
         ms_split_calling_results: 
+        strict: if True, assume one allele per bin, drop other cases
+                if False, use the average
 
     Returns:
 
@@ -123,12 +128,16 @@ def invert_biallelic_results(ms_split_calling_results):
             inverted_dict = dict()
             for allele, slot in ms_split_calling_results[ms][ca].items():
                 inverted_dict.setdefault(slot, []).append(allele)
-            tran_h1[ms][ca.histogram.sample_reads] = {k: v[0] for k, v in inverted_dict.items() if len(v) == 1}
+            if strict:
+                tran_h1[ms][ca.histogram.sample_reads] = {k: v[0] for k, v in inverted_dict.items() if len(v) == 1}
+            else:
+                tran_h1[ms][ca.histogram.sample_reads] = {k: sum(v)/len(v) for k, v in inverted_dict.items()}
     return tran_h1
 
 
-def add_mono_calling_to_hemizygous_loci(biallelic_dict, mono_dict, hemizygous_chromosomes=frozenset({'X', 'Y'})):
-    tran_ms_mono_and_bi = invert_biallelic_results(biallelic_dict)
+def add_mono_calling_to_hemizygous_loci(biallelic_dict, mono_dict,
+                                        hemizygous_chromosomes=frozenset({'X', 'Y'}), strict_alleles=True):
+    tran_ms_mono_and_bi = invert_biallelic_results(biallelic_dict, strict=strict_alleles)
     hemizygous_mss = set(Microsatellite.objects.filter(slice__chromosome__name__in=hemizygous_chromosomes))
     #add for each ms,sr the mono allelic calling
     for sr in mono_dict:

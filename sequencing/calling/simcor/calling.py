@@ -130,13 +130,16 @@ def get_indices(peaks, max_distance_from_peak):
     """This method gets the peaks ands returns ranges of proper values near them"""
     p1 = peaks[0]
     yield max(0, p1 - max_distance_from_peak)
-    for tup in pairwise_overlap(peaks):
-        p1, p2 = tup
-        p1_max = min(p1 + max_distance_from_peak, p1 + (p2 - p1) // 2)
-        p2_min = max(p1, p2 - max_distance_from_peak, p1 + (p2 - p1) // 2)
-        yield p1_max
-        yield p2_min
-    yield p2 + max_distance_from_peak
+    if len(peaks) > 1:
+        for tup in pairwise_overlap(peaks):
+            p1, p2 = tup
+            p1_max = min(p1 + max_distance_from_peak, p1 + (p2 - p1) // 2)
+            p2_min = max(p1, p2 - max_distance_from_peak, p1 + (p2 - p1) // 2)
+            yield p1_max
+            yield p2_min
+        yield p2 + max_distance_from_peak
+    else:
+        yield p1 + max_distance_from_peak
 
 
 def get_peaks_ranges(peaks, max_distance_from_peak):
@@ -144,11 +147,13 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False, min_prop=0.2):
+def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False, min_prop=0.2, filter_single_peak=True,):
     peaks = get_population_kernels(
         cas, allele_number=2, minimal_distance_between_peaks=3, case=case, filter_ones=filter_ones, min_prop=min_prop)
-    if peaks is None or len(peaks) != 2:
-        return
+    if peaks is None or len(peaks) > 2:
+        return None
+    if len(peaks) == 1 and filter_single_peak:
+        return None
     peaks.sort()
     peaks_by_range = {p: prange for p, prange in zip(peaks, get_peaks_ranges(peaks, max_distance_from_peak))}
     calling_assignments = dict()
