@@ -78,12 +78,17 @@ post_delete_files(FullMSVariations)
 
 
 class FullMSVAssignmentPart(models.Model):
-    merged_reads_part = models.ForeignKey(FullMSVMergedReadsPart, unique=True)
+    merged_reads_part = models.ForeignKey(FullMSVMergedReadsPart)
     assignment_bam = models.FilePathField(max_length=200)
     ms_variations = models.ForeignKey(FullMSVariations)
 
+    class Meta:
+        unique_together = (
+            ("merged_reads_part", "ms_variations"),
+        )
+
     def read_bam(self):
-        for ms_genotypes_name, read_id in _read_bam(self.sorted_assignment_bam):
+        for ms_genotypes_name, read_id in _read_bam(self.assignment_bam):
             yield read_id, ms_genotypes_name
 
     @property
@@ -97,10 +102,15 @@ post_delete_files(FullMSVAssignmentPart)
 
 
 class FullMSVAssignment(models.Model):
-    merged_reads = models.ForeignKey(FullMSVMergedReads, unique=True)
+    merged_reads = models.ForeignKey(FullMSVMergedReads)
     sorted_assignment_bam = models.FilePathField(max_length=200)
     ms_variations = models.ForeignKey(FullMSVariations)
     separation_finished = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = (
+            ("merged_reads", "ms_variations"),
+        )
 
     def read_bam(self):
         for ms_genotypes_name, read_id in _read_bam(self.sorted_assignment_bam):
