@@ -63,13 +63,13 @@ def merge_mono_mutations_dicts(d1, d2):
 
     """
     merged = dict()
-    for sr in d2.keys() | d1.keys():
+    for sr in d2.keys() | d1.keys():  # initialize l2 dictionaries
         merged[sr] = dict()
     for sr in d2.keys() - d1.keys():
         merged[sr].update(d2[sr])
     for sr in d1.keys() - d2.keys():
         merged[sr].update(d1[sr])
-    for sr in d1.keys() & d2.keys():
+    for sr in d1.keys() & d2.keys():  # l1 shared keys undergo l2 check for mutual exclusivity
         assert d1[sr].keys() & d2[sr].keys() == set()
         merged[sr].update(d1[sr])
         merged[sr].update(d2[sr])

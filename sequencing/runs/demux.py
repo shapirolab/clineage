@@ -194,6 +194,7 @@ def run_demux(ngs_run, demux_scheme):
                 fastq2=fastq2,
             )
 
+
 def merge_srs(srs_lst, bc):
     """ This method gets list of SampleReads from same Barcoded Content and merges them into one Sample Read"""
     merged_sr = dict()

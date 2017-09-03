@@ -108,3 +108,5 @@ class CalledAlleles(models.Model):
                 "calling_scheme",
             ),
         )
+
+

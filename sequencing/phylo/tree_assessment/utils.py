@@ -18,7 +18,7 @@ def random_choose(l, k):
 
 def memory_expensive_random_choose(l, k, n=50000000):
     cvs = set()
-    for elm in numpy.random.choice(list(l),(n,k),replace=True):
+    for elm in numpy.random.choice(list(l), (n, k), replace=True):
         elm = tuple(elm)
         if len({*elm}) != k:
             continue
