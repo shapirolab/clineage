@@ -314,53 +314,58 @@ def align_reads_to_ms_variations_part_as_list(merged_reads_part, padding, mss_ve
 
 
 def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
-    for fmsva_part in fmsva_parts:
-        assert isinstance(fmsva_part, FullMSVAssignmentPart)
-    merged_reads_set = set(fmsvap.merged_reads_part.merged_reads for fmsvap in fmsva_parts)
-    assert len(merged_reads_set) == 1
-    merged_reads = merged_reads_set.pop()
-    ms_variations_set = set(fmsvap.ms_variations for fmsvap in fmsva_parts)
-    assert len(ms_variations_set) == 1
-    msv = ms_variations_set.pop()
-    assert set(
-        (merged_reads.id, i * reads_chunk_size, reads_chunk_size) for i, reads_chunk in enumerate(grouper(
-            reads_chunk_size,
-            merged_reads.included_reads_generator(included_reads)
-        ))) == set(
-        (mrp.merged_reads_id, mrp.start_row, mrp.rows) for mrp in merged_reads.fullmsvmergedreadspart_set.filter(
-            rows=reads_chunk_size,
-        )
-    )
-    partial_bams = [fmsvap.assignment_bam for fmsvap in fmsva_parts]
-    def inner(raise_or_create_with_defaults):
-        with unique_file_cm("bam") as sorted_assignment_bam:
-            with unique_file_cm("bam") as temp_merged_bam:
-                if len(partial_bams) == 1:
-                    samtools_sort(
-                        '-o',
-                        sorted_assignment_bam,
-                        partial_bams[0]
-                    )
-                else:
-                    samtools_merge(
-                        temp_merged_bam,
-                        *partial_bams
-                    )
-                    samtools_sort(
-                        '-o',
-                        sorted_assignment_bam,
-                        temp_merged_bam
-                    )
-                    os.unlink(temp_merged_bam)
-            return raise_or_create_with_defaults(
-                sorted_assignment_bam=sorted_assignment_bam,
-                merged_reads=merged_reads,
-                ms_variations=msv,
+    by_msv = dict()
+    for fmsva_part in [f for fs in fmsva_parts for f in fs]:
+        by_msv.setdefault(fmsva_part.ms_variations, []).append(fmsva_part)
+    for msv, fmsva_parts_by_msv in by_msv.items():
+        for fmsva_part in fmsva_parts_by_msv:
+            assert isinstance(fmsva_part, FullMSVAssignmentPart)
+        merged_reads_set = set(fmsvap.merged_reads_part.merged_reads for fmsvap in fmsva_parts_by_msv)
+        assert len(merged_reads_set) == 1
+        merged_reads = merged_reads_set.pop()
+        ms_variations_set = set(fmsvap.ms_variations for fmsvap in fmsva_parts_by_msv)
+        assert len(ms_variations_set) == 1
+        msv = ms_variations_set.pop()
+        assert set(
+            (merged_reads.id, i * reads_chunk_size, reads_chunk_size) for i, reads_chunk in enumerate(grouper(
+                reads_chunk_size,
+                merged_reads.included_reads_generator(included_reads)
+            ))) == set(
+            (mrp.merged_reads_id, mrp.start_row, mrp.rows) for mrp in merged_reads.fullmsvmergedreadspart_set.filter(
+                rows=reads_chunk_size,
             )
-    return get_get_or_create(inner, FullMSVAssignment,
-                             merged_reads=merged_reads,
-                             ms_variations=msv,
-                             )
+        )
+        partial_bams = [fmsvap.assignment_bam for fmsvap in fmsva_parts_by_msv]
+
+        def inner(raise_or_create_with_defaults):
+            with unique_file_cm("bam") as sorted_assignment_bam:
+                with unique_file_cm("bam") as temp_merged_bam:
+                    if len(partial_bams) == 1:
+                        samtools_sort(
+                            '-o',
+                            sorted_assignment_bam,
+                            partial_bams[0]
+                        )
+                    else:
+                        samtools_merge(
+                            temp_merged_bam,
+                            *partial_bams
+                        )
+                        samtools_sort(
+                            '-o',
+                            sorted_assignment_bam,
+                            temp_merged_bam
+                        )
+                        os.unlink(temp_merged_bam)
+                return raise_or_create_with_defaults(
+                    sorted_assignment_bam=sorted_assignment_bam,
+                    merged_reads=merged_reads,
+                    ms_variations=msv,
+                )
+        yield get_get_or_create(inner, FullMSVAssignment,
+                                merged_reads=merged_reads,
+                                ms_variations=msv,
+                                )
 
 
 def index_fastqs(fmsva):

@@ -5,12 +5,14 @@ import io
 import plumbum
 from Bio import SeqIO
 
+from utils.groups import grouper
+from targeted_enrichment.amplicons.models import AmpliconCollection
 from sequencing.analysis.full_msv.full_msv import merge, \
     get_full_ms_variations, separate_reads_by_genotypes, \
     align_reads_to_ms_variations, stream_group_alignemnts, \
     split_merged_reads, align_reads_to_ms_variations_part, \
     merge_fmsva_parts, split_merged_reads_as_list, align_reads_to_ms_variations_part,\
-    merge_fmsva_parts
+    merge_fmsva_parts, align_reads_to_ms_variations_part_as_list
 from sequencing.analysis.models import HistogramEntryReads
 from sequencing.analysis.full_msv.models import FullMSVHistogram,  \
         FullMSVariations, FullMSVAssignment, FullMSVAssignmentPart, FullMSVMergedReads, \
@@ -411,9 +413,104 @@ def test_run_mono_split_alignments(demultiplexing, sample_reads_d, fmsv_reads_fd
         # FIXME?
         merged_reads = [merge(sr) for sr in demultiplexing.samplereads_set.all()]
         fmsv_merged_reads_parts_lists = [split_merged_reads_as_list(mr, reads_chunk_size, inc) for mr in merged_reads]
-        fmsva_parts_lists = [list(map(align_reads_to_ms_variations_part, fmsv_merged_reads_parts_list, itertools.repeat(ref_padding), itertools.repeat(mss_version))) for fmsv_merged_reads_parts_list in fmsv_merged_reads_parts_lists]        
+        fmsva_parts_lists = [list(map(align_reads_to_ms_variations_part_as_list, fmsv_merged_reads_parts_list, itertools.repeat(ref_padding), itertools.repeat(mss_version))) for fmsv_merged_reads_parts_list in fmsv_merged_reads_parts_lists]
         fmsvas = [merge_fmsva_parts(fmsva_parts_list, reads_chunk_size, inc) for fmsva_parts_list in fmsva_parts_lists]
         fhers_list = [list(separate_reads_by_genotypes(fmsva)) for fmsva in fmsvas]
+        for fhers in fhers_list:
+            hers_gen = fhers
+            for her in hers_gen:
+                herss[inc].add(her)
+    for inc, hers in herss.items():
+        parts = set()
+        for her in hers:
+            amp = her.histogram.amplicon_id
+            sr = her.histogram.sample_reads
+            bc = sr.barcoded_content_id
+            l_id = sr.library_id
+            gen = frozenset((msg.microsatellite_id, msg.repeat_number) for \
+                msg in her.microsatellite_genotypes.genotypes)
+            parts.add((l_id, bc, amp, gen))
+
+            her_fnames_d = {
+                R1: her.fastq1,
+                R2: her.fastq2,
+                RM: her.fastqm,
+            }
+
+            if inc == "M":
+                ref_reads_d = fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen]
+            else:  # inc == "F"
+                ref_reads_d = {
+                    R1: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R1] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                    R2: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][R2] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R2],
+                    RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
+                        fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
+                }
+
+            for r in [R1, R2, RM]:
+                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                    SeqIO.parse(her_fnames_d[r], "fastq"))
+                ) == \
+                set(srs_to_tups(
+                    ref_reads_d[r]
+                ))
+            assert her.num_reads == \
+                len(ref_reads_d[RM])
+        ref_parts = set()
+        for key_tups in fmsv_reads_fd:
+            if len(key_tups) < 5:
+                continue
+            l_id2, bc2, t2, amp2, gen2 = key_tups
+            if t2 == ASSEMBLED or inc == "F":
+                ref_parts.add((l_id2, bc2, amp2, gen2))
+        assert ref_parts == parts
+
+    for Model in [
+        FullMSVHistogram,
+        FullMSVariations,  # FIXME: get these from outside.
+        FullMSVAssignment,
+        FullMSVAssignmentPart,
+        FullMSVMergedReads,
+        FullMSVMergedReadsPart,
+        HistogramEntryReads,  # FIXME: get these from outside.
+    ]:
+        Model.objects.all().delete()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_run_mono_split_alignments_split_mapping(demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+    mss_version = 0
+    ref_padding = 50
+    reads_chunk_size = 1
+    amplicons_chunk_size = 1
+    for sr in demultiplexing.samplereads_set.all():
+        total_amplicon_collection = sr.library.subclass.panel.amplicon_collection
+        all_amplicons = total_amplicon_collection.amplicons.order_by('id')
+        amplicons_splitted = grouper(amplicons_chunk_size,
+                                     all_amplicons)  # split the amplicons to create smaller amplicon collections
+        for amplicon_subgroup in amplicons_splitted:
+            amplicon_collection = AmpliconCollection.custom_get_or_create(amplicons=amplicon_subgroup)
+            msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
+    herss = {inc: set() for inc in ["M"]}  # TODO: "F"
+    for inc in herss.keys():
+        # FIXME?
+        merged_reads = [merge(sr) for sr in demultiplexing.samplereads_set.all()]
+        fmsv_merged_reads_parts_lists = [split_merged_reads_as_list(mr, reads_chunk_size, inc) for mr in merged_reads]
+        fmsva_parts_lists = [
+            list(
+                map(
+                    align_reads_to_ms_variations_part_as_list,
+                        fmsv_merged_reads_parts_list,
+                        itertools.repeat(ref_padding),
+                        itertools.repeat(mss_version),
+                        itertools.repeat(amplicons_chunk_size),
+                )
+            ) for fmsv_merged_reads_parts_list in fmsv_merged_reads_parts_lists
+        ]
+        fmsvass = [list(merge_fmsva_parts(fmsva_parts_list, reads_chunk_size, inc)) for fmsva_parts_list in fmsva_parts_lists]
+        fhers_list = [list(separate_reads_by_genotypes(fmsva)) for fmsvas in fmsvass for fmsva in fmsvas]
         for fhers in fhers_list:
             hers_gen = fhers
             for her in hers_gen:
