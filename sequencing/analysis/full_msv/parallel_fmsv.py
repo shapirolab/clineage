@@ -6,7 +6,7 @@ from distributed import as_completed
 from sequencing.analysis.full_msv.full_msv import merge,\
     align_reads_to_ms_variations, separate_reads_by_genotypes, \
     split_merged_reads_as_list, align_reads_to_ms_variations_part, align_reads_to_ms_variations_as_list, \
-    merge_fmsva_parts
+    merge_fmsva_parts, align_reads_to_ms_variations_part_as_list
 
 
 def double_map(executor, func, future_lists, *params):
@@ -51,7 +51,8 @@ def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_
     yield fhers_list
 
 
-def run_parallel_split_alignments(executor, sample_reads, included_reads="M", reads_chunk_size=10**5, mss_version=0, ref_padding=50):
+def run_parallel_split_alignments(executor, sample_reads, included_reads="M", reads_chunk_size=10**5, mss_version=0,
+                                  ref_padding=50, amp_col_size=15000):
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
     merged_reads = executor.map(merge, sample_reads, pure=False)
@@ -64,8 +65,8 @@ def run_parallel_split_alignments(executor, sample_reads, included_reads="M", re
         pure=False
     )
     yield fmsv_merged_reads_parts_lists
-    fmsva_parts_lists = double_map(executor, close_connection_and(align_reads_to_ms_variations_part),
-                                 fmsv_merged_reads_parts_lists, ref_padding, mss_version)
+    fmsva_parts_lists = double_map(executor, close_connection_and(align_reads_to_ms_variations_part_as_list),
+                                 fmsv_merged_reads_parts_lists, ref_padding, mss_version, amp_col_size)
     yield fmsva_parts_lists
     merged_fmsvas = executor.map(
         close_connection_and(merge_fmsva_parts),

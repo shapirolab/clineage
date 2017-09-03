@@ -279,29 +279,38 @@ def align_reads_to_ms_variations_as_list(merged_reads, padding, mss_version, chu
     return list(align_reads_to_ms_variations(merged_reads, padding, mss_version, chunk_size))
 
 
-def align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version):
+def align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version, chunk_size=15000):
     assert isinstance(merged_reads_part, FullMSVMergedReadsPart)
-    amplicon_collection = merged_reads_part.merged_reads.sample_reads.library.subclass.panel.amplicon_collection
-    msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
-    def inner(raise_or_create_with_defaults):
-        with unique_file_cm("bam") as assignment_bam:
-            bowtie_to_bam = bowtie2_with_defaults2[
-                '-x', msv.index_files_prefix,
-                '-U', merged_reads_part.fastq_part,  # TODO: reconsider 'F'/'M' reads collections
-            ] | samtools_view[
-                '-bS',
-                '-'
-            ] > assignment_bam
-            bowtie_to_bam & plumbum.FG
-            return raise_or_create_with_defaults(
-                assignment_bam=assignment_bam,
-                merged_reads_part=merged_reads_part,
-                ms_variations=msv,
-            )
-    return get_get_or_create(inner, FullMSVAssignmentPart,
-        merged_reads_part=merged_reads_part,
-        ms_variations=msv,
-    )
+    total_amplicon_collection = merged_reads_part.merged_reads.sample_reads.library.subclass.panel.amplicon_collection
+    all_amplicons = total_amplicon_collection.amplicons.order_by('id')
+    amplicons_splitted = grouper(chunk_size,
+                                 all_amplicons)  # split the amplicons to create smaller amplicon collections
+    for amplicon_subgroup in amplicons_splitted:
+        amplicon_collection = AmpliconCollection.custom_get_or_create(amplicons=amplicon_subgroup)
+        msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
+        def inner(raise_or_create_with_defaults):
+            with unique_file_cm("bam") as assignment_bam:
+                bowtie_to_bam = bowtie2_with_defaults2[
+                    '-x', msv.index_files_prefix,
+                    '-U', merged_reads_part.fastq_part,  # TODO: reconsider 'F'/'M' reads collections
+                ] | samtools_view[
+                    '-bS',
+                    '-'
+                ] > assignment_bam
+                bowtie_to_bam & plumbum.FG
+                return raise_or_create_with_defaults(
+                    assignment_bam=assignment_bam,
+                    merged_reads_part=merged_reads_part,
+                    ms_variations=msv,
+                )
+        yield get_get_or_create(inner, FullMSVAssignmentPart,
+            merged_reads_part=merged_reads_part,
+            ms_variations=msv,
+        )
+
+
+def align_reads_to_ms_variations_part_as_list(merged_reads_part, padding, mss_version, chunk_size=15000):
+    return list(align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version, chunk_size=chunk_size))
 
 
 def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
