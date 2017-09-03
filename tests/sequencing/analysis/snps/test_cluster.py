@@ -15,6 +15,7 @@ from targeted_enrichment.amplicons.models import AmpliconCollection
 import django
 
 
+@pytest.mark.skipif(pytest.config.getoption("nomigrations"), reason="No migrations, no view.")
 @pytest.mark.django_db
 def test_run_parallel(executor,
                       demultiplexing,

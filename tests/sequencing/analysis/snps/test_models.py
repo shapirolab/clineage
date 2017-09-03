@@ -96,6 +96,7 @@ def test_get_target_id(vcf_object):
         assert set([6, 7]) == set(target_list)
 
 
+@pytest.mark.skipif(pytest.config.getoption("nomigrations"), reason="No migrations, no view.")
 @pytest.mark.django_db
 def test_get_rel_pos(vcf_rec, snp_reads_d, requires_snps, requires_snp_targets, requires_none_genotypes):
     rel_pos = retrieve_explicit_snps_positions(vcf_rec)
