@@ -38,7 +38,7 @@ def random_groups_of_sum(groups, random_groups_keys, random_groups_sum, group_si
 def grouper(n, iterable):
     it = iter(iterable)
     while True:
-       chunk = tuple(itertools.islice(it, n))
-       if not chunk:
-           return
-       yield chunk
+        chunk = tuple(itertools.islice(it, n))
+        if not chunk:
+            return
+        yield chunk

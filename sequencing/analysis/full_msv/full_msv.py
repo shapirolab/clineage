@@ -246,9 +246,8 @@ def align_reads_to_ms_variations_original(merged_reads, padding, mss_version):
 
 def align_reads_to_ms_variations(merged_reads, padding, mss_version, chunk_size=15000):
     total_amplicon_collection = merged_reads.sample_reads.library.subclass.panel.amplicon_collection
-    all_amplicons = total_amplicon_collection.amplicons.all()
-    amplicons_splitted = grouper(chunk_size,all_amplicons)  # split the amplicons to create smaller amplicon collections
     all_amplicons = total_amplicon_collection.amplicons.order_by('id')
+    amplicons_splitted = grouper(chunk_size, all_amplicons)  # split the amplicons to create smaller amplicon collections
     for amplicon_subgroup in amplicons_splitted:
         amplicon_collection = AmpliconCollection.custom_get_or_create(amplicons=amplicon_subgroup)
         msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
