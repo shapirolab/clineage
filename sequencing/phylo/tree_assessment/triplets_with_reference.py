@@ -5,7 +5,7 @@ from frogress import bar
 import dendropy
 
 
-def challenge_triplets_generator(ref_tree, n=1000, min_d=3):
+def challenge_triplets_generator(ref_tree, n=1000, min_d=3, exclude_direct_siblings=False):
     nodes = [n.taxon for n in ref_tree.leaf_nodes()]
     ndm = ref_tree.node_distance_matrix()
     pdm = ref_tree.phylogenetic_distance_matrix()
@@ -15,11 +15,13 @@ def challenge_triplets_generator(ref_tree, n=1000, min_d=3):
         d = ndm.distance(ref_tree.mrca(taxa=nodes_triplet), ref_tree.mrca(taxa=ref_close_pair))
         if d < min_d:
             continue
-        taxon_a, taxon_b = ref_close_pair
-        distance_a_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_a), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)  # path_edge_count
-        distance_b_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_b), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)
-        if min(distance_a_to_ab_mrca, distance_b_to_ab_mrca) < 2:
-            continue
+
+        if exclude_direct_siblings:
+            taxon_a, taxon_b = ref_close_pair
+            distance_a_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_a), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)  # path_edge_count
+            distance_b_to_ab_mrca = ndm.distance(ref_tree.find_node_for_taxon(taxon_b), ref_tree.mrca(taxa=ref_close_pair), is_weighted_edge_distances=False)
+            if min(distance_a_to_ab_mrca, distance_b_to_ab_mrca) < 2:  # Exclude direct brothers
+                continue
         yield d, nodes_triplet, ref_close_pair
 
 
