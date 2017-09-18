@@ -368,6 +368,10 @@ def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
                                 )
 
 
+def merge_fmsva_parts_as_list(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
+    return list(merge_fmsva_parts(fmsva_parts, reads_chunk_size, included_reads))
+
+
 def index_fastqs(fmsva):
     reads1 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq1, "fastq")
     reads2 = SeqIO.index(fmsva.merged_reads.sample_reads.fastq2, "fastq")

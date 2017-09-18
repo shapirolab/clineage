@@ -46,9 +46,13 @@ def run_parallel(executor, sample_reads, included_reads="M", mss_version=0, ref_
         itertools.repeat(ref_padding), itertools.repeat(mss_version), itertools.repeat(amp_col_size), pure=False
     )
     yield fmsvas
-
-    fhers_list = executor.map(list_iterator(close_connection_and(separate_reads_by_genotypes)), fmsvas, pure=False)
-    yield fhers_list
+    fhers_list = double_map(executor,list_iterator(close_connection_and(separate_reads_by_genotypes)), fmsvas) #still generator?!!?!?
+    #flatten the list here
+    real_fhers_list = []
+    for sublist in fhers_list:
+        real_fhers_list += sublist
+    #yield fhers_list
+    yield real_fhers_list
 
 
 def run_parallel_split_alignments(executor, sample_reads, included_reads="M", reads_chunk_size=10**5, mss_version=0,

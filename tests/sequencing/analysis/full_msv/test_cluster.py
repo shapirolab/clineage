@@ -227,7 +227,6 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
             if t2 == ASSEMBLED or inc == "F":
                 ref_parts.add((l_id2, bc2, amp2, gen2))
         assert ref_parts == parts
-
     for Model in [
         FullMSVHistogram,
         FullMSVariations,  # FIXME: get these from outside.

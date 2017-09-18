@@ -12,7 +12,7 @@ from sequencing.analysis.full_msv.full_msv import merge, \
     align_reads_to_ms_variations, stream_group_alignemnts, \
     split_merged_reads, align_reads_to_ms_variations_part, \
     merge_fmsva_parts, split_merged_reads_as_list, align_reads_to_ms_variations_part,\
-    merge_fmsva_parts, align_reads_to_ms_variations_part_as_list
+    merge_fmsva_parts_as_list, align_reads_to_ms_variations_part_as_list
 from sequencing.analysis.models import HistogramEntryReads
 from sequencing.analysis.full_msv.models import FullMSVHistogram,  \
         FullMSVariations, FullMSVAssignment, FullMSVAssignmentPart, FullMSVMergedReads, \
@@ -82,9 +82,10 @@ def test_align_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd, ac_134, re
         amplicon_collection = mr.sample_reads.library.subclass.panel.amplicon_collection
         fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
         for mrp in split_merged_reads(mr, 1, included_reads='M'):
-            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
-            assert fmsvap.merged_reads_part == mrp
-            assert os.path.isfile(fmsvap.assignment_bam)
+            fmsvaps = align_reads_to_ms_variations_part_as_list(mrp, padding, mss_version)
+            for fmsvap in fmsvaps:
+                assert fmsvap.merged_reads_part == mrp
+                assert os.path.isfile(fmsvap.assignment_bam)
         mr.fullmsvmergedreadspart_set.all().delete()
         fmsv.delete()
 
@@ -97,14 +98,16 @@ def test_colliding_split_merged_reads(fmsv_merged_reads_d, fmsv_reads_fd, ac_134
         amplicon_collection = mr.sample_reads.library.subclass.panel.amplicon_collection
         fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
         for mrp in split_merged_reads(mr, 1, included_reads='M'):
-            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
-            assert fmsvap.merged_reads_part == mrp
-            assert os.path.isfile(fmsvap.assignment_bam)
-            assert mrp.rows == 1
+            fmsvaps = align_reads_to_ms_variations_part_as_list(mrp, padding, mss_version)
+            for fmsvap in fmsvaps:
+                assert fmsvap.merged_reads_part == mrp
+                assert os.path.isfile(fmsvap.assignment_bam)
+                assert mrp.rows == 1
         for mrp in split_merged_reads(mr, 2, included_reads='M'):
-            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
-            assert fmsvap.merged_reads_part == mrp
-            assert os.path.isfile(fmsvap.assignment_bam)
+            fmsvaps = align_reads_to_ms_variations_part_as_list(mrp, padding, mss_version)
+            for fmsvap in fmsvaps:
+                assert fmsvap.merged_reads_part == mrp
+                assert os.path.isfile(fmsvap.assignment_bam)
             assert mrp.rows == 2
     assert FullMSVMergedReadsPart.objects.filter(rows=1).count()
     assert FullMSVMergedReadsPart.objects.exclude(rows=1).count()
@@ -124,15 +127,17 @@ def test_merge_aligned_merged_reads_parts(fmsv_merged_reads_d, fmsv_reads_fd, ac
         fmsv = get_full_ms_variations(amplicon_collection, padding, mss_version)
         fmsva_parts = []
         for mrp in split_merged_reads(mr, reads_chunk_size=1, included_reads='M'):
-            fmsvap = align_reads_to_ms_variations_part(mrp, padding, mss_version)
-            assert fmsvap.ms_variations.id == fmsv.id
-            assert fmsvap.merged_reads_part == mrp
-            assert os.path.isfile(fmsvap.assignment_bam)
-            fmsva_parts.append(fmsvap)
-        fmsva = merge_fmsva_parts(fmsva_parts, reads_chunk_size=1, included_reads='M')
-        assert fmsva.merged_reads == mr
-        assert os.path.isfile(fmsva.sorted_assignment_bam)
-        fmsva.delete()
+            fmsvaps = align_reads_to_ms_variations_part_as_list(mrp, padding, mss_version)
+            for fmsvap in fmsvaps:
+                assert fmsvap.ms_variations.id == fmsv.id
+                assert fmsvap.merged_reads_part == mrp
+                assert os.path.isfile(fmsvap.assignment_bam)
+            fmsva_parts.append(fmsvaps)
+        fmsvas = merge_fmsva_parts_as_list(fmsva_parts, reads_chunk_size=1, included_reads='M')
+        for fmsva in fmsvas:
+            assert fmsva.merged_reads == mr
+            assert os.path.isfile(fmsva.sorted_assignment_bam)
+            fmsva.delete()
         mr.fullmsvmergedreadspart_set.all().delete()
         fmsv.delete()
 
