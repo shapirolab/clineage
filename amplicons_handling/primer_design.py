@@ -100,6 +100,17 @@ def filter_by_size(filter_list, target_primers, best_size=160, margin_size=250):
     return filter_list
 
 
+def filter_by_sequences(filter_list, target_primers, excluded_sequences):
+    filtered_list = []
+    for tar in filter_list:
+        for ex_seq in excluded_sequences:
+            if ex_seq in target_primers[tar]['LEFT'] or ex_seq in target_primers[tar]['RIGHT']:
+                break
+        else:  # break didn't happen hence these primers are valid
+            filtered_list.append(tar)
+    return filtered_list
+
+
 def filter_by_delta_g(filter_list, target_primers, target, relative_target_pos, chromosome, delta_min=-70, delta_max=0):
     for tar in filter_list:
         template_slice = DNASlice(chromosome=chromosome,
@@ -131,6 +142,7 @@ def sort_best_primers(primer3_output, **kwargs):
     """
     size_filter = kwargs.get('size_filter', True)
     deltag_filter = kwargs.get('deltag_filter', False)
+    excluded_sequences = kwargs.get('excluded_sequences', ('GAGTC', 'GACTC'))
 
     target_primers = parse_primers(primer3_output)
     discarded_targets = []
@@ -152,6 +164,9 @@ def sort_best_primers(primer3_output, **kwargs):
     if deltag_filter:
         filter_list = filter_by_delta_g(filter_list, target_primers, target, relative_target_pos, chromosome,
                                         delta_min=kwargs.get('delta_min', -70), delta_max=kwargs.get('delta_max', 0))
+
+    # checking primers for excluded secunces
+    filter_list = filter_by_sequences(filter_list, target_primers, excluded_sequences)
 
     if filter_list:
         chosen_target_primers = target_primers[filter_list[0]]
