@@ -68,6 +68,7 @@ urlpatterns = [
 
     # collaborators_reports
     # url(r'^csv_view/partner_name:(?P<partner_name>\w+)$', views.partner_cells_table_view),
+    url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)/ngsrun:(?P<ngsrun>\w+)/demux_id:(?P<demux_id>\d+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)/ngsrun:(?P<ngsrun>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/ngsrun:(?P<ngsrun>\w+)$', views.partner_cells_table_view_db),
     url(r'^csv_view/cell_data/partner_name:(?P<partner_name>\w+)/individual_name:(?P<individual_name>\w+)$', views.partner_cells_table_view_db),

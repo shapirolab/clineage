@@ -397,8 +397,6 @@ def plate_input_with_names(request):
     return render(request, 'plate_cells_form.html', {'form': plate_form})
 
 
-
-
 def targets_tdv(request, taxa, assem):
     taxa_object = get_object_or_404(Taxa, taxonomy_id=taxa)
     assembly = get_object_or_404(Assembly, taxa=taxa_object, friendly_name=assem)
@@ -536,12 +534,12 @@ def partner_cells_html_view(request, partner_name, individual_name=None, palette
     return render_to_response('user_report.html', {'partner_dict': partner_dict})
     # return HttpResponse(response)
 
+
 def partner_cells_table_view_db(request, partner_name=None,
                                 ngsrun='all',
                                 individual_name=None,
+                                demux_id=None,
                                 palette_name='hls'):
-
-
     response = HttpResponse(content_type='text/csv')
     try:
         if partner_name:
@@ -576,7 +574,7 @@ def partner_cells_table_view_db(request, partner_name=None,
         writer.writeheader()
         # for lib in ngsrun.libraries.all():
 
-        for cell_values in user_cells_table_values_db(partner_name=partner_name, individual_name=individual_name, ngsrun_name=ngsrun):
+        for cell_values in user_cells_table_values_db(partner_name=partner_name, individual_name=individual_name, ngsrun_name=ngsrun, demux_id=demux_id):
             writer.writerow(cell_values)
     except User.DoesNotExist:
         raise Http404("No Partner names matches the given query.")
