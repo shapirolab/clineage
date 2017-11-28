@@ -200,21 +200,19 @@ def merge_srs(srs_lst, bc):
     merged_sr = dict()
     merged_sr["num_reads"] = 0
     with unique_file_cm("fastq") as fastq1_merged:
-        fd1 = open(fastq1_merged, 'w')
-        with unique_file_cm("fastq") as fastq2_merged:
-            fd2 = open(fastq2_merged, 'w')
-            for sr in srs_lst:
-                assert sr.barcoded_content == bc
-                merged_sr["num_reads"] += sr.num_reads
-                with open(sr.fastq1, 'r') as fastq1_in:
-                    shutil.copyfileobj(fastq1_in, fd1)
-                with open(sr.fastq2, 'r') as fastq2_in:
-                    shutil.copyfileobj(fastq2_in, fd2)
-            merged_sr["fastq1"] = fastq1_merged
-            merged_sr["fastq2"] = fastq2_merged
-            merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
-    fd1.close()
-    fd2.close()
+        with open(fastq1_merged, 'w') as fd1:
+            with unique_file_cm("fastq") as fastq2_merged:
+                with open(fastq2_merged, 'w') as fd2:
+                    for sr in srs_lst:
+                        assert sr.barcoded_content == bc
+                        merged_sr["num_reads"] += sr.num_reads
+                        with open(sr.fastq1, 'r') as fastq1_in:
+                            shutil.copyfileobj(fastq1_in, fd1)
+                        with open(sr.fastq2, 'r') as fastq2_in:
+                            shutil.copyfileobj(fastq2_in, fd2)
+                    merged_sr["fastq1"] = fastq1_merged
+                    merged_sr["fastq2"] = fastq2_merged
+                    merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
     return merged_sr
 
 
