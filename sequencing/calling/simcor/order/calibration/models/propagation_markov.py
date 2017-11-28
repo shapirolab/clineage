@@ -1,6 +1,5 @@
 
 import numpy
-from pandas.core.algorithms import isin
 
 from .markov import FixedStepMarkovModel
 
