@@ -1,9 +1,9 @@
-from ..hist_dist import pop_dist
+from sequencing.calling.hist_dist import pop_dist_corr_numpy
 
 
 def distance_from_model(syn_len, syn_hist, model_cycle, distance_measure):
     model_hist = model_cycle.get_hist_for_length(syn_len)
-    return pop_dist(syn_hist, model_hist, method=distance_measure)
+    return pop_dist_corr_numpy(syn_hist, model_hist)
 
 
 def distance_from_model_across_lengths(model, reference, distance_measure):

@@ -1,5 +1,5 @@
 
-from order.calibration.score import distance_from_model_across_lengths
+from sequencing.calling.simcor.order.calibration.score import distance_from_model_across_lengths
 from scipy import optimize
 
 
