@@ -1,3 +1,4 @@
+import itertools
 from sequencing.calling.hist_dist import pop_dist_corr_numpy
 
 
@@ -17,7 +18,7 @@ def distance_from_model_across_lengths(model, reference, distance_measure):
     cycles_dict = reference.cycles_dict
 
     score = 0.0
-    for syn_len, syn_hist_0, syn_hist_26, syn_hist_47 in syn_hist_list:
+    for syn_len, syn_hists_0, syn_hists_26, syn_hists_47 in syn_hist_list:
         cycles_tup = cycles_dict[syn_len]
         if len(cycles_tup) == 2:
             cycles_26, cycles_47 = cycles_tup
@@ -30,10 +31,11 @@ def distance_from_model_across_lengths(model, reference, distance_measure):
         model_26 = model.get_for_cycles(cycles_26)
         model_47 = model.get_for_cycles(cycles_47)
 
-        score += distance_from_model(syn_len, syn_hist_0, model_0,
-            distance_measure=distance_measure)
-        score += distance_from_model(syn_len, syn_hist_26, model_26,
-            distance_measure=distance_measure)
-        score += distance_from_model(syn_len, syn_hist_47, model_47,
-            distance_measure=distance_measure)
+        # Sum of squared distances
+        for model_hist, syn_hist in itertools.chain(
+                zip(itertools.repeat(model_0), syn_hists_0),
+                zip(itertools.repeat(model_26), syn_hists_26),
+                zip(itertools.repeat(model_47), syn_hists_47)):
+            score += distance_from_model(syn_len, syn_hist, model_hist,
+                distance_measure=distance_measure)**2
     return score
