@@ -18,9 +18,11 @@ def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=l
         plate_data_dict = get_cells_data_dict(srs, group_of_cell=group_of_cell)
         with relaxed_unlink(get_unique_path('tab')) as cell_data_path:
             write_cell_data_dict_to_file(plate_data_dict, cell_data_path)
-            plot = partial(
-                basic_tree_enrichment_and_plotting,
-                cell_data_path=cell_data_path,
-                mutation_table_path=mutation_table_path,
-                )
-            yield td, mutation_table_path, cell_data_path, plot
+            with relaxed_unlink(get_unique_path('png')) as output_plot:
+                plot = partial(
+                    basic_tree_enrichment_and_plotting,
+                    cell_data_path=cell_data_path,
+                    mutation_table_path=mutation_table_path,
+                    output_plot=output_plot,
+                    )
+            yield td, mutation_table_path, cell_data_path, plot, output_plot

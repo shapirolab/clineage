@@ -2,6 +2,8 @@ import os
 import csv
 from misc.utils import unlink, relaxed_unlink, get_unique_path
 from clineage.settings import NOA_MATLAB
+from .ete3_draw_tree import tree_draw
+from .utils import plot_display_tree
 
 import matlab.engine
 eng = matlab.engine.start_matlab()
@@ -138,6 +140,9 @@ def tree_enrichment_and_plotting(
         JSON_cluster_color_file_name='/dev/null',
         JSON_leaf_color_file_name='/dev/null',
         JSON_legend_file_name='/dev/null',
+        JSON_bootstrap_file_name='/dev/null',
+        JSON_leaf_order_file_name='/dev/null',
+        JSON_leaf_label_file_name='/dev/null',
 ):
     eng.Draw_tree_with_enrichment(
         cell_data_path,  # CELL_DATA_FILE,
@@ -150,6 +155,9 @@ def tree_enrichment_and_plotting(
         JSON_cluster_color_file_name,
         JSON_leaf_color_file_name,
         JSON_legend_file_name,
+        JSON_bootstrap_file_name,
+        JSON_leaf_order_file_name,
+        JSON_leaf_label_file_name,
     )
 
 
@@ -157,24 +165,78 @@ def basic_tree_enrichment_and_plotting(
         tree_newick,
         cell_data_path,
         mutation_table_path,
+        output_plot,
+        tree_name='Tree',
+        tree_scale='linear',
+        tree_rotation=True,
+        font_size=7,
+        font_legend=7,
+        node_size=3,
+        fig_width=500,
+        fig_height=300,
+        fig_dpi=120,
+        scale_rate=None,
+        distance_factor=1,
+        y_scale=True,
+
+
 ):
-    with relaxed_unlink(get_unique_path('json')) as json1:
-        with relaxed_unlink(get_unique_path('json')) as json2:
-            with relaxed_unlink(get_unique_path('json')) as json3:
-                with relaxed_unlink(get_unique_path('json')) as json4:
-                    with relaxed_unlink(get_unique_path('json')) as json5:
+    with relaxed_unlink(get_unique_path('json')) as duplicates_file:
+        with relaxed_unlink(get_unique_path('json')) as cluster_width_file:
+            with relaxed_unlink(get_unique_path('json')) as cluster_color_file:
+                with relaxed_unlink(get_unique_path('json')) as leaf_color_file:
+                    with relaxed_unlink(get_unique_path('json')) as legend_file:
                         with relaxed_unlink(get_unique_path('tab')) as clustering_metrics_file:
-                            tree_enrichment_and_plotting(
-                                tree_newick,
-                                cell_data_path,
-                                mutation_table_path,
-                                snp_table_path='',
-                                Lineage_Output_File=clustering_metrics_file,
-                                JSON_duplicates_file_name=json1,
-                                JSON_cluster_width_file_name=json2,
-                                JSON_cluster_color_file_name=json3,
-                                JSON_leaf_color_file_name=json4,
-                                JSON_legend_file_name=json5,
-                            )
-                            clustering_scores = read_statistics_file(clustering_metrics_file)
+                            with relaxed_unlink(get_unique_path('json')) as bootstrap_file:
+                                with relaxed_unlink(get_unique_path('json')) as leaf_order_file:
+                                    with relaxed_unlink(get_unique_path('json')) as leaf_label_file:
+
+                                        tree_enrichment_and_plotting(
+                                            tree_newick,
+                                            cell_data_path,
+                                            mutation_table_path,
+                                            snp_table_path='',
+                                            Lineage_Output_File=clustering_metrics_file,
+                                            JSON_duplicates_file_name=duplicates_file,
+                                            JSON_cluster_width_file_name=cluster_width_file,
+                                            JSON_cluster_color_file_name=cluster_color_file,
+                                            JSON_leaf_color_file_name=leaf_color_file,
+                                            JSON_legend_file_name=legend_file,
+                                            JSON_bootstrap_file_name=bootstrap_file,
+                                            JSON_leaf_order_file_name=leaf_order_file,
+                                            JSON_leaf_label_file_name=leaf_label_file,
+                                        )
+
+                                        tree, tstyle = tree_draw(
+                                            tree_newick,
+                                            tree_name=tree_name,
+                                            duplicate_file=duplicates_file,
+                                            clustering_sizes_file=cluster_width_file,
+                                            clustering_colors_file=cluster_color_file,
+                                            cell_colors_file=leaf_color_file,
+                                            legend_file=legend_file,
+                                            intermediate_node_sizes_file=bootstrap_file,
+                                            intermediate_node_labels_file=None,
+                                            order_vector_file=leaf_order_file,
+                                            leaf_labels_file=leaf_label_file,
+                                            tree_scale=tree_scale,
+                                            tree_rotation=tree_rotation,
+                                            font_size=font_size,
+                                            font_legend=font_legend,
+                                            node_size=node_size,
+                                            scale_rate=scale_rate,
+                                            distance_factor=distance_factor,
+                                            y_scale=y_scale,
+                                        )
+
+                                        plot_display_tree(
+                                            tree,
+                                            tstyle,
+                                            output_plot,
+                                            fig_width=fig_width,
+                                            fig_height=fig_height,
+                                            fig_dpi=fig_dpi,
+                                        )
+
+                                        clustering_scores = read_statistics_file(clustering_metrics_file)
     return clustering_scores
