@@ -185,6 +185,13 @@ class Histogram(object):
             return Histogram({i ** other: self[i] for i in self.keys()}, nsamples=self.nsamples)
         raise TypeError()
 
+    def yadd(self, other):
+        if isinstance(other, (int, float)):
+            return Histogram({i: self[i] + other for i in self.keys()}, nsamples=self.nsamples)
+        if isinstance(other, decimal.Decimal):
+            return self.yadd(float(other))
+        raise TypeError()
+
     def ymul(self, other):
         if isinstance(other, (int, float)):
             return Histogram({i: self[i] * other for i in self.keys()}, nsamples=self.nsamples)
