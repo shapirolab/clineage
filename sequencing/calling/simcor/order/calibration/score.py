@@ -1,10 +1,11 @@
 import itertools
-from sequencing.calling.hist_dist import pop_dist_corr_numpy
+from sequencing.calling.hist_dist import get_distance_function_by_name
 
 
 def distance_from_model(syn_len, syn_hist, model_cycle, distance_measure):
+    distance_function = get_distance_function_by_name(distance_measure)
     model_hist = model_cycle.get_hist_for_length(syn_len)
-    return pop_dist_corr_numpy(syn_hist, model_hist)
+    return distance_function(syn_hist, model_hist)
 
 
 def distance_from_model_across_lengths(model, reference, distance_measure):

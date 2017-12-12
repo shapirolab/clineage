@@ -1,5 +1,11 @@
 import numpy as np
-from .hist import get_lims
+from sequencing.calling.hist import get_lims
+import sys
+
+
+def maximum_likelihood(hist1, hist2):
+    li, ri = get_lims(hist1, hist2)
+    return -sum(np.log(hist1[x] if hist1[x] > 0 else sys.float_info.epsilon)*hist2[x] for x in range(li, ri))/sum(hist2._hist.values())
 
 
 def pop_dist_corr_numpy(hist1, hist2):
@@ -9,3 +15,10 @@ def pop_dist_corr_numpy(hist1, hist2):
     li, ri = get_lims(hist1, hist2)
     pmat = np.corrcoef([hist1[x] for x in range(li, ri)], [hist2[x] for x in range(li, ri)])
     return 1-pmat[0][1]
+
+
+def get_distance_function_by_name(func_name):
+    if func_name == 'con':
+        return pop_dist_corr_numpy
+    if func_name == 'ml':
+        return pop_dist_corr_numpy
