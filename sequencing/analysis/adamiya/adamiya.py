@@ -114,6 +114,7 @@ def align_primers_to_reads(reads_index):
                 bowtie2_with_defaults('-x', reads_index.index_files_prefix,
                                       '-f', panel_fasta,
                                       '-S', assignment_sam)
+            connection.close() # fix MySQL gone away after long processing
             return raise_or_create_with_defaults(
                 assignment_sam=assignment_sam,
             )
