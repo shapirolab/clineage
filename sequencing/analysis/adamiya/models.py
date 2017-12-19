@@ -16,7 +16,9 @@ def amplicon_margin_to_name(amplicon, side):
     if side not in [LEFT, RIGHT]:
         raise ValueError("Side should be one of adamiya.LEFT, adamiya.RIGHT")
     return 'amplicon_{}_{}'.format(amplicon.id, side)
+import functools
 
+@functools.lru_cache(maxsize=100000)
 def name_to_amplicon_margin(name):
     m = re.match("amplicon_([1-9][0-9]*)_({}|{})".format(LEFT, RIGHT), name)
     if not m:
