@@ -6,12 +6,20 @@ from .ete3_draw_tree import tree_draw
 from .utils import plot_display_tree
 
 import matlab.engine
-eng = matlab.engine.start_matlab()
-matlab_general_functions = os.path.join(NOA_MATLAB, r'General_Functions/')
-matlab_json = os.path.join(matlab_general_functions, r'jsonlab-1.2/jsonlab/')
-eng.addpath(NOA_MATLAB)
-eng.addpath(matlab_general_functions)
-eng.addpath(matlab_json)
+
+
+def start_matlab_eng():
+    eng = matlab.engine.start_matlab()
+    matlab_general_functions = os.path.join(NOA_MATLAB, r'General_Functions/')
+    matlab_json = os.path.join(matlab_general_functions, r'jsonlab-1.2/jsonlab/')
+    eng.addpath(NOA_MATLAB)
+    eng.addpath(matlab_general_functions)
+    eng.addpath(matlab_json)
+    return eng
+
+
+def stop_matlab_eng(eng):
+    eng.quit()
 
 
 def sr_label_func(sr):
@@ -51,6 +59,7 @@ def distance_calculation(
         'ML': 5,
         'IGOR': 6}
     assert distance_metric in distance_metric_map.keys()
+    eng = start_matlab_eng()
     eng.Distance_Calculation(
         'MStableInputFile', mutation_table_path,  # Input file (mutations table)
         'DistanceMatOutputFile', distance_matrix_output_path,  # Output file (Distance table)
@@ -59,6 +68,7 @@ def distance_calculation(
         'CellsToBeAnalysed', filter_cells_by,  # Filter cells with data in 'MS' / 'SNP' / 'MS_SNP'  !!!Use Only MS until understanding this
         'MSweight', ms_snp_weight  # Relevant only when UseDataToReconstructTree='MS_SNP'
     )
+    stop_matlab_eng(eng)
 
 
 def add_calculated_root_to_mutation_matrix(
@@ -84,6 +94,7 @@ def add_calculated_root_to_mutation_matrix(
     Returns:
 
     """
+    eng = start_matlab_eng()
     eng.calculate_root(
         cell_data_path,
         mutation_table_path,
@@ -93,6 +104,7 @@ def add_calculated_root_to_mutation_matrix(
         cells_to_be_used_as_root,
         JSON_duplicates_file_name
     )
+    stop_matlab_eng(eng)
 
 
 def distance_based_reconstruction(
@@ -112,12 +124,14 @@ def distance_based_reconstruction(
     Returns:
 
     """
+    eng = start_matlab_eng()
     eng.Tree_Distance_Based_Reconstruction(
         'DistanceMatInputFile', distance_matrix_path,
         'Algorithm', algorithm,
         'TreeOutputFileNewick', tree_newick_output,
         'TreeOutputFileMatlab', tree_matlab_file,
     )
+    stop_matlab_eng(eng)
 
 
 def read_statistics_file(path):
@@ -144,6 +158,7 @@ def tree_enrichment_and_plotting(
         JSON_leaf_order_file_name='/dev/null',
         JSON_leaf_label_file_name='/dev/null',
 ):
+    eng = start_matlab_eng()
     eng.Draw_tree_with_enrichment(
         cell_data_path,  # CELL_DATA_FILE,
         mutation_table_path,  # MS_TAB_FILE,  # this is actually a list of the cells to filter by
@@ -159,6 +174,7 @@ def tree_enrichment_and_plotting(
         JSON_leaf_order_file_name,
         JSON_leaf_label_file_name,
     )
+    stop_matlab_eng(eng)
 
 
 def basic_tree_enrichment_and_plotting(
@@ -240,3 +256,4 @@ def basic_tree_enrichment_and_plotting(
 
                                         clustering_scores = read_statistics_file(clustering_metrics_file)
     return clustering_scores
+
