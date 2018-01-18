@@ -15,7 +15,7 @@ def size_clustering(t, styles, clustering_sizes_file):
     branch_width = get_branch_width(clustering_sizes_file)
     for name, groups in branch_width.items():
         nodes = t.search_nodes(name=name)
-        assert len(nodes) == 1
+        assert len(nodes) == 1, nodes
         node = nodes[0]
         for group, pvalue in groups.items():
             width = min(10, -round(math.log10(pvalue)))
@@ -36,7 +36,7 @@ def color_clustering(t, ts, styles, clustering_colors_file):
     cluster_colors = get_cluster_colors(clustering_colors_file)
     for name, groups in cluster_colors.items():
         nodes = t.search_nodes(name=name)
-        assert len(nodes) == 1
+        assert len(nodes) == 1, nodes
         node = nodes[0]
         for group, color in groups.items():
             children = node.get_children()

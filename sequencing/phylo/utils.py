@@ -91,6 +91,7 @@ def get_cells_labels(leaf_labels_file):
 
 def get_branch_width(clustering_sizes_file):
     branches = load_json(clustering_sizes_file)
+    print('branches: ', branches)
     branches_width = branches['BranchPvals']
     new_dict_width = dict()
     for group in list(branches_width.keys()):

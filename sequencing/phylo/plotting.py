@@ -10,6 +10,19 @@ from misc.utils import unlink, relaxed_unlink, get_unique_path
 
 @contextlib.contextmanager
 def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
+    """
+    The function
+    :param srs: List of SampleReads
+    :param full_td: Dict of cells with their loci length
+    :param pl1:
+    :param pl2:
+    :param group_of_cell: list of the cell groups
+    :return: (yield) td -
+            mutation_table_path -
+            cell_data_path -
+            plot -
+            output_plot -
+    """
     td = copy.deepcopy(full_td)
     td = filter_mutation_map(td, pl1, pl2)
     td = filter_bipartition_loci(td)
