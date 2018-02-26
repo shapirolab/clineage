@@ -1,9 +1,11 @@
 from sequencing.phylo.matlab_wrappers import add_calculated_root_to_mutation_matrix
 from sequencing.phylo.csv_writers import print_mutation_dict_to_file
 from misc.utils import unlink, relaxed_unlink, get_unique_path
+from sequencing.calling.queries.mutation_maps import transpose_dict
 import os
 import csv
 import networkx as nx
+import numpy as np
 from frogress import bar
 from plumbum import local
 import dendropy
@@ -14,31 +16,21 @@ from TMC_CLI import parse_mutations_table, paired_triplets_generator, format_tri
 
 def add_root_to_dict(
         textual_mutation_dict,
-        cell_data_path,
         cells_to_be_used_as_root,
-        SNP_TAB_FILE='',
-        SNP_tab_output_file_with_Root='',
 ):
     new_d = dict()
-    with relaxed_unlink(get_unique_path('tab')) as temp_input_file_path:
-        print_mutation_dict_to_file(textual_mutation_dict, temp_input_file_path)
-        with relaxed_unlink(get_unique_path('json')) as JSON_duplicates_file_name:
-            with relaxed_unlink(get_unique_path('tab')) as temp_output_file_path:
-                add_calculated_root_to_mutation_matrix(
-                    mutation_table_path=temp_input_file_path,
-                    cell_data_path=cell_data_path,
-                    added_root_mutation_table_path=temp_output_file_path,
-                    cells_to_be_used_as_root=cells_to_be_used_as_root,
-                    SNP_TAB_FILE=SNP_TAB_FILE,
-                    SNP_tab_output_file_with_Root=SNP_tab_output_file_with_Root,
-                    JSON_duplicates_file_name=JSON_duplicates_file_name)
-                with open(temp_output_file_path) as f:
-                    rdr = csv.DictReader(f, dialect='excel-tab')
-                    for row in rdr:
-                        row_id = row['names']
-                        del row['names']
-                        new_d[row_id] = dict()
-                        new_d[row_id].update(row)
+    if cells_to_be_used_as_root == ['Ave']:
+        cells_to_be_used_as_root = set(c for loc in textual_mutation_dict for c in textual_mutation_dict[loc])
+    else:
+        cells_to_be_used_as_root = set(cells_to_be_used_as_root)
+    root_collection = dict()
+    for loc in textual_mutation_dict:
+        for c in textual_mutation_dict[loc].keys() & cells_to_be_used_as_root:
+            root_collection.setdefault(loc, []).append(textual_mutation_dict[loc][c])
+    for loc in root_collection:
+        val = int(np.median(root_collection[loc]))
+        new_d.setdefault(loc, dict())['root'] = val
+        new_d[loc].update(textual_mutation_dict[loc])
     return new_d
 
 
@@ -72,7 +64,6 @@ def get_cells_and_root(mutation_table_path_for_triplets):
 
 def calculate_triplets_tree(
         textual_mutation_dict,
-        cell_data_path,
         triplets_file,
         cells_to_be_used_as_root=['Ave'],
         score_threshold=0,  # print scores
@@ -85,8 +76,8 @@ def calculate_triplets_tree(
 ):
     rtd = add_root_to_dict(
         textual_mutation_dict=textual_mutation_dict,
-        cell_data_path=cell_data_path,
         cells_to_be_used_as_root=cells_to_be_used_as_root)
+    rtd = transpose_dict(rtd)
     rtd_for_sagi, cell_id_map_for_sagi = map_cell_ids_for_sagi(rtd)
     with relaxed_unlink(get_unique_path("tab")) as mutation_table_path_for_triplets:
         print_mutation_dict_to_file(rtd_for_sagi, mutation_table_path_for_triplets)  # This file operation is redundent
@@ -139,7 +130,6 @@ def run_sagis_triplets_binary(triplets_file, output_newick):
 
 def run_sagis_triplets(
     textual_mutation_dict,
-    cell_data_path,
     cells_to_be_used_as_root,
     newick_tree_path,
     score_threshold=0,  # print scores
@@ -153,7 +143,6 @@ def run_sagis_triplets(
     with relaxed_unlink(get_unique_path('triplets')) as triplets_list_path:
         cell_id_map_for_sagi = calculate_triplets_tree(
             textual_mutation_dict,
-            cell_data_path,
             triplets_list_path,
             cells_to_be_used_as_root,
             score_threshold=score_threshold,  # print scores
