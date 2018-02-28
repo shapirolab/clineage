@@ -9,7 +9,7 @@ from misc.utils import unlink, relaxed_unlink, get_unique_path
 
 
 @contextlib.contextmanager
-def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
+def prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
     """
     The function
     :param srs: List of SampleReads
@@ -31,11 +31,31 @@ def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=l
         plate_data_dict = get_cells_data_dict(srs, group_of_cell=group_of_cell)
         with relaxed_unlink(get_unique_path('tab')) as cell_data_path:
             write_cell_data_dict_to_file(plate_data_dict, cell_data_path)
-            with relaxed_unlink(get_unique_path('png')) as output_plot:
-                plot = partial(
-                    basic_tree_enrichment_and_plotting,
-                    cell_data_path=cell_data_path,
-                    mutation_table_path=mutation_table_path,
-                    output_plot=output_plot,
-                    )
-            yield td, mutation_table_path, cell_data_path, plot, output_plot
+            yield td, mutation_table_path, cell_data_path
+
+
+@contextlib.contextmanager
+def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
+    """
+    The function
+    :param srs: List of SampleReads
+    :param full_td: Dict of cells with their loci length
+    :param pl1:
+    :param pl2:
+    :param group_of_cell: list of the cell groups
+    :return: (yield) td -
+            mutation_table_path -
+            cell_data_path -
+            plot -
+            output_plot -
+    """
+    with prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=group_of_cell) \
+            as (td, mutation_table_path, cell_data_path):
+        with relaxed_unlink(get_unique_path('png')) as output_plot:
+            plot = partial(
+                basic_tree_enrichment_and_plotting,
+                cell_data_path=cell_data_path,
+                mutation_table_path=mutation_table_path,
+                output_plot=output_plot,
+                )
+        yield td, mutation_table_path, cell_data_path, plot, output_plot
