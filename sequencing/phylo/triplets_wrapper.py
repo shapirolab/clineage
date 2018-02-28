@@ -119,10 +119,16 @@ def convert_names_in_sagis_newick(indexes_as_labels_tree, labeled_tree, cell_id_
 tmc = local["/home/dcsoft/s/Noa/Tree_Analysis_2016/TMC/treeFromTriplets"]
 
 
+class EmptyTripletsFile(Exception):
+    pass
+
+
 def run_sagis_triplets_binary(triplets_file, output_newick):
     # tmc(
     #     "-fid", triplets_file,
     #     "-frtN", output_newick)
+    if os.stat(triplets_file).st_size == 0:
+        raise EmptyTripletsFile('Empty file: '.format(triplets_file))
     sagi_cli = '/home/dcsoft/s/Noa/Tree_Analysis_2016/TMC/treeFromTriplets -fid {} -frtN {} -w 1 -index 2'.format(
         triplets_file, output_newick)
     return os.system(sagi_cli)
