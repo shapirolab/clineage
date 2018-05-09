@@ -414,7 +414,7 @@ def separate_reads_by_genotypes(fmsva):
         ):
             yield her
     else:
-        reads1, reads2, readsm = index_fastqs(fmsva)
+        # reads1, reads2, readsm = index_fastqs(fmsva)
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
@@ -442,14 +442,17 @@ def separate_reads_by_genotypes(fmsva):
                     continue  # This happens when the database has changed but the indexed panel has not
 
                 def inner(raise_or_create_with_defaults):
-                    with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
-                            _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
-                            _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+                    # with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+                    #         _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
+                    #         _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
                         return raise_or_create_with_defaults(  # *
                             num_reads=len(read_ids),
-                            fastq1=genotypes_reads1_fastq_name,
-                            fastq2=genotypes_reads2_fastq_name,
-                            fastqm=genotypes_readsm_fastq_name,
+                            # fastq1=genotypes_reads1_fastq_name,
+                            # fastq2=genotypes_reads2_fastq_name,
+                            # fastqm=genotypes_readsm_fastq_name,
+                            fastq1='N/A',
+                            fastq2='N/A',
+                            fastqm='N/A',
                         )
                 yield get_get_or_create(inner, HistogramEntryReads,
                                         histogram=histogram,
