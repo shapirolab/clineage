@@ -74,10 +74,12 @@ def calculate_triplets_tree(
         sabc=0,
         tripletsnumber=5000,
 ):
-    rtd = add_root_to_dict(
-        textual_mutation_dict=textual_mutation_dict,
-        cells_to_be_used_as_root=cells_to_be_used_as_root)
-    rtd = transpose_dict(rtd)
+    rtd = transpose_dict(textual_mutation_dict)
+    if 'root' not in rtd:
+        rtd = add_root_to_dict(
+            textual_mutation_dict=textual_mutation_dict,
+            cells_to_be_used_as_root=cells_to_be_used_as_root)
+        rtd = transpose_dict(rtd)
     rtd_for_sagi, cell_id_map_for_sagi = map_cell_ids_for_sagi(rtd)
     with relaxed_unlink(get_unique_path("tab")) as mutation_table_path_for_triplets:
         print_mutation_dict_to_file(rtd_for_sagi, mutation_table_path_for_triplets)  # This file operation is redundent
