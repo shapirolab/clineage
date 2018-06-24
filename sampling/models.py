@@ -166,6 +166,9 @@ class Cell(models.Model):
     status = models.ForeignKey(SampleStatus, null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     classification = models.CharField(max_length=50, null=True, blank=True)
+    custom_group_labeling = models.CharField(max_length=50)
+    is_root_approximating = models.BooleanField(default=False)
+    
     def __str__(self):
         return '{}>{}'.format(str(self.sampling), self.name)
 
