@@ -147,9 +147,9 @@ def get_peaks_ranges(peaks, max_distance_from_peak):
         yield range(*t)
 
 
-def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False, min_prop=0.2, filter_single_peak=True,):
+def split_genotypes(cas, max_distance_from_peak=2, case=1, filter_ones=False, min_prop=0.2, filter_single_peak=True, minimal_distance_between_peaks=3):
     peaks = get_population_kernels(
-        cas, allele_number=2, minimal_distance_between_peaks=3, case=case, filter_ones=filter_ones, min_prop=min_prop)
+        cas, allele_number=2, minimal_distance_between_peaks=minimal_distance_between_peaks, case=case, filter_ones=filter_ones, min_prop=min_prop)
     if peaks is None or len(peaks) > 2:
         return None
     if len(peaks) == 1 and filter_single_peak:
