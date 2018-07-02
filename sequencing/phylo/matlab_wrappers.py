@@ -223,36 +223,36 @@ def basic_tree_enrichment_and_plotting(
                                             JSON_leaf_label_file_name=leaf_label_file,
                                         )
 
-                                        tree, tstyle = tree_draw(
-                                            tree_newick,
-                                            tree_name=tree_name,
-                                            duplicate_file=duplicates_file,
-                                            clustering_sizes_file=cluster_width_file,
-                                            clustering_colors_file=cluster_color_file,
-                                            cell_colors_file=leaf_color_file,
-                                            legend_file=legend_file,
-                                            intermediate_node_sizes_file=bootstrap_file,
-                                            intermediate_node_labels_file=None,
-                                            order_vector_file=leaf_order_file,
-                                            leaf_labels_file=leaf_label_file,
-                                            tree_scale=tree_scale,
-                                            tree_rotation=tree_rotation,
-                                            font_size=font_size,
-                                            font_legend=font_legend,
-                                            node_size=node_size,
-                                            scale_rate=scale_rate,
-                                            distance_factor=distance_factor,
-                                            y_scale=y_scale,
-                                        )
+                                        # tree, tstyle = tree_draw(
+                                        #     tree_newick,
+                                        #     tree_name=tree_name,
+                                        #     duplicate_file=duplicates_file,
+                                        #     clustering_sizes_file=cluster_width_file,
+                                        #     clustering_colors_file=cluster_color_file,
+                                        #     cell_colors_file=leaf_color_file,
+                                        #     legend_file=legend_file,
+                                        #     intermediate_node_sizes_file=bootstrap_file,
+                                        #     intermediate_node_labels_file=None,
+                                        #     order_vector_file=leaf_order_file,
+                                        #     leaf_labels_file=leaf_label_file,
+                                        #     tree_scale=tree_scale,
+                                        #     tree_rotation=tree_rotation,
+                                        #     font_size=font_size,
+                                        #     font_legend=font_legend,
+                                        #     node_size=node_size,
+                                        #     scale_rate=scale_rate,
+                                        #     distance_factor=distance_factor,
+                                        #     y_scale=y_scale,
+                                        # )
 
-                                        plot_display_tree(
-                                            tree,
-                                            tstyle,
-                                            output_plot,
-                                            fig_width=fig_width,
-                                            fig_height=fig_height,
-                                            fig_dpi=fig_dpi,
-                                        )
+                                        # plot_display_tree(
+                                        #     tree,
+                                        #     tstyle,
+                                        #     output_plot,
+                                        #     fig_width=fig_width,
+                                        #     fig_height=fig_height,
+                                        #     fig_dpi=fig_dpi,
+                                        # )
 
                                         clustering_scores = read_statistics_file(clustering_metrics_file)
     return clustering_scores
