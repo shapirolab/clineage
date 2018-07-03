@@ -52,13 +52,16 @@ def get_peaks(genotypes):
     return peaks
 
 
-def invert_calling_assignments(calling_assignments):
+def invert_calling_assignments(calling_assignments, average=False):
     ica = dict()
     for ca in calling_assignments:
         inverted_dict = dict()
         for allele, slot in calling_assignments[ca].items():
             inverted_dict.setdefault(slot, []).append(allele)
-        ica[ca.histogram.sample_reads] = {k: v[0] for k, v in inverted_dict.items() if len(v) == 1}
+        if average:
+            ica[ca.histogram.sample_reads] = {k: sum(v)//len(v) for k, v in inverted_dict.items()}
+        else:
+            ica[ca.histogram.sample_reads] = {k: v[0] for k, v in inverted_dict.items() if len(v) == 1}
     return ica
 
 
