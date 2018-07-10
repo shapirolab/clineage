@@ -64,15 +64,15 @@ class MSLengthBoundsModelMixin(models.Model, MSLengthBoundsMixin):
 
 
 class ProportionStepModelMixin(models.Model):
-    proportion_step = models.DecimalField(max_digits=3, decimal_places=2)
+    proportion_step = models.DecimalField(max_digits=6, decimal_places=5)
 
     class Meta:
         abstract = True
 
 
 class ProportionsBoundsModelMixin(models.Model, ProportionsBoundsMixin):
-    lower_prop_bound = models.DecimalField(max_digits=3, decimal_places=2)
-    upper_prop_bound = models.DecimalField(max_digits=3, decimal_places=2)
+    lower_prop_bound = models.DecimalField(max_digits=6, decimal_places=5)
+    upper_prop_bound = models.DecimalField(max_digits=6, decimal_places=5)
 
     @property
     def proportion_bounds(self):
@@ -86,9 +86,9 @@ class AlleleDistanceProportionBoundsModelMixin(models.Model):
     """
     Model Mixin for the exclusion function parameter fields
     """
-    length_sensitivity = models.DecimalField(max_digits=3, decimal_places=2)
-    diff_sensetivity = models.DecimalField(max_digits=3, decimal_places=2)
-    cycle_sensetivity = models.DecimalField(max_digits=3, decimal_places=2)
+    length_sensitivity = models.DecimalField(max_digits=6, decimal_places=5)
+    diff_sensetivity = models.DecimalField(max_digits=6, decimal_places=5)
+    cycle_sensetivity = models.DecimalField(max_digits=6, decimal_places=5)
 
     class Meta:
         abstract = True
@@ -129,10 +129,10 @@ class BestCorrelationCalledAlleles(CalledAlleles):
 
 
 class Proportions(models.Model):
-    p1 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
-    p2 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
-    p3 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
-    p4 = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    p1 = models.DecimalField(max_digits=6, decimal_places=5, null=True)
+    p2 = models.DecimalField(max_digits=6, decimal_places=5, null=True)
+    p3 = models.DecimalField(max_digits=6, decimal_places=5, null=True)
+    p4 = models.DecimalField(max_digits=6, decimal_places=5, null=True)
     _num_of_allele_fields = 4
 
     @classmethod
