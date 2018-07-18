@@ -31,19 +31,22 @@ def facs_or_none(sampling):
     return facs
 
 
-def get_cells_data_dict(srs, group_of_cell=lambda cell: '_'.join(cell.name.split('_')[:-2]), palette_name='hls'):
-    groups = {
-        g: i for i, g in enumerate(
-            {
-                group_of_cell(cell) for cell in [
-                    sr.barcoded_content.subclass.amplified_content.cell for sr in srs
-                ]
-             }
-        )
-    }
-    cell_groups = {cell: groups[group_of_cell(cell)] for cell in
-                   [sr.barcoded_content.subclass.amplified_content.cell for sr in srs]}
-    color_map = get_cells_color_map(cell_groups, palette_name=palette_name)
+def get_cells_data_dict(srs, group_of_cell=lambda cell: '_'.join(cell.name.split('_')[:-2]), palette_name='hls', complet_color_map_override=None):
+    if complet_color_map_override is None:
+        groups = {
+            g: i for i, g in enumerate(
+                {
+                    group_of_cell(cell) for cell in [
+                        sr.barcoded_content.subclass.amplified_content.cell for sr in srs
+                    ]
+                 }
+            )
+        }
+        cell_groups = {cell: groups[group_of_cell(cell)] for cell in
+                       [sr.barcoded_content.subclass.amplified_content.cell for sr in srs]}
+        color_map = get_cells_color_map(cell_groups, palette_name=palette_name)
+    else:
+        color_map = complet_color_map_override
     d = dict()
     for sr in srs:
         cell_cont = sr.barcoded_content.subclass.amplified_content

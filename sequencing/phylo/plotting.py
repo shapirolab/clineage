@@ -9,7 +9,7 @@ from misc.utils import unlink, relaxed_unlink, get_unique_path
 
 
 @contextlib.contextmanager
-def prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
+def prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name, complet_color_map_override=None):
     """
     The function
     :param srs: List of SampleReads
@@ -28,14 +28,14 @@ def prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda
     td = filter_bipartition_loci(td)
     with relaxed_unlink(get_unique_path('tab')) as mutation_table_path:
         print_mutation_dict_to_file(td, mutation_table_path)
-        plate_data_dict = get_cells_data_dict(srs, group_of_cell=group_of_cell)
+        plate_data_dict = get_cells_data_dict(srs, group_of_cell=group_of_cell, complet_color_map_override=complet_color_map_override)
         with relaxed_unlink(get_unique_path('tab')) as cell_data_path:
             write_cell_data_dict_to_file(plate_data_dict, cell_data_path)
             yield td, mutation_table_path, cell_data_path
 
 
 @contextlib.contextmanager
-def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name):
+def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=lambda cell: cell.name, complet_color_map_override=None):
     """
     The function
     :param srs: List of SampleReads
@@ -49,7 +49,7 @@ def prep_plot_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=l
             plot -
             output_plot -
     """
-    with prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=group_of_cell) \
+    with prep_mutation_map_and_cell_data(srs, full_td, pl1, pl2, group_of_cell=group_of_cell, complet_color_map_override=complet_color_map_override) \
             as (td, mutation_table_path, cell_data_path):
         with relaxed_unlink(get_unique_path('png')) as output_plot:
             plot = partial(
