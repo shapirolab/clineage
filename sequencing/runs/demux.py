@@ -195,26 +195,38 @@ def run_demux(ngs_run, demux_scheme):
             )
 
 
-def merge_srs(srs_lst, bc):
+def merge_srs(srs_lst, bc, root_demux):
     """ This method gets list of SampleReads from same Barcoded Content and merges them into one Sample Read"""
-    merged_sr = dict()
-    merged_sr["num_reads"] = 0
-    with unique_file_cm("fastq") as fastq1_merged:
-        with open(fastq1_merged, 'w') as fd1:
-            with unique_file_cm("fastq") as fastq2_merged:
-                with open(fastq2_merged, 'w') as fd2:
-                    for sr in srs_lst:
-                        assert sr.barcoded_content == bc
-                        merged_sr["num_reads"] += sr.num_reads
-                        with open(sr.fastq1, 'r') as fastq1_in:
-                            shutil.copyfileobj(fastq1_in, fd1)
-                        with open(sr.fastq2, 'r') as fastq2_in:
-                            shutil.copyfileobj(fastq2_in, fd2)
-                    merged_sr["fastq1"] = fastq1_merged
-                    merged_sr["fastq2"] = fastq2_merged
-                    merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
-                    merged_sr["bc"] = bc
-    return merged_sr
+    try:
+        yield SampleReads.objects.get(
+            demux=root_demux,
+            barcoded_content=bc)
+    except SampleReads.DoesNotExist:
+        merged_sr = dict()
+        merged_sr["num_reads"] = 0
+        with unique_file_cm("fastq") as fastq1_merged:
+            with open(fastq1_merged, 'w') as fd1:
+                with unique_file_cm("fastq") as fastq2_merged:
+                    with open(fastq2_merged, 'w') as fd2:
+                        for sr in srs_lst:
+                            assert sr.barcoded_content == bc
+                            merged_sr["num_reads"] += sr.num_reads
+                            with open(sr.fastq1, 'r') as fastq1_in:
+                                shutil.copyfileobj(fastq1_in, fd1)
+                            with open(sr.fastq2, 'r') as fastq2_in:
+                                shutil.copyfileobj(fastq2_in, fd2)
+                        merged_sr["fastq1"] = fastq1_merged
+                        merged_sr["fastq2"] = fastq2_merged
+                        merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
+                        merged_sr["bc"] = bc
+        yield SampleReads.objects.create(
+            demux=root_demux,
+            barcoded_content=bc,
+            library=merged_sr["library"],
+            num_reads=merged_sr["num_reads"],
+            fastq1=merged_sr["fastq1"],
+            fastq2=merged_sr["fastq2"],
+        )
 
 
 def prepare_merge_demuxes(ngs_runs, merged_demux_scheme):
@@ -236,12 +248,14 @@ def prepare_merge_demuxes(ngs_runs, merged_demux_scheme):
     srs_by_bc_dict = dict()
     # populate a dictionary with barcoded content id as key and list of its Sample Reads as value
     for ngs_run in ngs_runs:
-        demux = list(ngs_run.demultiplexing_set.all().exclude(demux_scheme=merged_demux_scheme))
+        demux = [dm for dm in ngs_run.demultiplexing_set.all() if not MergedDemultiplexing.objects.filter(id=dm.id)]
         assert len(demux) == 1
         demux = demux[0]
         for sr in demux.samplereads_set.all():
             srs_by_bc_dict.setdefault(sr.barcoded_content, list()).append(sr)
 
+    if merged_demux_scheme.name == 'intersection_demux_scheme':  # filter out BCs that are only present in a single run
+        return root_demux, {bc: srs for bc, srs in srs_by_bc_dict.items() if len(srs) == len(ngs_runs)}
     return root_demux, srs_by_bc_dict
 
 
@@ -251,40 +265,13 @@ def merge_demuxes(ngs_runs, merged_demux_scheme):
     Meaning, it concatenates the fastq files into one
     Each run must have its demux ready!!
     """
-
-    # assert len(ngs_runs) > 1# cannot merge one run
-    #
-    # root_demux = MergedDemultiplexing.objects.create(
-    #     ngs_run=ngs_runs[0],
-    #     demux_scheme=merged_demux_scheme,
-    # )
-    # # workaround to bypass voodoo of unknown field
-    # root_demux.ngs_runs = ngs_runs[1:]
-    # root_demux.save()
-    #
-    # srs_by_bc_dict = dict()
-    # #populate a dictionary with barcoded content id as key and list of its Sample Reads as value
-    # for ngs_run in ngs_runs:
-    #     demux = list(ngs_run.demultiplexing_set.all().exclude(demux_scheme=merged_demux_scheme))
-    #     assert len(demux) == 1
-    #     demux = demux[0]
-    #     for sr in demux.samplereads_set.all():
-    #         srs_by_bc_dict.setdefault(sr.barcoded_content, list()).append(sr)
-
     root_demux, srs_by_bc_dict = prepare_merge_demuxes(ngs_runs, merged_demux_scheme)
 
     # create merged file for each fastq1,fastq2 of each Sample Read
     for bc in srs_by_bc_dict:
         srs = srs_by_bc_dict[bc]
-        merged_sr = merge_srs(srs, bc)
-        yield SampleReads.objects.create(
-            demux=root_demux,
-            barcoded_content=bc,
-            library=merged_sr["library"],
-            num_reads=merged_sr["num_reads"],
-            fastq1=merged_sr["fastq1"],
-            fastq2=merged_sr["fastq2"],
-        )
+        merged_sr = merge_srs(srs, bc, root_demux)
+        yield merged_sr
 
 
 def merge_demuxes_parallel(executor, root_demux, srs_by_bc_dict):
@@ -294,21 +281,5 @@ def merge_demuxes_parallel(executor, root_demux, srs_by_bc_dict):
     """
     for bc in srs_by_bc_dict:
         srs = srs_by_bc_dict[bc]
-        merged_sr = executor.submit(merge_srs, srs,bc)
+        merged_sr = executor.submit(merge_srs, srs, bc, root_demux)
         yield merged_sr
-
-
-def run_merge_demuxes_parallel(executor, root_demux, srs_by_bc_dict):
-    """
-    This method is a wrapper for merge_demuxes_parallel.
-    It gets the results of prepare_merge_demuxes as input
-    """
-    for merged_sr in merge_demuxes_parallel(executor, root_demux, srs_by_bc_dict):
-        yield SampleReads.objects.create(
-            demux=root_demux,
-            barcoded_content=["bc"],
-            library=merged_sr["library"],
-            num_reads=merged_sr["num_reads"],
-            fastq1=merged_sr["fastq1"],
-            fastq2=merged_sr["fastq2"],
-        )
