@@ -1,5 +1,6 @@
 import random
 import numpy
+import scipy
 from itertools import combinations
 
 
@@ -16,12 +17,27 @@ def random_choose(l, k):
         yield comb
 
 
-def memory_expensive_random_choose(l, k, n=50000000):
+def ordered_memory_expensive_random_choose(l, k, n=50000000):
     cvs = set()
-    for elm in numpy.random.choice(list(l), (n, k), replace=True):
+    for elm in numpy.random.choice(list(l),(n,k),replace=True):
         elm = tuple(elm)
         if len({*elm}) != k:
             continue
+        if elm in cvs:
+            continue
+        cvs.add(elm)
+        yield elm
+
+
+def memory_expensive_random_choose(l, k, n=50000000):
+    l = list(l)
+    n = min(int(scipy.special.comb(len(l), k, repetition=True)), n)
+    cvs = set()
+    for elm in numpy.random.choice(l,(n,k),replace=True):
+        elm = tuple(elm)
+        if len({*elm}) != k:
+            continue
+        elm = frozenset(elm)
         if elm in cvs:
             continue
         cvs.add(elm)
