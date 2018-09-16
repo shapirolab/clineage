@@ -141,6 +141,10 @@ class SampleReads(models.Model):
         yield self.fastq1
         yield self.fastq2
 
+    @property
+    def cell(self):
+        return self.barcoded_content.subclass.amplified_content.cell
+
     def __str__(self):
         return "{} @ {}".format(self.barcoded_content.subclass, self.demux)
 
