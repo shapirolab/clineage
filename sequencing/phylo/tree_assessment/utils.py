@@ -29,14 +29,13 @@ def ordered_memory_expensive_random_choose(l, k, n=50000000):
         yield elm
 
 
-def memory_expensive_random_choose(l, k, n=50000000):
+def memory_expensive_random_choose(l, k, n=5000):
     l = list(l)
-    n = min(int(scipy.special.comb(len(l), k, repetition=True)), n)
+    n = min(int(scipy.special.comb(len(l), k, repetition=False)), n)
     cvs = set()
-    for elm in numpy.random.choice(l,(n,k),replace=True):
+    while len(cvs) < n:
+        elm = numpy.random.choice(l,k,replace=False)
         elm = tuple(elm)
-        if len({*elm}) != k:
-            continue
         elm = frozenset(elm)
         if elm in cvs:
             continue
