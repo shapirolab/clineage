@@ -486,9 +486,13 @@ def plate_well_selection(request, plate_plastica_id):
 
 
 def partner_cells_table_view(request, partner_name,
-                             cell_folder=settings.S_MAIN,
+                             cell_folder=None,
                              individual_name=None,
                              palette_name='hls'):
+    try:
+        cell_folder = settings.S_MAIN
+    except AttributeError as e:
+        pass
     response = HttpResponse(content_type='text/csv')
     try:
         p = User.objects.get(username__contains=partner_name)
