@@ -468,3 +468,20 @@ def separate_reads_by_genotypes(fmsva):
             fmsva.separation_finished = True
             fmsva.save()
 
+
+def seek_histogram(hist, verbose=False):
+    fmsva = hist.subclass.assignment
+    if verbose:
+        print('indexing fastqs')
+    reads1, reads2, readsm = index_fastqs(fmsva)
+    if verbose:
+        print('seeking')
+    for amp_id, histogram_reads in stream_group_alignemnts(fmsva):
+        if amp_id != hist.amplicon_id:
+            continue
+        for msg, read_ids in histogram_reads.items():
+            ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(
+                get_ms_genotypes_from_strings_tuple(msg)
+            )
+            yield ms_histogram_genotypes, ({'M': readsm[read_id], 'R1': reads1[read_id], 'R2': reads2[read_id]} for
+                                           read_id in read_ids)
