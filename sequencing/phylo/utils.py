@@ -192,7 +192,7 @@ def plot_display_tree(t, ts, output_plot, fig_width=500, fig_height=300, fig_dpi
     t.render(output_file, h=fig_height, w=fig_width, dpi=fig_dpi, tree_style=ts)
 
 
-import datetime
+from datetime import datetime
 def fix_directories(base_dir, ind_name):
     """
     make sure the dir base_path/curr_date/ind_name exists and create otherwise
@@ -203,9 +203,6 @@ def fix_directories(base_dir, ind_name):
         os.makedirs(dirs_to_create)
     return dirs_to_create
 
-import sys
-sys.path.append('/home/dcsoft/clineage-simulation/')
-from reconstruct import simplified_triplets_calculation
 
 def get_cells_group_map(srs):
     cells_group_map = dict()
