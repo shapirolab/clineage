@@ -1,4 +1,3 @@
-from sequencing.phylo.matlab_wrappers import add_calculated_root_to_mutation_matrix
 from sequencing.phylo.csv_writers import print_mutation_dict_to_file
 from misc.utils import unlink, relaxed_unlink, get_unique_path
 from sequencing.calling.queries.mutation_maps import transpose_dict
