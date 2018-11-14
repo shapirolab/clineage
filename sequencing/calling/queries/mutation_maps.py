@@ -201,3 +201,84 @@ def filter_bipartition_loci(full_td, case=1):
             for c in tbtd[loc]:
                 btd.setdefault(c, dict())[loc] = full_td[c][loc]
     return btd
+
+
+from decimal import Decimal
+def query_rounded_proportional_mutation_map(ind, multi_run_srs, schema_by_repeat_type, histogram_class):
+    mutations_dict = dict()
+    for repeat_type, (calling_schema, rt, ct) in schema_by_repeat_type.items():
+        cas_d = get_cas_dict(multi_run_srs, calling_schema, confidence_threshold=ct,
+                         reads_threshold=rt, histogram_class=histogram_class)
+        cas_d_by_ms = transpose_dict(cas_d)
+        for ms in cas_d_by_ms:
+            if repeat_type in ['ac_b', 'ac_bb'] and (ms.slice.chromosome.name not in ['X', 'Y'] or ind.sex == 'F'):
+                for sr in cas_d_by_ms[ms]:
+                    alleles = cas_d_by_ms[ms][sr].genotypes.alleles
+                    if len(alleles) == 1:
+                        prop = Decimal('1.0')
+                    elif len(alleles) == 2:
+                        prop = Decimal('0.5')
+                    else:
+                        raise ValueError(len(alleles))
+                    mutations_dict.setdefault(ms,dict())[sr]=frozenset(
+                        {(int(a), prop) for a in alleles})
+            elif ms.slice.chromosome.name in ['X', 'Y'] and repeat_type not in ['ac_b', 'ac_bb'] and ind.sex == 'M':
+                for sr in cas_d_by_ms[ms]:
+                    alleles = cas_d_by_ms[ms][sr].genotypes.alleles
+                    assert len(alleles) == 1
+                    mutations_dict.setdefault(ms,dict())[sr]=frozenset(
+                        {(int(a), Decimal('1.0')) for a in alleles})
+#                 genotypes = [a for ca in cas_d_by_ms[ms].values() for a in ca.genotypes.alleles]
+#                 genotypes_iterable = [genotypes]
+            elif calling_schema.allele_number == 1 and ms.slice.chromosome.name not in ['X','Y']:
+                continue
+            elif calling_schema.allele_number == 2 and ms.slice.chromosome.name in ['X','Y'] and ind.sex == 'M':
+                continue
+            elif calling_schema.allele_number == 1 and ind.sex == 'F':
+                continue
+            else:
+                # sanity check
+                print("ind {} did not pass any if condition with scheme {} and ms {}".format(ind.name, repeat_type, ms.id))
+                continue
+    return mutations_dict
+
+
+def get_root_genotypes(d_by_ms, multi_run_srs, p_mono=0.7, order=None):
+    # p_mono aims to classify between true mono-allelic loci and false ones
+    # A good test for that is the number of resulting mono and bi loci from the X chromosome of male VS female
+    if order is None:
+        root_apx_srs = {sr:sr.barcoded_content.subclass.amplified_content.cell.is_root_approximating for sr in multi_run_srs}
+        order = [[sr for sr in multi_run_srs if root_apx_srs[sr]]]
+    root_genotypes = dict()
+    for ms in d_by_ms:
+        root_genotype=None
+        for srs in order:
+            if ms in root_genotypes:
+                continue
+            bi_alleles = []
+            mono_alleles = []
+            for sr in set(srs)&d_by_ms[ms].keys():
+                alleles = [a for a,p in d_by_ms[ms][sr]]
+                if len(alleles) < 2:
+                    mono_alleles.append(sorted(alleles)[0])
+                    continue
+                bi_alleles.append(tuple(sorted(alleles)))
+            if bi_alleles:
+                bi_c = Counter(bi_alleles)
+                root_genotype = frozenset(
+                            {(int(a), Decimal('0.5')) for a in bi_c.most_common()[0][0]})
+            if mono_alleles:
+                mono_c = Counter(mono_alleles)
+                root_genotype = frozenset(
+                            {(mono_c.most_common()[0][0], Decimal('1.0'))})
+            if bi_alleles and mono_alleles:
+                if mono_c.most_common()[0][1]/(bi_c.most_common()[0][1]+mono_c.most_common()[0][1]) > p_mono:
+                    root_genotype = frozenset(
+                            {(mono_c.most_common()[0][0], Decimal('1.0'))})
+                else:
+                    root_genotype = frozenset(
+                            {(int(a), Decimal('0.5')) for a in bi_c.most_common()[0][0]})
+            if root_genotype is None:
+                continue
+            root_genotypes[ms] = root_genotype
+    return root_genotypes
