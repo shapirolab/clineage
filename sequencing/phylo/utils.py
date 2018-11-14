@@ -190,3 +190,45 @@ def plot_display_tree(t, ts, output_plot, fig_width=500, fig_height=300, fig_dpi
     output_file = output_plot.split('.')
     output_file = output_file[0] + '_ladderize.' + output_file[1]
     t.render(output_file, h=fig_height, w=fig_width, dpi=fig_dpi, tree_style=ts)
+
+
+import datetime
+def fix_directories(base_dir, ind_name):
+    """
+    make sure the dir base_path/curr_date/ind_name exists and create otherwise
+    """
+    curr_date = "{:%d_%m_%Y}".format(datetime.now())
+    dirs_to_create = "{}/{}/{}".format(base_dir,curr_date,ind_name)
+    if not os.path.exists(dirs_to_create):
+        os.makedirs(dirs_to_create)
+    return dirs_to_create
+
+import sys
+sys.path.append('/home/dcsoft/clineage-simulation/')
+from reconstruct import simplified_triplets_calculation
+
+def get_cells_group_map(srs):
+    cells_group_map = dict()
+    for sr in srs:
+        ac = sr.barcoded_content.subclass.amplified_content
+        cell = ac.cell
+        cells_group_map[sr.id] = cell.custom_group_labeling
+    return cells_group_map
+
+
+cell_labeler = lambda sr: 'ID{}'.format(sr.id)
+
+
+def textualize_d(objective_d):
+    d = dict()
+    for sr in objective_d:
+        if sr == 'root':
+            sr_label = 'root'
+        else:
+            sr_label = cell_labeler(sr)
+        for ms in objective_d[sr]:
+            d.setdefault(sr_label, dict())['{}_{}'.format(
+                ms.repeat_unit_type,
+                ms.id
+            )] = objective_d[sr][ms]
+    return d
