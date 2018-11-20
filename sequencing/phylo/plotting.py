@@ -91,7 +91,7 @@ def minimal_cell_data_context_wrapper(tree, groups_map):
             for node in tree.leaf_nodes():
                 writer.writerow(
                     {
-                        'Cell_Group': groups_map[node.taxon.label[2:]],
+                        'Cell_Group': groups_map[int(node.taxon.label[2:])],
                         'Cell_Group_short': '',
                         'Cell_ID': int(node.taxon.label[2:]),  # must be a number
                         'Sample_Reads_ID': int(node.taxon.label[2:])  # must be a number
