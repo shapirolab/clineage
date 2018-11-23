@@ -140,3 +140,4 @@ def end_to_end_triplets(
         normalized_newick_path,
         "newick", )
     prep_tree(tree)
+    return tree
