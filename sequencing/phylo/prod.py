@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/home/dcsoft/clineage/")
-import clineage.wsgi
 from sequencing.calling.models import HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, HighestPeaksMonoSimCorSchemeModel
 from sequencing.runs.models import NGSRun, Demultiplexing
 from sampling.models import Individual
@@ -113,6 +110,9 @@ def end_to_end_triplets(
     # mono, splitable, full_bi, combined_likelihood, splitable_then_full, full_then_splittable
     loci_filter='ncnr',
     score_threshold=0,
+    tripletsnumber=50000000,
+    printscores=True,
+    homo=False,
 ):
     path_triplets_list_raw = output_prefix + '.triplets'
     cell_id_map_for_sagi = simplified_triplets_calculation(
@@ -122,9 +122,10 @@ def end_to_end_triplets(
         score_threshold=score_threshold,
         choosing_method=choosing_method,
         scoring_method=scoring_method,
-        printscores=True,
+        printscores=printscores,
         loci_filter=loci_filter,
-        tripletsnumber=50000000,
+        tripletsnumber=tripletsnumber,
+        homo=homo,
     )
     with unlink(get_unique_path('newick')) as triplets_tree_path:
         sagi_wrapper(path_triplets_list_raw, triplets_tree_path, cell_id_map_for_sagi)
