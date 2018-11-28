@@ -1,27 +1,13 @@
-from frogress import bar
 from sequencing.calling.queries.mutation_maps import transpose_dict
-from sequencing.analysis.snps.models import SNPReads
-from sequencing.analysis.snps.parse_snps import snp_calling
-
-from sequencing.calling.queries.mutation_maps import filter_mutation_map
-from lib_prep.workflows.models import MagicalOM6BarcodedContent
-from targeted_enrichment.amplicons.models import Amplicon
-import functools
-from collections import Counter
-from frogress import bar
-from sequencing.analysis.models import SampleReads, AdamMergedReads, AdamReadsIndex, AdamMarginAssignment, \
-    AdamAmpliconReads, AdamHistogram, HistogramEntryReads, AdamMSVariations, \
-    MicrosatelliteHistogramGenotype, HistogramEntryReads, Histogram
-from targeted_enrichment.planning.models import Microsatellite
-from sequencing.calling.models import CalledAlleles
-from django.contrib.auth.models import User
-import pandas as pd
-from sequencing.analysis.full_msv.models import FullMSVHistogram
-from sequencing.calling.hist import Histogram as dHistogram
-from sequencing.calling.simcor.hist_analysis import better_get_far_apart_highest_peaks
-from sequencing.calling.queries.mutation_maps import filter_mutation_map
-
 import numpy as np
+import pandas as pd
+
+def get_probs(path='/home/dcsoft/s/ron/transition_table_exp9_ac_exvivo.csv'):
+    names_lst = [i for i in range(1,31)]
+    # prob_df = pd.read_csv('/home/dcsoft/s/ron/transition_table_nomodel_ac_exvivo.csv',names=names_lst )
+    prob_df = pd.read_csv(path,names=names_lst )
+    prob_df.index = np.arange(1, len(prob_df) + 1)
+    return prob_df
 
 
 def prep_tree(tree):
@@ -102,3 +88,52 @@ def calc_edge_len_noa_log_subtrees_no_divide(prob_dict, ud, vd,min_intersection_
     for loc in mutual_keys:
         running_sum += -np.log(prob_dict[ud[loc]][vd[loc]])
     return running_sum
+
+
+def sankoffize_intermediate_nodes(
+        tree, x_mutations_mono, transition_table='/home/dcsoft/s/ron/transition_table_exp9_ac_exvivo.csv'):
+    prob_df = get_probs(path=transition_table)
+    iprob_df = prob_df.applymap(lambda x: 1 - x)
+    iprob_dict = iprob_df.to_dict()
+
+    full_nodes_values_map = dict()
+
+    for loc in x_mutations_mono:
+        nodes_probe_dict = {k: {v: 0} for k, v in x_mutations_mono[loc].items()}
+        sub_tree = tree.extract_tree_with_taxa_labels(nodes_probe_dict.keys())
+        sankoff_node(sub_tree.seed_node, nodes_probe_dict, iprob_dict)  # updates nodes_probe_dict
+        loc_values = infer_loc_values_from_nodes_probe_dict(nodes_probe_dict)
+        #     infer_full_tree_from_subtree(tree, sub_tree, loc_values)  # updates loc_values
+        full_nodes_values_map[loc] = loc_values
+
+    # printing with different edge len
+    trans_full_nodes_values_map = transpose_dict(full_nodes_values_map)
+    return trans_full_nodes_values_map
+
+
+def sankoffize_by_mono_loci(
+        tree, x_mutations_mono, transition_table='/home/dcsoft/s/ron/transition_table_exp9_ac_exvivo.csv'):
+    trans_full_nodes_values_map = sankoffize_intermediate_nodes(tree, x_mutations_mono)
+    #     sankoffized_root = trans_full_nodes_values_map[None]
+    func = calc_edge_len_noa_log_subtrees_no_divide
+    # assign lengths
+    prob_dict = get_probs(path=transition_table).to_dict()
+    nodes_to_remove = []
+    for e in tree.edges():
+        if e.head_node is None or e.tail_node is None:
+            continue
+        if e.head_node == tree.seed_node or e.tail_node == tree.seed_node:
+            continue
+        if e.tail_node.label not in trans_full_nodes_values_map or e.head_node.label not in trans_full_nodes_values_map:
+            dist = None
+        else:
+            dist = func(prob_dict, trans_full_nodes_values_map[e.tail_node.label],
+                        trans_full_nodes_values_map[e.head_node.label], 15)
+        if dist is None:
+            nodes_to_remove.append(e.head_node)
+            continue
+        e.length = dist
+    tree.ladderize(ascending=False)
+    return tree
+
+
