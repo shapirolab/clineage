@@ -68,9 +68,9 @@ def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
 
 def prep_mutation_table(multi_run_srs, d_by_ms, order=None, p_mono=0.7, filtering_percentiles=None):
     cells_group_map = get_cells_group_map(multi_run_srs)
+    root = get_root_genotypes(d_by_ms, multi_run_srs, order=order, p_mono=p_mono)
     if filtering_percentiles is not None:
         d_by_ms = filter_mutation_map(d_by_ms, *filtering_percentiles)
-    root = get_root_genotypes(d_by_ms, multi_run_srs, order=order, p_mono=p_mono)
     d_with_root = transpose_dict(copy.deepcopy(d_by_ms))
     d_with_root['root'] = root
     textual_d = textualize_d(d_with_root)
