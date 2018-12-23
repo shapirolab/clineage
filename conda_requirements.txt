@@ -1,0 +1,10 @@
+seaborn
+biopython
+lxml
+Cython
+dask==0.15.1
+XlsxWriter
+primer3-py
+pysam
+pear
+bowtie2
