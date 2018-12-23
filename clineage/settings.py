@@ -17,6 +17,8 @@ BOWTIE2_PATH = '/net/mraid11/export/data/dcsoft/home/Adam/Software/bowtie2-2.2.2
 
 DATA_STORE = os.path.join(BASE_DIR,"storage")
 
+CHROMOSOMES_PATH = os.path.join(BASE_DIR,"reference_genomes")
+
 DOJANGO_DOJO_VERSION = "1.7.2"
 
 MANAGERS = ADMINS
@@ -249,7 +251,6 @@ LOGGING = {
         }
     }
 }
-
 
 try:
     from .local_settings import *
