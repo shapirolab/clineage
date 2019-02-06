@@ -67,7 +67,8 @@ def pairwise(iterable):
 
 
 @functools.lru_cache(maxsize=4096)  # apparantly this can be heavy
-def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=decimal.Decimal(0.21), diff_sensetivity=decimal.Decimal(0.65)):
+def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=decimal.Decimal(0.21),
+                          diff_sensetivity=decimal.Decimal(0.65), eps=decimal.Decimal(0.1)):
     """
     This function calculates the valid proportion bounds according to the difference between the alleles and length of the longer allele
     *Defaults are based on old AC experiment
@@ -76,6 +77,8 @@ def get_proportion_bounds(diff, longer_ms_len, cycle=20, length_sensitivity=deci
     distance_from_equilibrium = min(
         ((diff ** diff_sensetivity / (length_sensitivity * longer_ms_len)) ** 3),
         equilibrium)
+    if distance_from_equilibrium < eps:
+        return equilibrium, equilibrium
     return equilibrium-distance_from_equilibrium, equilibrium+distance_from_equilibrium
 
 
