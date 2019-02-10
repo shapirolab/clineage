@@ -293,7 +293,7 @@ def pileup(reads_alignment):
                              )
 
 
-def snp_table(cell_snps_list, score_threshold=0.5, method='explicit_snps', min_cover=5, partner=None):
+def extract_snp_dict(cell_snps_list, score_threshold=0.5, partner=None):
     snp_dict = {}
     if score_threshold < 0.5 or score_threshold > 1:
         score_threshold = 0.5
@@ -303,7 +303,6 @@ def snp_table(cell_snps_list, score_threshold=0.5, method='explicit_snps', min_c
         partnet_id = User.objects.get(username=partner)
 
     for cell_snps in cell_snps_list:
-
         cell_snps_dict = cell_snps.extract_snp_file()
         cell_id = cell_snps.vcf_read.reads_alignment.sample_read.id
         if partner:
@@ -315,7 +314,10 @@ def snp_table(cell_snps_list, score_threshold=0.5, method='explicit_snps', min_c
             if (chrom, loc) not in snp_dict:
                 snp_dict[(chrom, loc)] = {}
             snp_dict[(chrom, loc)].setdefault(str(cell_id), cell_snps_dict[(chrom, loc)])
+    return snp_dict
 
+def snp_table(cell_snps_list, score_threshold=0.5, method='explicit_snps', min_cover=5, partner=None):
+    snp_dict = extract_snp_dict(cell_snps_list, score_threshold=score_threshold, partner=partner)
     rows = convert_snp_dict_to_table(snp_dict,
                                      score_threshold=score_threshold,
                                      method=method,
