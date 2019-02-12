@@ -215,6 +215,12 @@ class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicM
     pass
 
 
+class HighestPeaksMonoSimCorSchemeModelDot(HighestPeaksMonoSimCorSchemeModel):
+    @property
+    def distance_metric(self):
+        return dot_product
+
+
 class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDot(HighestPeaksProximityRatioFilteredBiSimCorSchemeModel):
     @property
     def distance_metric(self):
