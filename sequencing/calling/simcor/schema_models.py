@@ -2,7 +2,7 @@ from django.db import models
 from sequencing.calling.models import CallingScheme
 from sequencing.calling.simcor.simulation_spaces import mono_sim_hists_space_generator, bi_sim_hists_space_generator,\
     proportional_bi_sim_hists_space_generator
-from sequencing.calling.hist_dist import pop_dist_corr_numpy, dot_product
+from sequencing.calling.hist_dist import pop_dist_corr_numpy, dot_product, dotv
 from sequencing.calling.simcor.calling import call_microsatellite_histogram, get_closest
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
     ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
@@ -218,10 +218,10 @@ class HighestPeaksMonoSimCorSchemeModel(HighestPeaksModelMixin, BaseMonoAllelicM
 class HighestPeaksMonoSimCorSchemeModelDot(HighestPeaksMonoSimCorSchemeModel):
     @property
     def distance_metric(self):
-        return dot_product
+        return dotv
 
 
 class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDot(HighestPeaksProximityRatioFilteredBiSimCorSchemeModel):
     @property
     def distance_metric(self):
-        return dot_product
+        return dotv

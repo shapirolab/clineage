@@ -42,6 +42,9 @@ class Histogram(object):
                 self.nsamples = nsamples
             else:
                 self.nsamples = sum(self.values())
+        self._vec = np.repeat(float(0), 50)
+        for x in self._hist:
+            self._vec[x] = self._hist[x]
         if trim_extremes:
             self.trim_extremes()
         if normalize:

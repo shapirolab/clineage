@@ -26,10 +26,25 @@ def dot_product(hist1, hist2):
     return 1-np.dot([h1[x] for x in range(li, ri)], [h2[x] for x in range(li, ri)])
 
 
+def dotv(hist1, hist2):
+    h1_n = np.linalg.norm(hist1._vec, ord=2)
+    h2_n = np.linalg.norm(hist2._vec, ord=2)
+    dot = np.dot(hist1._vec,hist2._vec) / (h1_n*h2_n)
+    return 1-dot
+
+
+def substruction(hist1, hist2):
+    h1_n = np.linalg.norm(hist1._vec, ord=1)
+    h2_n = np.linalg.norm(hist2._vec, ord=1)
+    return np.linalg.norm(hist1._vec-hist2._vec, ord=1)/(h1_n*h2_n)
+
+
 def get_distance_function_by_name(func_name):
     if func_name == 'con':
         return pop_dist_corr_numpy
     if func_name == 'dot':
         return dot_product
+    if func_name == 'sub':
+        return substruction
     if func_name == 'ml':
         return pop_dist_corr_numpy
