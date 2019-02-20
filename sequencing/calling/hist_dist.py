@@ -55,7 +55,7 @@ def derived_proportions_dot(rht, sim_hist):
     (rhmr, rhmc, rhv_n) = rht
     xt = np.matrix([sim_hist.vh1, sim_hist.vh2])
     x = xt.transpose()
-    beta = np.linalg.inv(xt*x)*xt*rhmc
+    beta = np.linalg.inv(xt*x)*(xt*rhmc)
     if min(beta)<0 or sum(beta)==0:
         if beta[0] <= 0:
             return helper_dot(rhmr, sim_hist.vh2), 0.0
