@@ -135,6 +135,16 @@ class Proportions(models.Model):
     p4 = models.DecimalField(max_digits=6, decimal_places=5, null=True)
     _num_of_allele_fields = 4
 
+    class Meta:
+        unique_together = (
+            (
+                "p1",
+                "p2",
+                "p3",
+                "p4",
+             ),
+        )
+
     @classmethod
     def proportion_field_names(cls):
         for i in range(1, cls._num_of_allele_fields + 1):
