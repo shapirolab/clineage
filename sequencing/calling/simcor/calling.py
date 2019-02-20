@@ -1,5 +1,7 @@
 from sequencing.calling.simcor.models_common import ProportionalMicrosatelliteAlleleSet, ProportionStepModelMixin
+from sequencing.calling.hist_dist import derived_proportions_dot
 import sys
+import numpy as np
 from sequencing.calling.models import MicrosatelliteAlleleSet
 from misc.utils import get_get_or_create
 from collections import Counter
@@ -46,6 +48,47 @@ def get_closest(real_hist, sim_space, distance_function):
             min_dist = distance
             best_sim_hist = sim_hist
         examined.add(sim_hist.identity)
+    return best_sim_hist, min_dist
+
+
+def real_hist_to_rht(real_hist):
+    rhv = real_hist._vec
+    rhmr = np.matrix(rhv)
+    rhmc = np.matrix(rhv).transpose()
+    rhv_n = np.linalg.norm(rhv, ord=2)
+    rht = (rhmr, rhmc, rhv_n)
+    return rht
+
+
+def get_closest_vec_opt(real_hist, sim_space, distance_function):
+    """
+    Measure a histogram against a simulation space and return the closest point in space
+    Args:
+        real_hist: Histogram object
+        sim_space: SimulatedHistograms generator
+        distance_function: lower-is-closer distance function
+
+    Returns:
+        SimulatedHistogram with minimal distance to real_hist
+    """
+    assert distance_function==derived_proportions_dot
+    min_dist = sys.maxsize
+    best_sim_hist = None
+    examined = set()
+    rht = real_hist_to_rht(real_hist)
+    for sim_hist in sim_space:
+        if sim_hist.identity in examined:
+            continue
+        conf, p = distance_function(rht, sim_hist)
+        if conf is None:
+            continue
+        distance = 1 - conf
+        if distance < min_dist:
+            min_dist = distance
+            best_sim_hist = sim_hist
+        examined.add(sim_hist.identity)
+    best_sim_hist._ms_lens_and_proportions = tuple(zip([a for a, _ in best_sim_hist.ms_lens_and_proportions], [p, 1 - p]))
+    best_sim_hist._alleles_to_proportions = {a: p for a, p in best_sim_hist._ms_lens_and_proportions if p > 0}
     return best_sim_hist, min_dist
 
 
