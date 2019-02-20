@@ -6,4 +6,5 @@ from sequencing.calling.simcor.schema_models import BaseSimCallingScheme, FullMo
     ProportionalSimCorScheme, BoundProportionalSimCorScheme, HighestPeaksProportionalBiSimCorSchemeModel, \
     ProximityRatioFilteredBoundProportionalSimCorScheme, ProximityRatioFilteredProportionalSimCorScheme, \
     HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, HighestPeaksMonoSimCorSchemeModel, \
-    HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDot, HighestPeaksMonoSimCorSchemeModelDot
+    HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDot, HighestPeaksMonoSimCorSchemeModelDot,\
+    HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA
