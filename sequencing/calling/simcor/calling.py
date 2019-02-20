@@ -86,9 +86,10 @@ def get_closest_vec_opt(real_hist, sim_space, distance_function):
         if distance < min_dist:
             min_dist = distance
             best_sim_hist = sim_hist
+            best_sim_hist._ms_lens_and_proportions = tuple(
+                zip([a for a, _ in best_sim_hist.ms_lens_and_proportions], [p, 1 - p]))
+            best_sim_hist._alleles_to_proportions = {a: p for a, p in best_sim_hist._ms_lens_and_proportions if p > 0}
         examined.add(sim_hist.identity)
-    best_sim_hist._ms_lens_and_proportions = tuple(zip([a for a, _ in best_sim_hist.ms_lens_and_proportions], [p, 1 - p]))
-    best_sim_hist._alleles_to_proportions = {a: p for a, p in best_sim_hist._ms_lens_and_proportions if p > 0}
     return best_sim_hist, min_dist
 
 

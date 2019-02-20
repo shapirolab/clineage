@@ -244,9 +244,9 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA(
         ):
             alleles_and_proportions, cycle = alleles_and_cycles
             alleles_and_proportions = frozenset({(a, Decimal('0.5')) for a, p in alleles_and_proportions})
-            if alleles_and_proportions not in alleles_set:
-                yield alleles_and_cycles
-            alleles_set.add(alleles_and_proportions)
+            if (alleles_and_proportions, cycle) not in alleles_set:
+                yield alleles_and_proportions, cycle
+            alleles_set.add((alleles_and_proportions, cycle))
 
     def find_best_in_space(self, hist):
         return get_closest_vec_opt(hist, self.filtered_sim_hists_space(hist), self.distance_metric)
