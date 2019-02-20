@@ -39,11 +39,41 @@ def substruction(hist1, hist2):
     return np.linalg.norm(hist1._vec-hist2._vec, ord=1)/(h1_n*h2_n)
 
 
+def logprob(real_hist, sim_hist):
+    np.dot(np.log(real_hist._vec), sim_hist._vec)
+    return
+
+
+def helper_dot(hv1, hv2):
+    h1_n = np.linalg.norm(hv1, ord=2)
+    h2_n = np.linalg.norm(hv2, ord=2)
+    dot = np.dot(hv1,hv2) / (h1_n*h2_n)
+    return dot
+
+
+def derived_proportions_dot(rht, sim_hist):
+    (rhmr, rhmc, rhv_n) = rht
+    xt = np.matrix([sim_hist.vh1, sim_hist.vh2])
+    x = xt.transpose()
+    beta = np.linalg.inv(xt*x)*xt*rhmc
+    if min(beta)<0 or sum(beta)==0:
+        if beta[0] <= 0:
+            return helper_dot(rhmr, sim_hist.vh2), 0.0
+        return helper_dot(rhmr, sim_hist.vh1), 1.0
+    p = beta[0]/sum(beta)
+    yhat = x*beta
+    yhat_n = np.linalg.norm(yhat, ord=2)
+    conf = np.dot(rhmr, yhat)/(yhat_n*rhv_n)
+    return float(conf), float(p)
+
+
 def get_distance_function_by_name(func_name):
     if func_name == 'con':
         return pop_dist_corr_numpy
     if func_name == 'dot':
         return dot_product
+    if func_name == 'dba':
+        return derived_proportions_dot
     if func_name == 'sub':
         return substruction
     if func_name == 'ml':
