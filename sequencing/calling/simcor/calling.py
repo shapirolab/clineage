@@ -93,6 +93,45 @@ def get_closest_vec_opt(real_hist, sim_space, distance_function):
     return best_sim_hist, min_dist
 
 
+def get_closest_vec_opt_mms(real_hist, sim_space, distance_function):
+    """
+    Measure a histogram against a simulation space and return the closest point in space
+    Args:
+        real_hist: Histogram object
+        sim_space: SimulatedHistograms generator
+        distance_function: lower-is-closer distance function
+
+    Returns:
+        SimulatedHistogram with minimal distance to real_hist
+    """
+    assert distance_function==derived_proportions_dot
+    min_dist = sys.maxsize
+    best_sim_hist = None
+    second_min_dist = sys.maxsize
+    second_best_sim_hist = None
+    examined = set()
+    rht = real_hist_to_rht(real_hist)
+    for sim_hist in sim_space:
+        if sim_hist.identity in examined:
+            continue
+        conf, p = distance_function(rht, sim_hist)
+        if conf is None:
+            continue
+        distance = 1 - conf
+        if distance < min_dist:
+            if best_sim_hist is not None:
+                if sim_hist.identity[0] != best_sim_hist.identity[0]:
+                    second_min_dist = min_dist
+                    second_best_sim_hist = best_sim_hist
+            min_dist = distance
+            best_sim_hist = sim_hist
+            best_sim_hist._ms_lens_and_proportions = tuple(
+                zip([a for a, _ in best_sim_hist.ms_lens_and_proportions], [p, 1 - p]))
+            best_sim_hist._alleles_to_proportions = {a: p for a, p in best_sim_hist._ms_lens_and_proportions if p > 0}
+        examined.add(sim_hist.identity)
+    return (best_sim_hist, min_dist), (second_best_sim_hist, second_min_dist)
+
+
 def call_microsatellite_histogram(calling_schema, dbhist, microsatellite):
     def inner(raise_or_create_with_defaults):
         hist = get_ms_hist(dbhist, microsatellite)

@@ -3,7 +3,8 @@ from sequencing.calling.models import CallingScheme
 from sequencing.calling.simcor.simulation_spaces import mono_sim_hists_space_generator, bi_sim_hists_space_generator,\
     proportional_bi_sim_hists_space_generator, vec_proportional_bi_sim_hists_space_generator
 from sequencing.calling.hist_dist import pop_dist_corr_numpy, derived_proportions_dot, dotv
-from sequencing.calling.simcor.calling import call_microsatellite_histogram, get_closest, get_closest_vec_opt
+from sequencing.calling.simcor.calling import call_microsatellite_histogram, get_closest, get_closest_vec_opt, \
+    get_closest_vec_opt_mms
 from sequencing.calling.simcor.models_common import CyclesModelMixin, SimulationsByCycles, MSLengthBoundsModelMixin, \
     ProportionsBoundsModelMixin, ProportionStepModelMixin, BestCorrelationCalledAlleles, \
     BestCorrelationProportionalCalledAlleles, \
@@ -250,6 +251,38 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA(
 
     def find_best_in_space(self, hist):
         return get_closest_vec_opt(hist, self.filtered_sim_hists_space(hist), self.distance_metric)
+
+    @property
+    def sim_hists_space_generator(self):
+        return vec_proportional_bi_sim_hists_space_generator
+
+
+class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBAMMS(
+    HighestPeaksRangeModelMixin, FilterByHistMixin, BestCorrelationProportionalHighestPeakCalledAlleleMIxin,
+    ProportionStepModelMixin, ProportionsBoundsModelMixin, AlleleDistanceProportionBoundsModelMixin, BaseBiAllelicMixin,
+    ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin, BaseSimCallingScheme):
+
+    @property
+    def distance_metric(self):
+        return derived_proportions_dot
+
+    @property
+    def alleles_and_cycles(self):
+        alleles_set = set()
+        for alleles_and_cycles in self.prf_filtered(
+            super().alleles_and_cycles,
+        ):
+            alleles_and_proportions, cycle = alleles_and_cycles
+            alleles_and_proportions = frozenset({(a, Decimal('0.5')) for a, p in alleles_and_proportions})
+            if (alleles_and_proportions, cycle) not in alleles_set:
+                yield alleles_and_proportions, cycle
+            alleles_set.add((alleles_and_proportions, cycle))
+
+    def find_best_in_space(self, hist):
+        best, second_best = get_closest_vec_opt_mms(hist, self.filtered_sim_hists_space(hist), self.distance_metric)
+        (best_sim_hist, min_dist) = best
+        (second_best_sim_hist, second_min_dist) = second_best
+        return best_sim_hist, second_min_dist - min_dist
 
     @property
     def sim_hists_space_generator(self):
