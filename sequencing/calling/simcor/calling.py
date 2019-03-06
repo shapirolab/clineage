@@ -59,8 +59,8 @@ def real_hist_to_rht(real_hist):
     rht = (rhmr, rhmc, rhv_n)
     return rht
 
-
-def get_closest_vec_opt(real_hist, sim_space, distance_function):
+from sequencing.calling.simcor.range import contains_excluded_proportions_wrapper
+def get_closest_vec_opt(real_hist, sim_space, distance_function, length_sensitivity=0.21, diff_sensetivity=0.65):
     """
     Measure a histogram against a simulation space and return the closest point in space
     Args:
@@ -84,6 +84,9 @@ def get_closest_vec_opt(real_hist, sim_space, distance_function):
             continue
         distance = 1 - conf
         if distance < min_dist:
+            # (frozenset({(6, Decimal('1.00000')), (5, Decimal('0.00000'))}), cyc)
+            if contains_excluded_proportions_wrapper(sim_hist.identity, length_sensitivity=length_sensitivity, diff_sensetivity=diff_sensetivity):
+                continue
             min_dist = distance
             best_sim_hist = sim_hist
             best_sim_hist._ms_lens_and_proportions = tuple(
@@ -93,7 +96,7 @@ def get_closest_vec_opt(real_hist, sim_space, distance_function):
     return best_sim_hist, min_dist
 
 
-def get_closest_vec_opt_mms(real_hist, sim_space, distance_function):
+def get_closest_vec_opt_mms(real_hist, sim_space, distance_function, length_sensitivity=0.21, diff_sensetivity=0.65):
     """
     Measure a histogram against a simulation space and return the closest point in space
     Args:
@@ -119,6 +122,10 @@ def get_closest_vec_opt_mms(real_hist, sim_space, distance_function):
             continue
         distance = 1 - conf
         if distance < min_dist:
+            # (frozenset({(6, Decimal('1.00000')), (5, Decimal('0.00000'))}), cyc)
+            if contains_excluded_proportions_wrapper(sim_hist.identity, length_sensitivity=length_sensitivity,
+                                                     diff_sensetivity=diff_sensetivity):
+                continue
             if best_sim_hist is not None:
                 if sim_hist.identity[0] != best_sim_hist.identity[0]:
                     second_min_dist = min_dist
