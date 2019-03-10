@@ -93,15 +93,21 @@ class ProportionalMultiSimulatedHistogram(Histogram):
 
 
 class VecBiProportionalMultiSimulatedHistogram(ProportionalMultiSimulatedHistogram):
-    def __init__(self, ms_lens_and_proportions, simulation_cycle, simulated_hist, vh1, vh2):
-        assert isinstance(ms_lens_and_proportions, frozenset)
+    def __init__(self, a1, a2, p1, p2,
+                 simulation_cycle, simulated_hist, vh1, vh2):
         assert isinstance(simulation_cycle, int)
+        ms_lens_and_proportions = (a1, p1), (a2, p2)
         self._ms_lens_and_proportions = ms_lens_and_proportions
         self._sim_cyc = simulation_cycle
         self._alleles_to_proportions = {a: p for a, p in ms_lens_and_proportions if p > 0}
         assert sum(self._alleles_to_proportions.values()) == 1
         self._vh1 = vh1
         self._vh2 = vh2
+        self._a1 = a1
+        self._a2 = a2
+        self._p1 = p1
+        self._p2 = p2
+
         super(ProportionalMultiSimulatedHistogram, self).__init__(simulated_hist)
 
     @property

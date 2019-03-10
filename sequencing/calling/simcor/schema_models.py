@@ -282,7 +282,8 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBAMMS(
     def find_best_in_space(self, hist):
         best, second_best = get_closest_vec_opt_mms(hist, self.filtered_sim_hists_space(hist), self.distance_metric,
                                                     length_sensitivity=self.length_sensitivity,
-                                                    diff_sensetivity=self.diff_sensetivity)
+                                                    diff_sensetivity=self.diff_sensetivity,
+                                                    eps=self.proportion_bounds[0])
         (best_sim_hist, min_dist) = best
         (second_best_sim_hist, second_min_dist) = second_best
         return best_sim_hist, second_min_dist - min_dist

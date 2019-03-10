@@ -71,10 +71,13 @@ def vec_proportional_bi_sim_hists_space_generator(sim_hists_dict, seeds_and_cycl
         model_hist = Histogram(dict())
         assert len(ms_lens_and_proportions) == 2
         (a1, p1), (a2, p2) = ms_lens_and_proportions
-        for syn_len, p in ms_lens_and_proportions:
-            model_hist = model_hist.asym_add(sim_hists_dict[syn_len][sim_cyc].ymul(p))
+        # for syn_len, p in ms_lens_and_proportions:
+        #     model_hist = model_hist.asym_add(sim_hists_dict[syn_len][sim_cyc].ymul(p))
         yield VecBiProportionalMultiSimulatedHistogram(
-            ms_lens_and_proportions=ms_lens_and_proportions,
+            a1 = a1,
+            a2 = a2,
+            p1 = p1,
+            p2 = p2,
             simulation_cycle=sim_cyc,
             simulated_hist=model_hist,
             vh1=sim_hists_dict[a1][sim_cyc]._vec,

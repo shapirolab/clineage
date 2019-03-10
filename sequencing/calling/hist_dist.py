@@ -48,10 +48,10 @@ def helper_dot(hv1, hv2):
     h1_n = np.linalg.norm(hv1, ord=2)
     h2_n = np.linalg.norm(hv2, ord=2)
     dot = np.dot(hv1,hv2) / (h1_n*h2_n)
-    return dot
+    return float(dot)
 
 
-def derived_proportions_dot(rht, sim_hist):
+def derived_proportions_dot(rht, sim_hist, eps=0.05):
     (rhmr, rhmc, rhv_n) = rht
     xt = np.matrix([sim_hist.vh1, sim_hist.vh2])
     x = xt.transpose()
@@ -59,6 +59,10 @@ def derived_proportions_dot(rht, sim_hist):
     if min(beta)<0 or sum(beta)==0:
         if beta[0] <= 0:
             return helper_dot(rhmr, sim_hist.vh2), 0.0
+        return helper_dot(rhmr, sim_hist.vh1), 1.0
+    if beta[0] / sum(beta) < eps:
+        return helper_dot(rhmr, sim_hist.vh2), 0.0
+    if beta[0] / sum(beta) > 1 - eps:
         return helper_dot(rhmr, sim_hist.vh1), 1.0
     p = beta[0]/sum(beta)
     yhat = x*beta
