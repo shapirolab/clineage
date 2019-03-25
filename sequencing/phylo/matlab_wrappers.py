@@ -2,8 +2,6 @@ import os
 import csv
 from misc.utils import unlink, relaxed_unlink, get_unique_path
 from clineage.settings import NOA_MATLAB
-from .ete3_draw_tree import tree_draw
-from .utils import plot_display_tree
 
 import matlab.engine
 
