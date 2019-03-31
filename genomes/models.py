@@ -254,3 +254,18 @@ class RestrictionSiteDNASlice_Overlaps(models.Model):
 
     class Meta:
         managed = False
+
+
+class DupSlice(models.Model):
+    slice = models.ForeignKey(DNASlice)
+    strand = models.CharField(max_length=1)
+    uid = models.IntegerField()
+
+    def __str__(self):
+        return "{} <==> ???".format(self.slice)
+
+    class Meta:
+        unique_together=[
+            ("uid", "slice")
+        ]
+        ordering=["uid", "slice"]
