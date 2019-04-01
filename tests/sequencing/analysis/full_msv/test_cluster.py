@@ -87,12 +87,14 @@ def test_map_runmerge(executor, fmsv_reads_fd, sample_reads_d):
             set(rc_srs_to_tups(fmsv_reads_fd[l_id, bc_id, UNASSEMBLED][R2]))
         mr.delete()
 
-
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     mss_version = 0
     ref_padding = 50
     for sr in demultiplexing.samplereads_set.all():
+        sr.write_her_files = write_her_file_flag
+        sr.save()
         amplicon_collection = sr.library.subclass.panel.amplicon_collection
         msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
@@ -134,14 +136,14 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, r
                     RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
         ref_parts = set()
@@ -162,12 +164,14 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, r
     ]:
         Model.objects.all().delete()
 
-
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     mss_version = 0
     ref_padding = 50
     for sr in demultiplexing.samplereads_set.all():
+        sr.write_her_files = write_her_file_flag
+        sr.save()
         amplicon_collection = sr.library.subclass.panel.amplicon_collection
         msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
@@ -209,14 +213,14 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
                     RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
         ref_parts = set()
@@ -236,12 +240,14 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
     ]:
         Model.objects.all().delete()
 
-
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     mss_version = 0
     ref_padding = 50
     for sr in demultiplexing.samplereads_set.all():
+        sr.write_her_files = write_her_file_flag
+        sr.save()
         amplicon_collection = sr.library.subclass.panel.amplicon_collection
         msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
@@ -283,14 +289,14 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
                     RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
         ref_parts = set()
@@ -311,12 +317,14 @@ def test_run_parallel_small_size_amplicon_collection(executor, demultiplexing, s
     ]:
         Model.objects.all().delete()
 
-
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel_split_alignments(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+def test_run_parallel_split_alignments(executor, demultiplexing, sample_reads_d, fmsv_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     mss_version = 0
     ref_padding = 50
     for sr in demultiplexing.samplereads_set.all():
+        sr.write_her_files = write_her_file_flag
+        sr.save()
         amplicon_collection = sr.library.subclass.panel.amplicon_collection
         msv = get_full_ms_variations(amplicon_collection, ref_padding, mss_version)
     herss = {inc: set() for inc in ["M"]}  # TODO: "F"
@@ -360,14 +368,14 @@ def test_run_parallel_split_alignments(executor, demultiplexing, sample_reads_d,
                     RM: fmsv_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         fmsv_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
         ref_parts = set()

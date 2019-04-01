@@ -86,11 +86,15 @@ def test_map_runmerge(executor, adam_reads_fd, sample_reads_d):
         mr.delete()
 
 
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
 @pytest.mark.django_db(transaction=True)
-def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     herss = {inc: set() for inc in ["M", "F"]}
     for inc in herss.keys():
         # FIXME?
+        for sr in demultiplexing.samplereads_set.all():
+            sr.write_her_files = write_her_file_flag
+            sr.save()
         lll = list(run_parallel(executor, demultiplexing.samplereads_set.all(), inc))
         for ll in lll:
             for l in ll:
@@ -130,14 +134,14 @@ def test_run_parallel(executor, demultiplexing, sample_reads_d, adam_reads_fd, r
                     RM: adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-            
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
         ref_parts = set()

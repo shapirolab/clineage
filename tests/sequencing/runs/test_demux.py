@@ -164,7 +164,9 @@ def test_merge_srs(sample_reads_d, mergeddemultiplexing):
     for bc in sr_dict:
         curr_srs = sr_dict[bc]
         lib = curr_srs[0].library
-        merged_sr = sequencing.runs.demux.merge_srs(curr_srs, bc)
+        merged_sr_lst = list(sequencing.runs.demux.merge_srs(curr_srs, bc, mergeddemultiplexing))
+        assert len(merged_sr_lst) == 1
+        merged_sr = merged_sr_lst[0]
         s = 0
         text1 = ""
         text2 = ""
@@ -174,14 +176,14 @@ def test_merge_srs(sample_reads_d, mergeddemultiplexing):
             #text1 += "\n" #TODO: Check if necessary
             text2 += open(sr.fastq2).read()
             #text2 += "\n" #TODO: Check if necessary
-            assert sr.library == merged_sr["library"]
-        res_sr = SampleReads.objects.create(
+            assert sr.library == merged_sr.library
+        res_sr, c = SampleReads.objects.get_or_create(
             demux=mergeddemultiplexing,
             barcoded_content=bc,
-            library=merged_sr["library"],
-            num_reads=merged_sr["num_reads"],
-            fastq1=merged_sr["fastq1"],
-            fastq2=merged_sr["fastq2"],
+            library=merged_sr.library,
+            num_reads=merged_sr.num_reads,
+            fastq1=merged_sr.fastq1,
+            fastq2=merged_sr.fastq2,
         )
 
         assert s == res_sr.num_reads

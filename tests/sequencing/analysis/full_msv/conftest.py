@@ -58,6 +58,7 @@ def sample_reads_d(sample_reads_files_d, demultiplexing, require_magicals):
             fastq1=fastq_r1,
             fastq2=fastq_r2,
             num_reads=f_d[NUM_READS],
+            write_her_files=True
         )
         # So our objects don't have "special" objects in fields
         sr = SampleReads.objects.get(pk=sr.pk)

@@ -127,6 +127,7 @@ class SampleReads(models.Model):
     num_reads = models.PositiveIntegerField()
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
+    write_her_files = models.BinaryField(default=False)
 
     class Meta:
         index_together = (
@@ -426,6 +427,10 @@ class HistogramEntryReads(models.Model):
 
     @property
     def files(self):
+        if self.fastq1 == 'N/A':
+            # no files
+            raise StopIteration
+        
         yield self.fastq1
         yield self.fastq2
         yield self.fastqm

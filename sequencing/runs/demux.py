@@ -110,7 +110,7 @@ SAMPLE_FASTQ_GZ_FORMAT = "{id}_S{idx}_R{read:d}_001.fastq.gz"
 SAMPLE_FASTQ_FORMAT = "{id}_S{idx}_R{read:d}_001.fastq"
 
 
-def run_demux(ngs_run, demux_scheme):
+def run_demux(ngs_run, demux_scheme, write_her_files=False):
     bc_l = []
     bc_libs_d = {}
     bc_idx_d = {}
@@ -192,6 +192,7 @@ def run_demux(ngs_run, demux_scheme):
                 num_reads=num_reads,
                 fastq1=fastq1,
                 fastq2=fastq2,
+                write_her_files=write_her_files,
             )
 
 
@@ -208,7 +209,9 @@ def merge_srs(srs_lst, bc, root_demux):
             with open(fastq1_merged, 'w') as fd1:
                 with unique_file_cm("fastq") as fastq2_merged:
                     with open(fastq2_merged, 'w') as fd2:
+                        keep_her_file = False
                         for sr in srs_lst:
+                            keep_her_file = keep_her_file or sr.write_her_files # if one keep hers so all will write
                             assert sr.barcoded_content == bc
                             merged_sr["num_reads"] += sr.num_reads
                             with open(sr.fastq1, 'r') as fastq1_in:
@@ -219,6 +222,7 @@ def merge_srs(srs_lst, bc, root_demux):
                         merged_sr["fastq2"] = fastq2_merged
                         merged_sr["library"] = sr.library #bc-library connections is 1 to 1 so this assignment is OK
                         merged_sr["bc"] = bc
+                        merged_sr["write_her_files"] = keep_her_file
         yield SampleReads.objects.create(
             demux=root_demux,
             barcoded_content=bc,
@@ -226,6 +230,7 @@ def merge_srs(srs_lst, bc, root_demux):
             num_reads=merged_sr["num_reads"],
             fastq1=merged_sr["fastq1"],
             fastq2=merged_sr["fastq2"],
+            write_her_files=merged_sr['write_her_files']
         )
 
 

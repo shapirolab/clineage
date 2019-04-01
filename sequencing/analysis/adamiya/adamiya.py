@@ -345,23 +345,32 @@ def separate_reads_by_genotypes(histogram):
     else:
         genotype_read_iterator = _collect_genotypes_from_sam(histogram)
         genotypes_reads = _aggregate_read_ids_by_genotypes(genotype_read_iterator)
-        reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
-        reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
-        readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
+        if histogram.sample_reads.write_her_files:
+            reads1 = SeqIO.index(histogram.amplicon_reads.fastq1, "fastq")
+            reads2 = SeqIO.index(histogram.amplicon_reads.fastq2, "fastq")
+            readsm = SeqIO.index(histogram.amplicon_reads.fastqm, "fastq")
         none_snp_genotype = SNPHistogramGenotype.objects.get(snp=None)
         snp_histogram_genotypes, c = SNPHistogramGenotypeSet.objects.get_or_create(
             **{fn: none_snp_genotype for fn in SNPHistogramGenotypeSet.genotype_field_names()})
         for genotypes, read_ids in genotypes_reads.items():
             ms_histogram_genotypes = MicrosatelliteHistogramGenotypeSet.get_for_msgs(genotypes)
             def inner(raise_or_create_with_defaults):
-                with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
-                    _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
-                    _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+                if histogram.sample_reads.write_her_files:
+                    with _extract_reads_by_id(readsm, read_ids) as genotypes_readsm_fastq_name, \
+                        _extract_reads_by_id(reads1, read_ids) as genotypes_reads1_fastq_name, \
+                        _extract_reads_by_id(reads2, read_ids) as genotypes_reads2_fastq_name:
+                        return raise_or_create_with_defaults(
+                            num_reads=len(read_ids),
+                            fastq1=genotypes_reads1_fastq_name,
+                            fastq2=genotypes_reads2_fastq_name,
+                            fastqm=genotypes_readsm_fastq_name,
+                        )
+                else:
                     return raise_or_create_with_defaults(
                         num_reads=len(read_ids),
-                        fastq1=genotypes_reads1_fastq_name,
-                        fastq2=genotypes_reads2_fastq_name,
-                        fastqm=genotypes_readsm_fastq_name,
+                        fastq1='N/A',
+                        fastq2='N/A',
+                        fastqm='N/A',
                     )
             yield get_get_or_create(inner, HistogramEntryReads, 
                 histogram=histogram,

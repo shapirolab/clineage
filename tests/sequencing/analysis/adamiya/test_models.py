@@ -123,14 +123,17 @@ def test_amplicons_mapping(adam_merged_reads_d, adam_reads_fd, requires_amplicon
             ri.delete()
             assert not os.path.exists(ri.index_dump_dir)
 
-
-def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes):
+@pytest.mark.parametrize('write_her_file_flag', [True, False])
+def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplicons, requires_microsatellites, requires_none_genotypes, write_her_file_flag):
     for (l_id, bc, inc, amp), aar in adam_amplicon_reads_d.items():
         ms_planning_version = 0
         padding = 50
         # FIXME
         # test_align_reads_to_ms_variations
         ah = align_reads_to_ms_variations(aar, padding, ms_planning_version)
+        sr = ah.sample_reads
+        sr.write_her_files = write_her_file_flag
+        sr.save()
         assert ah.amplicon_reads_id == aar.id
         # TODO: make this check more explicit.
         assert ah.ms_variations == AdamMSVariations.objects.get(
@@ -166,13 +169,14 @@ def test_genotype_mapping(adam_amplicon_reads_d, adam_reads_fd, requires_amplico
                     RM: adam_reads_fd[l_id, bc, ASSEMBLED, amp, gen][RM] + \
                         adam_reads_fd[l_id, bc, UNASSEMBLED, amp, gen][R1],
                 }
-            for r in [R1, R2, RM]:
-                assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
-                    SeqIO.parse(her_fnames_d[r], "fastq"))
-                ) == \
-                set(srs_to_tups(
-                    ref_reads_d[r]
-                ))
+            if her.histogram.sample_reads.write_her_files:
+                for r in [R1, R2, RM]:
+                    assert set(srs_to_tups(  # TODO: get informative error on genotyping mismatch
+                        SeqIO.parse(her_fnames_d[r], "fastq"))
+                    ) == \
+                    set(srs_to_tups(
+                        ref_reads_d[r]
+                    ))
             assert her.num_reads == \
                 len(ref_reads_d[RM])
             her.delete()
