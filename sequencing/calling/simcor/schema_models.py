@@ -233,6 +233,8 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA(
     ProportionStepModelMixin, ProportionsBoundsModelMixin, AlleleDistanceProportionBoundsModelMixin, BaseBiAllelicMixin,
     ProximityRatioFilteredBoundProportionalAllelesCyclesRangeMixin, ProportionalSimCorSchemeMixin, BaseSimCallingScheme):
 
+    is_prf = models.BooleanField(default=True)
+
     @property
     def distance_metric(self):
         return derived_proportions_dot
@@ -250,7 +252,7 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA(
             alleles_set.add((alleles_and_proportions, cycle))
 
     def find_best_in_space(self, hist):
-        return get_closest_vec_opt(hist, self.filtered_sim_hists_space(hist), self.distance_metric,
+        return get_closest_vec_opt(hist, self.filtered_sim_hists_space(hist), self.distance_metric, is_prf=self.is_prf,
                                    length_sensitivity=self.length_sensitivity, diff_sensetivity=self.diff_sensetivity)
 
     @property

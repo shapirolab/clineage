@@ -60,7 +60,7 @@ def real_hist_to_rht(real_hist):
     return rht
 
 from sequencing.calling.simcor.range import contains_excluded_proportions_wrapper
-def get_closest_vec_opt(real_hist, sim_space, distance_function, length_sensitivity=0.21, diff_sensetivity=0.65):
+def get_closest_vec_opt(real_hist, sim_space, distance_function, is_prf=True, length_sensitivity=0.21, diff_sensetivity=0.65):
     """
     Measure a histogram against a simulation space and return the closest point in space
     Args:
@@ -85,7 +85,7 @@ def get_closest_vec_opt(real_hist, sim_space, distance_function, length_sensitiv
         distance = 1 - conf
         if distance < min_dist:
             # (frozenset({(6, Decimal('1.00000')), (5, Decimal('0.00000'))}), cyc)
-            if contains_excluded_proportions_wrapper(sim_hist.identity, length_sensitivity=length_sensitivity, diff_sensetivity=diff_sensetivity):
+            if is_prf and contains_excluded_proportions_wrapper(sim_hist.identity, length_sensitivity=length_sensitivity, diff_sensetivity=diff_sensetivity):
                 continue
             min_dist = distance
             best_sim_hist = sim_hist
