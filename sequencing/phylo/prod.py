@@ -1,60 +1,20 @@
-from sequencing.calling.models import HighestPeaksProximityRatioFilteredBiSimCorSchemeModel, HighestPeaksMonoSimCorSchemeModel
-from sequencing.runs.models import NGSRun, Demultiplexing
-from sampling.models import Individual
-from lib_prep.workflows.models import MagicalOM6BarcodedContent, MagicalPCR1BarcodedContent
-import dendropy
 from misc.utils import unlink, relaxed_unlink, get_unique_path
 from sequencing.calling.queries.mutation_maps import get_root_genotypes
 from sequencing.calling.queries.mutation_maps import transpose_dict
-from lib_prep.workflows.models import MagicalOM6BarcodedContent
-from sequencing.analysis.models import SampleReads, AdamHistogram, FullMSVHistogram
 from sequencing.phylo.sankoff import prep_tree
-import copy
+from sequencing.phylo.utils import fix_directories, get_cells_group_map, textualize_d
 from misc.utils import unlink, get_unique_path
 from sequencing.phylo.triplets_wrapper import run_sagis_triplets_binary, convert_names_in_sagis_newick
 
-from sequencing.phylo.utils import fix_directories, get_cells_group_map, textualize_d
+import numpy as np
+import copy
+import dendropy
 import sys
 sys.path.append('/home/dcsoft/clineage-simulation/')
 from reconstruct import simplified_triplets_calculation
 
 
 
-def get_bcs_and_histogram_type(ind, run_name, aa_runs=('nsr4', 'nsr5')):
-    if run_name in aa_runs:
-        bcs = MagicalPCR1BarcodedContent.objects.filter(content__cell__individual=ind)
-        histogram_class = AdamHistogram
-    else:
-        bcs = MagicalOM6BarcodedContent.objects.filter(content__cell__individual=ind)
-        histogram_class = FullMSVHistogram
-    return bcs, histogram_class
-
-
-aa_runs=frozenset({'nsr4', 'nsr5'})  # generally constant unless future aa runs are added
-
-def get_multi_run_srs(ind, run_names):
-    multi_run_srs = []
-    runs_only = {run_name for run_name, demux_scheme_name in run_names}
-    assert runs_only & aa_runs != {} or runs_only - aa_runs == runs_only # same individual can't have runs analyzed differently
-    for run_name, demux_scheme_name in run_names:
-        run = NGSRun.objects.get(name=run_name)
-        demux = Demultiplexing.objects.get(ngs_run=run, demux_scheme__name=demux_scheme_name)
-        bcs, histogram_class = get_bcs_and_histogram_type(ind, run_name, aa_runs=aa_runs)
-        srs = SampleReads.objects.filter(demux=demux).filter(barcoded_content__in=bcs)
-#         srs = [sr for sr in srs if sr.cell.composition == sc]
-        skiped = [sr for sr in srs if not sr.cell.custom_group_labeling]
-        if skiped:
-            print('WARNING: removing {} cells with no group label'.format(len(skiped)))
-        srs = [sr for sr in srs if sr.cell.custom_group_labeling]
-        if demux_scheme_name == 'demux_scheme':
-            srs = [sr for sr in srs if sr.barcoded_content.subclass.amplified_content.cell.custom_group_labeling in
-                   ['Kera','Bulk']
-                  ]
-        multi_run_srs += srs
-    return multi_run_srs, histogram_class
-
-
-import numpy as np
 def filter_mutation_map(mutations_dict, pl1=50, pl2=50):
     l1_counts = {kl1: len(mutations_dict[kl1]) for kl1 in mutations_dict}
     trans_mutations_dict = transpose_dict(mutations_dict)

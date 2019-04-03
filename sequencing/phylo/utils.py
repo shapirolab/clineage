@@ -1,5 +1,7 @@
 import os
 import dendropy
+from datetime import datetime
+
 
 
 def normalize_newick(newick_path, normalized_newick_path):
@@ -50,8 +52,7 @@ def fix_directories(base_dir, ind_name):
 def get_cells_group_map(srs):
     cells_group_map = dict()
     for sr in srs:
-        ac = sr.barcoded_content.subclass.amplified_content
-        cell = ac.cell
+        cell = sr.cell
         cells_group_map[sr.id] = cell.custom_group_labeling
     return cells_group_map
 
