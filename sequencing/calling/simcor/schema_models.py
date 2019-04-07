@@ -253,7 +253,8 @@ class HighestPeaksProximityRatioFilteredBiSimCorSchemeModelDotBA(
 
     def find_best_in_space(self, hist):
         return get_closest_vec_opt(hist, self.filtered_sim_hists_space(hist), self.distance_metric, is_prf=self.is_prf,
-                                   length_sensitivity=self.length_sensitivity, diff_sensetivity=self.diff_sensetivity)
+                                   length_sensitivity=self.length_sensitivity, diff_sensetivity=self.diff_sensetivity,
+                                   eps=self.proportion_bounds[0])
 
     @property
     def sim_hists_space_generator(self):
