@@ -99,6 +99,7 @@ def calculate_triplets_tree(
 
 
 def convert_tree_with_cell_id_map(taxon_name_space, cell_id_map_for_sagi):
+    assert len(cell_id_map_for_sagi.keys()) == len(set(cell_id_map_for_sagi.values()))
     reverse_cell_id_map_for_sagi = {v: k for k, v in cell_id_map_for_sagi.items()}
     label_taxon_map = taxon_name_space.label_taxon_map()
     for l in label_taxon_map:
