@@ -181,7 +181,7 @@ def get_full_ms_variations(amplicon_collection, padding, mss_version):
 
 
 def split_merged_reads(merged_reads, reads_chunk_size=10**5, included_reads='M'):
-    num_reads = sum(1 for x in merged_reads.included_reads_generator(included_reads))
+    num_reads = merged_reads.num_reads(included_reads)
     if merged_reads.fullmsvmergedreadspart_set.count() == math.ceil(num_reads/reads_chunk_size):
         yield from merged_reads.fullmsvmergedreadspart_set.filter(rows=reads_chunk_size)
     else:

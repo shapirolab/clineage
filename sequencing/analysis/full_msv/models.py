@@ -13,9 +13,23 @@ from targeted_enrichment.amplicons.models import Amplicon, AmpliconCollection
 
 class FullMSVMergedReads(PearOutputMixin):
     sample_reads = models.ForeignKey(SampleReads, unique=True)
-
+    _num_reads_M = models.PositiveIntegerField(null=True, default=None)
+    _num_reads_F = models.PositiveIntegerField(null=True, default=None)
     INCLUDED_READS_OPTIONS = (('M', 'Only merged'),
                               ('F', 'Merged and unassembled_forward'),)
+
+
+    def num_reads(self, included_reads):
+        attr_name = '_num_reads_{}'.format(included_reads)
+        if included_reads not in ['M', 'F']:
+            raise ValueError("included_reads should be one of {}".format(
+                FullMSVMergedReads.INCLUDED_READS_OPTIONS))
+        if getattr(self, attr_name) is None:
+            num_reads = sum(1 for x in self.included_reads_generator(included_reads))
+            setattr(self,attr_name, num_reads)
+            self.save()
+        return getattr(self, attr_name)
+
 
     def included_reads_generator(self, included_reads):
         if included_reads == 'M':
