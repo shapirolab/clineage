@@ -2,9 +2,13 @@ seaborn
 biopython
 lxml
 Cython
-dask==0.15.1
+dask
 XlsxWriter
 primer3-py
 pysam
 pear
 bowtie2
+mysqlclient
+bcl2fastq  #conda install -c dranew bcl2fastq
+bwa
+networkx
