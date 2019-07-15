@@ -4,6 +4,7 @@ import itertools
 import contextlib
 import plumbum
 import math
+import resource
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
@@ -24,7 +25,7 @@ from sequencing.analysis.models_common import BowtieIndexMixin, \
     get_ms_genotypes_from_strings_tuple
 from targeted_enrichment.planning.models import Microsatellite
 from targeted_enrichment.amplicons.models import AmpliconCollection
-
+from sequencing.analysis.full_msv.parallel_fmsv import close_connection_and
 
 pear = plumbum.local["pear"]
 pear_with_defaults = pear["-v", "40",
@@ -338,6 +339,7 @@ def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
         partial_bams = [fmsvap.assignment_bam for fmsvap in fmsva_parts_by_msv]
 
         def inner(raise_or_create_with_defaults):
+            resource.setrlimit(resource.RLIMIT_OFILE, (4096, 4096))
             with unique_file_cm("bam") as sorted_assignment_bam:
                 with unique_file_cm("bam") as temp_merged_bam:
                     if len(partial_bams) == 1:
@@ -347,21 +349,26 @@ def merge_fmsva_parts(fmsva_parts, reads_chunk_size=10**5, included_reads='M'):
                             partial_bams[0]
                         )
                     else:
-                        samtools_merge(
-                            temp_merged_bam,
-                            *partial_bams
-                        )
-                        samtools_sort(
-                            '-o',
-                            sorted_assignment_bam,
-                            temp_merged_bam
-                        )
-                        os.unlink(temp_merged_bam)
-                return raise_or_create_with_defaults(
+                        with unique_file_cm("csv") as bams_list_path:
+                            with open(bams_list_path, 'w') as f:
+                                f.writelines(('\n').join(partial_bams))
+                            samtools_merge(
+                                '-b',
+                                bams_list_path,
+                                temp_merged_bam,
+                            )
+                            samtools_sort(
+                                '-o',
+                                sorted_assignment_bam,
+                                temp_merged_bam
+                            )
+                            os.unlink(temp_merged_bam)
+                            os.unlink(bams_list_path)
+                return close_connection_and(raise_or_create_with_defaults(
                     sorted_assignment_bam=sorted_assignment_bam,
                     merged_reads=merged_reads,
                     ms_variations=msv,
-                )
+                ))
         yield get_get_or_create(inner, FullMSVAssignment,
                                 merged_reads=merged_reads,
                                 ms_variations=msv,
