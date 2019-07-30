@@ -389,10 +389,10 @@ def index_fastqs(fmsva):
 
 def stream_group_alignemnts(fmsva):
     histogram_reads = {}
-    genotyped_reads = set()
+    # genotyped_reads = set()
     cur_amp_id = None
     for read_id, ms_genotypes_name in fmsva.read_bam():
-        assert read_id not in genotyped_reads  # TODO: consider removal
+        # assert read_id not in genotyped_reads  # TODO: consider removal
         prefix, ms_genotype_strings = split_ms_genotypes_name(ms_genotypes_name)
         amp_id = int(prefix)
         if amp_id != cur_amp_id:
@@ -401,7 +401,7 @@ def stream_group_alignemnts(fmsva):
                 histogram_reads = {}
             cur_amp_id = amp_id
         histogram_reads.setdefault(ms_genotype_strings, list()).append(read_id)
-        genotyped_reads.add(read_id)
+        # genotyped_reads.add(read_id)
     else:
         if cur_amp_id is not None:
             yield cur_amp_id, histogram_reads
