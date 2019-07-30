@@ -127,7 +127,7 @@ class SampleReads(models.Model):
     num_reads = models.PositiveIntegerField()
     fastq1 = models.FilePathField(max_length=200)
     fastq2 = models.FilePathField(max_length=200)
-    write_her_files = models.BinaryField(default=False)
+    write_her_files = models.BooleanField(default=False)
 
     class Meta:
         index_together = (
