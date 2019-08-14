@@ -132,19 +132,3 @@ def get_mutation_map(srs, classifying_ms_by_type, bin_map_by_ms, schema_by_repea
                     'histogram__sample_reads', 'microsatellite__slice__chromosome', 'genotypes'):
                 d.setdefault(ca.histogram.sample_reads, dict())[ca.microsatellite] = ca.genotypes.allele1
     return d
-
-
-def filter_by_minimal_group_size(classifying_ms_by_ind_by_type_by_grouping, group_size=2):
-    classifying_ms_by_ind_by_type = dict()
-    for ind in classifying_ms_by_ind_by_type_by_grouping:
-        classifying_ms_by_ind_by_type[ind] = dict()
-        for repeat_type in classifying_ms_by_ind_by_type_by_grouping[ind]:
-            classifying_ms_by_ind_by_type[ind][repeat_type] = list()
-            for tca in classifying_ms_by_ind_by_type_by_grouping[ind][repeat_type]:
-                if group_size == 0:
-                    classifying_ms_by_ind_by_type[ind][repeat_type] += \
-                    classifying_ms_by_ind_by_type_by_grouping[ind][repeat_type][tca]
-                    continue
-                if len(tca) > 1 and min(tca) >= group_size:
-                    classifying_ms_by_ind_by_type[ind][repeat_type] += classifying_ms_by_ind_by_type_by_grouping[ind][repeat_type][tca]
-    return classifying_ms_by_ind_by_type
