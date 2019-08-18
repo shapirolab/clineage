@@ -14,7 +14,7 @@ fasttree_pseudo_trans_unified = fasttree_pseudo['-trans', '/home/dcsoft/s/Ofir/u
 fasttree_trans_unifed = fasttree['-trans', '/home/dcsoft/s/Ofir/unified_for_fastree_asaf.mat']
 
 
-def create_FastTree_fasta_file(td, rldr, ind_name, title, min_group_size):
+def create_FastTree_fasta_file(td, rldr, ind_name, title, min_group_size, rldr_group):
     td_with_root = add_root_to_dict(td, rldr)
     df = pd.DataFrame.from_dict(td_with_root)
     vs = list(v for vs in td_with_root.values() for v in vs.values())
@@ -25,8 +25,8 @@ def create_FastTree_fasta_file(td, rldr, ind_name, title, min_group_size):
     df.replace(symbol_map, inplace=True)
     df.fillna("-", inplace=True)
     normalized_fasta_dir = fix_directories("/home/dcsoft/s/trees", ind_name)
-    normalized_fasta_path = '{}/{}_{}_FastTree_g{}.fasta'.format(normalized_fasta_dir, title, ind_name,
-                                                                   min_group_size)
+    normalized_fasta_path = '{}/{}_{}_FastTree_g{}_root_{}.fasta'.format(normalized_fasta_dir, title, ind_name,
+                                                                   min_group_size, rldr_group)
     with open(normalized_fasta_path, 'w') as f:
         for sr, row in df.iterrows():
             f.write('>{}\r\n{}\r\n'.format(sr, ''.join(row.values)))
@@ -42,18 +42,14 @@ def run_fasttree_binary(newick_output_file, mutations_fasta_path, variation=fast
     return good_tree
 
 
-def run_fastree(fasta_path, ind_name, title, min_group_size):
+def run_fastree(fasta_path, ind_name, title, min_group_size, rldr_group):
     newick_output_files = []
     normalized_newick_dir = fix_directories("/home/dcsoft/s/trees", ind_name)
     for name, method, kwargs in [
-    #         ('FTU','fasttree_trans_unified', {'variation':fasttree_trans_unifed}),
         ('FTPU', 'fasttree_pseudo_trans_unified', {'variation': fasttree_pseudo_trans_unified}),
-    #         ('FT','fasttree', {'variation':fasttree}),
-    #         ('FTP','fasttree_pseudo', {'variation':fasttree_pseudo}),
-    #         ('FTN','fasttree_trans_noa', {'variation':fasttree_trans_noa}),
-    #         ('FTPN','fasttree_pseudo_trans_noa', {'variation':fasttree_pseudo_trans_noa})
     ]:
-        newick_output_file = '{}/{}_{}_g{}_{}.newick'.format(normalized_newick_dir, title, ind_name, min_group_size, method)
+        newick_output_file = '{}/{}_{}_g{}_{}_root_{}.newick'.format(normalized_newick_dir, title, ind_name,
+                                                                     min_group_size, method, rldr_group)
         ret_tree = run_fasttree_binary(newick_output_file, fasta_path, list(kwargs.values())[0])
         newick_output_files.append(newick_output_file)
 
