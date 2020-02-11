@@ -1,4 +1,4 @@
-Django==1.9.8
+Django==1.11.28
 seaborn==0.7.1
 biopython==1.70
 django-mptt==0.8.4
