@@ -1,3 +1,5 @@
--e git+https://github.com/amosonn/frogress.git@bca0b7a21656b50c0d95cf1fc5000a50d275a627#egg=frogress
+-e git+ssh://git@github.com/amosonn/frogress.git@bca0b7a21656b50c0d95cf1fc5000a50d275a627#egg=frogress
 -e git+https://github.com/ofirr/dojango.git@9856ca4a0194f59a5fe41cc32739e36eaa1f4bc3#egg=dojango
 -e git+https://github.com/ofirr/dojango-datable.git@c4d27c23d66c023062270a31f05e21d0982e0b43#egg=dojango_datable
+-e git+ssh://git@github.com/amosonn/frogress.git@bca0b7a21656b50c0d95cf1fc5000a50d275a627#egg=frogress
+
