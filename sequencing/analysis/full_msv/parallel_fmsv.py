@@ -59,7 +59,7 @@ def run_parallel_split_alignments(executor, sample_reads, included_reads="M", re
                                   ref_padding=50, amp_col_size=15000):
     # TODO: set resource.getrlimit(resource.RLIMIT_CORE) to something low for all bowtie2 related jobs
     # *currently in dworker.q
-    merged_reads = executor.map(merge, sample_reads, pure=False)
+    merged_reads = executor.map(close_connection_and(merge), sample_reads, pure=False)
     yield merged_reads
     fmsv_merged_reads_parts_lists = executor.map(
         close_connection_and(split_merged_reads_as_list),

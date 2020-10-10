@@ -58,6 +58,8 @@ def merge(sample_reads):
             pear_with_defaults("-f", sample_reads.fastq1,
                                "-r", sample_reads.fastq2,
                                "-o", pear_output.pear_files_prefix)
+            from django.db import connection
+            connection.close()
             return raise_or_create_with_defaults(
                 pear_dump_dir=pear_dir,
             )
