@@ -1,4 +1,4 @@
-Django==1.9.8
+Django==1.11.29
 distributed==1.27.1
 PeakUtils==1.1.0
 django-extensions==1.6.7
