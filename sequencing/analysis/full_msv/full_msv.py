@@ -49,6 +49,10 @@ samtools_view = samtools["view"]
 samtools_merge = samtools["merge"]
 
 
+bwa = plumbum.local["bwa"]
+bwa_mem_paramed = bwa["mem", "-M", "-t", "20"]
+
+
 def merge(sample_reads):
     def inner(raise_or_create_with_defaults):
         with unique_dir_cm() as pear_dir:
@@ -293,14 +297,26 @@ def align_reads_to_ms_variations_part(merged_reads_part, padding, mss_version, c
         msv = get_full_ms_variations(amplicon_collection, padding, mss_version)
         def inner(raise_or_create_with_defaults):
             with unique_file_cm("bam") as assignment_bam:
-                bowtie_to_bam = bowtie2_with_defaults2[
-                    '-x', msv.index_files_prefix,
-                    '-U', merged_reads_part.fastq_part,  # TODO: reconsider 'F'/'M' reads collections
+                rstring = '@RG\tID:test_sample\tPL:illumina\tPU:1\tLB:test_sample\tSM:test_sample'
+                # fasta_path = '/net/192.168.107.11/export/dc_temp/PROD_STORAGE/52/bf/b4/73-1278-4456-bf1d-8bc12552f75a.fa'  # OM6
+                fasta_path = '/net/192.168.107.11/export/dc_temp/PROD_STORAGE/4d/c5/b4/a7-66fa-4a96-892d-94c5c4679973.fa'  # OM9
+                bwa_mem_to_bam = bwa_mem_paramed[
+                    '-R',
+                    rstring,
+                    fasta_path,
+                    merged_reads_part.fastq_part
                 ] | samtools_view[
                     '-bS',
                     '-'
                 ] > assignment_bam
-                bowtie_to_bam & plumbum.FG
+                # bowtie_to_bam = bowtie2_with_defaults2[
+                #     '-x', msv.index_files_prefix,
+                #     '-U', merged_reads_part.fastq_part,  # TODO: reconsider 'F'/'M' reads collections
+                # ] | samtools_view[
+                #     '-bS',
+                #     '-'
+                # ] > assignment_bam
+                bwa_mem_to_bam & plumbum.FG
                 return raise_or_create_with_defaults(
                     assignment_bam=assignment_bam,
                     merged_reads_part=merged_reads_part,
