@@ -48,8 +48,8 @@ services:
     volumes:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
       - data_store:/data_store
-      # - ./resources/entrypoint_clineage_worker.sh:/entrypoint.sh
-      - ./resources/entrypoint_debug.sh:/entrypoint.sh
+      - ./resources/entrypoint_clineage_worker.sh:/entrypoint.sh
+      # - ./resources/entrypoint_debug.sh:/entrypoint.sh
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
