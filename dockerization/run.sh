@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euo pipefail
 
-docker run --rm -u root --entrypoint /usr/bin/fish -it clineage 
+docker run --rm -p 8888:80 -u root --entrypoint /bin/bash -it --network=host clineage  
