@@ -49,13 +49,30 @@ services:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
       - data_store:/data_store
       - ./resources/entrypoint_clineage_worker.sh:/entrypoint.sh
-      # - ./resources/entrypoint_debug.sh:/entrypoint.sh
+      #- ./resources/entrypoint_debug.sh:/entrypoint.sh
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
       MYSQL_DATABASE: clineage_prod
       MYSQL_USER: dcsoft
       MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
+
+  jupyter:
+    depends_on:
+      - db
+      - clineage-web
+    image: clineage
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: clineage_prod
+      MYSQL_USER: dcsoft
+      MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
+    volumes:
+      - ./resources/entrypoint_jupyter1.sh:/entrypoint.sh
+    ports:
+      - 8888:8888
+    restart: always
 
 volumes:
   db_data: {}
