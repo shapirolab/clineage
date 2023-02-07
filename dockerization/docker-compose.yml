@@ -15,7 +15,7 @@ services:
   clineage-web:
     depends_on:
       - db
-    image: clineage
+    image: clineage:0.0.3
     restart: always
     volumes:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
@@ -32,7 +32,7 @@ services:
       MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
 
   task-scheduler:
-    image: clineage
+    image: clineage:0.0.3
     volumes:
       - ./resources/entrypoint_task_scheduler.sh:/entrypoint.sh
     ports:
@@ -43,7 +43,7 @@ services:
     depends_on:
       - clineage-web
       - task-scheduler
-    image: clineage
+    image: clineage:0.0.3
     restart: always
     volumes:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
@@ -61,7 +61,7 @@ services:
     depends_on:
       - db
       - clineage-web
-    image: clineage
+    image: clineage:0.0.3
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
