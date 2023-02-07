@@ -1,8 +1,7 @@
 from plumbum import local
 import dendropy
 import pandas as pd
-from sequencing.phylo.utils import fix_directories
-from sequencing.phylo.triplets_wrapper import add_root_to_dict
+from sequencing.phylo.utils import fix_directories, add_root_to_dict
 
 symbols = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W', 'Y', 'V']
 symbol_map = {i+7: s for i, s in enumerate(symbols)}

@@ -1,4 +1,5 @@
 from sequencing.phylo.csv_writers import print_mutation_dict_to_file
+from sequencing.phylo.utils import add_root_to_dict
 from misc.utils import unlink, relaxed_unlink, get_unique_path
 from sequencing.calling.queries.mutation_maps import transpose_dict
 import os
@@ -11,26 +12,6 @@ import dendropy
 import sys
 sys.path.append('/home/dcsoft/s/Ofir/triplets/triplets/')
 from TMC_CLI import parse_mutations_table, paired_triplets_generator, format_triplet
-
-
-def add_root_to_dict(
-        textual_mutation_dict,
-        cells_to_be_used_as_root,
-):
-    new_d = dict()
-    if cells_to_be_used_as_root == ['Ave']:
-        cells_to_be_used_as_root = set(c for loc in textual_mutation_dict for c in textual_mutation_dict[loc])
-    else:
-        cells_to_be_used_as_root = set(cells_to_be_used_as_root)
-    root_collection = dict()
-    for loc in textual_mutation_dict:
-        for c in textual_mutation_dict[loc].keys() & cells_to_be_used_as_root:
-            root_collection.setdefault(loc, []).append(textual_mutation_dict[loc][c])
-    for loc in root_collection:
-        val = int(np.median(root_collection[loc]))
-        new_d.setdefault(loc, dict())['root'] = val
-        new_d[loc].update(textual_mutation_dict[loc])
-    return new_d
 
 
 def map_cell_ids_for_sagi(rtd):
