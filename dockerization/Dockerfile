@@ -1,3 +1,13 @@
+FROM ubuntu:18.04 AS genomes
+
+RUN apt-get update
+RUN apt-get install -y wget
+
+RUN mkdir /hg19
+COPY ./get_hg19 /hg19/
+WORKDIR /hg19
+RUN ./get_hg19
+
 #FROM us.gcr.io/broad-dsp-gcr-public/terra-jupyter-python:0.1.2
 FROM ubuntu:18.04
 
@@ -13,11 +23,6 @@ RUN conda init bash \
     && . ~/.bashrc \
     && conda create --name py36 python=3.6
 
-
-RUN mkdir /hg19
-COPY ./get_hg19 /hg19/
-WORKDIR /hg19
-RUN ./get_hg19
 
 RUN mkdir /reqs 
 WORKDIR /reqs
@@ -43,7 +48,9 @@ RUN . ~/.bashrc && conda activate py36 && pip install -r requirements-dev.txt
 
 COPY . /clineage
 WORKDIR /clineage
-RUN mv /hg19 /clineage/
+#TODO: check if we can push this step back and only symlink here,
+#      then we can avoid multi-build and save build time
+COPY --from=genomes /hg19 /clineage/hg19
 
 CMD /entrypoint.sh
 #CMD sleep infinity
