@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 AS genomes
+FROM continuumio/anaconda3:2021.04 AS genomes
 
 RUN apt-get update
 RUN apt-get install -y wget
@@ -8,16 +8,13 @@ COPY ./get_hg19 /hg19/
 WORKDIR /hg19
 RUN ./get_hg19
 
-#FROM us.gcr.io/broad-dsp-gcr-public/terra-jupyter-python:0.1.2
-FROM ubuntu:18.04
+FROM continuumio/anaconda3:2021.04
 
 USER root
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y python3.6 vim tmux fish curl wget strace git gcc
-
-RUN wget -P /tmp https://repo.anaconda.com/archive/Anaconda3-2021.04-Linux-x86_64.sh
-RUN bash /tmp/Anaconda3-2021.04-Linux-x86_64.sh -b
-ENV PATH /root/anaconda3/bin/:$PATH
+RUN apt-get install -y vim tmux fish curl wget strace git gcc
+#RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq tango-common
+#RUN apt-get install -y python3.6
 
 RUN conda init bash \
     && . ~/.bashrc \
