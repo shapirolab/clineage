@@ -6,6 +6,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     restart: always
+    ports:
+      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: clineage_prod
@@ -69,7 +71,10 @@ services:
       MYSQL_USER: dcsoft
       MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
     volumes:
+      - ./resources/local_settings.py:/clineage/clineage/local_settings.py
       - ./resources/entrypoint_jupyter1.sh:/entrypoint.sh
+      - /ukr/local/lineage/notebooks:/clineage/notebooks2
+      - data_store:/data_store
     ports:
       - 8888:8888
     restart: always

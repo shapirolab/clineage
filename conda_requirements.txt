@@ -13,3 +13,4 @@ bcl2fastq  #conda install -c dranew bcl2fastq
 bwa
 networkx
 fasttree
+samtools

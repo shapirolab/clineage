@@ -47,7 +47,8 @@ COPY . /clineage
 WORKDIR /clineage
 #TODO: check if we can push this step back and only symlink here,
 #      then we can avoid multi-build and save build time
-COPY --from=genomes /hg19 /clineage/hg19
+RUN mkdir -p /clineage/chromosomes/Human/
+COPY --from=genomes /hg19 /clineage/chromosomes/Human/hg19
 
 CMD /entrypoint.sh
 #CMD sleep infinity
