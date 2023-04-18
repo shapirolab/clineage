@@ -2,7 +2,7 @@ import os.path
 import os
 
 #CHROMOSOMES_PATH = '/net/mraid11/export/dcstor/Ofir/GenomesData/'
-CHROMOSOMES_PATH = '/clineage/hg19/'
+CHROMOSOMES_PATH = '/clineage/chromosomes/'
 DEBUG=True
 # S_MAIN = '/net/mraid11/export/dcstor/LINEAGE/Hiseq/NSR2/fastq_human/Output'
 S_MAIN = '/data_store'

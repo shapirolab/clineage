@@ -74,6 +74,26 @@ def textualize_d(objective_d):
     return d
 
 
+def add_root_to_dict(
+        textual_mutation_dict,
+        cells_to_be_used_as_root,
+):
+    new_d = dict()
+    if cells_to_be_used_as_root == ['Ave']:
+        cells_to_be_used_as_root = set(c for loc in textual_mutation_dict for c in textual_mutation_dict[loc])
+    else:
+        cells_to_be_used_as_root = set(cells_to_be_used_as_root)
+    root_collection = dict()
+    for loc in textual_mutation_dict:
+        for c in textual_mutation_dict[loc].keys() & cells_to_be_used_as_root:
+            root_collection.setdefault(loc, []).append(textual_mutation_dict[loc][c])
+    for loc in root_collection:
+        val = int(np.median(root_collection[loc]))
+        new_d.setdefault(loc, dict())['root'] = val
+        new_d[loc].update(textual_mutation_dict[loc])
+    return new_d
+
+
 def finalize_tree(tree, ind_name, title, min_group_size, rldr_group):
     prep_tree(tree)
     normalized_newick_dir = fix_directories("/home/dcsoft/s/trees", ind_name)

@@ -6,6 +6,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     restart: always
+    ports:
+      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: clineage_prod
@@ -15,7 +17,7 @@ services:
   clineage-web:
     depends_on:
       - db
-    image: clineage
+    image: clineage:0.0.3
     restart: always
     volumes:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
@@ -32,7 +34,7 @@ services:
       MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
 
   task-scheduler:
-    image: clineage
+    image: clineage:0.0.3
     volumes:
       - ./resources/entrypoint_task_scheduler.sh:/entrypoint.sh
     ports:
@@ -43,7 +45,7 @@ services:
     depends_on:
       - clineage-web
       - task-scheduler
-    image: clineage
+    image: clineage:0.0.3
     restart: always
     volumes:
       - ./resources/local_settings.py:/clineage/clineage/local_settings.py
@@ -61,7 +63,7 @@ services:
     depends_on:
       - db
       - clineage-web
-    image: clineage
+    image: clineage:0.0.3
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
@@ -69,7 +71,10 @@ services:
       MYSQL_USER: dcsoft
       MYSQL_PASSWORD: 164d8ae81bd7e38a163ea2e144114b25
     volumes:
+      - ./resources/local_settings.py:/clineage/clineage/local_settings.py
       - ./resources/entrypoint_jupyter1.sh:/entrypoint.sh
+      - /ukr/local/lineage/notebooks:/clineage/notebooks2
+      - data_store:/data_store
     ports:
       - 8888:8888
     restart: always
