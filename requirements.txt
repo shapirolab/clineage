@@ -7,5 +7,5 @@ django-mptt==0.8.4
 PyVCF==0.6.8
 DendroPy==4.3.0
 spyne==2.12.11
-sqlparse==0.2.0
+sqlparse==0.4.4
 plumbum==1.6.4
